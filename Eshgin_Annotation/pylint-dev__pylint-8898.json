@@ -1,0 +1,32 @@
+{
+    "instance_id": "pylint-dev__pylint-8898",
+    "root_cause": [
+        {
+            "file": "pylint/config/argument.py",
+            "line": 117,
+            "statement": "for pattern in _csv_transformer(value):",
+            "note": "The bad-names-rgx option is a CSV-like list of regular expressions, but plain CSV splitting treats commas inside regex quantifiers as delimiters. A value such as '(foo{1,3})' is split into '(foo{1' and '3})', so Pylint compiles a mangled regular expression and reports the wrong parse error or crashes during config parsing."
+        }
+    ],
+    "reasoning": "The failure is caused by using the generic _csv_transformer for a field whose elements are regular expressions. Regex quantifiers can legally contain commas between braces, so the parser needs to distinguish separator commas from quantifier commas. The new _check_regexp_csv helper supplies that behavior; the __init__.py changes only export the helper and are not themselves fault-inducing.",
+    "fault_triggering_call_site": [
+        {
+            "file": "tests/config/test_config.py",
+            "line": 135,
+            "statement": "r = Run([str(EMPTY_MODULE), rf\"--bad-names-rgx={in_string}\"], exit=False)",
+            "note": "Directly exercises the option parser with cases such as 'foo, bar{1,3}'. Before the fix, the quantifier comma is interpreted as a list separator and the compiled pattern list does not match the expected regular expressions."
+        },
+        {
+            "file": "tests/config/test_config.py",
+            "line": 167,
+            "statement": "Run([str(EMPTY_MODULE), r\"--bad-names-rgx=(foo{1,}, foo{1,3}})\"], exit=False)",
+            "note": "Regression trigger for the error path. It verifies that only the true separator comma splits the CSV list and that the invalid regex reported is '(foo{1,}' rather than a fragment produced by splitting inside '{1,3}'."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

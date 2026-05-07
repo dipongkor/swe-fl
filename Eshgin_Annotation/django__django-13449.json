@@ -1,0 +1,44 @@
+{
+    "instance_id": "django__django-13449",
+    "root_cause": [
+        {
+            "file": "django/db/models/expressions.py",
+            "line": 1256,
+            "statement": "class Window(Expression):",
+            "note": "Docker verified. Window did not inherit SQLiteNumericMixin, so the new SQLite-specific decimal casting path had no mixin implementation to call. With the as_sqlite() method present but this inheritance reverted, test_lag_decimalfield fails with AttributeError: 'super' object has no attribute 'as_sqlite' at line 1342."
+        },
+        {
+            "file": "django/db/models/expressions.py",
+            "line": 1335,
+            "statement": "def as_sqlite(self, compiler, connection):",
+            "note": "Window lacked a SQLite-specific rendering path for DecimalField output. Removing this method while keeping SQLiteNumericMixin makes test_lag_decimalfield fail with sqlite3.OperationalError near 'OVER', because the numeric cast is placed inside the window expression instead of outside the complete OVER clause."
+        }
+    ],
+    "reasoning": "The failure is SQLite SQL generation for Lag() over a DecimalField. The correct fix has two coupled pieces: Window must inherit SQLiteNumericMixin, and Window must define as_sqlite() so DecimalField output is cast outside the complete window expression. I verified both partial reverts in the docker container. Removing only as_sqlite() gives the original SQL syntax failure near OVER. Reverting only the class inheritance leaves as_sqlite() present but breaks the super(Window, copy).as_sqlite(...) call because Expression has no as_sqlite() implementation. The earlier reference to def as_sql(self, compiler, connection, template=None) was only patch context; in the PR checkout that method is line 1301 and is not the second root-cause line.",
+    "fault_triggering_call_site": [
+        {
+            "file": "tests/expressions_window/tests.py",
+            "line": 214,
+            "statement": "qs = Employee.objects.annotate(lag=Window(expression=Lag(expression='bonus', offset=1), partition_by=F('department'), order_by=[F('bonus').asc(), F('name').asc()]))",
+            "note": "Constructs a Window/Lag expression whose output_field is DecimalField because bonus is DecimalField."
+        },
+        {
+            "file": "tests/expressions_window/tests.py",
+            "line": 219,
+            "statement": "self.assertQuerysetEqual(qs, [...], transform=lambda row: (row.name, row.bonus, row.department, row.lag))",
+            "note": "Evaluates the queryset. On SQLite before the fix, SQL compilation/execution fails near OVER due to the misplaced decimal cast."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true,
+    "verification": {
+        "container": "django__django-13449",
+        "fixed_test": "python tests/runtests.py --verbosity 1 expressions_window.tests.WindowFunctionTests.test_lag_decimalfield -> passed",
+        "reverted_test_1": "remove Window.as_sqlite() only -> failed with sqlite3.OperationalError near OVER",
+        "reverted_test_2": "revert class Window(SQLiteNumericMixin, Expression) to class Window(Expression) only -> failed with AttributeError: 'super' object has no attribute 'as_sqlite'"
+    }
+}

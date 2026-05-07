@@ -1,0 +1,20 @@
+{
+  "instance_id": "astropy__astropy-13579",
+  "root_cause": [
+    {
+      "file": "astropy/wcs/wcsapi/wrappers/sliced_wcs.py",
+      "line": 254,
+      "statement": "world_arrays_new.append(1.)",
+      "note": "When reconstructing the full world coordinate array for world_to_pixel, sliced-out world dimensions are filled with the hardcoded value 1.0 instead of the actual world coordinate at the slice position. For a coupled WCS where spatial and spectral dimensions interact via PCij, passing 1.0 instead of the correct wavelength value produces a wrong pixel result."
+    }
+  ],
+  "reasoning": "When reconstructing the full world coordinate array for world_to_pixel, sliced-out world dimensions are filled with the hardcoded value 1.0 instead of the actual world coordinate at the slice position.",
+  "fault_triggering_call_site": [
+    {
+      "file": "astropy/wcs/wcsapi/wrappers/tests/test_sliced_wcs.py",
+      "line": 935,
+      "statement": "out_pix = sl.world_to_pixel_values(world[0], world[1])"
+    }
+  ],
+  "confidence": "high"
+}

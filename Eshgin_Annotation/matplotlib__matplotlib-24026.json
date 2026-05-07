@@ -1,0 +1,26 @@
+{
+    "instance_id": "matplotlib__matplotlib-24026",
+    "root_cause": [
+        {
+            "file": "lib/matplotlib/stackplot.py",
+            "line": 73,
+            "statement": "axes.set_prop_cycle(color=colors)",
+            "note": "When explicit colors were supplied, stackplot installed them into the Axes property cycle instead of using them locally for this stackplot call. This mutates the Axes cycler and also sends CN aliases such as 'C2' through set_prop_cycle validation, which rejects them. The fix uses a local itertools.cycle(colors) and passes next(colors) directly to fill_between."
+        }
+    ],
+    "reasoning": "The focused regression test exercises the explicit colors path: ax.stackplot(..., colors=['C0', 'C1', 'C2']). The only pre-existing line that causes that failure is axes.set_prop_cycle(color=colors): it mutates the Axes property cycle and rejects CN color aliases through prop-cycle validation. The other changed lines are supporting implementation: importing itertools, creating a local color iterator, and replacing facecolor=color with facecolor=next(colors) so colors can be applied without changing the Axes cycle. The old get_next_color() calls are not separate root causes for this FAIL_TO_PASS test; for colors=None the patched code still obtains colors from axes._get_lines.get_next_color(), just through a local generator.",
+    "fault_triggering_call_site": [
+        {
+            "file": "lib/matplotlib/tests/test_axes.py",
+            "line": 2858,
+            "statement": "ax.stackplot(\"x\", \"y1\", \"y2\", \"y3\", data=data, colors=[\"C0\", \"C1\", \"C2\"])",
+            "note": "Directly exercises the explicit-colors path with CN color aliases. Before the fix, set_prop_cycle(color=colors) raises validation errors and mutates the Axes cycler."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

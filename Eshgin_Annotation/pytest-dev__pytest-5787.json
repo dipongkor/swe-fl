@@ -1,0 +1,32 @@
+{
+    "instance_id": "pytest-dev__pytest-5787",
+    "root_cause": [
+        {
+            "file": "src/_pytest/reports.py",
+            "line": 192,
+            "statement": "d[\"longrepr\"] = disassembled_report(self)",
+            "note": "The inner disassembled_report() function inside _to_json serializes longrepr by extracting only reprtraceback, reprcrash, and sections. It never inspects whether longrepr is an ExceptionChainRepr and never serializes the 'chain' attribute, which holds all the chained exception entries. For a chained exception, only the outermost traceback is preserved; all prior exceptions in the chain are silently dropped during serialization."
+        },
+        {
+            "file": "src/_pytest/reports.py",
+            "line": 253,
+            "statement": "exception_info = ReprExceptionInfo(\n    reprtraceback=ReprTraceback(**reprtraceback),\n    reprcrash=ReprFileLocation(**reprcrash),\n)",
+            "note": "The _from_json deserialization always reconstructs a ReprExceptionInfo object regardless of whether the original longrepr was an ExceptionChainRepr. Since the serialized dict has no 'chain' key (it was never written by disassembled_report), the deserialized object is always a single-exception ReprExceptionInfo, losing all chained exception information. The fix replaces both _to_json and _from_json bodies with calls to the new free functions _report_to_json and _report_kwargs_from_json, which correctly serialize and deserialize the chain attribute of ExceptionChainRepr."
+        }
+    ],
+    "reasoning": "The bug is a serialization/deserialization roundtrip failure for chained exceptions. When pytest-xdist serializes a report over the wire, it calls _to_json() which internally uses disassembled_report(), a function that only knows about reprtraceback/reprcrash/sections and is completely unaware of ExceptionChainRepr.chain. On deserialization, _from_json() always constructs a ReprExceptionInfo (single exception) even though the original was an ExceptionChainRepr (multiple chained exceptions). The result is that after the roundtrip, loaded_report.longrepr is a ReprExceptionInfo instance instead of ExceptionChainRepr, failing the isinstance check in the test. The fix replaces the entire inline logic in both methods with calls to _report_to_json and _report_kwargs_from_json, which explicitly handle the chain attribute by checking isinstance(rep.longrepr, ExceptionChainRepr) and serializing each chain entry.",
+    "fault_triggering_call_site": [
+        {
+            "file": "testing/test_reports.py",
+            "line": 308,
+            "statement": "check_longrepr(loaded_report.longrepr)",
+            "note": "In TestReportSerialization.test_chained_exceptions[TestReport] and test_chained_exceptions[CollectReport]. After the serialize/deserialize roundtrip via report._to_json() and report_class._from_json(data), loaded_report.longrepr is a ReprExceptionInfo instead of ExceptionChainRepr. The first assertion inside check_longrepr, assert isinstance(longrepr, ExceptionChainRepr), fails for both parametrize variants."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}

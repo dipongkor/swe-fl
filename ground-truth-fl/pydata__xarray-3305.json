@@ -1,0 +1,39 @@
+{
+    "instance_id": "pydata__xarray-3305",
+    "root_cause": [
+        {
+            "file": "xarray/core/variable.py",
+            "line": 1595,
+            "statement": "def quantile(self, q, dim=None, interpolation=\"linear\"):",
+            "note": "Variable.quantile had no keep_attrs parameter, so callers could not request attribute preservation at the variable reduction layer."
+        },
+        {
+            "file": "xarray/core/variable.py",
+            "line": 1661,
+            "statement": "return Variable(new_dims, qs)",
+            "note": "The quantile result was always constructed without attrs. DataArray.quantile delegates to Variable.quantile, so DataArray(..., attrs=...).quantile(..., keep_attrs=True) still returned an object with empty attrs."
+        },
+        {
+            "file": "xarray/core/dataset.py",
+            "line": 4771,
+            "statement": "q, dim=reduce_dims, interpolation=interpolation",
+            "note": "Dataset.quantile also delegated to Variable.quantile without forwarding keep_attrs, so dataset variables would drop attrs even after the variable-level API could preserve them."
+        }
+    ],
+    "reasoning": "The issue is an attribute propagation break in the quantile reduction path. The public DataArray/Dataset APIs expose keep_attrs, but the lower-level Variable.quantile implementation ignored that policy and returned a fresh Variable without attrs. The fix extends Variable.quantile with keep_attrs, resolves the default via _get_keep_attrs(default=False), passes attrs into the new Variable, and forwards keep_attrs from Dataset.quantile.",
+    "fault_triggering_call_site": [
+        {
+            "file": "xarray/tests/test_dataarray.py",
+            "line": 2306,
+            "statement": "actual = DataArray(self.va).quantile(q, dim=dim, keep_attrs=True)",
+            "note": "Direct trigger for the DataArray path. The computed numeric values are correct, but before the fix actual.attrs is empty despite keep_attrs=True."
+        },
+        {
+            "file": "xarray/tests/test_dataarray.py",
+            "line": 2311,
+            "statement": "assert actual.attrs == self.attrs",
+            "note": "This assertion captures the bug: quantile should preserve the original attrs when keep_attrs=True."
+        }
+    ],
+    "confidence": "high"
+}

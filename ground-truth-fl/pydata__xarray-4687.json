@@ -1,0 +1,33 @@
+{
+    "instance_id": "pydata__xarray-4687",
+    "root_cause": [
+        {
+            "file": "xarray/core/computation.py",
+            "line": 1730,
+            "statement": "def where(cond, x, y):",
+            "note": "Docker verified. The old top-level xr.where signature did not accept keep_attrs, so callers could not request attr preservation. Reverting the PR to this signature makes test_where_attrs fail with TypeError when it calls xr.where(..., keep_attrs=True)."
+        },
+        {
+            "file": "xarray/core/computation.py",
+            "line": 1812,
+            "statement": "apply_ufunc(..., dask=\"allowed\") without keep_attrs=keep_attrs",
+            "note": "The old implementation also did not pass an attrs policy to apply_ufunc, so even an accepted API would have dropped attrs instead of preserving attrs from x."
+        }
+    ],
+    "reasoning": "The fixed PR branch passes xarray/tests/test_computation.py::test_where_attrs. Reverting xr.where to its old signature and removing the keep_attrs handling reproduces the bug immediately: xr.where(cond, x, y, keep_attrs=True) raises TypeError. The added lambda attrs policy is needed so keep_attrs=True uses attrs from x, matching DataArray.where/Dataset.where semantics.",
+    "fault_triggering_call_site": [
+        {
+            "file": "xarray/tests/test_computation.py",
+            "line": 1929,
+            "statement": "actual = xr.where(cond, x, y, keep_attrs=True)",
+            "note": "Direct regression trigger. Old xr.where rejects keep_attrs; fixed xr.where accepts it and preserves attrs from x."
+        },
+        {
+            "file": "xarray/tests/test_computation.py",
+            "line": 1931,
+            "statement": "assert_identical(expected, actual)",
+            "note": "Verifies that the resulting DataArray includes attrs={\"attr\": \"x\"}, not dropped attrs."
+        }
+    ],
+    "confidence": "high"
+}

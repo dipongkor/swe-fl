@@ -1,0 +1,32 @@
+{
+    "instance_id": "astropy__astropy-13579",
+    "root_cause": [
+        {
+            "file": "astropy/wcs/wcsapi/wrappers/sliced_wcs.py",
+            "line": 254,
+            "statement": "world_arrays_new.append(1.)",
+            "note": "world_to_pixel_values filled sliced-out world coordinates with the constant 1.0. For WCSes whose retained and sliced axes are coupled, that arbitrary world coordinate is inconsistent with the pixel slice and changes the inverse transform result."
+        }
+    ],
+    "reasoning": "SlicedLowLevelWCS must supply plausible world coordinates for axes removed by slicing before delegating to the underlying WCS. A hard-coded 1.0 only works accidentally for uncoupled transforms. The fix computes the world coordinates corresponding to pixel zero in the kept slice and uses those values for sliced-out axes, preserving consistency when PC matrix terms couple sliced and retained dimensions.",
+    "fault_triggering_call_site": [
+        {
+            "file": "astropy/wcs/wcsapi/wrappers/tests/test_sliced_wcs.py",
+            "line": 933,
+            "statement": "sl = SlicedLowLevelWCS(fits_wcs, 0)",
+            "note": "Creates a 2D slice out of a 3D WCS whose PC matrix couples the spectral and spatial axes."
+        },
+        {
+            "file": "astropy/wcs/wcsapi/wrappers/tests/test_sliced_wcs.py",
+            "line": 935,
+            "statement": "out_pix = sl.world_to_pixel_values(world[0], world[1])",
+            "note": "Calls the sliced inverse transform using world coordinates from the original pixel (0, 0, 0). With the constant 1.0 for the sliced-out world axis, out_pix[0] is not close to 0."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

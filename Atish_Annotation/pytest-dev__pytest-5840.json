@@ -1,0 +1,32 @@
+{
+  "instance_id": "pytest-dev__pytest-5840",
+  "root_cause": [
+    {
+      "file": "src/_pytest/config/__init__.py",
+      "line": 457,
+      "statement": "self._conftestpath2mod[conftestpath] = mod",
+      "note": "Stores the conftest module using a py.path.local key (after unique_path normalization). The test looks up using a pathlib.Path key via Path().resolve(), so the lookup fails despite the conftest being loaded."
+    }
+  ],
+  "reasoning": "unique_path() returns a py.path.local object, which is used as the key when storing loaded conftests in _conftestpath2mod. The test constructs its lookup key using Path(str(subconftest)).resolve(), a pathlib.Path object. These two types do not compare equal even for the same path, so the membership check fails.",
+  "fault_triggering_call_site": [
+    {
+      "file": "src/_pytest/config/__init__.py",
+      "line": 420,
+      "statement": "mod = self._importconftest(conftestpath)",
+      "note": "Confirmed via traceback.print_stack(). Called from _getconftestmodules after finding a conftest.py on the path. The conftest is loaded and stored with a py.path.local key here."
+    },
+    {
+      "file": "testing/test_conftest.py",
+      "line": 167,
+      "statement": "conftest_setinitial(conftest, [sub.dirpath()], confcutdir=testdir.tmpdir)",
+      "note": "Pre-existing test. Triggers conftest loading then checks _conftestpath2mod using a pathlib.Path key. Confirmed via traceback.print_stack() at config/__init__.py:402 and :437."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": false
+}

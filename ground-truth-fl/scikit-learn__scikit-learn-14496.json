@@ -1,0 +1,23 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-XXXX",
+  "root_cause": [
+    {
+      "file": "sklearn/cluster/optics_.py",
+      "line": 440,
+      "statement": "min_samples = max(2, min_samples * n_samples)",
+      "note": "Float multiplication produces float result. No int() cast, so min_samples remains float and propagates into NearestNeighbors as n_neighbors."
+    }
+  ],
+  "reasoning": "When min_samples or min_cluster_size is provided as a float between 0 and 1, the conversion logic multiplies by n_samples to get an absolute count but never casts the result to int.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/cluster/tests/test_optics.py",
+      "line": 107,
+      "statement": "clust = OPTICS(min_samples=0.1, min_cluster_size=0.08, max_eps=20, cluster_method='xi', xi=0.4).fit(X)",
+      "note": "Pre-existing test. First call with float min_samples — exposes missing int cast. Stack trace is directly available, no manual tracing needed.",
+      "is_test_file": true,
+      "is_modified_in_patch": false
+    }
+  ],
+  "confidence": "high"
+}

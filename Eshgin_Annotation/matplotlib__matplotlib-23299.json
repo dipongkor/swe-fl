@@ -1,0 +1,37 @@
+{
+    "instance_id": "matplotlib__matplotlib-23299",
+    "root_cause": [
+        {
+            "file": "lib/matplotlib/__init__.py",
+            "line": 1090,
+            "statement": "orig = rcParams.copy()",
+            "note": "The old rc_context copied and restored every rcParam, including backend. Reverting to this line makes test_no_backend_reset_rccontext fail because backend is restored to agg after leaving the context instead of remaining module://aardvark."
+        }
+    ],
+    "reasoning": "The fixed PR branch passes lib/matplotlib/tests/test_rcparams.py::test_no_backend_reset_rccontext. Reverting rc_context to orig = rcParams.copy() reproduces the failure: mpl.rcParams['backend'] is reset to agg after context exit. The fix converts the copied rcParams to a plain dict and deletes backend before restoration, preventing backend reset side effects.",
+    "fault_triggering_call_site": [
+        {
+            "file": "lib/matplotlib/tests/test_rcparams.py",
+            "line": 501,
+            "statement": "with mpl.rc_context():\n    mpl.rcParams['backend'] = 'module://aardvark'",
+            "note": "Sets backend inside rc_context. Old rc_context restores the previous backend on exit; fixed rc_context leaves backend untouched."
+        },
+        {
+            "file": "lib/matplotlib/tests/test_rcparams.py",
+            "line": 503,
+            "statement": "assert mpl.rcParams['backend'] == 'module://aardvark'",
+            "note": "Fails before the fix because backend becomes agg."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false,
+    "verification": {
+        "container": "matplotlib__matplotlib-23299",
+        "fixed_test": "/opt/miniconda3/envs/testbed/bin/pytest -q lib/matplotlib/tests/test_rcparams.py::test_no_backend_reset_rccontext -rA -> passed",
+        "reverted_test": "same test after reverting rc_context backend exclusion -> failed, backend was agg instead of module://aardvark"
+    }
+}

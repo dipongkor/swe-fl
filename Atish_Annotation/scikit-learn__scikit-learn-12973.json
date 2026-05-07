@@ -1,0 +1,25 @@
+{
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "root_cause": [
+        {
+            "file": "sklearn/linear_model/least_angle.py",
+            "line": 1503,
+            "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(X, y, self.fit_intercept, self.normalize, self.copy_X)",
+            "note": "Passes self.copy_X (instance attribute) instead of the copy_X argument supplied to fit(). The user-provided copy_X is silently discarded."
+        }
+    ],
+    "reasoning": "LassoLarsIC.fit() accepts a copy_X parameter intended to override the instance-level default at call time, but _preprocess_data is called with self.copy_X instead of the local copy_X argument. This means the fit-time override has no effect. The instance default always governs whether X is copied, regardless of what the caller passes.",
+    "fault_triggering_call_site": [
+        {
+            "file": "sklearn/linear_model/tests/test_least_angle.py",
+            "line": 718,
+            "statement": "lasso_lars.fit(X, y, copy_X=copy_X)",
+            "note": "Called with copy_X=False expecting X to be modified in place. X remains unchanged because self.copy_X=True overrides the argument. Confirmed via traceback.print_stack() at least_angle.py:1503.",
+            "is_test_file": true,
+            "is_modified_in_patch": false
+        }
+    ],
+    "fault_inducing": true,
+    "confidence": "high",
+    "is_defensive": false
+}

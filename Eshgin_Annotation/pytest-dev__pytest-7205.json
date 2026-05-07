@@ -1,0 +1,44 @@
+{
+    "instance_id": "pytest-dev__pytest-7205",
+    "root_cause": [
+        {
+            "file": "src/_pytest/setuponly.py",
+            "line": 69,
+            "statement": "tw.write(\"[{}]\".format(fixturedef.cached_param))",
+            "note": "Implicitly calls str() on fixturedef.cached_param via format(). When cached_param is a bytes object (e.g. b'Hello World') and Python is run with -bb (BytesWarning treated as error), this raises BytesWarning: str() on a bytes instance. The fix replaces this with tw.write(\"[{}]\".format(saferepr(fixturedef.cached_param, maxsize=42))), which produces a safe repr-based string for any type including bytes without triggering BytesWarning."
+        }
+    ],
+    "reasoning": "Line 69 must use saferepr() instead of raw format interpolation. str.format() implicitly calls __str__ on its arguments, for bytes under -bb this is a hard BytesWarning error. saferepr() avoids this by using repr()-based formatting that is safe for any type. The 9 failures in test_show_fixtures_with_parameters, test_show_fixtures_with_parameter_ids, and test_show_fixtures_with_parameter_ids_function all involve parametrized fixtures whose cached_param is displayed via _show_fixture_action, all reach the same line 69. test_show_fixture_action_with_bytes is the direct non-regression test for the reported issue.",
+    "fault_triggering_call_site": [
+        {
+            "file": "testing/test_setuponly.py",
+            "line": "312-3",
+            "statement": "result = testdir.run(sys.executable, \"-bb\", \"-m\", \"pytest\", \"--setup-show\", str(test_file))",
+            "note": "Direct reproduction of the reported bug. Runs pytest with -bb so BytesWarning is promoted to an error, and the parametrized fixture passes b'Hello World' as cached_param. This is the only test that explicitly sets -bb, making it the canonical trigger for the BytesWarning at line 69."
+        },
+        {
+            "file": "testing/test_setuponly.py",
+            "line": "146-7",
+            "statement": "result = testdir.runpytest(mode, p)",
+            "note": "In test_show_fixtures_with_parameters. Runs pytest with a session-scoped parametrized fixture (params=['foo', 'bar']), causing _show_fixture_action to call tw.write('[{}]'.format(fixturedef.cached_param)) at line 69. Without the saferepr import restored, this hits a NameError; with the import but without the saferepr fix, the raw format call works for str params but would break for bytes. Fails across all three modes (--setup-only, --setup-plan, --setup-show) because mode is a module-scoped fixture parameterized over those three values."
+        },
+        {
+            "file": "testing/test_setuponly.py",
+            "line": "180-1",
+            "statement": "result = testdir.runpytest(mode, p)",
+            "note": "In test_show_fixtures_with_parameter_ids. Same trigger path as line 146 — parametrized fixture with ids=['spam', 'ham'] causes cached_param display via line 69. Fails across all three modes for the same reason."
+        },
+        {
+            "file": "testing/test_setuponly.py",
+            "line": "200-1",
+            "statement": "result = testdir.runpytest(mode, p)",
+            "note": "In test_show_fixtures_with_parameter_ids_function. Same trigger path — parametrized fixture with ids=lambda p: p.upper() causes cached_param display via line 69. Fails across all three modes for the same reason."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}

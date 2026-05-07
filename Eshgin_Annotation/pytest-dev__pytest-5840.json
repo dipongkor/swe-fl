@@ -1,0 +1,32 @@
+{
+    "instance_id": "pytest-dev__pytest-5840",
+    "root_cause": [
+        {
+            "file": "src/_pytest/config/__init__.py",
+            "line": 415,
+            "statement": "for parent in directory.parts():",
+            "note": "Iterating directory.parts() without first calling realpath() means symlinks in the directory path are never resolved before walking up the hierarchy to find conftest.py files. The fix changes this to directory.realpath().parts(), which resolves symlinks and gives the canonical real path before iteration. Without this, conftest.py files reachable only via symlink are never discovered. However, inverting this fix alone does not cause any test to fail, there is no fault-triggering test that directly exercises this code path in the test suite."
+        },
+        {
+            "file": "src/_pytest/pathlib.py",
+            "line": 346,
+            "statement": "return type(path)(normcase(str(path.realpath())))",
+            "note": "unique_path() normalizes paths via normcase(), which on case-insensitive but case-preserving file systems such as Windows lowercases the entire path string. When this lowercased path is used to import conftest modules, Python cannot find the package because the real directory name differs in case (e.g. 'PIsys' becomes 'pisys'), directly causing ModuleNotFoundError. The fix removes unique_path() entirely and replaces its role with pathlib.Path.resolve(), which canonicalizes paths without altering case."
+        }
+    ],
+    "reasoning": "The normcase bug in unique_path() is the sole root cause with a direct fault-triggering test. test_setinitial_conftest_subdirs[test] and test_setinitial_conftest_subdirs[tests] fail because the test asserts that Path(str(subconftest)).resolve() is present as a key in _conftestpath2mod, but the buggy code stores the lowercased normcase path as the key, which does not match the resolved Path key the test constructs. The directory.parts() change is a correctness fix for symlink resolution but has no test that catches its absence, it is included in the fix as a defensive improvement rather than as a response to a failing test.",
+    "fault_triggering_call_site": [
+        {
+            "file": "testing/test_conftest.py",
+            "line": 170,
+            "statement": "assert key in conftest._conftestpath2mod",
+            "note": "In test_setinitial_conftest_subdirs[test] and test_setinitial_conftest_subdirs[tests]. key = Path(str(subconftest)).resolve() is a resolved pathlib.Path, but the buggy unique_path() stores a normcase-lowercased py.path as the key. The two are not equal as dict keys, so the assertion fails. The 'whatever' and '.dotdir' cases pass because they assert the key is NOT present, which holds under both buggy and fixed code."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}

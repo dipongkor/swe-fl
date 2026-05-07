@@ -1,0 +1,27 @@
+{
+  "instance_id": "pylint-dev__pylint-6528",
+  "root_cause": [
+    {
+      "file": "pylint/lint/pylinter.py",
+      "line": [567,568],
+      "statement": "@staticmethod\ndef _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
+      "note": "Defined as a staticmethod with no access to self.config. The os.walk loop yields subdirectory roots without ever checking ignore/ignore_patterns/ignore_paths, so ignored subdirectories are passed downstream as valid module roots."
+    }
+  ],
+  "reasoning": "_discover_files walks the directory tree recursively and yields discovered paths, but never consults the ignore configuration. The ignore check in expand_modules only applies to the top-level inputs passed by the caller — it never sees subdirectories that _discover_files surfaces during the walk.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/lint/unittest_lint.py",
+      "line": 879,
+      "statement": "run = Run(['--recursive', 'y', ignore_parameter, ignore_parameter_value, join(REGRTEST_DATA_DIR, 'directory')], exit=False)",
+      "note": "Pre-existing parametrized test. Triggers _discover_files via linter.check() -> _discover_files. Confirmed via traceback.print_stack() at pylinter.py:569.",
+      "is_test_file": true,
+      "is_modified_in_patch": false
+    }
+  ],
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": false,
+  "notes": "The _is_ignored_file helper extracted in expand_modules.py is a refactoring hunk (hunk_type: cleanup) — it enables reuse of the ignore logic in _discover_files but is not itself the RC. The RC is the missing ignore check in the os.walk loop inside _discover_files."
+}

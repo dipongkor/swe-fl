@@ -1,0 +1,26 @@
+{
+  "instance_id": "pydata__xarray-4687",
+  "root_cause": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1730,
+      "statement": "def where(cond, x, y):",
+      "note": "Function signature does not include keep_attrs parameter. Python raises TypeError before the function body is entered when keep_attrs is passed by the caller."
+    }
+  ],
+  "reasoning": "xr.where() has no keep_attrs parameter in its signature. When the caller passes keep_attrs=True, Python raises TypeError at the call site before the function body executes.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_computation.py",
+      "line": 1929,
+      "statement": "actual = xr.where(cond, x, y, keep_attrs=True)",
+      "note": "Pre-existing test. Passes keep_attrs=True to where(). Python raises TypeError immediately at this call site — function body never entered, traceback.print_stack() never fires.",
+      "is_test_file": true,
+      "is_modified_in_patch": false
+    }
+  ],
+  "fault_inducing": true,
+  "confidence": "high",
+  "multi_rc": false,
+  "notes": "TypeError fires before function entry — no stack trace from print_stack() in stderr. Single-hunk, single-RC fix: add keep_attrs parameter to signature and pass it to apply_ufunc."
+}

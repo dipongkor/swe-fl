@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-14007",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1418,
+      "statement": "return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]",
+      "note": "execute_sql() returns rows from INSERT RETURNING directly without passing them through get_converters()/apply_converters(). The from_db_value hook defined on returning fields is never called, so raw database values (plain int) are returned instead of the field's Python wrapper type."
+    }
+  ],
+  "reasoning": "execute_sql() returns rows from INSERT RETURNING directly without passing them through get_converters()/apply_converters(). The from_db_value hook defined on returning fields is never called, so raw database values (plain int) are returned instead of the field's Python wrapper type.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/custom_pk/tests.py",
+      "line": 237,
+      "statement": "self.assertIsInstance(obj.id, MyWrapper)",
+      "note": "Pre-existing test (test_auto_field_subclass_create). Creates an object with a custom auto field that defines from_db_value returning MyWrapper. After create(), obj.id is a plain int instead of MyWrapper. Confirmed via traceback.print_stack() at compiler.py:1404."
+    }
+  ],
+  "confidence": "high"
+}

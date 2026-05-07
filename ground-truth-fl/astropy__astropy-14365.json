@@ -1,0 +1,27 @@
+{
+  "instance_id": "astropy__astropy-14365",
+  "root_cause": [
+    {
+      "file": "astropy/io/ascii/qdp.py",
+      "line": 71,
+      "statement": "_line_type_re = re.compile(_type_re)",
+      "note": "The regex is compiled without re.IGNORECASE. _command_re uses uppercase 'READ [TS]ERR' so lowercase commands like 'read terr 1' fail to match, raising ValueError: Unrecognized QDP line."
+    },
+    {
+      "file": "astropy/io/ascii/qdp.py",
+      "line": 309,
+      "statement": "if v == \"NO\":",
+      "note": "Case-sensitive exact string comparison means lowercase 'no' values in data lines are not recognized as masked values and are not converted to np.ma.masked."
+    }
+  ],
+  "reasoning": "QDP format is case-insensitive but the parser assumes uppercase. The regex compiled without re.IGNORECASE rejects lowercase commands, and the 'NO' masked value check uses exact string comparison. Both must be fixed for full case-insensitive support.",
+  "fault_triggering_call_site": [
+    {
+      "file": "astropy/io/ascii/tests/test_qdp.py",
+      "line": 93,
+      "statement": "table = _read_table_qdp(path, names=['MJD', 'Rate'], table_id=0)",
+      "note": "Pre-existing test (test_roundtrip[True]). lowercase=True converts all commands to lowercase. _read_table_qdp -> _get_tables_from_qdp_file -> _get_type_from_list_of_lines -> _line_type raises ValueError on 'read terr 1'."
+    }
+  ],
+  "confidence": "high"
+}

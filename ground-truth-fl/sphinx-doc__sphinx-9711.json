@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9711",
+  "root_cause": [
+    {
+      "file": "sphinx/extension.py",
+      "line": 58,
+      "statement": "if extension.version == 'unknown version' or reqversion > extension.version:",
+      "note": "String comparison instead of semantic version comparison. '3.9' > '3.10' is True lexicographically."
+    }
+  ],
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_extension.py",
+      "line": 25,
+      "statement": "verify_needs_extensions(app, app.config)",
+      "note": "First call with reqversion='3.9', extension.version='3.10' — exposes the string comparison bug."
+    }
+  ],
+  "confidence": "high",
+  "reasoning": "The condition uses raw string comparison (>) to check if the required version exceeds the installed version. When comparing '3.9' > '3.10', Python compares lexicographically character by character — '9' > '1' at the third character, so the condition evaluates to True. This incorrectly signals that the requirement is unmet and raises VersionRequirementError, even though 3.10 semantically satisfies >= 3.9."
+}

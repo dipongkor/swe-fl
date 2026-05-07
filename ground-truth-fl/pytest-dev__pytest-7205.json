@@ -1,0 +1,27 @@
+{
+  "instance_id": "pytest-dev__pytest-7205",
+  "root_cause": [
+    {
+      "file": "src/_pytest/setuponly.py",
+      "line": 69,
+      "statement": "tw.write(\"[{}]\".format(fixturedef.cached_param))",
+      "note": "Format string implicitly calls str() on cached_param. When the fixture parameter is a bytes object and Python is run with -bb (BytesWarning as error), this raises BytesWarning instead of safely rendering the value."
+    }
+  ],
+  "reasoning": "When rendering fixture parameters in --setup-show output, _show_fixture_action formats cached_param directly into a string using [{}]. This implicit str() conversion works for most types but fails for bytes when Python runs with -bb, which elevates BytesWarning to an error.",
+  "fault_triggering_call_site": [
+    {
+      "file": "src/_pytest/setuponly.py",
+      "line": 35,
+      "statement": "_show_fixture_action(fixturedef, \"SETUP\")",
+      "note": "Called from pytest_fixture_setup hook during fixture setup. Stack trace confirmed via test output: setuponly.py:35 → _show_fixture_action → setuponly.py:70 where BytesWarning is raised."
+    },
+    {
+      "file": "testing/test_setuponly.py",
+      "line": 315,
+      "statement": "assert result.ret == 0",
+      "note": "Pre-existing test. Runs pytest with -bb flag and a bytes fixture parameter. Fails because BytesWarning is raised as an error during fixture setup display."
+    }
+  ],
+  "confidence": "high"
+}

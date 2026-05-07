@@ -1,0 +1,20 @@
+{
+  "instance_id": "psf__requests-2317",
+  "root_cause": [
+    {
+      "file": "requests/sessions.py",
+      "line": 428,
+      "statement": "method = builtin_str(method)",
+      "note": "builtin_str is Python 3's str(). Calling str(b'GET') produces \"b'GET'\" — the repr of the bytes object — not \"GET\". This malformed method string is sent to the server which rejects the request."
+    }
+  ],
+  "reasoning": "When method is passed as bytes (e.g. b'GET'), builtin_str(method) calls Python 3's str() on a bytes object, yielding the string literal \"b'GET'\" instead of decoding it to \"GET\". This malformed method string propagates into the HTTP request, causing the server to reject it.",
+  "fault_triggering_call_site": [
+    {
+      "file": "test_requests.py",
+      "line": 1394,
+      "statement": "r = requests.request(b'GET', httpbin('get'))"
+    }
+  ],
+  "confidence": "high"
+}

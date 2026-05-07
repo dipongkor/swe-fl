@@ -1,0 +1,44 @@
+{
+    "instance_id": "django__django-14007",
+    "root_cause": [
+        {
+            "file": "django/db/models/sql/compiler.py",
+            "line": 1415,
+            "statement": "return self.connection.ops.fetch_returned_insert_rows(cursor)",
+            "note": "InsertCompiler returned database-provided inserted rows directly, bypassing field converters for returning_fields. Custom AutoField subclasses with from_db_value therefore received raw database integers after bulk_create."
+        },
+        {
+            "file": "django/db/models/sql/compiler.py",
+            "line": 1418,
+            "statement": "return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]",
+            "note": "The single-row RETURNING path had the same bypass: returned column values were assigned to model attributes before get_converters()/apply_converters could wrap them."
+        },
+        {
+            "file": "django/db/models/sql/compiler.py",
+            "line": 1419,
+            "statement": "return [(self.connection.ops.last_insert_id(cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column),)]",
+            "note": "The fallback last_insert_id path also returned a raw primary-key value, so even create() on backends without RETURNING skipped from_db_value for the inserted primary key."
+        }
+    ],
+    "reasoning": "All insert-returning branches shared one flaw: they returned raw rows immediately. Normal query result paths apply database converters based on the selected expressions; returning_fields needs the same treatment using field.get_col(), get_converters(), and apply_converters(). The fix gathers rows first, applies converters if present, and only then returns them.",
+    "fault_triggering_call_site": [
+        {
+            "file": "tests/custom_pk/tests.py",
+            "line": 236,
+            "statement": "obj = CustomAutoFieldModel.objects.create()",
+            "note": "Triggers the insert returning path for a BigAutoField subclass whose from_db_value wraps integers in MyWrapper."
+        },
+        {
+            "file": "tests/custom_pk/tests.py",
+            "line": 237,
+            "statement": "self.assertIsInstance(obj.id, MyWrapper)",
+            "note": "Fails before the fix because obj.id is the raw integer returned from the insert instead of the converted MyWrapper instance."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}

@@ -1,0 +1,26 @@
+{
+    "instance_id": "astropy__astropy-7671",
+    "root_cause": [
+        {
+            "file": "astropy/utils/introspection.py",
+            "line": 146,
+            "statement": "return LooseVersion(have_version) >= LooseVersion(version)",
+            "note": "minversion passed version strings containing suffixes such as 'dev' and 'rc1' directly to LooseVersion. LooseVersion can produce mixed integer/string component lists for those versions, and comparing them to installed versions such as '0.12.2' can raise TypeError."
+        }
+    ],
+    "reasoning": "The failure is not in module resolution; it occurs at the LooseVersion comparison. Normalizing the requested version to its leading dotted numeric release before comparison avoids LooseVersion's mixed-type comparison bug for inputs such as '0.12dev' while preserving the intended minimum-version check.",
+    "fault_triggering_call_site": [
+        {
+            "file": "astropy/utils/tests/test_introspection.py",
+            "line": 70,
+            "statement": "good_versions = ['0.12', '0.12.1', '0.12.0.dev', '0.12dev']",
+            "note": "Adds the compact dev-suffix form that previously raised TypeError when minversion compared LooseVersion('0.12.2') against LooseVersion('0.12dev')."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

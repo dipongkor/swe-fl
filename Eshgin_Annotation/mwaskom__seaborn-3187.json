@@ -1,0 +1,38 @@
+{
+    "instance_id": "mwaskom__seaborn-3187",
+    "root_cause": [
+        {
+            "file": "seaborn/_core/scales.py",
+            "line": 382,
+            "statement": "labels = axis.major.formatter.format_ticks(locs)",
+            "note": "The objects interface generated legend labels with Matplotlib's ScalarFormatter while leaving offset/scientific notation enabled. The legend did not display the formatter's offset text, so large values were shown as small offset-relative labels."
+        },
+        {
+            "file": "seaborn/utils.py",
+            "line": 703,
+            "statement": "formatter = mpl.ticker.ScalarFormatter()",
+            "note": "The relational plotting utility path used the same kind of ScalarFormatter for legend tick labels without disabling offsets or scientific notation, producing incorrect labels for large numeric hue/size ranges."
+        }
+    ],
+    "reasoning": "Both failing tests exercise legend generation for large continuous values. Matplotlib can format such ticks as small labels plus separate offset/scientific context, but Seaborn legends only render the label strings and not that offset context. Disabling useOffset and scientific formatting before format_ticks forces each legend label to contain the full numeric value.",
+    "fault_triggering_call_site": [
+        {
+            "file": "tests/_core/test_plot.py",
+            "line": 2057,
+            "statement": "p = Plot(**xy, color=color).add(MockMark()).plot()",
+            "note": "Objects API trigger. color is xy['x'] + 1e8, so an offset-aware ScalarFormatter would produce labels that parse below 1e7 even though the underlying values are large."
+        },
+        {
+            "file": "tests/test_relational.py",
+            "line": 680,
+            "statement": "g = relplot(data=long_df, x=\"x\", y=\"y\", hue=long_df[\"z\"] + 1e8)",
+            "note": "Relational API trigger. The legend text should contain the full large hue values; before the fix the formatter's offset was lost."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}

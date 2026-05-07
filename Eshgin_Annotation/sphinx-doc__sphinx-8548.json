@@ -1,0 +1,32 @@
+{
+    "instance_id": "sphinx-doc__sphinx-8548",
+    "root_cause": [
+        {
+            "file": "sphinx/ext/autodoc/importer.py",
+            "line": "310-316",
+            "statement": "if analyzer:\n    namespace = '.'.join(objpath)\n    for (ns, name), docstring in analyzer.attr_docs.items():\n        if namespace == ns and name not in members:\n            members[name] = ClassAttribute(subject, name, INSTANCEATTR, '\\n'.join(docstring))",
+            "note": "The original get_class_members accepts a single 'analyzer' argument representing only the current class's module analyzer. The 'if analyzer:' block matches attribute docs only against the current class namespace ('.'.join(objpath)), so instance attributes documented in parent classes (e.g. Foo.attr1 inherited by Bar) are never discovered. The fix replaces this with a loop over getmro(subject) that independently calls ModuleAnalyzer.for_module(cls.__module__) for every class in the hierarchy, finding inherited instance attrs."
+        },
+        {
+            "file": "sphinx/ext/autodoc/__init__.py",
+            "line": 1587,
+            "statement": "members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)",
+            "note": "The call site passes self.analyzer, which is the analyzer for the subject class only. This is the externally-scoped single-analyzer that the buggy 'if analyzer:' block in importer.py depends on, reinforcing the MRO-blindness. The fix drops this argument entirely; get_class_members now builds its own analyzers internally per-class as it walks the MRO."
+        }
+    ],
+    "reasoning": "The failure in test_inherited_instance_variable is precise: Bar inherits attr1 from Foo, but the original get_class_members only queries the analyzer for Bar's own namespace, so attr1 (documented in Foo via 'self.attr1 = ...') is never found. The root cause is an incomplete MRO walk in the analyzer-querying step of get_class_members, not a missing parameter. The fix restructures the function to iterate getmro(subject), call ModuleAnalyzer.for_module() per class, and match attr_docs against each cls.__qualname__, making the analyzer parameter on the signature unnecessary and therefore removed. The __init__.py call site is updated in lockstep to omit self.analyzer. The existing report's framing was inverted: it described the bug as 'missing parameter', but the original code had the parameter; the bug was what that parameter was used for (single-class lookup instead of full MRO traversal).",
+    "fault_triggering_call_site": [
+        {
+            "file": "tests/test_ext_autodoc_autoclass.py",
+            "line": "82-83",
+            "statement": "actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)",
+            "note": "Triggers the inherited-members path. With options={'members': True, 'inherited-members': True}, autodoc calls get_class_members for Bar. The original code queries only Bar's analyzer, missing attr1 which is an instance attribute documented in the parent class Foo. The assertion expects attr1, attr2, attr3; the original code returns only attr2 and attr3."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}

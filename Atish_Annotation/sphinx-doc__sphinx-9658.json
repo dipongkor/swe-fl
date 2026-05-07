@@ -1,0 +1,33 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9658",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/autodoc/mock.py",
+      "line": 43,
+      "statement": "self.__qualname__ = ''",
+      "note": "Hardcodes qualname to empty string on every instantiation, discarding class identity"
+    },
+    {
+      "file": "sphinx/ext/autodoc/mock.py",
+      "line": 74,
+      "statement": "attrs = {'__module__': module, '__display_name__': ...}",
+      "note": "__name__ never set in subclass attrs, so __init__ has nothing correct to draw from"
+    }
+  ],
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_util_typing.py",
+      "line": 177,
+      "statement": "assert restify(unknown.secret.Class) == ':py:class:`unknown.secret.Class`'",
+      "note": "New test added in patch — not pre-existing. restify reads __qualname__ which is ''",
+      "is_test_file": true
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true,
+  "reasoning": "When a mock subclass is created via _make_subclass, the attrs dict never includes __name__, so the subclass inherits the class-level default __name__ = '' from _MockObject. Then when any instance of that subclass is initialized, __init__ runs self.__qualname__ = self.__name__ — which is '' — clobbering the qualname to empty string. So when restify reads __qualname__ to build the cross-reference string, it gets nothing, producing :py:class:unknown.secret. instead of `:py:class:`unknown.secret.Class."
+}

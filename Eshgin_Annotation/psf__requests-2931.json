@@ -1,0 +1,26 @@
+{
+    "instance_id": "psf__requests-2931",
+    "root_cause": [
+        {
+            "file": "requests/models.py",
+            "line": 84,
+            "statement": "return to_native_string(data)",
+            "note": "_encode_params is also used for request bodies. When data is bytes, converting it with to_native_string decodes it to text, so a binary PUT body no longer remains bytes after Request.prepare()."
+        }
+    ],
+    "reasoning": "The reported regression is about binary payload preservation. _encode_params should leave bytes and strings unchanged for body preparation; URL query preparation can separately coerce str/bytes params into native text before calling _encode_params. The second hunk in prepare_url preserves the existing URL-param behavior, but the primary fault for test_binary_put is the unconditional to_native_string(data) in _encode_params.",
+    "fault_triggering_call_site": [
+        {
+            "file": "test_requests.py",
+            "line": 161,
+            "statement": "request = requests.Request('PUT', 'http://example.com', data=u\"\\u00f6\\u00f6\\u00f6\".encode(\"utf-8\")).prepare()",
+            "note": "Directly prepares a PUT request with a UTF-8 encoded bytes payload. Before the fix, request.body is converted to native text; the assertion on line 163 requires it to remain bytes."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

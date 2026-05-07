@@ -1,0 +1,22 @@
+{
+  "instance_id": "matplotlib__matplotlib-23299",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/__init__.py",
+      "line": 1090,
+      "statement": "orig = rcParams.copy()",
+      "note": "rc_context() saves all rcParams including 'backend' and restores them all on exit. When the context exits, any change to 'backend' made inside the context is reverted, even though backend switching has side effects (loaded figures, Gcf state) that are not rolled back."
+    }
+  ],
+  "reasoning": "rc_context() is a general-purpose context manager for temporarily changing rcParams. It saves a full copy of rcParams on entry and restores it on exit. The 'backend' key is included in this save/restore cycle. When backend is changed inside the context, rc_context exit reverts it — but the side effects of backend switching (figures registered in Gcf, loaded backend modules) are not reverted. This inconsistency means figures created inside the context become orphaned when the backend is reset.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_rcparams.py",
+      "line": 501,
+      "statement": "with mpl.rc_context():",
+      "note": "Pre-existing test. Sets backend inside rc_context, asserts it persists after exit. Confirmed via traceback.print_stack() at __init__.py:1090. Note: rc_context also fires during test setup via mpl_test_settings fixture."
+    }
+  ],
+  "confidence": "high",
+  "notes": "Value-mismatch failure — no exception. The docstring addition is a cleanup hunk. The dict() wrapping of rcParams.copy() is incidental — the key fix is del orig['backend']."
+}

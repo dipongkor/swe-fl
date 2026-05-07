@@ -1,0 +1,57 @@
+{
+    "instance_id": "astropy__astropy-14598",
+    "root_cause": [
+        {
+            "file": "astropy/io/fits/card.py",
+            "line": 862,
+            "statement": "value = value.rstrip().replace(\"''\", \"'\")",
+            "note": "Docker verified. This line collapses doubled single quotes while parsing long FITS string cards. Reverting it makes test_long_string_value_with_quotes fail because \"x\" * 100 + \"''\" roundtrips as a value ending in a single quote."
+        },
+        {
+            "file": "astropy/io/fits/card.py",
+            "line": 69,
+            "statement": "_strg_comment_RE = re.compile(f\"({_strg})? *{_comm_field}?$\")",
+            "note": "The end-of-string anchor is required so that parsing a CONTINUE-card value/comment field consumes the entire string. If the anchor is removed, re.match() may succeed on only a prefix of the value/comment field. In Card._split(), that partial match is then treated as a valid parsed long-string fragment, so trailing content can be ignored or mis-associated with the comment. This affects long FITS string roundtripping, especially when the value ends with escaped/doubled single quotes."
+        }
+    ],
+    "reasoning": "The fixed PR branch passes TestHeaderFunctions.test_long_string_value_with_quotes. The primary directly verified root cause is the quote-handling line: reverting the replacement of doubled single quotes reproduces the reported corruption where a value ending in \"''\" roundtrips with one quote lost. A second parser-soundness issue is the _strg_comment_RE end anchor. This regex is used in Card._split() when reconstructing logical long-string cards from CONTINUE cards. Because Python re.match() does not require full-string consumption by default, removing the '$' anchor allows the parser to accept only a prefix of the value/comment field. That can make _split() extract an incomplete string fragment while silently ignoring remaining characters, which explains failures in long-string cases with embedded or trailing quotes. Therefore the anchor should be treated as a secondary/supporting root cause for correctly parsing long FITS string card fragments, even if the quote replacement line is the stronger directly fault-inducing line for the focused SWE-bench FAIL_TO_PASS test.",
+    "fault_triggering_call_site": [
+        {
+            "file": "astropy/io/fits/tests/test_header.py",
+            "line": 586,
+            "statement": "testval = \"x\" * 100 + \"''\"",
+            "note": "Constructs a long string ending in doubled single quotes."
+        },
+        {
+            "file": "astropy/io/fits/tests/test_header.py",
+            "line": 588,
+            "statement": "c = fits.Card.fromstring(c.image)",
+            "note": "Triggers parsing of a serialized long FITS string card. The logical card is reconstructed through Card._split(), which uses _strg_comment_RE for CONTINUE-card fragments."
+        },
+        {
+            "file": "astropy/io/fits/card.py",
+            "line": 533,
+            "statement": "m = self._strg_comment_RE.match(vc)",
+            "note": "This is the parser call site affected by the missing '$' anchor. Without the anchor, a prefix-only match can be accepted as valid."
+        },
+        {
+            "file": "astropy/io/fits/card.py",
+            "line": 537,
+            "statement": "value = m.group(\"strg\") or \"\"",
+            "note": "The parsed string fragment is taken from the regex match. If the regex only matched a prefix, the remaining part of the CONTINUE value/comment field is lost from reconstruction."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "medium-high",
+    "multi_rc": true,
+    "verification": {
+        "container": "astropy__astropy-14598",
+        "fixed_test": "/opt/miniconda3/envs/testbed/bin/pytest -q astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_string_value_with_quotes -rA -> passed",
+        "reverted_test_1": "revert quote replacement line -> failed, value lost one quote",
+        "reverted_test_2": "remove _strg_comment_RE end anchor -> failed in long-string parsing; observed assertion mismatch where the reconstructed long string ending in doubled quotes did not equal the expected value",
+        "note": "The quote replacement line remains the primary directly verified root cause for the SWE-bench regression. The regex anchor is included as a secondary parser-correctness root cause because it prevents prefix-only matches during CONTINUE-card reconstruction."
+    }
+}

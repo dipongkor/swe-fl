@@ -1,0 +1,32 @@
+{
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "root_cause": [
+        {
+            "file": "sklearn/metrics/_ranking.py",
+            "line": 1086,
+            "statement": "thresholds = np.r_[thresholds[0] + 1, thresholds]",
+            "note": "The sentinel threshold prepended to force fpr=0, tpr=0 at the start of the ROC curve is computed as thresholds[0] + 1. When y_score is a probability estimate (values in [0, 1]), thresholds[0] is the highest score, so thresholds[0] + 1 produces a value in (1, 2], which exceeds the valid probability range. The fix replaces this arithmetic sentinel with np.inf, which is semantically correct ('classify everything as negative for any finite threshold') and does not violate the [0, 1] range constraint of probability estimates."
+        }
+    ],
+    "reasoning": "The ROC curve algorithm prepends a synthetic threshold higher than all real scores to anchor the curve at (fpr=0, tpr=0). The original heuristic of thresholds[0] + 1 works for unconstrained scores but breaks the invariant that thresholds must remain within [0, 1] when y_score represents probabilities. Using np.inf is both a correct general solution and range-safe: it is always strictly greater than any finite score regardless of scale, and it does not produce an out-of-range value for probability estimates. The test_roc_curve_drop_intermediate failure confirms the fix must use np.inf specifically, since that test asserts the prepended value is np.inf. The test_roc_curve_with_probablity_estimates failure confirms the original bug: thresholds[0] + 1 exceeds 1.0 for probability inputs, violating the assertion assert np.isinf(thresholds[0]).",
+    "fault_triggering_call_site": [
+        {
+            "file": "sklearn/metrics/tests/test_ranking.py",
+            "line": "2214-15",
+            "statement": "_, _, thresholds = roc_curve(y_true, y_score) \nassert np.isinf(thresholds[0])",
+            "note": "Triggers the bug directly: y_score is drawn from rng.rand(10) so all values are in [0, 1). thresholds[0] + 1 therefore lands in (1, 2], failing the np.isinf assertion and violating the probability estimate contract."
+        },
+        {
+            "file": "sklearn/metrics/tests/test_ranking.py",
+            "line": 421,
+            "statement": "assert_array_almost_equal(thresholds, [np.inf, 1.0, 0.7, 0.0])",
+            "note": "Triggers the bug via the drop_intermediate path: the test explicitly expects np.inf as the first threshold, but the buggy code produces thresholds[0] + 1 = 1.0 + 1 = 2.0, causing an array mismatch."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

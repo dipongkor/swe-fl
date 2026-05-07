@@ -1,0 +1,33 @@
+{
+  "instance_id": "django__django-13121",
+  "root_cause": [
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 717,
+      "statement": "return connection.ops.date_interval_sql(self.value), []",
+      "note": "DurationValue.as_sql() calls date_interval_sql() which returns a raw string SQL literal with an empty params list. On SQLite this returns the microseconds as a plain integer string. When this value is read back from the database it arrives as a string and convert_durationfield_value fails trying to use it as a timedelta microseconds component."
+    }
+  ],
+  "reasoning": "DurationValue.as_sql() calls date_interval_sql() which returns a raw string SQL literal with an empty params list. On SQLite this returns the microseconds as a plain integer string. When this value is read back from the database it arrives as a string and convert_durationfield_value fails trying to use it as a timedelta microseconds component.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/expressions/tests.py",
+      "line": 1424,
+      "statement": "test_set = [e.name for e in Experiment.objects.filter(start__lt=F('assigned') + delay)]",
+      "note": "Pre-existing test (test_mixed_comparisons2). F('assigned') + delay triggers _combine() wrapping timedelta in DurationValue. Confirmed via traceback.print_stack() at expressions.py:714.",
+      "is_test_file": true,
+      "is_modified_in_patch": false
+    },
+    {
+      "file": "tests/expressions/tests.py",
+      "line": 1473,
+      "statement": "qs = Experiment.objects.annotate(duration=F('estimated_time') + delta)",
+      "note": "Pre-existing test (test_duration_expressions). Same RC path. Confirmed via traceback.print_stack() at expressions.py:714.",
+      "is_test_file": true,
+      "is_modified_in_patch": false
+    }
+  ],
+  "confidence": "medium",
+  "multi_rc": false,
+  "notes": "Multiple tests trigger the same RC. The patch removes DurationValue entirely and also removes date_interval_sql from base/mysql/sqlite backends — those are cleanup hunks. The _combine() change replacing DurationValue with Value(other, output_field=DurationField()) is the positive fix."
+}

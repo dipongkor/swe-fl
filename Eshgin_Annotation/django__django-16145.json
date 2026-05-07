@@ -1,0 +1,32 @@
+{
+    "instance_id": "django__django-16145",
+    "root_cause": [
+        {
+            "file": "django/core/management/commands/runserver.py",
+            "line": 150,
+            "statement": "\"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,",
+            "note": "The startup message used self.addr directly for non-IPv6 addresses. When the user passed addrport='0:8000', parsing left self.addr as '0', so the displayed URL became http://0:8000/ instead of the documented 0.0.0.0 form."
+        }
+    ],
+    "reasoning": "The server binding semantics already treat address 0 as all IPv4 interfaces, but the user-facing URL formatter did not normalize that special value. The fix computes a display addr that still handles raw IPv6 with brackets, maps '0' to '0.0.0.0', and otherwise keeps the parsed address unchanged.",
+    "fault_triggering_call_site": [
+        {
+            "file": "tests/admin_scripts/tests.py",
+            "line": 1593,
+            "statement": "call_command(\"runserver\", addrport=\"0:8000\", use_reloader=False, skip_checks=True, stdout=self.output)",
+            "note": "Runs the management command with the documented shorthand address."
+        },
+        {
+            "file": "tests/admin_scripts/tests.py",
+            "line": 1600,
+            "statement": "self.assertIn(\"Starting development server at http://0.0.0.0:8000/\", self.output.getvalue())",
+            "note": "Checks the exact user-facing message. Before the fix the output contains http://0:8000/."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": false
+}

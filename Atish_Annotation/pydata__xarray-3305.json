@@ -1,0 +1,33 @@
+{
+  "instance_id": "pydata__xarray-3305",
+  "root_cause": [
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4771,
+      "statement": "variables[name] = var.quantile(q, dim=reduce_dims, interpolation=interpolation)",
+      "note": "Dataset.quantile() calls Variable.quantile() without passing keep_attrs, so attrs are never forwarded to the per-variable result regardless of what the caller requested."
+    },
+    {
+      "file": "xarray/core/variable.py",
+      "line": 1662,
+      "statement": "return Variable(new_dims, qs)",
+      "note": "Variable.quantile() has no keep_attrs parameter and always constructs the result without attrs, so even if dataset.py passed keep_attrs there was no mechanism to preserve them."
+    }
+  ],
+  "reasoning": "DataArray.quantile() delegates to Dataset.quantile() via _to_temp_dataset(). Dataset.quantile() iterates over variables and calls Variable.quantile() for each, but never passes keep_attrs. Variable.quantile() itself has no keep_attrs parameter and always returns Variable(new_dims, qs) with no attrs. The chain means attrs are dropped at the Variable level and never reach the DataArray result, even when keep_attrs=True is explicitly requested by the caller.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_dataarray.py",
+      "line": 2306,
+      "statement": "actual = DataArray(self.va).quantile(q, dim=dim, keep_attrs=True)",
+      "note": "Pre-existing test. Passes keep_attrs=True and asserts actual.attrs == self.attrs. Confirmed via traceback.print_stack() at dataset.py:4697 and variable.py:1596.",
+      "is_test_file": true,
+      "is_modified_in_patch": false
+    }
+  ],
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true,
+  "notes": "Two cooperating RCs: dataset.py never passes keep_attrs downstream, and variable.py has no parameter to receive it. Both must be fixed together. The docstring and whitespace changes in variable.py are cleanup hunks."
+}

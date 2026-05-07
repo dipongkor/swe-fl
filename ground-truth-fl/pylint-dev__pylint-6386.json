@@ -1,0 +1,21 @@
+{
+  "instance_id": "pylint-dev__pylint-6386",
+  "root_cause": [
+    {
+      "file": "pylint/config/utils.py",
+      "line": 221,
+      "statement": "if not argument.startswith('--'):",
+      "note": "Only '--' prefixed tokens are recognized as preprocessable options."
+    }
+  ],
+  "reasoning": "PREPROCESSABLE_OPTIONS intercepts known flags before argparse sees them. --verbose is intercepted correctly and never reaches argparse's argument consumption logic. But the loop guard uses startswith('--'), so -v is treated as a regular argument and forwarded to argparse raw. argparse sees -v registered as _DoNothingAction with nargs=None and expects one argument — raising ArgumentError.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/config/test_config.py",
+      "line": 107,
+      "statement": "Run([str(EMPTY_MODULE), '-v'], exit=False)",
+      "note": "Pre-existing test. Passes -v with no argument. Stack trace confirms: arguments_manager.py:258 -> argparse parse_known_args -> _match_argument raises ArgumentError 'expected one argument'."
+    }
+  ],
+  "confidence": "high"
+}

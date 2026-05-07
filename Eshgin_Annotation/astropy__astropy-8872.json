@@ -1,0 +1,38 @@
+{
+    "instance_id": "astropy__astropy-8872",
+    "root_cause": [
+        {
+            "file": "astropy/units/quantity.py",
+            "line": 299,
+            "statement": "if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):",
+            "note": "The dtype-preservation check used np.can_cast(np.float32, value.dtype) as a proxy for whether the input can represent floats. float16 fails that proxy, so Quantity construction promoted float16 arrays to Python float/float64 even though float16 is already a floating dtype."
+        },
+        {
+            "file": "astropy/units/quantity.py",
+            "line": 380,
+            "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):",
+            "note": "The later default-casting branch repeated the same proxy and could cast non-object non-integer inputs based on the wrong criterion. The fix narrows default promotion to integer, unsigned integer, and object kinds."
+        }
+    ],
+    "reasoning": "The intended policy is to promote integer and object inputs to floating point by default while preserving floating dtypes, including float16. The old can_cast(np.float32, dtype) check answers a different question and classifies float16 as needing promotion. Checking dtype.kind directly preserves all floating dtypes and still promotes integer/object inputs.",
+    "fault_triggering_call_site": [
+        {
+            "file": "astropy/units/tests/test_quantity.py",
+            "line": 145,
+            "statement": "a3_16 = np.array([1., 2.], dtype=np.float16)",
+            "note": "Creates the float16 input that was incorrectly promoted."
+        },
+        {
+            "file": "astropy/units/tests/test_quantity.py",
+            "line": 147,
+            "statement": "assert q3_16.dtype == a3_16.dtype",
+            "note": "Captures the expected dtype preservation. Before the fix, q3_16.dtype becomes float64."
+        }
+    ],
+    "rc_ftcs_same": false,
+    "hunk_type": "rc",
+    "fault_inducing": true,
+    "rc_in_this_hunk": true,
+    "confidence": "high",
+    "multi_rc": true
+}
