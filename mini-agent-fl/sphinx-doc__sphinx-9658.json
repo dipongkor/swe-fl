@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "sphinx/ext/autodoc/mock.py", "line": 43, "statement": "        self.__qualname__ = ''"}], "reasoning": "The _MockObject.__init__ method sets __qualname__ to an empty string, which causes restify() to generate incorrect base class references like 'torch.nn.' instead of 'torch.nn.Module' when mock objects are used as base classes and accessed via __orig_bases__.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "sphinx/ext/autodoc/mock.py",
+            "line": 43,
+            "statement": "        self.__qualname__ = ''"
+        }
+    ],
+    "reasoning": "The _MockObject.__init__ method sets __qualname__ to an empty string, which causes restify() to generate incorrect base class references like 'torch.nn.' instead of 'torch.nn.Module' when mock objects are used as base classes and accessed via __orig_bases__.",
+    "confidence": "high"
+}

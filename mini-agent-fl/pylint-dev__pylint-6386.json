@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "pylint/config/callback_actions.py", "line": 40, "statement": "class _DoNothingAction(_CallbackAction):"}], "reasoning": "The _DoNothingAction class did not override __init__ to set nargs=0, causing argparse to expect one argument for options using this action. Adding an __init__ method that passes nargs=0 to the parent class fixes the issue.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "pylint/config/callback_actions.py",
+            "line": 40,
+            "statement": "class _DoNothingAction(_CallbackAction):"
+        }
+    ],
+    "reasoning": "The _DoNothingAction class did not override __init__ to set nargs=0, causing argparse to expect one argument for options using this action. Adding an __init__ method that passes nargs=0 to the parent class fixes the issue.",
+    "confidence": "high"
+}

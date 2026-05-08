@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "pylint/config/argument.py", "line": 117, "statement": "    for pattern in _csv_transformer(value):"}], "reasoning": "The _regexp_csv_transfomer function uses _csv_transformer which naively splits on all commas, breaking regex patterns that contain commas as part of their syntax (e.g., {1,3} for repetition counts). The fix introduces _regexp_parts_csv_transformer which is aware of regex syntax and only splits on commas that are not inside parentheses, brackets, or braces.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "pylint/config/argument.py",
+            "line": 117,
+            "statement": "    for pattern in _csv_transformer(value):"
+        }
+    ],
+    "reasoning": "The _regexp_csv_transfomer function uses _csv_transformer which naively splits on all commas, breaking regex patterns that contain commas as part of their syntax (e.g., {1,3} for repetition counts). The fix introduces _regexp_parts_csv_transformer which is aware of regex syntax and only splits on commas that are not inside parentheses, brackets, or braces.",
+    "confidence": "high"
+}

@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "sphinx/extension.py",
-      "line": 58,
+      "line": 54,
       "statement": "if extension.version == 'unknown version' or reqversion > extension.version:",
       "note": "String comparison instead of semantic version comparison. '3.9' > '3.10' is True lexicographically."
     }

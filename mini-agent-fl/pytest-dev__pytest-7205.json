@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "src/_pytest/setuponly.py", "line": 69, "statement": "        tw.write(\"[{}]\".format(fixturedef.cached_param))"}], "reasoning": "The code uses format() which implicitly calls str() on fixturedef.cached_param. When the parameter is a bytes object, this triggers a BytesWarning in Python when run with -bb flag. Using saferepr() instead of implicit str() conversion avoids this warning while providing a proper representation of the value.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "src/_pytest/setuponly.py",
+            "line": 69,
+            "statement": "        tw.write(\"[{}]\".format(fixturedef.cached_param))"
+        }
+    ],
+    "reasoning": "The code uses format() which implicitly calls str() on fixturedef.cached_param. When the parameter is a bytes object, this triggers a BytesWarning in Python when run with -bb flag. Using saferepr() instead of implicit str() conversion avoids this warning while providing a proper representation of the value.",
+    "confidence": "high"
+}

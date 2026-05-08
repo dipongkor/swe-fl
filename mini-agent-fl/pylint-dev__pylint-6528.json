@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "pylint/lint/pylinter.py", "line": 568, "statement": "    def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:"}], "reasoning": "The _discover_files method was a static method that did not accept or use the ignore settings (ignore_list, ignore_list_re, ignore_list_paths_re) when discovering files in recursive mode, causing all ignore settings to be ignored.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "pylint/lint/pylinter.py",
+            "line": 568,
+            "statement": "    def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:"
+        }
+    ],
+    "reasoning": "The _discover_files method was a static method that did not accept or use the ignore settings (ignore_list, ignore_list_re, ignore_list_paths_re) when discovering files in recursive mode, causing all ignore settings to be ignored.",
+    "confidence": "high"
+}

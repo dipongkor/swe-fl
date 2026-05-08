@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "src/_pytest/pathlib.py", "line": 345, "statement": "    return type(path)(normcase(str(path.realpath())))"}], "reasoning": "The unique_path function was using normcase() which converts paths to lowercase on Windows, breaking Python imports that require the actual case. The fix is to use only realpath() which resolves symlinks and returns the path with the actual case on disk.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "src/_pytest/pathlib.py",
+            "line": 345,
+            "statement": "    return type(path)(normcase(str(path.realpath())))"
+        }
+    ],
+    "reasoning": "The unique_path function was using normcase() which converts paths to lowercase on Windows, breaking Python imports that require the actual case. The fix is to use only realpath() which resolves symlinks and returns the path with the actual case on disk.",
+    "confidence": "high"
+}

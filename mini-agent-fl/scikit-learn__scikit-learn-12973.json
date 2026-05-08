@@ -1,1 +1,16 @@
-{"root_cause": [{"file": "sklearn/linear_model/least_angle.py", "line": 1482, "statement": "    def fit(self, X, y, copy_X=True):"}, {"file": "sklearn/linear_model/least_angle.py", "line": 1508, "statement": "            X, y, self.fit_intercept, self.normalize, self.copy_X)"}], "reasoning": "The fit method has copy_X parameter with default True that conflicts with self.copy_X from __init__. Line 1508 uses self.copy_X while line 1509 uses the parameter copy_X, creating inconsistent behavior where different parts of the method use different copy_X values.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "sklearn/linear_model/least_angle.py",
+            "line": 1482,
+            "statement": "    def fit(self, X, y, copy_X=True):"
+        },
+        {
+            "file": "sklearn/linear_model/least_angle.py",
+            "line": 1508,
+            "statement": "            X, y, self.fit_intercept, self.normalize, self.copy_X)"
+        }
+    ],
+    "reasoning": "The fit method has copy_X parameter with default True that conflicts with self.copy_X from __init__. Line 1508 uses self.copy_X while line 1509 uses the parameter copy_X, creating inconsistent behavior where different parts of the method use different copy_X values.",
+    "confidence": "high"
+}

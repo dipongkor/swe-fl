@@ -1,1 +1,16 @@
-{"root_cause": [{"file": "xarray/core/computation.py", "line": 1908, "statement": "    coord = _ensure_numeric(coord)  # type: ignore # https://github.com/python/mypy/issues/1533 ?"}, {"file": "xarray/core/computation.py", "line": 1913, "statement": "    res *= coord"}], "reasoning": "The polyval function was using the data values of the DataArray for polynomial evaluation instead of the coordinate values. When a DataArray has datetime64 data but timedelta64 coordinates (e.g., absolute timestamps as data but time deltas as coordinates), the polynomial should be evaluated at the coordinate values (time deltas), not the data values (absolute timestamps). The fix extracts and uses the coordinate values when available, while preserving the original coordinate dtypes in the result.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "xarray/core/computation.py",
+            "line": 1908,
+            "statement": "    coord = _ensure_numeric(coord)  # type: ignore # https://github.com/python/mypy/issues/1533 ?"
+        },
+        {
+            "file": "xarray/core/computation.py",
+            "line": 1913,
+            "statement": "    res *= coord"
+        }
+    ],
+    "reasoning": "The polyval function was using the data values of the DataArray for polynomial evaluation instead of the coordinate values. When a DataArray has datetime64 data but timedelta64 coordinates (e.g., absolute timestamps as data but time deltas as coordinates), the polynomial should be evaluated at the coordinate values (time deltas), not the data values (absolute timestamps). The fix extracts and uses the coordinate values when available, while preserving the original coordinate dtypes in the result.",
+    "confidence": "high"
+}

@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "src/_pytest/reports.py", "line": 165, "statement": "reprtraceback = rep.longrepr.reprtraceback.__dict__.copy()"}], "reasoning": "The disassembled_report function in _to_json method only serialized a single reprtraceback and reprcrash, without handling the chain attribute of ExceptionChainRepr objects. This caused chained exceptions to lose all but the last exception when serialized for xdist.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "src/_pytest/reports.py",
+            "line": 165,
+            "statement": "reprtraceback = rep.longrepr.reprtraceback.__dict__.copy()"
+        }
+    ],
+    "reasoning": "The disassembled_report function in _to_json method only serialized a single reprtraceback and reprcrash, without handling the chain attribute of ExceptionChainRepr objects. This caused chained exceptions to lose all but the last exception when serialized for xdist.",
+    "confidence": "high"
+}

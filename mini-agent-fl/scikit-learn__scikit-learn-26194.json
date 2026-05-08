@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "sklearn/metrics/_ranking.py", "line": 1086, "statement": "    thresholds = np.r_[thresholds[0] + 1, thresholds]"}], "reasoning": "The line unconditionally adds 1 to the maximum threshold value, which causes thresholds to exceed 1 when y_score contains probability estimates (values in [0, 1]). The fix checks if thresholds[0] <= 1 and uses a value slightly above 1 instead of thresholds[0] + 1 for probability estimates.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "sklearn/metrics/_ranking.py",
+            "line": 1086,
+            "statement": "    thresholds = np.r_[thresholds[0] + 1, thresholds]"
+        }
+    ],
+    "reasoning": "The line unconditionally adds 1 to the maximum threshold value, which causes thresholds to exceed 1 when y_score contains probability estimates (values in [0, 1]). The fix checks if thresholds[0] <= 1 and uses a value slightly above 1 instead of thresholds[0] + 1 for probability estimates.",
+    "confidence": "high"
+}
