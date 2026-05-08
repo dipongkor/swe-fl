@@ -1,1 +1,16 @@
-{"root_cause": [{"file": "astropy/utils/introspection.py", "line": 143, "statement": "        return LooseVersion(have_version) >= LooseVersion(version)"}, {"file": "astropy/utils/introspection.py", "line": 145, "statement": "        return LooseVersion(have_version) > LooseVersion(version)"}], "reasoning": "The LooseVersion class from distutils has a bug when comparing versions with mixed types (e.g., '1.14.3' vs '1.14dev'), causing a TypeError. The fix replaces LooseVersion with packaging.version.parse which properly handles all version string formats including dev, rc, alpha, and beta suffixes.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "astropy/utils/introspection.py",
+            "line": 143,
+            "statement": "        return LooseVersion(have_version) >= LooseVersion(version)"
+        },
+        {
+            "file": "astropy/utils/introspection.py",
+            "line": 145,
+            "statement": "        return LooseVersion(have_version) > LooseVersion(version)"
+        }
+    ],
+    "reasoning": "The LooseVersion class from distutils has a bug when comparing versions with mixed types (e.g., '1.14.3' vs '1.14dev'), causing a TypeError. The fix replaces LooseVersion with packaging.version.parse which properly handles all version string formats including dev, rc, alpha, and beta suffixes.",
+    "confidence": "high"
+}

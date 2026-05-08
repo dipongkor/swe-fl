@@ -1,1 +1,11 @@
-{"root_cause": [{"file": "xarray/core/computation.py", "line": 1813, "statement": "    return apply_ufunc("}], "reasoning": "The where function was calling apply_ufunc without any keep_attrs parameter, which defaults to False and causes attributes to be dropped. Additionally, even with keep_attrs=True, it would preserve attributes from the condition (first argument) rather than from the data arguments (x and y), which is not the expected behavior.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "xarray/core/computation.py",
+            "line": 1813,
+            "statement": "    return apply_ufunc("
+        }
+    ],
+    "reasoning": "The where function was calling apply_ufunc without any keep_attrs parameter, which defaults to False and causes attributes to be dropped. Additionally, even with keep_attrs=True, it would preserve attributes from the condition (first argument) rather than from the data arguments (x and y), which is not the expected behavior.",
+    "confidence": "high"
+}

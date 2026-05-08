@@ -20,7 +20,7 @@
             "note": "Dataset.quantile also delegated to Variable.quantile without forwarding keep_attrs, so dataset variables would drop attrs even after the variable-level API could preserve them."
         }
     ],
-    "reasoning": "The issue is an attribute propagation break in the quantile reduction path. The public DataArray/Dataset APIs expose keep_attrs, but the lower-level Variable.quantile implementation ignored that policy and returned a fresh Variable without attrs. The fix extends Variable.quantile with keep_attrs, resolves the default via _get_keep_attrs(default=False), passes attrs into the new Variable, and forwards keep_attrs from Dataset.quantile.",
+    "reasoning": "The issue is an attribute propagation break in the quantile reduction path. The public DataArray/Dataset APIs expose keep_attrs, but the lower-level Variable.quantile implementation ignored that policy and returned a fresh Variable without attrs.",
     "fault_triggering_call_site": [
         {
             "file": "xarray/tests/test_dataarray.py",

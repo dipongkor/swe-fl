@@ -1,1 +1,16 @@
-{"root_cause": [{"file": "sphinx/ext/autodoc/__init__.py", "line": 749, "statement": "            elif (namespace, membername) in attr_docs:"}, {"file": "sphinx/ext/autodoc/__init__.py", "line": 601, "statement": "                if key in attr_docs:"}], "reasoning": "The code only checks for attribute documentation in the current class namespace, not in base class namespaces. When inherited-members is enabled, attributes documented in base classes should also be found and their docstrings should be retrieved.", "confidence": "high"}
+{
+    "root_cause": [
+        {
+            "file": "sphinx/ext/autodoc/__init__.py",
+            "line": 749,
+            "statement": "            elif (namespace, membername) in attr_docs:"
+        },
+        {
+            "file": "sphinx/ext/autodoc/__init__.py",
+            "line": 601,
+            "statement": "                if key in attr_docs:"
+        }
+    ],
+    "reasoning": "The code only checks for attribute documentation in the current class namespace, not in base class namespaces. When inherited-members is enabled, attributes documented in base classes should also be found and their docstrings should be retrieved.",
+    "confidence": "high"
+}
