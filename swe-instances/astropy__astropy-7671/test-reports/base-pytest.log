@@ -1,0 +1,1101 @@
+fitscheck.py               195 ERROR    EXCEPTION 'missing.fits' .. [Errno 2] No such file or directory: 'missing.fits'
+fitscheck.py               211 WARNING  1 errors
+fitscheck.py               149 INFO     OK '/testbed/astropy/io/fits/tests/data/checksum.fits'
+fitscheck.py               136 WARNING  MISSING '/tmp/fits-test-4m4cia9d/checksum.fits' .. Checksum not found in HDU #0
+fitscheck.py               211 WARNING  1 errors
+fitscheck.py               136 WARNING  MISSING '/tmp/fits-test-4m4cia9d/checksum.fits' .. Checksum not found in HDU #0
+fitscheck.py               211 WARNING  1 errors
+fitscheck.py               136 WARNING  MISSING '/testbed/astropy/io/fits/tests/data/arange.fits' .. Checksum not found in HDU #0
+fitscheck.py               211 WARNING  1 errors
+fitscheck.py               146 WARNING  BAD '/tmp/fits-test-ojjvf13z/test.fits' Checksum verification failed for HDU ('PRIMARY', 1).
+
+fitscheck.py               211 WARNING  1 errors
+fitscheck.py               146 WARNING  BAD '/tmp/fits-test-ojjvf13z/test.fits' Checksum verification failed for HDU ('PRIMARY', 1).
+
+fitscheck.py               211 WARNING  1 errors
+fitsdiff.py                242 ERROR    Wildcard pattern '/tmp/fits-test-296v3x04/tmp_file1*' did not match any files.
+fitsdiff.py                272 WARNING  'arange.fits' has no match in '/tmp/fits-test-weqcawh7/sub'
+fitsheader.py              196 WARNING  /testbed/astropy/io/fits/tests/data/arange.fits (HDU 0): Keyword RANDOMKEY not found.
+fitsheader.py              196 WARNING  /testbed/astropy/io/fits/tests/data/test0.fits (HDU 0): Keyword BACKGRND not found.
+fitsheader.py              196 WARNING  /testbed/astropy/io/fits/tests/data/test0.fits (HDU 3): Keyword FOO not found.
+fitsheader.py              196 WARNING  /testbed/astropy/io/fits/tests/data/test0.fits (HDU 0): Keyword BACKGRND not found.
+fitsheader.py              177 WARNING  /testbed/astropy/io/fits/tests/data/zerowidth.fits: Extension DOES_NOT_EXIST not found.
+fitsheader.py              196 WARNING  /testbed/astropy/io/fits/tests/data/zerowidth.fits (HDU AIPS FQ): Keyword DOES_NOT_EXIST not found.
+nddata.py                  187 INFO     overwriting Quantity's current unit with specified unit.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+ndslicing.py               104 INFO     uncertainty cannot be sliced.
+ndslicing.py               122 INFO     wcs cannot be sliced.
+ccddata.py                 540 INFO     using the unit photon passed to the FITS reader instead of the unit adu in the FITS file.
+ccddata.py                 511 INFO     first HDU with data is extension 1.
+ccddata.py                 540 INFO     using the unit adu passed to the FITS reader instead of the unit adu in the FITS file.
+ccddata.py                 216 INFO     array provided for uncertainty; assuming it is a StdDevUncertainty.
+ccddata.py                 540 INFO     using the unit photon passed to the FITS reader instead of the unit adu in the FITS file.
+ccddata.py                 511 INFO     first HDU with data is extension 1.
+ccddata.py                 540 INFO     using the unit count passed to the FITS reader instead of the unit COUNTS in the FITS file.
+ccddata.py                 409 INFO     An exception happened while extracting WCS informations from the Header.
+InconsistentAxisTypesError: ERROR 4 in wcs_types() at line 2521 of file cextern/wcslib/C/wcs.c:
+Unmatched celestial axes.
+
+nddata.py                  164 INFO     overwriting NDData's current meta with specified meta.
+nduncertainty.py           165 INFO     parent_nddata should be a weakref to an NDData object.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  152 INFO     overwriting NDData's current mask with specified mask.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  140 INFO     overwriting NDData's current unit with specified unit.
+nddata.py                  146 INFO     overwriting NDData's current uncertainty with specified uncertainty.
+nddata.py                  152 INFO     overwriting NDData's current mask with specified mask.
+nddata.py                  158 INFO     overwriting NDData's current wcs with specified wcs.
+nddata.py                  164 INFO     overwriting NDData's current meta with specified meta.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+nddata.py                  146 INFO     overwriting NDData's current uncertainty with specified uncertainty.
+nddata.py                  158 INFO     overwriting NDData's current wcs with specified wcs.
+nddata.py                  164 INFO     overwriting NDData's current meta with specified meta.
+nddata.py                  164 INFO     overwriting NDData's current meta with specified meta.
+nddata.py                  152 INFO     overwriting NDData's current mask with specified mask.
+nddata.py                  175 INFO     overwriting Masked Objects's current mask with specified mask.
+nddata.py                  175 INFO     overwriting Masked Objects's current mask with specified mask.
+nddata.py                  187 INFO     overwriting Quantity's current unit with specified unit.
+nddata.py                  187 INFO     overwriting Quantity's current unit with specified unit.
+nddata.py                  140 INFO     overwriting NDData's current unit with specified unit.
+nduncertainty.py            81 INFO     overwriting Quantity's current unit with specified unit.
+nduncertainty.py            81 INFO     overwriting Quantity's current unit with specified unit.
+nduncertainty.py            81 INFO     overwriting Quantity's current unit with specified unit.
+nduncertainty.py            71 INFO     overwriting Uncertainty's current unit with specified unit.
+nduncertainty.py            71 INFO     overwriting Uncertainty's current unit with specified unit.
+nduncertainty.py            71 INFO     overwriting Uncertainty's current unit with specified unit.
+nddata.py                  293 INFO     uncertainty should have attribute uncertainty_type.
+hub.py                     268 INFO     Hub set to run with Web Profile support enabled.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     268 INFO     Hub set to run with Web Profile support enabled.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     268 INFO     Hub set to run with Web Profile support enabled.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     268 INFO     Hub set to run with Web Profile support enabled.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+hub.py                     268 INFO     Hub set to run with Web Profile support enabled.
+hub.py                     402 INFO     Hub started
+hub.py                     471 INFO     Hub is stopping...
+hub.py                     497 INFO     Hub stopped.
+table.py                  1398 INFO     Upgrading Table to masked Table. Use Table.filled() to convert to unmasked table.
+table.py                  1398 INFO     Upgrading Table to masked Table. Use Table.filled() to convert to unmasked table.
+showtable.py                88 ERROR    [Errno 2] No such file or directory: 'foobar.fits'
+logger.py                  200 WARNING  This is a warning
+logger.py                  200 WARNING  This is a warning
+logger.py                  200 WARNING  CustomAstropyWarningClass: This is a warning
+logger.py                  200 WARNING  W02: ?:?:?: W02: a attribute 'b' is invalid.  Must be a standard XML id
+logger.py                  202 WARNING  Regression test for #2671
+logger.py                  259 ERROR    Exception: This is an Exception
+logger.py                  259 ERROR    TypeError: homogeneous list must contain only objects of type '<class 'int'>'
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+logger.py                  259 ERROR    Exception
+test_logger.py             300 ERROR    Error message
+test_logger.py             301 WARNING  Warning message
+test_logger.py             302 INFO     Information message
+test_logger.py             300 ERROR    Error message
+test_logger.py             301 WARNING  Warning message
+test_logger.py             302 INFO     Information message
+test_logger.py             303 DEBUG    Debug message
+test_logger.py             300 ERROR    Error message
+test_logger.py             301 WARNING  Warning message
+test_logger.py             302 INFO     Information message
+test_logger.py             300 ERROR    Error message
+test_logger.py             301 WARNING  Warning message
+test_logger.py             300 ERROR    Error message
+test_logger.py             346 ERROR    Error message
+test_logger.py             347 WARNING  Warning message
+test_logger.py             355 ERROR    Error message
+test_logger.py             356 WARNING  Warning message
+test_logger.py             364 ERROR    Error message
+test_logger.py             365 WARNING  Warning message
+test_logger.py             383 ERROR    Error message
+test_logger.py             384 WARNING  Warning message
+test_logger.py             385 INFO     Information message
+test_logger.py             383 ERROR    Error message
+test_logger.py             384 WARNING  Warning message
+test_logger.py             385 INFO     Information message
+test_logger.py             386 DEBUG    Debug message
+test_logger.py             383 ERROR    Error message
+test_logger.py             384 WARNING  Warning message
+test_logger.py             385 INFO     Information message
+test_logger.py             383 ERROR    Error message
+test_logger.py             384 WARNING  Warning message
+test_logger.py             383 ERROR    Error message
+test_logger.py             435 ERROR    Error message
+test_logger.py             436 WARNING  Warning message
+test_logger.py             456 ERROR    Error message
+test_logger.py             457 WARNING  Warning message
+test_logger.py             475 ERROR    Error message
+test_logger.py             476 WARNING  Warning message
+logger.py                  200 WARNING  AstropyDeprecationWarning: astropy.utils.compat.futures is now deprecated - use concurrent.futures instead
+logger.py                  200 WARNING  failed to download http://maia.usno.navy.mil/ser7/finals2000A.all, using local IERS-B: <urlopen error An attempt was made to connect to the internet by a test that was not marked `remote_data`. The requested host was: maia.usno.navy.mil>
+logger.py                  200 WARNING  ErfaWarning: ERFA function "dtf2d" yielded 1 of "time is after end of day (Note 5)"
+logger.py                  200 WARNING  ErfaWarning: ERFA function "dtf2d" yielded 1 of "dubious year (Note 6)"
+wcs.py                    2602 INFO     
+        Inconsistent SIP distortion information is present in the current WCS:
+        SIP coefficients were detected, but CTYPE is missing "-SIP" suffix,
+        therefore the current WCS is internally inconsistent.
+
+        Because relax has been set to True, the resulting output WCS will have
+        "-SIP" appended to CTYPE in order to make the header internally consistent.
+
+        However, this may produce incorrect astrometry in the output WCS, if
+        in fact the current WCS is already distortion-corrected.
+
+        Therefore, if current WCS is already distortion-corrected (eg, drizzled)
+        then SIP distortion components should not apply. In that case, for a WCS
+        that is already distortion-corrected, please remove the SIP coefficients
+        from the header.
+
+        
