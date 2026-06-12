@@ -1,4 +1,4 @@
-**1**: Comment removal from
+**1**: Comment removal
 **2**: Function-declaration reordering/Changing the location
 **3**: Identifier renaming
 **4**: Parameter reordering
