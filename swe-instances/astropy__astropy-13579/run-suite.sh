@@ -1,16 +1,17 @@
-run_suite() {
+#!/usr/bin/env bash
 
+run_suite() {
     local prefix="$1"
-  
+
     pytest -rA -vv \
-    -o console_output_style=classic \
-    --tb=short \
-    --cov-config=/testbed/.coveragerc \
-    --cov-report=term-missing \
-    --junitxml=../reports/${prefix}-junit.xml \
-    --log-file=../reports/${prefix}-pytest.log \
-    --log-file-level=DEBUG \
-    2>&1 | tee ../reports/${prefix}-pytest.out
+        -o console_output_style=classic \
+        --tb=short \
+        --cov-config=/testbed/.coveragerc \
+        --cov-report=term-missing \
+        --junitxml=../reports/${prefix}-junit.xml \
+        --log-file=../reports/${prefix}-pytest.log \
+        --log-file-level=DEBUG \
+        2>&1 | tee ../reports/${prefix}-pytest.out
 }
 
 rule="$1"

@@ -1,0 +1,31 @@
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..fae4d1f0d 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -88,6 +88,14 @@ def resolve_name(name, *additional_parts):
+     return ret
+ 
+ 
++def _get_version(module, version_path):
++    """Read a version string off ``module`` following the dotted
++    ``version_path`` attribute path."""
++    if '.' not in version_path:
++        return getattr(module, version_path)
++    return resolve_name(module.__name__, version_path)
++
++
+ def minversion(module, version, inclusive=True, version_path='__version__'):
+     """
+     Returns `True` if the specified Python module satisfies a minimum version
+@@ -134,10 +142,7 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+                          'module, or the import name of the module; '
+                          'got {0!r}'.format(module))
+ 
+-    if '.' not in version_path:
+-        have_version = getattr(module, version_path)
+-    else:
+-        have_version = resolve_name(module.__name__, version_path)
++    have_version = _get_version(module, version_path)
+ 
+     if inclusive:
+         return LooseVersion(have_version) >= LooseVersion(version)

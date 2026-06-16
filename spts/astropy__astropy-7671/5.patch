@@ -1,0 +1,44 @@
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..216a52cf9 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -88,7 +88,8 @@ def resolve_name(name, *additional_parts):
+     return ret
+ 
+ 
+-def minversion(module, version, inclusive=True, version_path='__version__'):
++def minversion(module, version, inclusive=True, version_path='__version__',
++               default=False):
+     """
+     Returns `True` if the specified Python module satisfies a minimum version
+     requirement, and `False` if not.
+@@ -114,6 +115,11 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+         Defaults to just ``'__version__'``, which should work for most Python
+         modules.
+ 
++    default : `bool`
++        The value to return when the version cannot be determined because the
++        ``version_path`` attribute is missing from the module (default:
++        `False`).
++
+     Examples
+     --------
+ 
+@@ -134,10 +140,13 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+                          'module, or the import name of the module; '
+                          'got {0!r}'.format(module))
+ 
+-    if '.' not in version_path:
+-        have_version = getattr(module, version_path)
+-    else:
+-        have_version = resolve_name(module.__name__, version_path)
++    try:
++        if '.' not in version_path:
++            have_version = getattr(module, version_path)
++        else:
++            have_version = resolve_name(module.__name__, version_path)
++    except (AttributeError, ImportError):
++        return default
+ 
+     if inclusive:
+         return LooseVersion(have_version) >= LooseVersion(version)

@@ -1,0 +1,43 @@
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..789daf3cf 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -89,38 +89,6 @@ def resolve_name(name, *additional_parts):
+ 
+ 
+ def minversion(module, version, inclusive=True, version_path='__version__'):
+-    """
+-    Returns `True` if the specified Python module satisfies a minimum version
+-    requirement, and `False` if not.
+-
+-    Parameters
+-    ----------
+-
+-    module : module or `str`
+-        An imported module of which to check the version, or the name of
+-        that module (in which case an import of that module is attempted--
+-        if this fails `False` is returned).
+-
+-    version : `str`
+-        The version as a string that this module must have at a minimum (e.g.
+-        ``'0.12'``).
+-
+-    inclusive : `bool`
+-        The specified version meets the requirement inclusively (i.e. ``>=``)
+-        as opposed to strictly greater than (default: `True`).
+-
+-    version_path : `str`
+-        A dotted attribute path to follow in the module for the version.
+-        Defaults to just ``'__version__'``, which should work for most Python
+-        modules.
+-
+-    Examples
+-    --------
+-
+-    >>> import astropy
+-    >>> minversion(astropy, '0.4.4')
+-    True
+-    """
+     if isinstance(module, types.ModuleType):
+         module_name = module.__name__
+     elif isinstance(module, str):

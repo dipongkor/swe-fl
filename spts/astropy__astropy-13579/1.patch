@@ -1,0 +1,13 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+index d7605b078..d2ce40652 100644
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -259,8 +259,6 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+         for ipixel in range(self._wcs.pixel_n_dim):
+             if isinstance(self._slices_pixel[ipixel], slice) and self._slices_pixel[ipixel].start is not None:
+                 pixel_arrays[ipixel] -= self._slices_pixel[ipixel].start
+-
+-        # Detect the case of a length 0 array
+         if isinstance(pixel_arrays, np.ndarray) and not pixel_arrays.shape:
+             return pixel_arrays
+         pixel = tuple(pixel_arrays[ip] for ip in self._pixel_keep)

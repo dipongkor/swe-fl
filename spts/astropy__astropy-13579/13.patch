@@ -1,0 +1,31 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+index d7605b078..cbcc06c66 100644
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -242,8 +242,11 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+ 
+         return world_arrays
+ 
+-    def world_to_pixel_values(self, *world_arrays):
+-        world_arrays = tuple(map(np.asanyarray, world_arrays))
++    def _fill_dropped_world_dimensions(self, world_arrays):
++        """
++        Expand the kept world coordinates back to the full set expected by the
++        underlying WCS, inserting a placeholder value for each dropped dimension.
++        """
+         world_arrays_new = []
+         iworld_curr = -1
+         for iworld in range(self._wcs.world_n_dim):
+@@ -253,7 +256,11 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+             else:
+                 world_arrays_new.append(1.)
+ 
+-        world_arrays_new = np.broadcast_arrays(*world_arrays_new)
++        return np.broadcast_arrays(*world_arrays_new)
++
++    def world_to_pixel_values(self, *world_arrays):
++        world_arrays = tuple(map(np.asanyarray, world_arrays))
++        world_arrays_new = self._fill_dropped_world_dimensions(world_arrays)
+         pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))
+ 
+         for ipixel in range(self._wcs.pixel_n_dim):

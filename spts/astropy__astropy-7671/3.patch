@@ -1,0 +1,34 @@
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..affacfaf0 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -88,7 +88,7 @@ def resolve_name(name, *additional_parts):
+     return ret
+ 
+ 
+-def minversion(module, version, inclusive=True, version_path='__version__'):
++def minversion(module, required_version, inclusive=True, version_path='__version__'):
+     """
+     Returns `True` if the specified Python module satisfies a minimum version
+     requirement, and `False` if not.
+@@ -101,7 +101,7 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+         that module (in which case an import of that module is attempted--
+         if this fails `False` is returned).
+ 
+-    version : `str`
++    required_version : `str`
+         The version as a string that this module must have at a minimum (e.g.
+         ``'0.12'``).
+ 
+@@ -140,9 +140,9 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+         have_version = resolve_name(module.__name__, version_path)
+ 
+     if inclusive:
+-        return LooseVersion(have_version) >= LooseVersion(version)
++        return LooseVersion(have_version) >= LooseVersion(required_version)
+     else:
+-        return LooseVersion(have_version) > LooseVersion(version)
++        return LooseVersion(have_version) > LooseVersion(required_version)
+ 
+ 
+ def find_current_module(depth=1, finddiff=False):

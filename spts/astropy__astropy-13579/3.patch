@@ -1,0 +1,31 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+index d7605b078..d1be5d11e 100644
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -242,19 +242,19 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+ 
+         return world_arrays
+ 
+-    def world_to_pixel_values(self, *world_arrays):
+-        world_arrays = tuple(map(np.asanyarray, world_arrays))
+-        world_arrays_new = []
++    def world_to_pixel_values(self, *world_lists):
++        world_lists = tuple(map(np.asanyarray, world_lists))
++        world_lists_new = []
+         iworld_curr = -1
+         for iworld in range(self._wcs.world_n_dim):
+             if iworld in self._world_keep:
+                 iworld_curr += 1
+-                world_arrays_new.append(world_arrays[iworld_curr])
++                world_lists_new.append(world_lists[iworld_curr])
+             else:
+-                world_arrays_new.append(1.)
++                world_lists_new.append(1.)
+ 
+-        world_arrays_new = np.broadcast_arrays(*world_arrays_new)
+-        pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))
++        world_lists_new = np.broadcast_arrays(*world_lists_new)
++        pixel_arrays = list(self._wcs.world_to_pixel_values(*world_lists_new))
+ 
+         for ipixel in range(self._wcs.pixel_n_dim):
+             if isinstance(self._slices_pixel[ipixel], slice) and self._slices_pixel[ipixel].start is not None:

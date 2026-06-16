@@ -1,0 +1,30 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+index d7605b078..82c95b128 100644
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -246,19 +246,23 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+         world_arrays = tuple(map(np.asanyarray, world_arrays))
+         world_arrays_new = []
+         iworld_curr = -1
+-        for iworld in range(self._wcs.world_n_dim):
++        iworld = 0
++        while iworld < self._wcs.world_n_dim:
+             if iworld in self._world_keep:
+                 iworld_curr += 1
+                 world_arrays_new.append(world_arrays[iworld_curr])
+             else:
+                 world_arrays_new.append(1.)
++            iworld += 1
+ 
+         world_arrays_new = np.broadcast_arrays(*world_arrays_new)
+         pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))
+ 
+-        for ipixel in range(self._wcs.pixel_n_dim):
++        ipixel = 0
++        while ipixel < self._wcs.pixel_n_dim:
+             if isinstance(self._slices_pixel[ipixel], slice) and self._slices_pixel[ipixel].start is not None:
+                 pixel_arrays[ipixel] -= self._slices_pixel[ipixel].start
++            ipixel += 1
+ 
+         # Detect the case of a length 0 array
+         if isinstance(pixel_arrays, np.ndarray) and not pixel_arrays.shape:

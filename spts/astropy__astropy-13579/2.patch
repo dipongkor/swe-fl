@@ -1,0 +1,68 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+index d7605b078..5471ffbf7 100644
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -242,32 +242,6 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+ 
+         return world_arrays
+ 
+-    def world_to_pixel_values(self, *world_arrays):
+-        world_arrays = tuple(map(np.asanyarray, world_arrays))
+-        world_arrays_new = []
+-        iworld_curr = -1
+-        for iworld in range(self._wcs.world_n_dim):
+-            if iworld in self._world_keep:
+-                iworld_curr += 1
+-                world_arrays_new.append(world_arrays[iworld_curr])
+-            else:
+-                world_arrays_new.append(1.)
+-
+-        world_arrays_new = np.broadcast_arrays(*world_arrays_new)
+-        pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))
+-
+-        for ipixel in range(self._wcs.pixel_n_dim):
+-            if isinstance(self._slices_pixel[ipixel], slice) and self._slices_pixel[ipixel].start is not None:
+-                pixel_arrays[ipixel] -= self._slices_pixel[ipixel].start
+-
+-        # Detect the case of a length 0 array
+-        if isinstance(pixel_arrays, np.ndarray) and not pixel_arrays.shape:
+-            return pixel_arrays
+-        pixel = tuple(pixel_arrays[ip] for ip in self._pixel_keep)
+-        if self.pixel_n_dim == 1 and self._wcs.pixel_n_dim > 1:
+-            pixel = pixel[0]
+-        return pixel
+-
+     @property
+     def world_axis_object_components(self):
+         return [self._wcs.world_axis_object_components[idx] for idx in self._world_keep]
+@@ -306,3 +280,30 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+     @property
+     def axis_correlation_matrix(self):
+         return self._wcs.axis_correlation_matrix[self._world_keep][:, self._pixel_keep]
++
++
++    def world_to_pixel_values(self, *world_arrays):
++        world_arrays = tuple(map(np.asanyarray, world_arrays))
++        world_arrays_new = []
++        iworld_curr = -1
++        for iworld in range(self._wcs.world_n_dim):
++            if iworld in self._world_keep:
++                iworld_curr += 1
++                world_arrays_new.append(world_arrays[iworld_curr])
++            else:
++                world_arrays_new.append(1.)
++
++        world_arrays_new = np.broadcast_arrays(*world_arrays_new)
++        pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))
++
++        for ipixel in range(self._wcs.pixel_n_dim):
++            if isinstance(self._slices_pixel[ipixel], slice) and self._slices_pixel[ipixel].start is not None:
++                pixel_arrays[ipixel] -= self._slices_pixel[ipixel].start
++
++        # Detect the case of a length 0 array
++        if isinstance(pixel_arrays, np.ndarray) and not pixel_arrays.shape:
++            return pixel_arrays
++        pixel = tuple(pixel_arrays[ip] for ip in self._pixel_keep)
++        if self.pixel_n_dim == 1 and self._wcs.pixel_n_dim > 1:
++            pixel = pixel[0]
++        return pixel

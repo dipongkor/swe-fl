@@ -1,0 +1,42 @@
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..dfffc97fa 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -121,6 +121,9 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+     >>> minversion(astropy, '0.4.4')
+     True
+     """
++    print("minversion: checking {0!r} against required version {1!r} "
++          "(inclusive={2})".format(module, version, inclusive))
++
+     if isinstance(module, types.ModuleType):
+         module_name = module.__name__
+     elif isinstance(module, str):
+@@ -128,6 +131,8 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+         try:
+             module = resolve_name(module_name)
+         except ImportError:
++            print("minversion: could not import module {0!r}; "
++                  "returning False".format(module_name))
+             return False
+     else:
+         raise ValueError('module argument must be an actual imported '
+@@ -139,10 +144,16 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+     else:
+         have_version = resolve_name(module.__name__, version_path)
+ 
++    print("minversion: module {0!r} has version {1!r}".format(
++        module_name, have_version))
++
+     if inclusive:
+-        return LooseVersion(have_version) >= LooseVersion(version)
++        result = LooseVersion(have_version) >= LooseVersion(version)
+     else:
+-        return LooseVersion(have_version) > LooseVersion(version)
++        result = LooseVersion(have_version) > LooseVersion(version)
++
++    print("minversion: result = {0}".format(result))
++    return result
+ 
+ 
+ def find_current_module(depth=1, finddiff=False):
