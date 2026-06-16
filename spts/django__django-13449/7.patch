@@ -1,0 +1,75 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index 90d90119d0..f4d1c15472 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1253,6 +1253,15 @@ class OrderBy(BaseExpression):
+         self.descending = True
+ 
+ 
++def _safe_repr(obj):
++    # repr()/str() of not-yet-validated expressions (e.g. a frame with an
++    # invalid value) can raise, so logging must never trust them.
++    try:
++        return repr(obj)
++    except Exception as exc:
++        return '<unrepresentable %s: %s>' % (type(obj).__name__, exc)
++
++
+ class Window(Expression):
+     template = '%(expression)s OVER (%(window)s)'
+     # Although the main expression may either be an aggregate or an
+@@ -1263,6 +1272,9 @@ class Window(Expression):
+     filterable = False
+ 
+     def __init__(self, expression, partition_by=None, order_by=None, frame=None, output_field=None):
++        print('Window.__init__: expression=%s, partition_by=%s, order_by=%s, frame=%s, output_field=%s' % (
++            _safe_repr(expression), _safe_repr(partition_by), _safe_repr(order_by),
++            _safe_repr(frame), _safe_repr(output_field)))
+         self.partition_by = partition_by
+         self.order_by = order_by
+         self.frame = frame
+@@ -1290,15 +1302,21 @@ class Window(Expression):
+         self.source_expression = self._parse_expressions(expression)[0]
+ 
+     def _resolve_output_field(self):
++        print('Window._resolve_output_field: source_expression=%r' % self.source_expression)
+         return self.source_expression.output_field
+ 
+     def get_source_expressions(self):
++        print('Window.get_source_expressions: source_expression=%s, partition_by=%s, order_by=%s, frame=%s' % (
++            _safe_repr(self.source_expression), _safe_repr(self.partition_by),
++            _safe_repr(self.order_by), _safe_repr(self.frame)))
+         return [self.source_expression, self.partition_by, self.order_by, self.frame]
+ 
+     def set_source_expressions(self, exprs):
++        print('Window.set_source_expressions: exprs=[%s]' % ', '.join(_safe_repr(e) for e in exprs))
+         self.source_expression, self.partition_by, self.order_by, self.frame = exprs
+ 
+     def as_sql(self, compiler, connection, template=None):
++        print('Window.as_sql: self=%s, template=%r' % (_safe_repr(self), template))
+         connection.ops.check_expression_support(self)
+         if not connection.features.supports_over_clause:
+             raise NotSupportedError('This backend does not support window expressions.')
+@@ -1327,10 +1345,12 @@ class Window(Expression):
+         params.extend(window_params)
+         template = template or self.template
+ 
+-        return template % {
++        result_sql = template % {
+             'expression': expr_sql,
+             'window': ''.join(window_sql).strip()
+-        }, params
++        }
++        print('Window.as_sql: result sql=%r, params=%r' % (result_sql, params))
++        return result_sql, params
+ 
+     def __str__(self):
+         return '{} OVER ({}{}{})'.format(
+@@ -1344,6 +1364,7 @@ class Window(Expression):
+         return '<%s: %s>' % (self.__class__.__name__, self)
+ 
+     def get_group_by_cols(self, alias=None):
++        print('Window.get_group_by_cols: alias=%r' % alias)
+         return []
+ 
+ 

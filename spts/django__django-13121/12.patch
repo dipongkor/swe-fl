@@ -1,0 +1,20 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index a156c5e881..9bd3d5a390 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -56,10 +56,11 @@ class Combinable:
+     def _combine(self, other, connector, reversed):
+         if not hasattr(other, 'resolve_expression'):
+             # everything must be resolvable to an expression
+-            if isinstance(other, datetime.timedelta):
+-                other = DurationValue(other, output_field=fields.DurationField())
+-            else:
+-                other = Value(other)
++            other = (
++                DurationValue(other, output_field=fields.DurationField())
++                if isinstance(other, datetime.timedelta)
++                else Value(other)
++            )
+ 
+         if reversed:
+             return CombinedExpression(other, connector, self)

@@ -1,0 +1,49 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..f7c0aed78 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -1499,10 +1499,13 @@ class LassoLarsIC(LassoLars):
+             returns an instance of self.
+         """
+         X, y = check_X_y(X, y, y_numeric=True)
++        print("[LarsIC.fit] input X shape=%s, y shape=%s" % (X.shape, y.shape))
+ 
+         X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(
+             X, y, self.fit_intercept, self.normalize, self.copy_X)
+         max_iter = self.max_iter
++        print("[LarsIC.fit] preprocessed: fit_intercept=%s, normalize=%s, "
++              "max_iter=%s" % (self.fit_intercept, self.normalize, max_iter))
+ 
+         Gram = self.precompute
+ 
+@@ -1510,6 +1513,8 @@ class LassoLarsIC(LassoLars):
+             X, y, Gram=Gram, copy_X=copy_X, copy_Gram=True, alpha_min=0.0,
+             method='lasso', verbose=self.verbose, max_iter=max_iter,
+             eps=self.eps, return_n_iter=True, positive=self.positive)
++        print("[LarsIC.fit] lars_path done: n_iter=%s, coef_path shape=%s, "
++              "n_alphas=%s" % (self.n_iter_, coef_path_.shape, len(alphas_)))
+ 
+         n_samples = X.shape[0]
+ 
+@@ -1519,6 +1524,8 @@ class LassoLarsIC(LassoLars):
+             K = log(n_samples)  # BIC
+         else:
+             raise ValueError('criterion should be either bic or aic')
++        print("[LarsIC.fit] criterion=%s, K=%s, n_samples=%s"
++              % (self.criterion, K, n_samples))
+ 
+         R = y[:, np.newaxis] - np.dot(X, coef_path_)  # residuals
+         mean_squared_error = np.mean(R ** 2, axis=0)
+@@ -1540,7 +1547,12 @@ class LassoLarsIC(LassoLars):
+                            K * df)  # Eqns. 2.15--16 in (Zou et al, 2007)
+         n_best = np.argmin(self.criterion_)
+ 
++        print("[LarsIC.fit] criterion_ values=%s" % (self.criterion_,))
++        print("[LarsIC.fit] selected n_best=%s, alpha_=%s" % (n_best, alphas_[n_best]))
++
+         self.alpha_ = alphas_[n_best]
+         self.coef_ = coef_path_[:, n_best]
+         self._set_intercept(Xmean, ymean, Xstd)
++        print("[LarsIC.fit] done: n_nonzero_coefs=%s, intercept_=%s"
++              % (np.sum(np.abs(self.coef_) > 0), self.intercept_))
+         return self

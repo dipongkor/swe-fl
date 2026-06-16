@@ -1,0 +1,24 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..afafbfec2 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -1525,14 +1525,18 @@ class LassoLarsIC(LassoLars):
+         sigma2 = np.var(y)
+ 
+         df = np.zeros(coef_path_.shape[1], dtype=np.int)  # Degrees of freedom
+-        for k, coef in enumerate(coef_path_.T):
++        k = 0
++        while k < coef_path_.shape[1]:
++            coef = coef_path_.T[k]
+             mask = np.abs(coef) > np.finfo(coef.dtype).eps
+             if not np.any(mask):
++                k += 1
+                 continue
+             # get the number of degrees of freedom equal to:
+             # Xc = X[:, mask]
+             # Trace(Xc * inv(Xc.T, Xc) * Xc.T) ie the number of non-zero coefs
+             df[k] = np.sum(mask)
++            k += 1
+ 
+         self.alphas_ = alphas_
+         eps64 = np.finfo('float64').eps

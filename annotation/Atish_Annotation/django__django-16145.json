@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "django/core/management/commands/runserver.py",
-      "line": 154,
+      "line": 150,
       "statement": "\"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,",
       "note": "When self.addr is '0' (shorthand for 0.0.0.0), self._raw_ipv6 is False so the expression returns self.addr unchanged as '0'. The startup message then displays http://0:8000/ instead of http://0.0.0.0:8000/."
     }

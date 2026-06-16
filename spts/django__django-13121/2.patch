@@ -1,0 +1,99 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index a156c5e881..c5de9e1325 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -53,18 +53,6 @@ class Combinable:
+     BITRIGHTSHIFT = '>>'
+     BITXOR = '#'
+ 
+-    def _combine(self, other, connector, reversed):
+-        if not hasattr(other, 'resolve_expression'):
+-            # everything must be resolvable to an expression
+-            if isinstance(other, datetime.timedelta):
+-                other = DurationValue(other, output_field=fields.DurationField())
+-            else:
+-                other = Value(other)
+-
+-        if reversed:
+-            return CombinedExpression(other, connector, self)
+-        return CombinedExpression(self, connector, other)
+-
+     #############
+     # OPERATORS #
+     #############
+@@ -146,6 +134,19 @@ class Combinable:
+         raise NotImplementedError(
+             "Use .bitand() and .bitor() for bitwise logical operations."
+         )
++    
++    def _combine(self, other, connector, reversed):
++        if not hasattr(other, 'resolve_expression'):
++            # everything must be resolvable to an expression
++            if isinstance(other, datetime.timedelta):
++                other = DurationValue(other, output_field=fields.DurationField())
++            else:
++                other = Value(other)
++
++        if reversed:
++            return CombinedExpression(other, connector, self)
++        return CombinedExpression(self, connector, other)
++
+ 
+ 
+ @deconstructible
+@@ -440,6 +441,13 @@ class CombinedExpression(SQLiteNumericMixin, Expression):
+     def set_source_expressions(self, exprs):
+         self.lhs, self.rhs = exprs
+ 
++    def resolve_expression(self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False):
++        c = self.copy()
++        c.is_summary = summarize
++        c.lhs = c.lhs.resolve_expression(query, allow_joins, reuse, summarize, for_save)
++        c.rhs = c.rhs.resolve_expression(query, allow_joins, reuse, summarize, for_save)
++        return c
++    
+     def as_sql(self, compiler, connection):
+         try:
+             lhs_output = self.lhs.output_field
+@@ -470,12 +478,6 @@ class CombinedExpression(SQLiteNumericMixin, Expression):
+         sql = connection.ops.combine_expression(self.connector, expressions)
+         return expression_wrapper % sql, expression_params
+ 
+-    def resolve_expression(self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False):
+-        c = self.copy()
+-        c.is_summary = summarize
+-        c.lhs = c.lhs.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+-        c.rhs = c.rhs.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+-        return c
+ 
+ 
+ class DurationExpression(CombinedExpression):
+@@ -708,15 +710,6 @@ class Value(Expression):
+     def get_group_by_cols(self, alias=None):
+         return []
+ 
+-
+-class DurationValue(Value):
+-    def as_sql(self, compiler, connection):
+-        connection.ops.check_expression_support(self)
+-        if connection.features.has_native_duration_field:
+-            return super().as_sql(compiler, connection)
+-        return connection.ops.date_interval_sql(self.value), []
+-
+-
+ class RawSQL(Expression):
+     def __init__(self, sql, params, output_field=None):
+         if output_field is None:
+@@ -1113,6 +1106,12 @@ class Exists(Subquery):
+             sql = 'CASE WHEN {} THEN 1 ELSE 0 END'.format(sql)
+         return sql, params
+ 
++class DurationValue(Value):
++    def as_sql(self, compiler, connection):
++        connection.ops.check_expression_support(self)
++        if connection.features.has_native_duration_field:
++            return super().as_sql(compiler, connection)
++        return connection.ops.date_interval_sql(self.value), []
+ 
+ class OrderBy(BaseExpression):
+     template = '%(expression)s %(ordering)s'

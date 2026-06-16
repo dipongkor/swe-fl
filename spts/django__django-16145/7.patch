@@ -1,0 +1,45 @@
+diff --git a/django/core/management/commands/runserver.py b/django/core/management/commands/runserver.py
+index 3c39f57e4d..dc431576c4 100644
+--- a/django/core/management/commands/runserver.py
++++ b/django/core/management/commands/runserver.py
+@@ -120,11 +120,13 @@ class Command(BaseCommand):
+             self.inner_run(None, **options)
+ 
+     def inner_run(self, *args, **options):
++        print("[runserver] inner_run starting")
+         # If an exception was silenced in ManagementUtility.execute in order
+         # to be raised in the child process, raise it now.
+         autoreload.raise_last_exception()
+ 
+         threading = options["use_threading"]
++        print("[runserver] use_threading=%s" % threading)
+         # 'shutdown_message' is a stealth option.
+         shutdown_message = options.get("shutdown_message", "")
+         quit_command = "CTRL-BREAK" if sys.platform == "win32" else "CONTROL-C"
+@@ -154,6 +156,10 @@ class Command(BaseCommand):
+         )
+ 
+         try:
++            print(
++                "[runserver] starting server at %s:%s (ipv6=%s)"
++                % (self.addr, self.port, self.use_ipv6)
++            )
+             handler = self.get_handler(*args, **options)
+             run(
+                 self.addr,
+@@ -164,6 +170,7 @@ class Command(BaseCommand):
+                 server_cls=self.server_cls,
+             )
+         except OSError as e:
++            print("[runserver] OSError caught: errno=%s" % e.errno)
+             # Use helpful error messages instead of ugly tracebacks.
+             ERRORS = {
+                 errno.EACCES: "You don't have permission to access that port.",
+@@ -178,6 +185,7 @@ class Command(BaseCommand):
+             # Need to use an OS exit because sys.exit doesn't work in a thread
+             os._exit(1)
+         except KeyboardInterrupt:
++            print("[runserver] KeyboardInterrupt — shutting down")
+             if shutdown_message:
+                 self.stdout.write(shutdown_message)
+             sys.exit(0)

@@ -1,0 +1,47 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index f02199d97c..034caedebb 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1401,24 +1401,38 @@ class SQLInsertCompiler(SQLCompiler):
+             ]
+ 
+     def execute_sql(self, returning_fields=None):
++        print(f"[SQLInsertCompiler.execute_sql] START - returning_fields={returning_fields}")
+         assert not (
+             returning_fields and len(self.query.objs) != 1 and
+             not self.connection.features.can_return_rows_from_bulk_insert
+         )
+         self.returning_fields = returning_fields
++        print(f"[SQLInsertCompiler.execute_sql] Assertion passed, num_objs={len(self.query.objs)}")
+         with self.connection.cursor() as cursor:
+             for sql, params in self.as_sql():
++                print(f"[SQLInsertCompiler.execute_sql] Executing SQL: {sql[:100]}...")
+                 cursor.execute(sql, params)
++                print(f"[SQLInsertCompiler.execute_sql] SQL executed successfully")
+             if not self.returning_fields:
++                print(f"[SQLInsertCompiler.execute_sql] No returning_fields, returning empty list")
+                 return []
+             if self.connection.features.can_return_rows_from_bulk_insert and len(self.query.objs) > 1:
+-                return self.connection.ops.fetch_returned_insert_rows(cursor)
++                print(f"[SQLInsertCompiler.execute_sql] Fetching returned insert rows (bulk)")
++                rows = self.connection.ops.fetch_returned_insert_rows(cursor)
++                print(f"[SQLInsertCompiler.execute_sql] Fetched {len(rows)} rows from bulk insert")
++                return rows
+             if self.connection.features.can_return_columns_from_insert:
+                 assert len(self.query.objs) == 1
+-                return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]
+-            return [(self.connection.ops.last_insert_id(
++                print(f"[SQLInsertCompiler.execute_sql] Fetching returned insert columns (single row)")
++                result = [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]
++                print(f"[SQLInsertCompiler.execute_sql] Fetched columns: {result}")
++                return result
++            print(f"[SQLInsertCompiler.execute_sql] Fetching last_insert_id")
++            last_id = self.connection.ops.last_insert_id(
+                 cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
+-            ),)]
++            )
++            print(f"[SQLInsertCompiler.execute_sql] last_insert_id={last_id}")
++            return [(last_id,)]
+ 
+ 
+ class SQLDeleteCompiler(SQLCompiler):

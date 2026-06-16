@@ -1,0 +1,37 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+index 53345a6b..85d4f9df 100644
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -571,24 +571,32 @@ class PyLinter(
+         Returns iterator of paths to discovered modules and packages.
+         """
+         for something in files_or_modules:
++            print(f"[_discover_files] Processing: {something}")
+             if os.path.isdir(something) and not os.path.isfile(
+                 os.path.join(something, "__init__.py")
+             ):
++                print(f"[_discover_files] {something} is a directory without __init__.py, walking...")
+                 skip_subtrees: list[str] = []
+                 for root, _, files in os.walk(something):
+                     if any(root.startswith(s) for s in skip_subtrees):
+                         # Skip subtree of already discovered package.
++                        print(f"[_discover_files] Skipping subtree: {root}")
+                         continue
+                     if "__init__.py" in files:
+                         skip_subtrees.append(root)
++                        print(f"[_discover_files] Found package (has __init__.py): {root}")
+                         yield root
+                     else:
++                        py_files = [f for f in files if f.endswith(".py")]
++                        if py_files:
++                            print(f"[_discover_files] Found {len(py_files)} Python files in {root}: {py_files}")
+                         yield from (
+                             os.path.join(root, file)
+                             for file in files
+                             if file.endswith(".py")
+                         )
+             else:
++                print(f"[_discover_files] Yielding as-is: {something}")
+                 yield something
+ 
+     def check(self, files_or_modules: Sequence[str] | str) -> None:

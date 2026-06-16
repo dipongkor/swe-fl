@@ -1,0 +1,18 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..a13844fcd 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -1513,10 +1513,10 @@ class LassoLarsIC(LassoLars):
+ 
+         n_samples = X.shape[0]
+ 
+-        if self.criterion == 'aic':
+-            K = 2  # AIC
+-        elif self.criterion == 'bic':
++        if self.criterion == 'bic':
+             K = log(n_samples)  # BIC
++        elif self.criterion == 'aic':
++            K = 2  # AIC
+         else:
+             raise ValueError('criterion should be either bic or aic')
+ 

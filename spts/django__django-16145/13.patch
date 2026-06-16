@@ -1,0 +1,53 @@
+diff --git a/django/core/management/commands/runserver.py b/django/core/management/commands/runserver.py
+index 3c39f57e4d..babbc4e541 100644
+--- a/django/core/management/commands/runserver.py
++++ b/django/core/management/commands/runserver.py
+@@ -119,22 +119,7 @@ class Command(BaseCommand):
+         else:
+             self.inner_run(None, **options)
+ 
+-    def inner_run(self, *args, **options):
+-        # If an exception was silenced in ManagementUtility.execute in order
+-        # to be raised in the child process, raise it now.
+-        autoreload.raise_last_exception()
+-
+-        threading = options["use_threading"]
+-        # 'shutdown_message' is a stealth option.
+-        shutdown_message = options.get("shutdown_message", "")
+-        quit_command = "CTRL-BREAK" if sys.platform == "win32" else "CONTROL-C"
+-
+-        if not options["skip_checks"]:
+-            self.stdout.write("Performing system checks...\n\n")
+-            self.check(display_num_errors=True)
+-        # Need to check migrations here, so can't use the
+-        # requires_migrations_check attribute.
+-        self.check_migrations()
++    def write_startup_message(self, quit_command):
+         now = datetime.now().strftime("%B %d, %Y - %X")
+         self.stdout.write(now)
+         self.stdout.write(
+@@ -153,6 +138,24 @@ class Command(BaseCommand):
+             }
+         )
+ 
++    def inner_run(self, *args, **options):
++        # If an exception was silenced in ManagementUtility.execute in order
++        # to be raised in the child process, raise it now.
++        autoreload.raise_last_exception()
++
++        threading = options["use_threading"]
++        # 'shutdown_message' is a stealth option.
++        shutdown_message = options.get("shutdown_message", "")
++        quit_command = "CTRL-BREAK" if sys.platform == "win32" else "CONTROL-C"
++
++        if not options["skip_checks"]:
++            self.stdout.write("Performing system checks...\n\n")
++            self.check(display_num_errors=True)
++        # Need to check migrations here, so can't use the
++        # requires_migrations_check attribute.
++        self.check_migrations()
++        self.write_startup_message(quit_command)
++
+         try:
+             handler = self.get_handler(*args, **options)
+             run(

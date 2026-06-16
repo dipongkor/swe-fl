@@ -1,0 +1,20 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index f02199d97c..39794a28f1 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1400,12 +1400,12 @@ class SQLInsertCompiler(SQLCompiler):
+                 for p, vals in zip(placeholder_rows, param_rows)
+             ]
+ 
+-    def execute_sql(self, returning_fields=None):
++    def execute_sql(self, fields_to_return=None, fetch_all=None):
+         assert not (
+-            returning_fields and len(self.query.objs) != 1 and
++            fields_to_return and len(self.query.objs) != 1 and
+             not self.connection.features.can_return_rows_from_bulk_insert
+         )
+-        self.returning_fields = returning_fields
++        self.returning_fields = fields_to_return
+         with self.connection.cursor() as cursor:
+             for sql, params in self.as_sql():
+                 cursor.execute(sql, params)

@@ -1,0 +1,35 @@
+diff --git a/sklearn/cluster/optics_.py b/sklearn/cluster/optics_.py
+index 4f7eb11ab..d7cf200d4 100755
+--- a/sklearn/cluster/optics_.py
++++ b/sklearn/cluster/optics_.py
+@@ -453,7 +453,12 @@ if metric=’precomputed’.
+                             p=p,
+                             n_jobs=n_jobs)
+ 
++    print("[compute_optics_graph] n_samples=%d, min_samples=%d, "
++          "max_eps=%s, metric=%s" % (n_samples, min_samples, max_eps, metric))
++
+     nbrs.fit(X)
++    print("[compute_optics_graph] NearestNeighbors fitted, computing core "
++          "distances...")
+     # Here we first do a kNN query for each point, this differs from
+     # the original OPTICS that only used epsilon range queries.
+     # TODO: handle working_memory somehow?
+@@ -462,6 +467,8 @@ if metric=’precomputed’.
+                                                working_memory=None)
+     # OPTICS puts an upper limit on these, use inf for undefined.
+     core_distances_[core_distances_ > max_eps] = np.inf
++    print("[compute_optics_graph] %d core points found"
++          % np.sum(np.isfinite(core_distances_)))
+ 
+     # Main OPTICS loop. Not parallelizable. The order that entries are
+     # written to the 'ordering_' list is important!
+@@ -485,6 +492,8 @@ if metric=’precomputed’.
+                             processed=processed, X=X, nbrs=nbrs,
+                             metric=metric, metric_params=metric_params,
+                             p=p, max_eps=max_eps)
++    print("[compute_optics_graph] main loop done, %d points ordered"
++          % len(ordering))
+     if np.all(np.isinf(reachability_)):
+         warnings.warn("All reachability values are inf. Set a larger"
+                       " max_eps or all data will be considered outliers.",

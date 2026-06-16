@@ -1,0 +1,55 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..046dded9f 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -1348,6 +1348,33 @@ class LassoLarsCV(LarsCV):
+         # to avoid setting n_nonzero_coefs
+ 
+ 
++def _lars_path_degrees_of_freedom(coef_path):
++    """Compute the degrees of freedom at each point of a LARS coef path.
++
++    The degrees of freedom equal the number of non-zero coefficients, i.e.::
++
++        Xc = X[:, mask]
++        Trace(Xc * inv(Xc.T, Xc) * Xc.T)
++
++    Parameters
++    ----------
++    coef_path : array, shape (n_features, n_alphas)
++        Coefficients along the path.
++
++    Returns
++    -------
++    df : array, shape (n_alphas,)
++        Number of degrees of freedom at each point of the path.
++    """
++    df = np.zeros(coef_path.shape[1], dtype=np.int)
++    for k, coef in enumerate(coef_path.T):
++        mask = np.abs(coef) > np.finfo(coef.dtype).eps
++        if not np.any(mask):
++            continue
++        df[k] = np.sum(mask)
++    return df
++
++
+ class LassoLarsIC(LassoLars):
+     """Lasso model fit with Lars using BIC or AIC for model selection
+ 
+@@ -1524,15 +1551,7 @@ class LassoLarsIC(LassoLars):
+         mean_squared_error = np.mean(R ** 2, axis=0)
+         sigma2 = np.var(y)
+ 
+-        df = np.zeros(coef_path_.shape[1], dtype=np.int)  # Degrees of freedom
+-        for k, coef in enumerate(coef_path_.T):
+-            mask = np.abs(coef) > np.finfo(coef.dtype).eps
+-            if not np.any(mask):
+-                continue
+-            # get the number of degrees of freedom equal to:
+-            # Xc = X[:, mask]
+-            # Trace(Xc * inv(Xc.T, Xc) * Xc.T) ie the number of non-zero coefs
+-            df[k] = np.sum(mask)
++        df = _lars_path_degrees_of_freedom(coef_path_)
+ 
+         self.alphas_ = alphas_
+         eps64 = np.finfo('float64').eps

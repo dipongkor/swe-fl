@@ -1,0 +1,18 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index f02199d97c..b5aa7be8d2 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1407,7 +1407,12 @@ class SQLInsertCompiler(SQLCompiler):
+         )
+         self.returning_fields = returning_fields
+         with self.connection.cursor() as cursor:
+-            for sql, params in self.as_sql():
++            sql_iter = iter(self.as_sql())
++            while True:
++                try:
++                    sql, params = next(sql_iter)
++                except StopIteration:
++                    break
+                 cursor.execute(sql, params)
+             if not self.returning_fields:
+                 return []

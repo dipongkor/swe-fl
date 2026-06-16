@@ -1,0 +1,20 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index a156c5e881..6409c12d1d 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -55,7 +55,6 @@ class Combinable:
+ 
+     def _combine(self, other, connector, reversed):
+         if not hasattr(other, 'resolve_expression'):
+-            # everything must be resolvable to an expression
+             if isinstance(other, datetime.timedelta):
+                 other = DurationValue(other, output_field=fields.DurationField())
+             else:
+@@ -465,7 +464,6 @@ class CombinedExpression(SQLiteNumericMixin, Expression):
+         sql, params = compiler.compile(self.rhs)
+         expressions.append(sql)
+         expression_params.extend(params)
+-        # order of precedence
+         expression_wrapper = '(%s)'
+         sql = connection.ops.combine_expression(self.connector, expressions)
+         return expression_wrapper % sql, expression_params

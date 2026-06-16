@@ -1,0 +1,13 @@
+diff --git a/src/_pytest/setuponly.py b/src/_pytest/setuponly.py
+index c9cc589ff..5309a9757 100644
+--- a/src/_pytest/setuponly.py
++++ b/src/_pytest/setuponly.py
+@@ -54,7 +54,7 @@ def _show_fixture_action(fixturedef, msg):
+     tw.write(" " * 2 * fixturedef.scopenum)
+     tw.write(
+         "{step} {scope} {fixture}".format(
+-            step=msg.ljust(8),  # align the output to TEARDOWN
++            step=msg.ljust(8), 
+             scope=fixturedef.scope[0].upper(),
+             fixture=fixturedef.argname,
+         )

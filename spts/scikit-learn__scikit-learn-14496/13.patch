@@ -1,0 +1,44 @@
+diff --git a/sklearn/cluster/optics_.py b/sklearn/cluster/optics_.py
+index 4f7eb11ab..fda7aa9ca 100755
+--- a/sklearn/cluster/optics_.py
++++ b/sklearn/cluster/optics_.py
+@@ -463,6 +463,26 @@ if metric=’precomputed’.
+     # OPTICS puts an upper limit on these, use inf for undefined.
+     core_distances_[core_distances_ > max_eps] = np.inf
+ 
++    ordering = _compute_optics_ordering(
++        X=X, reachability_=reachability_, predecessor_=predecessor_,
++        core_distances_=core_distances_, nbrs=nbrs, metric=metric,
++        metric_params=metric_params, p=p, max_eps=max_eps)
++
++    if np.all(np.isinf(reachability_)):
++        warnings.warn("All reachability values are inf. Set a larger"
++                      " max_eps or all data will be considered outliers.",
++                      UserWarning)
++    return ordering, core_distances_, reachability_, predecessor_
++
++
++def _compute_optics_ordering(X, reachability_, predecessor_, core_distances_,
++                             nbrs, metric, metric_params, p, max_eps):
++    """Compute the cluster ordering of the OPTICS reachability graph.
++
++    Iterates over all points, always processing the unprocessed point with the
++    smallest reachability distance, and updating the reachability and
++    predecessor arrays in place. Returns the resulting object ordering.
++    """
+     # Main OPTICS loop. Not parallelizable. The order that entries are
+     # written to the 'ordering_' list is important!
+     # Note that this implementation is O(n^2) theoretically, but
+@@ -485,11 +505,7 @@ if metric=’precomputed’.
+                             processed=processed, X=X, nbrs=nbrs,
+                             metric=metric, metric_params=metric_params,
+                             p=p, max_eps=max_eps)
+-    if np.all(np.isinf(reachability_)):
+-        warnings.warn("All reachability values are inf. Set a larger"
+-                      " max_eps or all data will be considered outliers.",
+-                      UserWarning)
+-    return ordering, core_distances_, reachability_, predecessor_
++    return ordering
+ 
+ 
+ def _set_reach_dist(core_distances_, reachability_, predecessor_,

@@ -1,0 +1,102 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index a156c5e881..24cf38eac4 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -54,15 +54,21 @@ class Combinable:
+     BITXOR = '#'
+ 
+     def _combine(self, other, connector, reversed):
++        print(f"[_combine] Combining {type(self).__name__} with {type(other).__name__} using connector: {connector}, reversed: {reversed}")
+         if not hasattr(other, 'resolve_expression'):
+             # everything must be resolvable to an expression
++            print(f"[_combine] Converting {type(other).__name__} to expression")
+             if isinstance(other, datetime.timedelta):
++                print(f"[_combine] Detected timedelta, wrapping as DurationValue")
+                 other = DurationValue(other, output_field=fields.DurationField())
+             else:
++                print(f"[_combine] Wrapping as Value")
+                 other = Value(other)
+ 
+         if reversed:
++            print(f"[_combine] Creating reversed CombinedExpression: {type(other).__name__} {connector} {type(self).__name__}")
+             return CombinedExpression(other, connector, self)
++        print(f"[_combine] Creating CombinedExpression: {type(self).__name__} {connector} {type(other).__name__}")
+         return CombinedExpression(self, connector, other)
+ 
+     #############
+@@ -441,33 +447,44 @@ class CombinedExpression(SQLiteNumericMixin, Expression):
+         self.lhs, self.rhs = exprs
+ 
+     def as_sql(self, compiler, connection):
++        print(f"[CombinedExpression.as_sql] Starting with connector: {self.connector}")
+         try:
+             lhs_output = self.lhs.output_field
++            print(f"[CombinedExpression.as_sql] LHS output field: {lhs_output.get_internal_type() if lhs_output else None}")
+         except FieldError:
+             lhs_output = None
++            print(f"[CombinedExpression.as_sql] LHS output field: FieldError (set to None)")
+         try:
+             rhs_output = self.rhs.output_field
++            print(f"[CombinedExpression.as_sql] RHS output field: {rhs_output.get_internal_type() if rhs_output else None}")
+         except FieldError:
+             rhs_output = None
++            print(f"[CombinedExpression.as_sql] RHS output field: FieldError (set to None)")
+         if (not connection.features.has_native_duration_field and
+                 ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or
+                  (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):
++            print(f"[CombinedExpression.as_sql] Delegating to DurationExpression")
+             return DurationExpression(self.lhs, self.connector, self.rhs).as_sql(compiler, connection)
+         if (lhs_output and rhs_output and self.connector == self.SUB and
+             lhs_output.get_internal_type() in {'DateField', 'DateTimeField', 'TimeField'} and
+                 lhs_output.get_internal_type() == rhs_output.get_internal_type()):
++            print(f"[CombinedExpression.as_sql] Delegating to TemporalSubtraction")
+             return TemporalSubtraction(self.lhs, self.rhs).as_sql(compiler, connection)
++        print(f"[CombinedExpression.as_sql] Using standard expression compilation")
+         expressions = []
+         expression_params = []
+         sql, params = compiler.compile(self.lhs)
++        print(f"[CombinedExpression.as_sql] LHS compiled: {sql}")
+         expressions.append(sql)
+         expression_params.extend(params)
+         sql, params = compiler.compile(self.rhs)
++        print(f"[CombinedExpression.as_sql] RHS compiled: {sql}")
+         expressions.append(sql)
+         expression_params.extend(params)
+         # order of precedence
+         expression_wrapper = '(%s)'
+         sql = connection.ops.combine_expression(self.connector, expressions)
++        print(f"[CombinedExpression.as_sql] Combined SQL: {sql}")
+         return expression_wrapper % sql, expression_params
+ 
+     def resolve_expression(self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False):
+@@ -683,21 +700,30 @@ class Value(Expression):
+         return "{}({})".format(self.__class__.__name__, self.value)
+ 
+     def as_sql(self, compiler, connection):
++        print(f"[Value.as_sql] Processing value: {self.value!r}")
+         connection.ops.check_expression_support(self)
+         val = self.value
+         output_field = self._output_field_or_none
++        print(f"[Value.as_sql] Output field: {output_field}")
+         if output_field is not None:
++            print(f"[Value.as_sql] Output field type: {output_field.get_internal_type()}")
+             if self.for_save:
++                print(f"[Value.as_sql] Using for_save path: get_db_prep_save")
+                 val = output_field.get_db_prep_save(val, connection=connection)
+             else:
++                print(f"[Value.as_sql] Using get_db_prep_value path")
+                 val = output_field.get_db_prep_value(val, connection=connection)
++            print(f"[Value.as_sql] Prepared value: {val!r}")
+             if hasattr(output_field, 'get_placeholder'):
++                print(f"[Value.as_sql] Field has get_placeholder, using custom placeholder")
+                 return output_field.get_placeholder(val, compiler, connection), [val]
+         if val is None:
+             # cx_Oracle does not always convert None to the appropriate
+             # NULL type (like in case expressions using numbers), so we
+             # use a literal SQL NULL
++            print(f"[Value.as_sql] Value is None, returning literal NULL")
+             return 'NULL', []
++        print(f"[Value.as_sql] Using standard placeholder '%s'")
+         return '%s', [val]
+ 
+     def resolve_expression(self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False):

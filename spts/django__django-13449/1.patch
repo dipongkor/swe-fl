@@ -1,0 +1,14 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index 90d90119d0..7be19b0d7d 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1255,9 +1255,6 @@ class OrderBy(BaseExpression):
+ 
+ class Window(Expression):
+     template = '%(expression)s OVER (%(window)s)'
+-    # Although the main expression may either be an aggregate or an
+-    # expression with an aggregate function, the GROUP BY that will
+-    # be introduced in the query as a result is not desired.
+     contains_aggregate = False
+     contains_over_clause = True
+     filterable = False

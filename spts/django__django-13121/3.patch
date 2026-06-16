@@ -1,0 +1,100 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index a156c5e881..bea285ac81 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -53,7 +53,7 @@ class Combinable:
+     BITRIGHTSHIFT = '>>'
+     BITXOR = '#'
+ 
+-    def _combine(self, other, connector, reversed):
++    def _apply_operator(self, other, connector, reversed):
+         if not hasattr(other, 'resolve_expression'):
+             # everything must be resolvable to an expression
+             if isinstance(other, datetime.timedelta):
+@@ -70,25 +70,25 @@ class Combinable:
+     #############
+ 
+     def __neg__(self):
+-        return self._combine(-1, self.MUL, False)
++        return self._apply_operator(-1, self.MUL, False)
+ 
+     def __add__(self, other):
+-        return self._combine(other, self.ADD, False)
++        return self._apply_operator(other, self.ADD, False)
+ 
+     def __sub__(self, other):
+-        return self._combine(other, self.SUB, False)
++        return self._apply_operator(other, self.SUB, False)
+ 
+     def __mul__(self, other):
+-        return self._combine(other, self.MUL, False)
++        return self._apply_operator(other, self.MUL, False)
+ 
+     def __truediv__(self, other):
+-        return self._combine(other, self.DIV, False)
++        return self._apply_operator(other, self.DIV, False)
+ 
+     def __mod__(self, other):
+-        return self._combine(other, self.MOD, False)
++        return self._apply_operator(other, self.MOD, False)
+ 
+     def __pow__(self, other):
+-        return self._combine(other, self.POW, False)
++        return self._apply_operator(other, self.POW, False)
+ 
+     def __and__(self, other):
+         if getattr(self, 'conditional', False) and getattr(other, 'conditional', False):
+@@ -98,16 +98,16 @@ class Combinable:
+         )
+ 
+     def bitand(self, other):
+-        return self._combine(other, self.BITAND, False)
++        return self._apply_operator(other, self.BITAND, False)
+ 
+     def bitleftshift(self, other):
+-        return self._combine(other, self.BITLEFTSHIFT, False)
++        return self._apply_operator(other, self.BITLEFTSHIFT, False)
+ 
+     def bitrightshift(self, other):
+-        return self._combine(other, self.BITRIGHTSHIFT, False)
++        return self._apply_operator(other, self.BITRIGHTSHIFT, False)
+ 
+     def bitxor(self, other):
+-        return self._combine(other, self.BITXOR, False)
++        return self._apply_operator(other, self.BITXOR, False)
+ 
+     def __or__(self, other):
+         if getattr(self, 'conditional', False) and getattr(other, 'conditional', False):
+@@ -117,25 +117,25 @@ class Combinable:
+         )
+ 
+     def bitor(self, other):
+-        return self._combine(other, self.BITOR, False)
++        return self._apply_operator(other, self.BITOR, False)
+ 
+     def __radd__(self, other):
+-        return self._combine(other, self.ADD, True)
++        return self._apply_operator(other, self.ADD, True)
+ 
+     def __rsub__(self, other):
+-        return self._combine(other, self.SUB, True)
++        return self._apply_operator(other, self.SUB, True)
+ 
+     def __rmul__(self, other):
+-        return self._combine(other, self.MUL, True)
++        return self._apply_operator(other, self.MUL, True)
+ 
+     def __rtruediv__(self, other):
+-        return self._combine(other, self.DIV, True)
++        return self._apply_operator(other, self.DIV, True)
+ 
+     def __rmod__(self, other):
+-        return self._combine(other, self.MOD, True)
++        return self._apply_operator(other, self.MOD, True)
+ 
+     def __rpow__(self, other):
+-        return self._combine(other, self.POW, True)
++        return self._apply_operator(other, self.POW, True)
+ 
+     def __rand__(self, other):
+         raise NotImplementedError(

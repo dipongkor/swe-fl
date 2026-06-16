@@ -1,0 +1,44 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index f02199d97c..fb82de3d87 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1400,6 +1400,23 @@ class SQLInsertCompiler(SQLCompiler):
+                 for p, vals in zip(placeholder_rows, param_rows)
+             ]
+ 
++    def _fetch_insert_results(self, cursor):
++        """
++        Fetch and return the results from an INSERT statement.
++        Handles bulk inserts, single row inserts with returned columns, and last_insert_id.
++        """
++        if self.connection.features.can_return_rows_from_bulk_insert and len(self.query.objs) > 1:
++            rows = self.connection.ops.fetch_returned_insert_rows(cursor)
++            return rows
++        if self.connection.features.can_return_columns_from_insert:
++            assert len(self.query.objs) == 1
++            result = [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]
++            return result
++        last_id = self.connection.ops.last_insert_id(
++            cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
++        )
++        return [(last_id,)]
++
+     def execute_sql(self, returning_fields=None):
+         assert not (
+             returning_fields and len(self.query.objs) != 1 and
+@@ -1411,14 +1428,7 @@ class SQLInsertCompiler(SQLCompiler):
+                 cursor.execute(sql, params)
+             if not self.returning_fields:
+                 return []
+-            if self.connection.features.can_return_rows_from_bulk_insert and len(self.query.objs) > 1:
+-                return self.connection.ops.fetch_returned_insert_rows(cursor)
+-            if self.connection.features.can_return_columns_from_insert:
+-                assert len(self.query.objs) == 1
+-                return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]
+-            return [(self.connection.ops.last_insert_id(
+-                cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
+-            ),)]
++            return self._fetch_insert_results(cursor)
+ 
+ 
+ class SQLDeleteCompiler(SQLCompiler):

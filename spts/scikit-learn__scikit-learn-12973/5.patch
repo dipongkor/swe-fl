@@ -1,0 +1,24 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..5fcbf3a03 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -1479,7 +1479,7 @@ class LassoLarsIC(LassoLars):
+         self.eps = eps
+         self.fit_path = True
+ 
+-    def fit(self, X, y, copy_X=True):
++    def fit(self, X, y, copy_X=True, alpha_min=0.0):
+         """Fit the model using X, y as training data.
+ 
+         Parameters
+@@ -1492,6 +1492,10 @@ class LassoLarsIC(LassoLars):
+ 
+         copy_X : boolean, optional, default True
+             If ``True``, X will be copied; else, it may be overwritten.
++            
++        alpha_min : float, optional, default 0.0
++        Minimum correlation along the path. Allows early stopping of the
++        LARS algorithm to find solutions with larger regularization.
+ 
+         Returns
+         -------

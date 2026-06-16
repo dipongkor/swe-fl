@@ -13,18 +13,18 @@ pydata__xarray-3305
 pydata__xarray-4687
 pydata__xarray-6599
 pylint-dev__pylint-6386
-pylint-dev__pylint-6528
-pylint-dev__pylint-8898
+pylint-dev__pylint-6528 --> done
+pylint-dev__pylint-8898 --
 pytest-dev__pytest-5787
 pytest-dev__pytest-5840
-pytest-dev__pytest-7205
-scikit-learn__scikit-learn-12973
-scikit-learn__scikit-learn-14496
+pytest-dev__pytest-7205 --> done
+scikit-learn__scikit-learn-12973 --> done
+scikit-learn__scikit-learn-14496 --> done
 scikit-learn__scikit-learn-26194
 sphinx-doc__sphinx-8548
-sphinx-doc__sphinx-9658
+sphinx-doc__sphinx-9658 --> done
 sphinx-doc__sphinx-9711
-django__django-13121
-django__django-13449
-django__django-14007
-django__django-16145
+django__django-13121 --> done
+django__django-13449 --> done
+django__django-14007 --> done
+django__django-16145 --> done

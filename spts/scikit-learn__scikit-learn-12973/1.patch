@@ -1,0 +1,66 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..5c1c9c859 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -1480,24 +1480,6 @@ class LassoLarsIC(LassoLars):
+         self.fit_path = True
+ 
+     def fit(self, X, y, copy_X=True):
+-        """Fit the model using X, y as training data.
+-
+-        Parameters
+-        ----------
+-        X : array-like, shape (n_samples, n_features)
+-            training data.
+-
+-        y : array-like, shape (n_samples,)
+-            target values. Will be cast to X's dtype if necessary
+-
+-        copy_X : boolean, optional, default True
+-            If ``True``, X will be copied; else, it may be overwritten.
+-
+-        Returns
+-        -------
+-        self : object
+-            returns an instance of self.
+-        """
+         X, y = check_X_y(X, y, y_numeric=True)
+ 
+         X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(
+@@ -1514,30 +1496,28 @@ class LassoLarsIC(LassoLars):
+         n_samples = X.shape[0]
+ 
+         if self.criterion == 'aic':
+-            K = 2  # AIC
++            K = 2  
+         elif self.criterion == 'bic':
+-            K = log(n_samples)  # BIC
++            K = log(n_samples) 
+         else:
+             raise ValueError('criterion should be either bic or aic')
+ 
+-        R = y[:, np.newaxis] - np.dot(X, coef_path_)  # residuals
++        R = y[:, np.newaxis] - np.dot(X, coef_path_) 
+         mean_squared_error = np.mean(R ** 2, axis=0)
+         sigma2 = np.var(y)
+ 
+-        df = np.zeros(coef_path_.shape[1], dtype=np.int)  # Degrees of freedom
++        df = np.zeros(coef_path_.shape[1], dtype=np.int)  
+         for k, coef in enumerate(coef_path_.T):
+             mask = np.abs(coef) > np.finfo(coef.dtype).eps
+             if not np.any(mask):
+                 continue
+-            # get the number of degrees of freedom equal to:
+-            # Xc = X[:, mask]
+-            # Trace(Xc * inv(Xc.T, Xc) * Xc.T) ie the number of non-zero coefs
++            
+             df[k] = np.sum(mask)
+ 
+         self.alphas_ = alphas_
+         eps64 = np.finfo('float64').eps
+         self.criterion_ = (n_samples * mean_squared_error / (sigma2 + eps64) +
+-                           K * df)  # Eqns. 2.15--16 in (Zou et al, 2007)
++                           K * df)  
+         n_best = np.argmin(self.criterion_)
+ 
+         self.alpha_ = alphas_[n_best]

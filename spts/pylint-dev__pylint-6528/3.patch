@@ -1,0 +1,22 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+index 53345a6b..66f2c104 100644
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -565,7 +565,7 @@ class PyLinter(
+                 self._msgs_state[msg.msgid] = False
+ 
+     @staticmethod
+-    def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:
++    def _discover_files_or_modules(files_or_modules: Sequence[str]) -> Iterator[str]:
+         """Discover python modules and packages in sub-directory.
+ 
+         Returns iterator of paths to discovered modules and packages.
+@@ -605,7 +605,7 @@ class PyLinter(
+             )
+             files_or_modules = (files_or_modules,)  # type: ignore[assignment]
+         if self.config.recursive:
+-            files_or_modules = tuple(self._discover_files(files_or_modules))
++            files_or_modules = tuple(self._discover_files_or_modules(files_or_modules))
+         if self.config.from_stdin:
+             if len(files_or_modules) != 1:
+                 raise exceptions.InvalidArgsError(

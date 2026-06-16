@@ -1,0 +1,13 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+index 53345a6b..a39df610 100644
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -565,7 +565,7 @@ class PyLinter(
+                 self._msgs_state[msg.msgid] = False
+ 
+     @staticmethod
+-    def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:
++    def _discover_files(files_or_modules: Sequence[str], include_hidden_files: bool = False) -> Iterator[str]:
+         """Discover python modules and packages in sub-directory.
+ 
+         Returns iterator of paths to discovered modules and packages.

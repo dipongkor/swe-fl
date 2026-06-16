@@ -1,0 +1,44 @@
+diff --git a/sphinx/ext/autodoc/mock.py b/sphinx/ext/autodoc/mock.py
+index b562f47fd..94e881163 100644
+--- a/sphinx/ext/autodoc/mock.py
++++ b/sphinx/ext/autodoc/mock.py
+@@ -34,7 +34,7 @@ class _MockObject:
+             superclass = args[1][-1].__class__
+             if superclass is cls:
+                 # subclassing MockObject
+-                return _make_subclass(args[0], superclass.__display_name__,
++                return _make_subclass(superclass.__display_name__, args[0],
+                                       superclass=superclass, attributes=args[2])
+ 
+         return super().__new__(cls)
+@@ -55,10 +55,10 @@ class _MockObject:
+         return (self.__class__,)
+ 
+     def __getitem__(self, key: Any) -> "_MockObject":
+-        return _make_subclass(str(key), self.__display_name__, self.__class__)()
++        return _make_subclass(self.__display_name__, str(key), self.__class__)()
+ 
+     def __getattr__(self, key: str) -> "_MockObject":
+-        return _make_subclass(key, self.__display_name__, self.__class__)()
++        return _make_subclass(self.__display_name__, key, self.__class__)()
+ 
+     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+         call = self.__class__()
+@@ -69,7 +69,7 @@ class _MockObject:
+         return self.__display_name__
+ 
+ 
+-def _make_subclass(name: str, module: str, superclass: Any = _MockObject,
++def _make_subclass(module: str, name: str, superclass: Any = _MockObject,
+                    attributes: Any = None, decorator_args: Tuple = ()) -> Any:
+     attrs = {'__module__': module,
+              '__display_name__': module + '.' + name,
+@@ -90,7 +90,7 @@ class _MockModule(ModuleType):
+         self.__path__: List[str] = []
+ 
+     def __getattr__(self, name: str) -> _MockObject:
+-        return _make_subclass(name, self.__name__)()
++        return _make_subclass(self.__name__, name)()
+ 
+     def __repr__(self) -> str:
+         return self.__name__

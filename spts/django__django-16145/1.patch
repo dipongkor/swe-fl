@@ -1,0 +1,41 @@
+diff --git a/django/core/management/commands/runserver.py b/django/core/management/commands/runserver.py
+index 3c39f57e4d..27e5d6e45e 100644
+--- a/django/core/management/commands/runserver.py
++++ b/django/core/management/commands/runserver.py
+@@ -120,20 +120,15 @@ class Command(BaseCommand):
+             self.inner_run(None, **options)
+ 
+     def inner_run(self, *args, **options):
+-        # If an exception was silenced in ManagementUtility.execute in order
+-        # to be raised in the child process, raise it now.
+         autoreload.raise_last_exception()
+ 
+         threading = options["use_threading"]
+-        # 'shutdown_message' is a stealth option.
+         shutdown_message = options.get("shutdown_message", "")
+         quit_command = "CTRL-BREAK" if sys.platform == "win32" else "CONTROL-C"
+ 
+         if not options["skip_checks"]:
+             self.stdout.write("Performing system checks...\n\n")
+             self.check(display_num_errors=True)
+-        # Need to check migrations here, so can't use the
+-        # requires_migrations_check attribute.
+         self.check_migrations()
+         now = datetime.now().strftime("%B %d, %Y - %X")
+         self.stdout.write(now)
+@@ -164,7 +159,6 @@ class Command(BaseCommand):
+                 server_cls=self.server_cls,
+             )
+         except OSError as e:
+-            # Use helpful error messages instead of ugly tracebacks.
+             ERRORS = {
+                 errno.EACCES: "You don't have permission to access that port.",
+                 errno.EADDRINUSE: "That port is already in use.",
+@@ -175,7 +169,6 @@ class Command(BaseCommand):
+             except KeyError:
+                 error_text = e
+             self.stderr.write("Error: %s" % error_text)
+-            # Need to use an OS exit because sys.exit doesn't work in a thread
+             os._exit(1)
+         except KeyboardInterrupt:
+             if shutdown_message:

@@ -1,0 +1,46 @@
+diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py
+index 53345a6b..3e214a29 100644
+--- a/pylint/lint/pylinter.py
++++ b/pylint/lint/pylinter.py
+@@ -570,26 +570,34 @@ class PyLinter(
+ 
+         Returns iterator of paths to discovered modules and packages.
+         """
+-        for something in files_or_modules:
++        i = 0
++        while i < len(files_or_modules):
++            something = files_or_modules[i]
+             if os.path.isdir(something) and not os.path.isfile(
+                 os.path.join(something, "__init__.py")
+             ):
+                 skip_subtrees: list[str] = []
+-                for root, _, files in os.walk(something):
++                walk_results = list(os.walk(something))
++                j = 0
++                while j < len(walk_results):
++                    root, _, files = walk_results[j]
+                     if any(root.startswith(s) for s in skip_subtrees):
+                         # Skip subtree of already discovered package.
++                        j += 1
+                         continue
+                     if "__init__.py" in files:
+                         skip_subtrees.append(root)
+                         yield root
+                     else:
+-                        yield from (
+-                            os.path.join(root, file)
+-                            for file in files
+-                            if file.endswith(".py")
+-                        )
++                        k = 0
++                        while k < len(files):
++                            if files[k].endswith(".py"):
++                                yield os.path.join(root, files[k])
++                            k += 1
++                    j += 1
+             else:
+                 yield something
++            i += 1
+ 
+     def check(self, files_or_modules: Sequence[str] | str) -> None:
+         """Main checking entry: check a list of files or modules from their name.

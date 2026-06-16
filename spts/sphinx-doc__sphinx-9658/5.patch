@@ -1,0 +1,17 @@
+diff --git a/sphinx/ext/autodoc/mock.py b/sphinx/ext/autodoc/mock.py
+index b562f47fd..8595236d2 100644
+--- a/sphinx/ext/autodoc/mock.py
++++ b/sphinx/ext/autodoc/mock.py
+@@ -70,9 +70,10 @@ class _MockObject:
+ 
+ 
+ def _make_subclass(name: str, module: str, superclass: Any = _MockObject,
+-                   attributes: Any = None, decorator_args: Tuple = ()) -> Any:
++                   attributes: Any = None, decorator_args: Tuple = (),
++                   display_name: Optional[str] = None) -> Any:
+     attrs = {'__module__': module,
+-             '__display_name__': module + '.' + name,
++             '__display_name__': display_name or module + '.' + name,
+              '__sphinx_decorator_args__': decorator_args}
+     attrs.update(attributes or {})
+ 
