@@ -1,0 +1,45 @@
+diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py
+index c580043eeb..ccc1634aa1 100644
+--- a/lib/matplotlib/stackplot.py
++++ b/lib/matplotlib/stackplot.py
+@@ -14,7 +14,7 @@ __all__ = ['stackplot']
+ 
+ 
+ def stackplot(axes, x, *args,
+-              labels=(), colors=None, baseline='zero',
++              labels=(), colors=None, hatch=None, baseline='zero',
+               **kwargs):
+     """
+     Draw a stacked area plot.
+@@ -53,6 +53,12 @@ def stackplot(axes, x, *args,
+ 
+         If not specified, the colors from the Axes property cycle will be used.
+ 
++    hatch : str, optional
++        A hatching pattern (e.g. ``'/'``, ``'x'``) applied to all of the
++        stacked areas. See
++        :doc:`/gallery/shapes_and_collections/hatch_style_reference` for the
++        available patterns. If unspecified, no hatching is applied.
++
+     data : indexable object, optional
+         DATA_PARAMETER_PLACEHOLDER
+ 
+@@ -110,7 +116,8 @@ def stackplot(axes, x, *args,
+     # Color between x = 0 and the first array.
+     color = axes._get_lines.get_next_color()
+     coll = axes.fill_between(x, first_line, stack[0, :],
+-                             facecolor=color, label=next(labels, None),
++                             facecolor=color, hatch=hatch,
++                             label=next(labels, None),
+                              **kwargs)
+     coll.sticky_edges.y[:] = [0]
+     r = [coll]
+@@ -119,6 +126,7 @@ def stackplot(axes, x, *args,
+     for i in range(len(y) - 1):
+         color = axes._get_lines.get_next_color()
+         r.append(axes.fill_between(x, stack[i, :], stack[i + 1, :],
+-                                   facecolor=color, label=next(labels, None),
++                                   facecolor=color, hatch=hatch,
++                                   label=next(labels, None),
+                                    **kwargs))
+     return r

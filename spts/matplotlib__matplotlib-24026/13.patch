@@ -1,0 +1,99 @@
+diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py
+index c580043eeb..201e552ace 100644
+--- a/lib/matplotlib/stackplot.py
++++ b/lib/matplotlib/stackplot.py
+@@ -13,6 +13,58 @@ from matplotlib import _api
+ __all__ = ['stackplot']
+ 
+ 
++def _compute_baseline(baseline, y, stack):
++    """
++    Compute the lowest boundary (*first_line*) of a stacked area plot for the
++    requested *baseline* method, adjusting *stack* in place as needed.
++
++    Parameters
++    ----------
++    baseline : {'zero', 'sym', 'wiggle', 'weighted_wiggle'}
++        The baseline method; see `.stackplot` for details.
++    y : np.ndarray
++        The unstacked (M, N) data.
++    stack : np.ndarray
++        The cumulative sum of *y* along axis 0; modified in place for every
++        baseline except ``'zero'``.
++
++    Returns
++    -------
++    first_line : float or np.ndarray
++        The lower boundary of the first (bottom) stacked area.
++    """
++    if baseline == 'zero':
++        first_line = 0.
++
++    elif baseline == 'sym':
++        first_line = -np.sum(y, 0) * 0.5
++        stack += first_line[None, :]
++
++    elif baseline == 'wiggle':
++        m = y.shape[0]
++        first_line = (y * (m - 0.5 - np.arange(m)[:, None])).sum(0)
++        first_line /= -m
++        stack += first_line
++
++    elif baseline == 'weighted_wiggle':
++        total = np.sum(y, 0)
++        # multiply by 1/total (or zero) to avoid infinities in the division:
++        inv_total = np.zeros_like(total)
++        mask = total > 0
++        inv_total[mask] = 1.0 / total[mask]
++        increase = np.hstack((y[:, 0:1], np.diff(y)))
++        below_size = total - stack
++        below_size += 0.5 * y
++        move_up = below_size * inv_total
++        move_up[:, 0] = 0.5
++        center = (move_up - 0.5) * increase
++        center = np.cumsum(center.sum(0))
++        first_line = center - 0.5 * total
++        stack += first_line
++
++    return first_line
++
++
+ def stackplot(axes, x, *args,
+               labels=(), colors=None, baseline='zero',
+               **kwargs):
+@@ -78,34 +130,7 @@ def stackplot(axes, x, *args,
+ 
+     _api.check_in_list(['zero', 'sym', 'wiggle', 'weighted_wiggle'],
+                        baseline=baseline)
+-    if baseline == 'zero':
+-        first_line = 0.
+-
+-    elif baseline == 'sym':
+-        first_line = -np.sum(y, 0) * 0.5
+-        stack += first_line[None, :]
+-
+-    elif baseline == 'wiggle':
+-        m = y.shape[0]
+-        first_line = (y * (m - 0.5 - np.arange(m)[:, None])).sum(0)
+-        first_line /= -m
+-        stack += first_line
+-
+-    elif baseline == 'weighted_wiggle':
+-        total = np.sum(y, 0)
+-        # multiply by 1/total (or zero) to avoid infinities in the division:
+-        inv_total = np.zeros_like(total)
+-        mask = total > 0
+-        inv_total[mask] = 1.0 / total[mask]
+-        increase = np.hstack((y[:, 0:1], np.diff(y)))
+-        below_size = total - stack
+-        below_size += 0.5 * y
+-        move_up = below_size * inv_total
+-        move_up[:, 0] = 0.5
+-        center = (move_up - 0.5) * increase
+-        center = np.cumsum(center.sum(0))
+-        first_line = center - 0.5 * total
+-        stack += first_line
++    first_line = _compute_baseline(baseline, y, stack)
+ 
+     # Color between x = 0 and the first array.
+     color = axes._get_lines.get_next_color()

@@ -1,0 +1,17 @@
+diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py
+index c580043eeb..d12ba30a34 100644
+--- a/lib/matplotlib/stackplot.py
++++ b/lib/matplotlib/stackplot.py
+@@ -116,9 +116,11 @@ def stackplot(axes, x, *args,
+     r = [coll]
+ 
+     # Color between array i-1 and array i
+-    for i in range(len(y) - 1):
++    i = 0
++    while i < len(y) - 1:
+         color = axes._get_lines.get_next_color()
+         r.append(axes.fill_between(x, stack[i, :], stack[i + 1, :],
+                                    facecolor=color, label=next(labels, None),
+                                    **kwargs))
++        i += 1
+     return r

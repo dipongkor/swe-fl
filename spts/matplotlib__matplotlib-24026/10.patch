@@ -1,0 +1,69 @@
+diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py
+index c580043eeb..1ec0006f70 100644
+--- a/lib/matplotlib/stackplot.py
++++ b/lib/matplotlib/stackplot.py
+@@ -78,34 +78,36 @@ def stackplot(axes, x, *args,
+ 
+     _api.check_in_list(['zero', 'sym', 'wiggle', 'weighted_wiggle'],
+                        baseline=baseline)
+-    if baseline == 'zero':
+-        first_line = 0.
+-
+-    elif baseline == 'sym':
+-        first_line = -np.sum(y, 0) * 0.5
+-        stack += first_line[None, :]
+-
+-    elif baseline == 'wiggle':
+-        m = y.shape[0]
+-        first_line = (y * (m - 0.5 - np.arange(m)[:, None])).sum(0)
+-        first_line /= -m
+-        stack += first_line
+-
+-    elif baseline == 'weighted_wiggle':
+-        total = np.sum(y, 0)
+-        # multiply by 1/total (or zero) to avoid infinities in the division:
+-        inv_total = np.zeros_like(total)
+-        mask = total > 0
+-        inv_total[mask] = 1.0 / total[mask]
+-        increase = np.hstack((y[:, 0:1], np.diff(y)))
+-        below_size = total - stack
+-        below_size += 0.5 * y
+-        move_up = below_size * inv_total
+-        move_up[:, 0] = 0.5
+-        center = (move_up - 0.5) * increase
+-        center = np.cumsum(center.sum(0))
+-        first_line = center - 0.5 * total
+-        stack += first_line
++    match baseline:
++        case 'zero':
++            first_line = 0.
++
++        case 'sym':
++            first_line = -np.sum(y, 0) * 0.5
++            stack += first_line[None, :]
++
++        case 'wiggle':
++            m = y.shape[0]
++            first_line = (y * (m - 0.5 - np.arange(m)[:, None])).sum(0)
++            first_line /= -m
++            stack += first_line
++
++        case 'weighted_wiggle':
++            total = np.sum(y, 0)
++            # multiply by 1/total (or zero) to avoid infinities in the
++            # division:
++            inv_total = np.zeros_like(total)
++            mask = total > 0
++            inv_total[mask] = 1.0 / total[mask]
++            increase = np.hstack((y[:, 0:1], np.diff(y)))
++            below_size = total - stack
++            below_size += 0.5 * y
++            move_up = below_size * inv_total
++            move_up[:, 0] = 0.5
++            center = (move_up - 0.5) * increase
++            center = np.cumsum(center.sum(0))
++            first_line = center - 0.5 * total
++            stack += first_line
+ 
+     # Color between x = 0 and the first array.
+     color = axes._get_lines.get_next_color()

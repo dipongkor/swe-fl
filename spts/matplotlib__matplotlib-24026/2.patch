@@ -1,0 +1,25 @@
+diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py
+index c580043eeb..fcd4fc0751 100644
+--- a/lib/matplotlib/stackplot.py
++++ b/lib/matplotlib/stackplot.py
+@@ -69,9 +69,7 @@ def stackplot(axes, x, *args,
+     y = np.row_stack(args)
+ 
+     labels = iter(labels)
+-    if colors is not None:
+-        axes.set_prop_cycle(color=colors)
+-
++    
+     # Assume data passed has not been 'stacked', so stack it here.
+     # We'll need a float buffer for the upcoming calculations.
+     stack = np.cumsum(y, axis=0, dtype=np.promote_types(y.dtype, np.float32))
+@@ -106,6 +104,9 @@ def stackplot(axes, x, *args,
+         center = np.cumsum(center.sum(0))
+         first_line = center - 0.5 * total
+         stack += first_line
++    
++    if colors is not None:
++        axes.set_prop_cycle(color=colors)
+ 
+     # Color between x = 0 and the first array.
+     color = axes._get_lines.get_next_color()

@@ -1,0 +1,23 @@
+diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py
+index c580043eeb..2eeac60604 100644
+--- a/lib/matplotlib/stackplot.py
++++ b/lib/matplotlib/stackplot.py
+@@ -67,9 +67,12 @@ def stackplot(axes, x, *args,
+     """
+ 
+     y = np.row_stack(args)
++    print(f"[stackplot] x length={len(x)}, y shape={y.shape}, "
++          f"baseline={baseline!r}")
+ 
+     labels = iter(labels)
+     if colors is not None:
++        print(f"[stackplot] setting custom color cycle: {colors}")
+         axes.set_prop_cycle(color=colors)
+ 
+     # Assume data passed has not been 'stacked', so stack it here.
+@@ -121,4 +124,5 @@ def stackplot(axes, x, *args,
+         r.append(axes.fill_between(x, stack[i, :], stack[i + 1, :],
+                                    facecolor=color, label=next(labels, None),
+                                    **kwargs))
++    print(f"[stackplot] created {len(r)} PolyCollection(s)")
+     return r

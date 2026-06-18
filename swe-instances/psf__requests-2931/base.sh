@@ -12,8 +12,8 @@
 set -uo pipefail   # NOTE: intentionally NOT `set -e` — failing base-run tests
                    # are expected and must not abort the script.
 
-INSTANCE_ID="matplotlib__matplotlib-24026"
-BASE_COMMIT="14c96b510ebeba40f573e512299b1976f35b620e"
+INSTANCE_ID="psf__requests-2931"
+BASE_COMMIT="5f7a3a74aab1625c2bb65f643197ee885e3da576"
 
 # Resolve the directory this script lives in (portable).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
