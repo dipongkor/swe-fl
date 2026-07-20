@@ -1,0 +1,14 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 1b3285ddc..f094bd4fa 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -827,9 +827,6 @@ class Card(_Verify):
+         return comment
+ 
+     def _split(self):
+-        """
+-        Split the card image between the keyword and the rest of the card.
+-        """
+         if self._image is not None:
+             # If we already have a card image, don't try to rebuild a new card
+             # image, which self.image would do

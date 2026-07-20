@@ -1,0 +1,13 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+index ded609cbe..eb0b446b1 100644
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -270,7 +270,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+     __array_priority__ = 10000
+ 
+     def __new__(cls, value, unit=None, dtype=None, copy=True, order=None,
+-                subok=False, ndmin=0):
++                subok=False, ndmin=0, _unused=None):
+ 
+         if unit is not None:
+             # convert unit first, to avoid multiple string->unit conversions

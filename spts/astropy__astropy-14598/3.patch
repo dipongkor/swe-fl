@@ -1,0 +1,21 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 1b3285ddc..89696e8e2 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -858,11 +858,11 @@ class Card(_Verify):
+                 if not m:
+                     return kw, vc
+ 
+-                value = m.group("strg") or ""
+-                value = value.rstrip().replace("''", "'")
+-                if value and value[-1] == "&":
+-                    value = value[:-1]
+-                values.append(value)
++                card_value = m.group("strg") or ""
++                card_value = card_value.rstrip().replace("''", "'")
++                if card_value and card_value[-1] == "&":
++                    card_value = card_value[:-1]
++                values.append(card_value)
+                 comment = m.group("comm")
+                 if comment:
+                     comments.append(comment.rstrip())

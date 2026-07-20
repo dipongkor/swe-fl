@@ -1,0 +1,29 @@
+diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py
+index 83a4f004a..283e4e47d 100644
+--- a/astropy/io/ascii/qdp.py
++++ b/astropy/io/ascii/qdp.py
+@@ -5,6 +5,7 @@ not meant to be used directly, but instead are available as readers/writers in
+ `astropy.table`. See :ref:`astropy:table_io` for more details.
+ """
+ import copy
++import logging
+ import re
+ import warnings
+ from collections.abc import Iterable
+@@ -12,6 +13,8 @@ from collections.abc import Iterable
+ import numpy as np
+ 
+ from astropy.table import Table
++
++_LOG = logging.getLogger(__name__)
+ from astropy.utils.exceptions import AstropyUserWarning
+ 
+ from . import basic, core
+@@ -69,6 +72,7 @@ def _line_type(line, delimiter=None):
+     _data_re = rf"({_decimal_re}|NO|[-+]?nan)({sep}({_decimal_re}|NO|[-+]?nan))*)"
+     _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+     _line_type_re = re.compile(_type_re)
++    _LOG.debug("Parsing QDP line")
+     line = line.strip()
+     if not line:
+         return "comment"

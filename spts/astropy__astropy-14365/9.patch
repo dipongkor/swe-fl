@@ -1,0 +1,24 @@
+diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py
+index 83a4f004a..7d4a7e48e 100644
+--- a/astropy/io/ascii/qdp.py
++++ b/astropy/io/ascii/qdp.py
+@@ -305,7 +305,10 @@ def _get_tables_from_qdp_file(qdp_file, input_colnames=None, delimiter=None):
+                 current_rows = []
+ 
+             values = []
+-            for v in line.split(delimiter):
++            value_tokens = line.split(delimiter)
++            value_index = 0
++            while value_index < len(value_tokens):
++                v = value_tokens[value_index]
+                 if v == "NO":
+                     values.append(np.ma.masked)
+                 else:
+@@ -314,6 +317,7 @@ def _get_tables_from_qdp_file(qdp_file, input_colnames=None, delimiter=None):
+                         values.append(int(v))
+                     except ValueError:
+                         values.append(float(v))
++                value_index += 1
+             current_rows.append(values)
+             continue
+ 

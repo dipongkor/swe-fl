@@ -1,0 +1,17 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 1b3285ddc..f874b7d23 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -843,7 +843,11 @@ class Card(_Verify):
+             values = []
+             comments = []
+             keyword = None
+-            for card in self._itersubcards():
++            subcards = list(self._itersubcards())
++            subcard_index = 0
++            while subcard_index < len(subcards):
++                card = subcards[subcard_index]
++                subcard_index += 1
+                 kw, vc = card._split()
+                 if keyword is None:
+                     keyword = kw

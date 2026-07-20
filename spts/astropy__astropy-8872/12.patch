@@ -1,0 +1,14 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+index ded609cbe..49efa6477 100644
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -348,8 +348,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+             value_unit = getattr(value, 'unit', None)
+             if value_unit is None:
+                 # Default to dimensionless for no (initialized) unit attribute.
+-                if unit is None:
+-                    unit = cls._default_unit
++                unit = cls._default_unit if unit is None else unit
+                 value_unit = unit  # signal below that no conversion is needed
+             else:
+                 try:

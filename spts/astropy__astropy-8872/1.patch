@@ -1,0 +1,73 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+index ded609cbe..b897043cb 100644
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -194,68 +194,6 @@ class QuantityInfo(QuantityInfoBase):
+ 
+ 
+ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+-    """A `~astropy.units.Quantity` represents a number with some associated unit.
+-
+-    See also: http://docs.astropy.org/en/stable/units/quantity.html
+-
+-    Parameters
+-    ----------
+-    value : number, `~numpy.ndarray`, `Quantity` object (sequence), str
+-        The numerical value of this quantity in the units given by unit.  If a
+-        `Quantity` or sequence of them (or any other valid object with a
+-        ``unit`` attribute), creates a new `Quantity` object, converting to
+-        `unit` units as needed.  If a string, it is converted to a number or
+-        `Quantity`, depending on whether a unit is present.
+-
+-    unit : `~astropy.units.UnitBase` instance, str
+-        An object that represents the unit associated with the input value.
+-        Must be an `~astropy.units.UnitBase` object or a string parseable by
+-        the :mod:`~astropy.units` package.
+-
+-    dtype : ~numpy.dtype, optional
+-        The dtype of the resulting Numpy array or scalar that will
+-        hold the value.  If not provided, it is determined from the input,
+-        except that any input that cannot represent float (integer and bool)
+-        is converted to float.
+-
+-    copy : bool, optional
+-        If `True` (default), then the value is copied.  Otherwise, a copy will
+-        only be made if ``__array__`` returns a copy, if value is a nested
+-        sequence, or if a copy is needed to satisfy an explicitly given
+-        ``dtype``.  (The `False` option is intended mostly for internal use,
+-        to speed up initialization where a copy is known to have been made.
+-        Use with care.)
+-
+-    order : {'C', 'F', 'A'}, optional
+-        Specify the order of the array.  As in `~numpy.array`.  This parameter
+-        is ignored if the input is a `Quantity` and ``copy=False``.
+-
+-    subok : bool, optional
+-        If `False` (default), the returned array will be forced to be a
+-        `Quantity`.  Otherwise, `Quantity` subclasses will be passed through,
+-        or a subclass appropriate for the unit will be used (such as
+-        `~astropy.units.Dex` for ``u.dex(u.AA)``).
+-
+-    ndmin : int, optional
+-        Specifies the minimum number of dimensions that the resulting array
+-        should have.  Ones will be pre-pended to the shape as needed to meet
+-        this requirement.  This parameter is ignored if the input is a
+-        `Quantity` and ``copy=False``.
+-
+-    Raises
+-    ------
+-    TypeError
+-        If the value provided is not a Python numeric type.
+-    TypeError
+-        If the unit provided is not either a :class:`~astropy.units.Unit`
+-        object or a parseable string unit.
+-
+-    Notes
+-    -----
+-    Quantities can also be created by multiplying a number or array with a
+-    :class:`~astropy.units.Unit`. See http://docs.astropy.org/en/latest/units/
+-
+-    """
+     # Need to set a class-level default for _equivalencies, or
+     # Constants can not initialize properly
+     _equivalencies = []

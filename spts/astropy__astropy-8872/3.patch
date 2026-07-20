@@ -1,0 +1,77 @@
+diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py
+index ded609cbe..ac7b60eec 100644
+--- a/astropy/units/quantity.py
++++ b/astropy/units/quantity.py
+@@ -303,9 +303,9 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+             return np.array(value, dtype=dtype, copy=copy, order=order,
+                             subok=True, ndmin=ndmin)
+ 
+-        # Maybe str, or list/tuple of Quantity? If so, this may set value_unit.
++        # Maybe str, or list/tuple of Quantity? If so, this may set input_unit.
+         # To ensure array remains fast, we short-circuit it.
+-        value_unit = None
++        input_unit = None
+         if not isinstance(value, np.ndarray):
+             if isinstance(value, str):
+                 # The first part of the regex string matches any integer/float;
+@@ -330,9 +330,9 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+ 
+                 unit_string = v.string[v.end():].strip()
+                 if unit_string:
+-                    value_unit = Unit(unit_string)
++                    input_unit = Unit(unit_string)
+                     if unit is None:
+-                        unit = value_unit  # signal no conversion needed below.
++                        unit = input_unit  # signal no conversion needed below.
+ 
+             elif (isiterable(value) and len(value) > 0 and
+                   all(isinstance(v, Quantity) for v in value)):
+@@ -340,20 +340,20 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+                 if unit is None:
+                     unit = value[0].unit
+                 value = [q.to_value(unit) for q in value]
+-                value_unit = unit  # signal below that conversion has been done
++                input_unit = unit  # signal below that conversion has been done
+ 
+-        if value_unit is None:
++        if input_unit is None:
+             # If the value has a `unit` attribute and if not None
+             # (for Columns with uninitialized unit), treat it like a quantity.
+-            value_unit = getattr(value, 'unit', None)
+-            if value_unit is None:
++            input_unit = getattr(value, 'unit', None)
++            if input_unit is None:
+                 # Default to dimensionless for no (initialized) unit attribute.
+                 if unit is None:
+                     unit = cls._default_unit
+-                value_unit = unit  # signal below that no conversion is needed
++                input_unit = unit  # signal below that no conversion is needed
+             else:
+                 try:
+-                    value_unit = Unit(value_unit)
++                    input_unit = Unit(input_unit)
+                 except Exception as exc:
+                     raise TypeError("The unit attribute {0!r} of the input could "
+                                     "not be parsed as an astropy Unit, raising "
+@@ -361,8 +361,8 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+                                     .format(value.unit, exc))
+ 
+                 if unit is None:
+-                    unit = value_unit
+-                elif unit is not value_unit:
++                    unit = input_unit
++                elif unit is not input_unit:
+                     copy = False  # copy will be made in conversion at end
+ 
+         value = np.array(value, dtype=dtype, copy=copy, order=order,
+@@ -383,8 +383,8 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
+             value = value.astype(float)
+ 
+         value = value.view(cls)
+-        value._set_unit(value_unit)
+-        if unit is value_unit:
++        value._set_unit(input_unit)
++        if unit is input_unit:
+             return value
+         else:
+             # here we had non-Quantity input that had a "unit" attribute
