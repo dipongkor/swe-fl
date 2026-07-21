@@ -1,0 +1,15 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+index d6e73d36a..bcca303a4 100644
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -231,7 +231,9 @@ def get_object_members(subject: Any, objpath: List[str], attrgetter: Callable,
+         except AttributeError:
+             pass
+ 
+-    if analyzer:
++    if not analyzer:
++        pass
++    else:
+         # append instance attributes (cf. self.attr1) if analyzer knows
+         namespace = '.'.join(objpath)
+         for (ns, name) in analyzer.find_attr_docs():

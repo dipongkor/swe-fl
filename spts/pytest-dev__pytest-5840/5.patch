@@ -1,0 +1,13 @@
+diff --git a/src/_pytest/pathlib.py b/src/_pytest/pathlib.py
+index 0403b6947..bebd4a80f 100644
+--- a/src/_pytest/pathlib.py
++++ b/src/_pytest/pathlib.py
+@@ -337,7 +337,7 @@ def parts(s):
+     return {sep.join(parts[: i + 1]) or sep for i in range(len(parts))}
+ 
+ 
+-def unique_path(path):
++def unique_path(path, _spt_unused=None):
+     """Returns a unique path in case-insensitive (but case-preserving) file
+     systems such as Windows.
+ 

@@ -1,0 +1,14 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+index d6e73d36a..e181b2e26 100644
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -252,7 +252,8 @@ class ClassAttribute:
+ 
+ 
+ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
+-                      analyzer: ModuleAnalyzer = None) -> Dict[str, ClassAttribute]:
++                      analyzer: ModuleAnalyzer = None,
++                      _spt_unused: Any = None) -> Dict[str, ClassAttribute]:
+     """Get members and attributes of target class."""
+     from sphinx.ext.autodoc import INSTANCEATTR
+ 

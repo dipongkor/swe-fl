@@ -1,0 +1,15 @@
+diff --git a/pylint/config/argument.py b/pylint/config/argument.py
+index 30a5fd17..b041018c 100644
+--- a/pylint/config/argument.py
++++ b/pylint/config/argument.py
+@@ -111,7 +111,9 @@ def _regex_transformer(value: str) -> Pattern[str]:
+         raise argparse.ArgumentTypeError(msg) from e
+ 
+ 
+-def _regexp_csv_transfomer(value: str) -> Sequence[Pattern[str]]:
++def _regexp_csv_transfomer(
++    value: str, _spt_unused: object = None
++) -> Sequence[Pattern[str]]:
+     """Transforms a comma separated list of regular expressions."""
+     patterns: list[Pattern[str]] = []
+     for pattern in _csv_transformer(value):

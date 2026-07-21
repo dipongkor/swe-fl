@@ -1,0 +1,22 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+index 4682d5b6e..4deb8effe 100644
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -151,7 +151,7 @@ class BaseReport:
+         )
+         return verbose
+ 
+-    def _to_json(self):
++    def _to_json(self, _spt_unused=None):
+         """
+         This was originally the serialize_report() function from xdist (ca03269).
+ 
+@@ -202,7 +202,7 @@ class BaseReport:
+         return d
+ 
+     @classmethod
+-    def _from_json(cls, reportdict):
++    def _from_json(cls, reportdict, _spt_unused=None):
+         """
+         This was originally the serialize_report() function from xdist (ca03269).
+ 
