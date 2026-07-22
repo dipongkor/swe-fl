@@ -1,0 +1,19 @@
+{
+  "django__django-13346": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-13346",
+    "model_patch": "diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py\nindex fafc1beee8..0ca22780a6 100644\n--- a/django/db/models/fields/json.py\n+++ b/django/db/models/fields/json.py\n@@ -503,3 +503,8 @@ class KeyTransformFactory:\n \n     def __call__(self, *args, **kwargs):\n         return KeyTransform(self.key_name, *args, **kwargs)\n+\n+class KeyTransformIn(KeyTransformNumericLookupMixin, lookups.In):\n+    pass\n+\n+KeyTransform.register_lookup(KeyTransformIn)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/json.py",
+          "line": 508,
+          "statement": "KeyTransform.register_lookup(KeyTransformIn)"
+        }
+      ],
+      "reasoning": "The __in lookup was not registered for KeyTransform, causing it to fall back to the default lookup which doesn't handle JSONField key transforms correctly on non-native JSON backends.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

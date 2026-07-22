@@ -1,0 +1,61 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index aaf35ee37c..b50f317707 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -604,7 +604,7 @@ class Query(BaseExpression):
+             # If the left side of the join was already relabeled, use the
+             # updated alias.
+             join = join.relabeled_clone(change_map)
+-            new_alias = self.join(join, reuse=reuse)
++            new_alias = self.join(join, reuse=reuse, current_qs=rhs.alias_map)
+             if join.join_type == INNER:
+                 rhs_votes.add(new_alias)
+             # We can't reuse the same join again in the query. If we have two
+@@ -745,7 +745,7 @@ class Query(BaseExpression):
+             for model, values in seen.items():
+                 callback(target, model, values)
+ 
+-    def table_alias(self, table_name, create=False, filtered_relation=None):
++    def table_alias(self, table_name, create=False, filtered_relation=None, current_qs=None):
+         """
+         Return a table alias for the given table_name and whether this is a
+         new alias or not.
+@@ -762,6 +762,10 @@ class Query(BaseExpression):
+         # Create a new alias for this table.
+         if alias_list:
+             alias = '%s%d' % (self.alias_prefix, len(self.alias_map) + 1)
++            i = 1
++            while alias in self.alias_map or current_qs and alias in current_qs:
++                i += 1
++                alias = '%s%d' % (self.alias_prefix, len(self.alias_map) + i)
+             alias_list.append(alias)
+         else:
+             # The first occurrence of a table uses the table name directly.
+@@ -846,6 +850,9 @@ class Query(BaseExpression):
+         relabelling any references to them in select columns and the where
+         clause.
+         """
++        # Ensure keys and values are disjoint - otherwise an alias might be
++        # changed twice (e.g. first T4 -> T5, and then T5 -> T6) according to
++        # the order of the change_map, resulting in incorrect aliasing.
+         assert set(change_map).isdisjoint(change_map.values())
+ 
+         # 1. Update references in "select" (normal columns plus aliases),
+@@ -948,7 +955,7 @@ class Query(BaseExpression):
+         """
+         return len([1 for count in self.alias_refcount.values() if count])
+ 
+-    def join(self, join, reuse=None):
++    def join(self, join, reuse=None, current_qs=None):
+         """
+         Return an alias for the 'join', either reusing an existing alias for
+         that join or creating a new one. 'join' is either a base_table_class or
+@@ -976,7 +983,7 @@ class Query(BaseExpression):
+             return reuse_alias
+ 
+         # No reuse is possible, so we need a new alias.
+-        alias, _ = self.table_alias(join.table_name, create=True, filtered_relation=join.filtered_relation)
++        alias, _ = self.table_alias(join.table_name, create=True, filtered_relation=join.filtered_relation, current_qs=current_qs)
+         if join.join_type:
+             if self.alias_map[join.parent_alias].join_type == LOUTER or join.nullable:
+                 join_type = LOUTER

@@ -1,0 +1,13 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index a791908caf..bfd0ebc6f3 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -350,8 +350,6 @@ class SQLCompiler:
+                 for idx, (sel_expr, _, col_alias) in enumerate(self.select):
+                     if is_ref and col_alias == src.refs:
+                         src = src.source
+-                    elif col_alias:
+-                        continue
+                     if src == sel_expr:
+                         resolved.set_source_expressions([RawSQL('%d' % (idx + 1), ())])
+                         break

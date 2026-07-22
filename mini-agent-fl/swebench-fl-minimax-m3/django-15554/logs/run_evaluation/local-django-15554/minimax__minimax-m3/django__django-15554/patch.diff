@@ -1,0 +1,41 @@
+diff --git a/django/db/models/sql/datastructures.py b/django/db/models/sql/datastructures.py
+index 1edf040e82..302b337f07 100644
+--- a/django/db/models/sql/datastructures.py
++++ b/django/db/models/sql/datastructures.py
+@@ -162,8 +162,17 @@ class Join:
+         return hash(self.identity)
+ 
+     def equals(self, other):
+-        # Ignore filtered_relation in equality check.
+-        return self.identity[:-1] == other.identity[:-1]
++        """
++        Two joins are considered equal if everything but the filtered_relation
++        is the same, or if both filtered_relations match. A join with no
++        filtered_relation can be matched to one with a filtered_relation to
++        enable reuse of the filtered_relation's alias.
++        """
++        if self.filtered_relation is None and other.filtered_relation is not None:
++            return self.identity[:-1] == other.identity[:-1]
++        if self.filtered_relation is not None and other.filtered_relation is None:
++            return self.identity[:-1] == other.identity[:-1]
++        return self.identity == other.identity
+ 
+     def demote(self):
+         new = self.relabeled_clone({})
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index 54f3258eac..a45ec29f6e 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -805,7 +805,11 @@ class Query(BaseExpression):
+ 
+         # Create a new alias for this table.
+         if alias_list:
+-            alias = "%s%d" % (self.alias_prefix, len(self.alias_map) + 1)
++            if filtered_relation is not None:
++                # Use the filtered_relation's alias.
++                alias = filtered_relation.alias
++            else:
++                alias = "%s%d" % (self.alias_prefix, len(self.alias_map) + 1)
+             alias_list.append(alias)
+         else:
+             # The first occurrence of a table uses the table name directly.

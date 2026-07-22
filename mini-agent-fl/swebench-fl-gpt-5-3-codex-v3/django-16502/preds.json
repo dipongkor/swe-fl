@@ -1,0 +1,19 @@
+{
+  "django__django-16502": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-16502",
+    "model_patch": "diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py\nindex fef5532e58..ea4bd66bc7 100644\n--- a/django/core/servers/basehttp.py\n+++ b/django/core/servers/basehttp.py\n@@ -143,6 +143,12 @@ class ServerHandler(simple_server.ServerHandler):\n         if self.headers.get(\"Connection\") == \"close\":\n             self.request_handler.close_connection = True\n \n+\n+    def finish_response(self):\n+        if self.environ.get(\"REQUEST_METHOD\") == \"HEAD\":\n+            self.result = []\n+        return super().finish_response()\n+\n     def close(self):\n         self.get_stdin().read()\n         super().close()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/servers/basehttp.py",
+          "line": 148,
+          "statement": "        if self.environ.get(\"REQUEST_METHOD\") == \"HEAD\":"
+        }
+      ],
+      "reasoning": "The development server ServerHandler no longer strips response iterables for HEAD requests, so runserver sends a body for HEAD contrary to HTTP semantics.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

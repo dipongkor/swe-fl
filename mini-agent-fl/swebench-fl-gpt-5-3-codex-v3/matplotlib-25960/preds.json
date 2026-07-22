@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25960": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-25960",
+    "model_patch": "diff --git a/lib/matplotlib/gridspec.py b/lib/matplotlib/gridspec.py\nindex c86a527ef5..95ee58b505 100644\n--- a/lib/matplotlib/gridspec.py\n+++ b/lib/matplotlib/gridspec.py\n@@ -439,7 +439,7 @@ class GridSpec(GridSpecBase):\n \n         This is a subset of the attributes of `.SubplotParams`.\n         \"\"\"\n-        return [k for k in self._AllowedKeys if getattr(self, k)]\n+        return [k for k in self._AllowedKeys if getattr(self, k) is not None]\n \n     def tight_layout(self, figure, renderer=None,\n                      pad=1.08, h_pad=None, w_pad=None, rect=None):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/gridspec.py",
+          "line": 442,
+          "statement": "        return [k for k in self._AllowedKeys if getattr(self, k)]"
+        }
+      ],
+      "reasoning": "The check used truthiness, so explicitly setting spacing to 0 made it appear unmodified and caused fallback behavior that ignored user-provided zero spacing.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

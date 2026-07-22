@@ -1,0 +1,19 @@
+{
+  "django__django-14349": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-14349",
+    "model_patch": "diff --git a/django/core/validators.py b/django/core/validators.py\nindex a385819510..cb6a835378 100644\n--- a/django/core/validators.py\n+++ b/django/core/validators.py\n@@ -105,6 +105,11 @@ class URLValidator(RegexValidator):\n         scheme = value.split('://')[0].lower()\n         if scheme not in self.schemes:\n             raise ValidationError(self.message, code=self.code, params={'value': value})\n+        # Reject URLs containing newlines, tabs, or carriage returns. These\n+        # characters are stripped by urlsplit() on Python versions patched for\n+        # bpo-43882, so the check must happen before calling urlsplit().\n+        if '\\n' in value or '\\r' in value or '\\t' in value:\n+            raise ValidationError(self.message, code=self.code, params={'value': value})\n \n         # Then check full URL\n         try:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/validators.py",
+          "line": 112,
+          "statement": "        if '\\n' in value or '\\r' in value or '\\t' in value:"
+        }
+      ],
+      "reasoning": "On Python versions patched for bpo-43882, urllib.parse.urlsplit() strips leading and trailing CR, LF, and TAB characters before splitting the URL, so URLs like 'http://www.djangoproject.com/\\n' are silently transformed to 'http://www.djangoproject.com/' before reaching the URLValidator's regex and ipv6 checks. The validator must explicitly reject URLs containing these forbidden control characters before urlsplit() is called, which is what this new check does.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

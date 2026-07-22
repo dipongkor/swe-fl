@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-10449": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py\nindex e16ab8ce5..eb30e3651 100644\n--- a/sphinx/ext/autodoc/__init__.py\n+++ b/sphinx/ext/autodoc/__init__.py\n@@ -1578,7 +1578,7 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type:\n         if self.config.autodoc_typehints_format == \"short\":\n             kwargs.setdefault('unqualified_typehints', True)\n \n-        sig = super().format_signature()\n+        sig = super().format_signature(**kwargs)\n         sigs = []\n \n         overloads = self.get_overloaded_signatures()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/__init__.py",
+          "line": 1581,
+          "statement": "        sig = super().format_signature()"
+        }
+      ],
+      "reasoning": "ClassDocumenter.format_signature dropped kwargs when delegating to the parent, so show_return_annotation=False set earlier was ignored and constructor return annotations leaked into class signatures.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

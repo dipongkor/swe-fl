@@ -1,0 +1,19 @@
+{
+  "django__django-15128": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-15128",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex aaf35ee37c..ffe92e6ba6 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -846,6 +846,31 @@ class Query(BaseExpression):\n         relabelling any references to them in select columns and the where\n         clause.\n         \"\"\"\n+        # If keys and values of change_map were to intersect, an alias might be\n+        # updated twice (e.g. T4 -> T5, T5 -> T6) depending on their order in\n+        # change_map. In order to avoid this, create the mapping to a temporary\n+        # sequence of aliases that don't intersect the keys or values, then\n+        # apply the intended target aliases.\n+        if set(change_map).intersection(change_map.values()):\n+            translation = {}\n+            used = set(change_map).union(change_map.values())\n+            for old_alias in change_map:\n+                # Find an alias that doesn't collide with any existing alias\n+                # nor with the current keys/values of change_map.\n+                num = 1\n+                while True:\n+                    new_alias = '%s%d' % (self.alias_prefix, num)\n+                    if new_alias not in used and new_alias not in self.alias_map:\n+                        break\n+                    num += 1\n+                used.add(new_alias)\n+                translation[old_alias] = new_alias\n+            self.change_aliases(translation)\n+            change_map = {\n+                translation[old_alias]: new_alias\n+                for old_alias, new_alias in change_map.items()\n+            }\n+\n         assert set(change_map).isdisjoint(change_map.values())\n \n         # 1. Update references in \"select\" (normal columns plus aliases),\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 849,
+          "statement": "        assert set(change_map).isdisjoint(change_map.values())"
+        }
+      ],
+      "reasoning": "In Query.combine (OR operations), sequential rhs aliases (e.g. T4, T5) can be remapped to overlapping targets (T5, T6), producing a change_map whose keys intersect its values; change_aliases then fails the disjointness assertion (and would otherwise relabel an alias twice). The fix breaks the overlap by first remapping to fresh non-colliding temporary aliases.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

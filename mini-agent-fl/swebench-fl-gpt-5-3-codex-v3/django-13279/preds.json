@@ -1,0 +1,19 @@
+{
+  "django__django-13279": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-13279",
+    "model_patch": "diff --git a/django/contrib/sessions/backends/base.py b/django/contrib/sessions/backends/base.py\nindex b5453160a5..1b5e5108d8 100644\n--- a/django/contrib/sessions/backends/base.py\n+++ b/django/contrib/sessions/backends/base.py\n@@ -108,11 +108,20 @@ class SessionBase:\n \n     def encode(self, session_dict):\n         \"Return the given session dictionary serialized and encoded as a string.\"\n+        # RemovedInDjango40Warning: pre-Django 3.1 format will be invalid.\n+        if settings.DEFAULT_HASHING_ALGORITHM == 'sha1':\n+            return self._legacy_encode(session_dict)\n         return signing.dumps(\n             session_dict, salt=self.key_salt, serializer=self.serializer,\n             compress=True,\n         )\n \n+    def _legacy_encode(self, session_dict):\n+        # RemovedInDjango40Warning: pre-Django 3.1 format will be invalid.\n+        serialized = self.serializer().dumps(session_dict)\n+        hash = self._hash(serialized)\n+        return base64.b64encode(hash.encode() + b\":\" + serialized).decode('ascii')\n+\n     def decode(self, session_data):\n         try:\n             return signing.loads(session_data, salt=self.key_salt, serializer=self.serializer)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/sessions/backends/base.py",
+          "line": 111,
+          "statement": "        return signing.dumps("
+        }
+      ],
+      "reasoning": "Session encoding always used the new signing format, so nodes configured with DEFAULT_HASHING_ALGORITHM='sha1' still wrote data unreadable by older instances during rolling upgrades. Falling back to legacy encoding for sha1 preserves cross-version compatibility.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-16597": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-16597",
+    "model_patch": "diff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py\nindex ce4dd30f2..eb4bf184a 100644\n--- a/sympy/core/assumptions.py\n+++ b/sympy/core/assumptions.py\n@@ -186,6 +186,7 @@\n     'nonnegative    ==  real & !negative',\n \n     'zero           ->  even & finite',\n+    'even           ->  finite',\n \n     'prime          ->  integer & positive',\n     'composite      ->  integer & positive & !prime',\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/assumptions.py",
+          "line": 188,
+          "statement": "    'zero           ->  even & finite',"
+        }
+      ],
+      "reasoning": "The assumption rules only specified that zero implies finite but had no general implication from even to finite, so symbols declared even did not infer finiteness.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

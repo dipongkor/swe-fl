@@ -1,0 +1,7 @@
+2026-07-01 08:20:04,501 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-07-01 08:20:05,947 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-07-01 08:20:05,950 - minisweagent - INFO - Running on 1 instances...
+2026-07-01 08:20:05,951 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-07-01 08:20:09,029 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-009fecec -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-14496:latest sleep 2h
+2026-07-01 08:22:00,021 - minisweagent.environment - INFO - Started container minisweagent-009fecec with ID 5d177cc78db12a687a2cd12264d580b0c92ae1e7452c7a52602eb036fbd744a9
+2026-07-01 08:23:04,582 - minisweagent - INFO - Saved trajectory to 'swebench-fl-gemini-3.1-flash-lite/scikit-learn-14496/scikit-learn__scikit-learn-14496/scikit-learn__scikit-learn-14496.traj.json'

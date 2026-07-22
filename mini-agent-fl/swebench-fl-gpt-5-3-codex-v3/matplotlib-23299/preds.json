@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-23299": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-23299",
+    "model_patch": "diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py\nindex c268a56724..1bceb2b490 100644\n--- a/lib/matplotlib/__init__.py\n+++ b/lib/matplotlib/__init__.py\n@@ -1175,7 +1175,12 @@ def get_backend():\n     --------\n     matplotlib.use\n     \"\"\"\n-    return rcParams['backend']\n+    backend = rcParams._get_backend_or_none()\n+    if backend is None:\n+        # Fall back to the originally configured backend without triggering\n+        # auto-backend resolution (which can switch backends and close figs).\n+        backend = rcParamsOrig['backend']\n+    return backend\n \n \n def interactive(b):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/__init__.py",
+          "line": 1178,
+          "statement": "    backend = rcParams._get_backend_or_none()"
+        }
+      ],
+      "reasoning": "Previously get_backend() accessed rcParams['backend'], which triggers backend auto-resolution and can call pyplot.switch_backend(), clearing figures. Avoiding __getitem__ prevents unintended backend switching and figure cleanup.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

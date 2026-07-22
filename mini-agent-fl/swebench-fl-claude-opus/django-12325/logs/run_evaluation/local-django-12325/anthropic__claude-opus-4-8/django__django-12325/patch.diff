@@ -1,0 +1,30 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+index 8ea6c05ef9..3b9b0c82eb 100644
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -204,7 +204,7 @@ class ModelBase(type):
+             for field in base._meta.local_fields:
+                 if isinstance(field, OneToOneField):
+                     related = resolve_relation(new_class, field.remote_field.model)
+-                    parent_links[make_model_tuple(related)] = field
++                    parent_links.setdefault(make_model_tuple(related), []).append(field)
+ 
+         # Track fields inherited from base models.
+         inherited_attributes = set()
+@@ -237,7 +237,15 @@ class ModelBase(type):
+                 base = base._meta.concrete_model
+                 base_key = make_model_tuple(base)
+                 if base_key in parent_links:
+-                    field = parent_links[base_key]
++                    # Prefer the OneToOneField explicitly declared as a
++                    # parent link. Fall back to the last declared
++                    # OneToOneField so that a missing parent_link=True is
++                    # reported for it in Options._prepare().
++                    candidates = parent_links[base_key]
++                    field = next(
++                        (f for f in candidates if f.remote_field.parent_link),
++                        candidates[-1],
++                    )
+                 elif not is_proxy:
+                     attr_name = '%s_ptr' % base._meta.model_name
+                     field = OneToOneField(

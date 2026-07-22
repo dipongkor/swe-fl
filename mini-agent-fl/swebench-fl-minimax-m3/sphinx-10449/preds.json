@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-10449": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/typehints.py b/sphinx/ext/autodoc/typehints.py\nindex 06768168e..afef5a865 100644\n--- a/sphinx/ext/autodoc/typehints.py\n+++ b/sphinx/ext/autodoc/typehints.py\n@@ -28,7 +28,7 @@ def record_typehints(app: Sphinx, objtype: str, name: str, obj: Any,\n             for param in sig.parameters.values():\n                 if param.annotation is not param.empty:\n                     annotation[param.name] = typing.stringify(param.annotation, mode)\n-            if sig.return_annotation is not sig.empty:\n+            if sig.return_annotation is not sig.empty and objtype != \"class\":\n                 annotation['return'] = typing.stringify(sig.return_annotation, mode)\n     except (TypeError, ValueError):\n         pass\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/typehints.py",
+          "line": 31,
+          "statement": "            if sig.return_annotation is not sig.empty:"
+        }
+      ],
+      "reasoning": "When `autodoc_typehints = \"description\"` is set, the `record_typehints` function is called for each documented object via the `autodoc-process-signature` event. For a class, `inspect.signature(obj)` returns the signature of the class's `__init__` method, which includes the return annotation (typically `None`). This return annotation is then recorded in the annotations dict and later added to the class's field list as 'Return type: None'. The fix skips recording the return annotation when the object type is 'class', since a class does not have a meaningful return type (the return annotation of `__init__` or `__new__` is not a return annotation of the class itself).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

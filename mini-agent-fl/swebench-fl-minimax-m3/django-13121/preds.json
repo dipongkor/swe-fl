@@ -1,0 +1,19 @@
+{
+  "django__django-13121": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13121",
+    "model_patch": "diff --git a/django/db/backends/base/operations.py b/django/db/backends/base/operations.py\nindex 2e283a3193..2648560510 100644\n--- a/django/db/backends/base/operations.py\n+++ b/django/db/backends/base/operations.py\n@@ -8,6 +8,7 @@ from django.conf import settings\n from django.db import NotSupportedError, transaction\n from django.db.backends import utils\n from django.utils import timezone\n+from django.utils.dateparse import parse_duration\n from django.utils.encoding import force_str\n \n \n@@ -580,7 +581,11 @@ class BaseDatabaseOperations:\n \n     def convert_durationfield_value(self, value, expression, connection):\n         if value is not None:\n-            return datetime.timedelta(0, 0, value)\n+            if isinstance(value, str):\n+                value = parse_duration(value)\n+            else:\n+                value = datetime.timedelta(0, 0, value)\n+        return value\n \n     def check_expression_support(self, expression):\n         \"\"\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/base/operations.py",
+          "line": 583,
+          "statement": "            return datetime.timedelta(0, 0, value)"
+        }
+      ],
+      "reasoning": "The original convert_durationfield_value method only handled numeric values (microseconds), but on SQLite and MySQL, durations-only expressions (DurationField + DurationField or DurationField + timedelta) return the result as a string formatted by str(timedelta) (e.g., '1 day, 2:00:00') instead of an integer. The fix detects if the value is a string and uses parse_duration() to convert it, while still supporting the original numeric microsecond format.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "django__django-15629": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-15629",
+    "model_patch": "diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py\nindex 696bfd7742..64c2c49f5b 100644\n--- a/django/db/backends/base/schema.py\n+++ b/django/db/backends/base/schema.py\n@@ -1038,6 +1038,9 @@ class BaseDatabaseSchemaEditor:\n         for old_rel, new_rel in rels_to_update:\n             rel_db_params = new_rel.field.db_parameters(connection=self.connection)\n             rel_type = rel_db_params[\"type\"]\n+            rel_collation = rel_db_params.get(\"collation\")\n+            if rel_collation:\n+                rel_type += \" \" + self._collate_sql(rel_collation)\n             fragment, other_actions = self._alter_column_type_sql(\n                 new_rel.related_model, old_rel.field, new_rel.field, rel_type\n             )\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/base/schema.py",
+          "line": 1040,
+          "statement": "            rel_type = rel_db_params[\"type\"]"
+        }
+      ],
+      "reasoning": "When propagating PK type changes to referencing foreign key columns, only the database type was copied and collation from db_parameters was ignored, causing MySQL FK/PK collation mismatches.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

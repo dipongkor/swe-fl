@@ -1,0 +1,282 @@
+diff --git a/django/contrib/gis/db/backends/postgis/schema.py b/django/contrib/gis/db/backends/postgis/schema.py
+index 77a9096ef4..656a2a69dc 100644
+--- a/django/contrib/gis/db/backends/postgis/schema.py
++++ b/django/contrib/gis/db/backends/postgis/schema.py
+@@ -50,12 +50,22 @@ class PostGISSchemaEditor(DatabaseSchemaEditor):
+             expressions=expressions,
+         )
+ 
+-    def _alter_column_type_sql(self, table, old_field, new_field, new_type):
++    def _alter_column_type_sql(
++        self,
++        table,
++        old_field,
++        new_field,
++        new_type,
++        old_collation=None,
++        new_collation=None,
++    ):
+         """
+         Special case when dimension changed.
+         """
+         if not hasattr(old_field, "dim") or not hasattr(new_field, "dim"):
+-            return super()._alter_column_type_sql(table, old_field, new_field, new_type)
++            return super()._alter_column_type_sql(
++                table, old_field, new_field, new_type, old_collation, new_collation
++            )
+ 
+         if old_field.dim == 2 and new_field.dim == 3:
+             sql_alter = self.sql_alter_column_to_3d
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+index 696bfd7742..f2b50ac924 100644
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -916,16 +916,12 @@ class BaseDatabaseSchemaEditor:
+         # Collation change?
+         old_collation = old_db_params.get("collation")
+         new_collation = new_db_params.get("collation")
+-        if old_collation != new_collation:
+-            # Collation change handles also a type change.
+-            fragment = self._alter_column_collation_sql(
+-                model, new_field, new_type, new_collation
+-            )
+-            actions.append(fragment)
+-        # Type change?
+-        elif (old_type, old_type_suffix) != (new_type, new_type_suffix):
++        # Type or collation change?
++        if (old_type, old_type_suffix) != (new_type, new_type_suffix) or (
++            old_collation != new_collation
++        ):
+             fragment, other_actions = self._alter_column_type_sql(
+-                model, old_field, new_field, new_type
++                model, old_field, new_field, new_type, old_collation, new_collation
+             )
+             actions.append(fragment)
+             post_actions.extend(other_actions)
+@@ -1038,8 +1034,16 @@ class BaseDatabaseSchemaEditor:
+         for old_rel, new_rel in rels_to_update:
+             rel_db_params = new_rel.field.db_parameters(connection=self.connection)
+             rel_type = rel_db_params["type"]
++            rel_collation = rel_db_params.get("collation")
++            old_rel_db_params = old_rel.field.db_parameters(connection=self.connection)
++            old_rel_collation = old_rel_db_params.get("collation")
+             fragment, other_actions = self._alter_column_type_sql(
+-                new_rel.related_model, old_rel.field, new_rel.field, rel_type
++                new_rel.related_model,
++                old_rel.field,
++                new_rel.field,
++                rel_type,
++                old_rel_collation,
++                rel_collation,
+             )
+             self.execute(
+                 self.sql_alter_column
+@@ -1160,7 +1164,15 @@ class BaseDatabaseSchemaEditor:
+             params,
+         )
+ 
+-    def _alter_column_type_sql(self, model, old_field, new_field, new_type):
++    def _alter_column_type_sql(
++        self,
++        model,
++        old_field,
++        new_field,
++        new_type,
++        old_collation=None,
++        new_collation=None,
++    ):
+         """
+         Hook to specialize column type alteration for different backends,
+         for cases when a creation type is different to an alteration type
+@@ -1170,6 +1182,23 @@ class BaseDatabaseSchemaEditor:
+         an ALTER TABLE statement and a list of extra (sql, params) tuples to
+         run once the field is altered.
+         """
++        # Collation change handles also a type change.
++        if old_collation != new_collation:
++            collation = (
++                "" if new_collation is None else self._collate_sql(new_collation)
++            )
++            return (
++                (
++                    self.sql_alter_column_collate
++                    % {
++                        "column": self.quote_name(new_field.column),
++                        "type": new_type,
++                        "collation": " " + collation if collation else "",
++                    },
++                    [],
++                ),
++                [],
++            )
+         return (
+             (
+                 self.sql_alter_column_type
+@@ -1182,19 +1211,6 @@ class BaseDatabaseSchemaEditor:
+             [],
+         )
+ 
+-    def _alter_column_collation_sql(self, model, new_field, new_type, new_collation):
+-        return (
+-            self.sql_alter_column_collate
+-            % {
+-                "column": self.quote_name(new_field.column),
+-                "type": new_type,
+-                "collation": " " + self._collate_sql(new_collation)
+-                if new_collation
+-                else "",
+-            },
+-            [],
+-        )
+-
+     def _alter_many_to_many(self, model, old_field, new_field, strict):
+         """Alter M2Ms to repoint their to= endpoints."""
+         # Rename the through table
+diff --git a/django/db/backends/mysql/schema.py b/django/db/backends/mysql/schema.py
+index 562b209eef..beccc70c90 100644
+--- a/django/db/backends/mysql/schema.py
++++ b/django/db/backends/mysql/schema.py
+@@ -165,9 +165,19 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+             new_type += " NOT NULL"
+         return new_type
+ 
+-    def _alter_column_type_sql(self, model, old_field, new_field, new_type):
++    def _alter_column_type_sql(
++        self,
++        model,
++        old_field,
++        new_field,
++        new_type,
++        old_collation=None,
++        new_collation=None,
++    ):
+         new_type = self._set_field_new_type_null_status(old_field, new_type)
+-        return super()._alter_column_type_sql(model, old_field, new_field, new_type)
++        return super()._alter_column_type_sql(
++            model, old_field, new_field, new_type, old_collation, new_collation
++        )
+ 
+     def _rename_field_sql(self, table, old_field, new_field, new_type):
+         new_type = self._set_field_new_type_null_status(old_field, new_type)
+diff --git a/django/db/backends/oracle/schema.py b/django/db/backends/oracle/schema.py
+index f2a5099110..6fcc1aaa76 100644
+--- a/django/db/backends/oracle/schema.py
++++ b/django/db/backends/oracle/schema.py
+@@ -169,7 +169,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+                         self._create_fk_sql(rel.related_model, rel.field, "_fk")
+                     )
+ 
+-    def _alter_column_type_sql(self, model, old_field, new_field, new_type):
++    def _alter_column_type_sql(
++        self,
++        model,
++        old_field,
++        new_field,
++        new_type,
++        old_collation=None,
++        new_collation=None,
++    ):
+         auto_field_types = {"AutoField", "BigAutoField", "SmallAutoField"}
+         # Drop the identity if migrating away from AutoField.
+         if (
+@@ -178,7 +186,24 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+             and self._is_identity_column(model._meta.db_table, new_field.column)
+         ):
+             self._drop_identity(model._meta.db_table, new_field.column)
+-        return super()._alter_column_type_sql(model, old_field, new_field, new_type)
++        if new_collation is not None and old_collation != new_collation:
++            return super()._alter_column_type_sql(
++                model, old_field, new_field, new_type, old_collation, new_collation
++            )
++        elif old_collation != new_collation:
++            # Oracle needs to explicitly restore a column to its default
++            # collation.
++            return super()._alter_column_type_sql(
++                model,
++                old_field,
++                new_field,
++                new_type,
++                old_collation,
++                self._get_default_collation(model._meta.db_table),
++            )
++        return super()._alter_column_type_sql(
++            model, old_field, new_field, new_type, old_collation, new_collation
++        )
+ 
+     def normalize_name(self, name):
+         """
+@@ -241,10 +266,3 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+                 [self.normalize_name(table_name)],
+             )
+             return cursor.fetchone()[0]
+-
+-    def _alter_column_collation_sql(self, model, new_field, new_type, new_collation):
+-        if new_collation is None:
+-            new_collation = self._get_default_collation(model._meta.db_table)
+-        return super()._alter_column_collation_sql(
+-            model, new_field, new_type, new_collation
+-        )
+diff --git a/django/db/backends/postgresql/schema.py b/django/db/backends/postgresql/schema.py
+index 3053c8d370..a7a55b9eea 100644
+--- a/django/db/backends/postgresql/schema.py
++++ b/django/db/backends/postgresql/schema.py
+@@ -105,12 +105,39 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+                 )
+         return None
+ 
+-    def _alter_column_type_sql(self, model, old_field, new_field, new_type):
+-        self.sql_alter_column_type = "ALTER COLUMN %(column)s TYPE %(type)s"
++    def _alter_column_type_sql(
++        self,
++        model,
++        old_field,
++        new_field,
++        new_type,
++        old_collation=None,
++        new_collation=None,
++    ):
+         # Cast when data type changed.
+         using_sql = " USING %(column)s::%(type)s"
+         new_internal_type = new_field.get_internal_type()
+         old_internal_type = old_field.get_internal_type()
++        if new_collation != old_collation:
++            column = strip_quotes(new_field.column)
++            self.sql_alter_column_type = "ALTER COLUMN %(column)s TYPE %(type)s"
++            collate_sql = (
++                self._collate_sql(new_collation) if new_collation is not None else ""
++            )
++            if collate_sql:
++                collate_sql = " " + collate_sql
++            return (
++                (
++                    (self.sql_alter_column_type + collate_sql + using_sql)
++                    % {
++                        "column": self.quote_name(column),
++                        "type": new_type,
++                    },
++                    [],
++                ),
++                [],
++            )
++        self.sql_alter_column_type = "ALTER COLUMN %(column)s TYPE %(type)s"
+         if new_internal_type == "ArrayField" and new_internal_type == old_internal_type:
+             # Compare base data types for array fields.
+             if list(self._field_base_data_types(old_field)) != list(
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+index fad5560486..bb4e065e37 100644
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1180,7 +1180,12 @@ class ForeignKey(ForeignObject):
+         return self.target_field.rel_db_type(connection=connection)
+ 
+     def db_parameters(self, connection):
+-        return {"type": self.db_type(connection), "check": self.db_check(connection)}
++        target_db_parameters = self.target_field.db_parameters(connection)
++        return {
++            "type": self.db_type(connection),
++            "check": self.db_check(connection),
++            "collation": target_db_parameters.get("collation"),
++        }
+ 
+     def convert_empty_strings(self, value, expression, connection):
+         if (not value) and isinstance(value, str):

@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-3993": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pydata__xarray-3993",
+    "model_patch": "diff --git a/doc/whats-new.rst b/doc/whats-new.rst\nindex 488d8baa..839a99f5 100644\n--- a/doc/whats-new.rst\n+++ b/doc/whats-new.rst\n@@ -42,6 +42,13 @@ Breaking changes\n - remove deprecated ``autoclose`` kwargs from :py:func:`open_dataset` (:pull:`4725`).\n   By `Aureliana Barghini <https://github.com/aurghs>`_.\n \n+Deprecations\n+~~~~~~~~~~~~\n+\n+- :py:meth:`DataArray.integrate` has had its ``dim`` argument renamed to ``coord`` for\n+  consistency with :py:meth:`Dataset.integrate`. ``dim`` is now deprecated, and will\n+  raise a ``FutureWarning`` if used (:issue:`3993`).\n+  By `Tom Nicholas <https://github.com/TomNicholas>`_.\n \n New Features\n ~~~~~~~~~~~~\ndiff --git a/xarray/core/dataarray.py b/xarray/core/dataarray.py\nindex 2fef3edb..32fe3e92 100644\n--- a/xarray/core/dataarray.py\n+++ b/xarray/core/dataarray.py\n@@ -3481,16 +3481,22 @@ class DataArray(AbstractArray, DataWithCoords):\n         return self._from_temp_dataset(ds)\n \n     def integrate(\n-        self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n+        self,\n+        coord: Union[Hashable, Sequence[Hashable]] = None,\n+        datetime_unit: str = None,\n+        *,\n+        dim: Union[Hashable, Sequence[Hashable]] = None,\n     ) -> \"DataArray\":\n         \"\"\" integrate the array with the trapezoidal rule.\n \n         .. note::\n-            This feature is limited to simple cartesian geometry, i.e. dim\n+            This feature is limited to simple cartesian geometry, i.e. coord\n             must be one dimensional.\n \n         Parameters\n         ----------\n+        coord: hashable, or a sequence of hashable\n+            Coordinate(s) used for the integration.\n         dim : hashable, or sequence of hashable\n             Coordinate(s) used for the integration.\n         datetime_unit : {\"Y\", \"M\", \"W\", \"D\", \"h\", \"m\", \"s\", \"ms\", \"us\", \"ns\", \\\n@@ -3503,6 +3509,7 @@ class DataArray(AbstractArray, DataWithCoords):\n \n         See also\n         --------\n+        Dataset.integrate\n         numpy.trapz: corresponding numpy function\n \n         Examples\n@@ -3528,7 +3535,21 @@ class DataArray(AbstractArray, DataWithCoords):\n         array([5.4, 6.6, 7.8])\n         Dimensions without coordinates: y\n         \"\"\"\n-        ds = self._to_temp_dataset().integrate(dim, datetime_unit)\n+        if dim is not None and coord is not None:\n+            raise ValueError(\n+                \"Cannot pass both 'dim' and 'coord'. Please pass only 'coord' instead.\"\n+            )\n+\n+        if dim is not None and coord is None:\n+            coord = dim\n+            msg = (\n+                \"The `dim` keyword argument to `DataArray.integrate` is \"\n+                \"being replaced with `coord`, for consistency with \"\n+                \"`Dataset.integrate`. Please pass `coord` instead.\"\n+            )\n+            warnings.warn(msg, FutureWarning, stacklevel=2)\n+\n+        ds = self._to_temp_dataset().integrate(coord, datetime_unit)\n         return self._from_temp_dataset(ds)\n \n     def unify_chunks(self) -> \"DataArray\":\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/dataarray.py",
+          "line": 3484,
+          "statement": "        self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None"
+        }
+      ],
+      "reasoning": "The DataArray.integrate method had its first argument named 'dim' rather than 'coord', which was inconsistent with the Dataset.integrate method and with DataArray.differentiate. This caused confusion since integrate/differentiate are inherently coordinate-based operations requiring distance information, not dimension-based operations.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

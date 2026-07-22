@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-13877": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-13877",
+    "model_patch": "diff --git a/sympy/core/exprtools.py b/sympy/core/exprtools.py\nindex 4e0de9ec1..f439eaace 100644\n--- a/sympy/core/exprtools.py\n+++ b/sympy/core/exprtools.py\n@@ -1176,7 +1176,12 @@ def do(expr):\n         if p.is_Add:\n             list_args = [do(a) for a in Add.make_args(p)]\n             # get a common negative (if there) which gcd_terms does not remove\n-            if all(a.as_coeff_Mul()[0] < 0 for a in list_args):\n+            def check(a):\n+                coeff = a.as_coeff_Mul()[0]\n+                if coeff is S.NaN:\n+                    return False\n+                return coeff < 0\n+            if all(check(a) for a in list_args):\n                 cont = -cont\n                 list_args = [-a for a in list_args]\n             # watch out for exp(-(x+2)) which gcd_terms will change to exp(-x-2)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/exprtools.py",
+          "line": 1179,
+          "statement": "if all(a.as_coeff_Mul()[0] < 0 for a in list_args):"
+        }
+      ],
+      "reasoning": "The code directly compares the coefficient of an expression to 0, which fails when the coefficient is NaN, as NaN comparison is invalid in SymPy.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

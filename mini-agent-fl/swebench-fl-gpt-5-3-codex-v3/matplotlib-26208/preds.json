@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-26208": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-26208",
+    "model_patch": "diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py\nindex 5203e3232c..2f9efb9610 100644\n--- a/lib/matplotlib/axes/_base.py\n+++ b/lib/matplotlib/axes/_base.py\n@@ -2875,7 +2875,10 @@ class _AxesBase(martist.Artist):\n                 # in mutatedx or mutatedy.\n                 return\n             else:\n-                x0, x1 = (-np.inf, np.inf)\n+                # No data on any of the shared axes: keep existing bounds\n+                # instead of forcing nonsingular defaults, which can mutate\n+                # sibling axes' limits to +/-inf-derived placeholders.\n+                return\n             # If x0 and x1 are nonfinite, get default limits from the locator.\n             locator = axis.get_major_locator()\n             x0, x1 = locator.nonsingular(x0, x1)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/axes/_base.py",
+          "line": 2878,
+          "statement": "                x0, x1 = (-np.inf, np.inf)"
+        }
+      ],
+      "reasoning": "When no shared axis has finite data limits and view limits are not marked mutated, autoscale_view forced (-inf, inf) through nonsingular/view-limit logic, which updates bounds unexpectedly on twinned axes and leads to dataLim corruption symptoms. Returning early preserves existing limits when there is no data to autoscale.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

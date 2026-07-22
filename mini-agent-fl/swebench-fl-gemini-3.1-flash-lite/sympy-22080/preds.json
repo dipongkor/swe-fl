@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-22080": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-22080",
+    "model_patch": "diff --git a/sympy/printing/precedence.py b/sympy/printing/precedence.py\nindex 47ff463faf..8505f30ac8 100644\n--- a/sympy/printing/precedence.py\n+++ b/sympy/printing/precedence.py\n@@ -36,6 +36,7 @@\n     \"Sub\": PRECEDENCE[\"Add\"],\n     \"Not\": PRECEDENCE[\"Not\"],\n     \"Function\" : PRECEDENCE[\"Func\"],\n+    \"Mod\": 40,\n     \"NegativeInfinity\": PRECEDENCE[\"Add\"],\n     \"MatAdd\": PRECEDENCE[\"Add\"],\n     \"MatPow\": PRECEDENCE[\"Pow\"],\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/precedence.py",
+          "line": 39,
+          "statement": "\"Mod\": 40,"
+        }
+      ],
+      "reasoning": "The Mod function was not assigned a precedence value, causing it to default to the precedence of a Function (70), which is too high for the % operator in Python (which has the same precedence as multiplication, 50). By setting it to 40, we ensure it is correctly parenthesized when used in expressions.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

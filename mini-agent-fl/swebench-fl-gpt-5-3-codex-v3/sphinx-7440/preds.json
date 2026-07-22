@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7440": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-7440",
+    "model_patch": "",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "doc/glossary.rst",
+          "line": 1,
+          "statement": ".. _glossary:"
+        }
+      ],
+      "reasoning": "The reported duplicate MySQL/mysql glossary term issue is not present in this repository's doc/glossary.rst; the file contains unrelated glossary entries, so no source change is applicable here.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

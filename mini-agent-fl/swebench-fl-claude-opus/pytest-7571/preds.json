@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7571": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pytest-dev__pytest-7571",
+    "model_patch": "diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py\nindex 11031f2f2..8f00d1967 100644\n--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -346,6 +346,7 @@ class LogCaptureFixture:\n         self._item = item\n         # dict of log name -> log level\n         self._initial_logger_levels = {}  # type: Dict[Optional[str], int]\n+        self._initial_handler_level = None  # type: Optional[int]\n \n     def _finalize(self) -> None:\n         \"\"\"Finalizes the fixture.\n@@ -353,6 +354,8 @@ class LogCaptureFixture:\n         This restores the log levels changed by :meth:`set_level`.\n         \"\"\"\n         # restore log levels\n+        if self._initial_handler_level is not None:\n+            self.handler.setLevel(self._initial_handler_level)\n         for logger_name, level in self._initial_logger_levels.items():\n             logger = logging.getLogger(logger_name)\n             logger.setLevel(level)\n@@ -434,6 +437,8 @@ class LogCaptureFixture:\n         # save the original log-level to restore it during teardown\n         self._initial_logger_levels.setdefault(logger, logger_obj.level)\n         logger_obj.setLevel(level)\n+        if self._initial_handler_level is None:\n+            self._initial_handler_level = self.handler.level\n         self.handler.setLevel(level)\n \n     @contextmanager\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/logging.py",
+          "line": 437,
+          "statement": "        self.handler.setLevel(level)"
+        }
+      ],
+      "reasoning": "LogCaptureFixture.set_level changes the caplog handler's level via self.handler.setLevel(level) but never saves the original handler level, and _finalize only restores logger levels (not the handler level), so the elevated handler level leaks into subsequent tests.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

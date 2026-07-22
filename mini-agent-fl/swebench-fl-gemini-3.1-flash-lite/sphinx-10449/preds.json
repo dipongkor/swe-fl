@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-10449": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/typehints.py b/sphinx/ext/autodoc/typehints.py\nindex 06768168e..150e69b46 100644\n--- a/sphinx/ext/autodoc/typehints.py\n+++ b/sphinx/ext/autodoc/typehints.py\n@@ -123,13 +123,12 @@ def modify_field_list(node: nodes.field_list, annotations: Dict[str, str]) -> No\n             field += nodes.field_body('', nodes.paragraph('', ''))\n             node += field\n \n-    if 'return' in annotations and 'return' not in arguments:\n+    if 'return' in annotations and 'return' not in arguments and annotations['return'] != 'None':\n         field = nodes.field()\n         field += nodes.field_name('', 'rtype')\n-        field += nodes.field_body('', nodes.paragraph('', annotation))\n+        field += nodes.field_body('', nodes.paragraph('', annotations['return']))\n         node += field\n \n-\n def augment_descriptions_with_types(\n     node: nodes.field_list,\n     annotations: Dict[str, str],\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/typehints.py",
+          "line": 126,
+          "statement": "if 'return' in annotations and 'return' not in arguments:"
+        }
+      ],
+      "reasoning": "The original code incorrectly added an 'rtype' field even if the return type was 'None', and it also used the 'annotation' variable from the loop scope instead of the actual return annotation.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

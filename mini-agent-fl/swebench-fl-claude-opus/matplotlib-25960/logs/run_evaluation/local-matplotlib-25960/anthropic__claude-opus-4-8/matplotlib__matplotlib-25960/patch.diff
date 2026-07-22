@@ -1,0 +1,62 @@
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+index dab2bc4a5a..fce8b0865c 100644
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -2272,19 +2272,50 @@ class SubFigure(FigureBase):
+             self.bbox_relative.p0 = bbox.p0
+             self.bbox_relative.p1 = bbox.p1
+             return
+-        # need to figure out *where* this subplotspec is.
++        # need to figure out *where* this subplotspec is, and set the
++        # bbox_relative accordingly, taking wspace and hspace into account.
+         gs = self._subplotspec.get_gridspec()
++
++        # get the width and height ratios, and the wspace/hspace
+         wr = np.asarray(gs.get_width_ratios())
+         hr = np.asarray(gs.get_height_ratios())
+-        dx = wr[self._subplotspec.colspan].sum() / wr.sum()
+-        dy = hr[self._subplotspec.rowspan].sum() / hr.sum()
+-        x0 = wr[:self._subplotspec.colspan.start].sum() / wr.sum()
+-        y0 = 1 - hr[:self._subplotspec.rowspan.stop].sum() / hr.sum()
++        nrows, ncols = gs.get_geometry()
++        # If wspace/hspace are not explicitly set on the gridspec, default
++        # to no spacing (preserving the historic subfigure behaviour).
++        wspace = 0 if gs.wspace is None else gs.wspace
++        hspace = 0 if gs.hspace is None else gs.hspace
++
++        # calculate the cell widths/heights, and the separator sizes, so
++        # that the whole grid spans the range [0, 1] in both directions.
++        # This mirrors GridSpecBase.get_grid_positions but keeps the grid
++        # within [0, 1] (i.e. no outer margins).
++        cell_w = 1 / (ncols + wspace * (ncols - 1))
++        sep_w = wspace * cell_w
++        norm_w = cell_w * ncols / wr.sum()
++        cell_widths = wr * norm_w
++        sep_widths = np.array([0] + [sep_w] * (ncols - 1))
++        cell_ws = np.cumsum(np.column_stack([sep_widths, cell_widths]).flat)
++        lefts, rights = (cell_ws).reshape((-1, 2)).T
++
++        cell_h = 1 / (nrows + hspace * (nrows - 1))
++        sep_h = hspace * cell_h
++        norm_h = cell_h * nrows / hr.sum()
++        cell_heights = hr * norm_h
++        sep_heights = np.array([0] + [sep_h] * (nrows - 1))
++        cell_hs = np.cumsum(np.column_stack([sep_heights, cell_heights]).flat)
++        tops, bottoms = (1 - cell_hs).reshape((-1, 2)).T
++
++        rows = self._subplotspec.rowspan
++        cols = self._subplotspec.colspan
++        x0 = lefts[cols].min()
++        x1 = rights[cols].max()
++        y0 = bottoms[rows].min()
++        y1 = tops[rows].max()
+         if self.bbox_relative is None:
+-            self.bbox_relative = Bbox.from_bounds(x0, y0, dx, dy)
++            self.bbox_relative = Bbox.from_extents(x0, y0, x1, y1)
+         else:
+             self.bbox_relative.p0 = (x0, y0)
+-            self.bbox_relative.p1 = (x0 + dx, y0 + dy)
++            self.bbox_relative.p1 = (x1, y1)
+ 
+     def get_constrained_layout(self):
+         """

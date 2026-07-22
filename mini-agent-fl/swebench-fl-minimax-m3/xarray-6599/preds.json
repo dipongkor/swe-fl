@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-6599": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pydata__xarray-6599",
+    "model_patch": "diff --git a/xarray/core/computation.py b/xarray/core/computation.py\nindex 823cbe02..fa82fbbb 100644\n--- a/xarray/core/computation.py\n+++ b/xarray/core/computation.py\n@@ -1933,14 +1933,16 @@ def _ensure_numeric(data: T_Xarray) -> T_Xarray:\n     from .dataset import Dataset\n \n     def to_floatable(x: DataArray) -> DataArray:\n-        if x.dtype.kind in \"mM\":\n+        if x.dtype.kind == \"M\":\n+            # datetimes\n             return x.copy(\n                 data=datetime_to_numeric(\n-                    x.data,\n-                    offset=np.datetime64(\"1970-01-01\"),\n-                    datetime_unit=\"ns\",\n-                ),\n+                    x.data, offset=np.datetime64(\"1970-01-01\"), datetime_unit=\"ns\"\n+                )\n             )\n+        elif x.dtype.kind == \"m\":\n+            # timedeltas\n+            return x.astype(float)\n         return x\n \n     if isinstance(data, Dataset):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/computation.py",
+          "line": 1936,
+          "statement": "        if x.dtype.kind in \"mM\":"
+        }
+      ],
+      "reasoning": "The _ensure_numeric function was applying the datetime offset (np.datetime64('1970-01-01')) to timedelta64 data, which produces incorrect results. The fix splits the handling: for datetime64 (kind 'M'), use datetime_to_numeric with the datetime offset; for timedelta64 (kind 'm'), simply convert to float using astype(float).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

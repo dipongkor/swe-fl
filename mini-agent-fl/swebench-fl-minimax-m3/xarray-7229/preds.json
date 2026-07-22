@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-7229": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pydata__xarray-7229",
+    "model_patch": "diff --git a/xarray/core/computation.py b/xarray/core/computation.py\nindex 3f7e8f74..2a908556 100644\n--- a/xarray/core/computation.py\n+++ b/xarray/core/computation.py\n@@ -1860,7 +1860,9 @@ def where(cond, x, y, keep_attrs=None):\n     if keep_attrs is True:\n         # keep the attributes of x, the second parameter, by default to\n         # be consistent with the `where` method of `DataArray` and `Dataset`\n-        keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})\n+        keep_attrs = lambda attrs, context: (\n+            getattr(x, \"attrs\", {}) if len(attrs) < 2 else attrs[1]\n+        )\n \n     # alignment for three arguments is complicated, so don't support it yet\n     return apply_ufunc(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/computation.py",
+          "line": 1863,
+          "statement": "keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})"
+        }
+      ],
+      "reasoning": "The lambda passed as `keep_attrs` to `apply_ufunc` in `xr.where` is called for both the output data variable and for each coordinate variable. It always returns `x.attrs` (the data variable's attributes), which causes coordinate attributes to be overwritten with the data variable's attributes. The fix is to return `attrs[1]` (the second argument's attributes for the specific variable being merged) when there are 2+ entries in the attrs list, which correctly returns the coordinate's attributes for coordinate merges and the data variable's attributes for the main variable merge. For the scalar case (where the attrs list has fewer than 2 entries), it falls back to `getattr(x, 'attrs', {})` as before.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

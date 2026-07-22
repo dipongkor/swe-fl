@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-10673": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-10673",
+    "model_patch": "diff --git a/sphinx/environment/adapters/toctree.py b/sphinx/environment/adapters/toctree.py\nindex 9678e3c7c..0ba6947a9 100644\n--- a/sphinx/environment/adapters/toctree.py\n+++ b/sphinx/environment/adapters/toctree.py\n@@ -164,6 +164,17 @@ class TocTree:\n                                           'doesn\\'t have a title: no link will be generated'),\n                                        ref, location=toctreenode)\n                 except KeyError:\n+                    if ref in ['genindex', 'modindex', 'search']:\n+                        reference = nodes.reference('', '', internal=True, refuri=ref, anchorname='',\n+                                                    *[nodes.Text(title or ref)])\n+                        para = addnodes.compact_paragraph('', '', reference)\n+                        item = nodes.list_item('', para)\n+                        toc = nodes.bullet_list('', item)\n+                        if separate:\n+                            entries.append(toc)\n+                        else:\n+                            entries.extend(toc.children)\n+                        continue\n                     # this is raised if the included file does not exist\n                     if excluded(self.env.doc2path(ref, False)):\n                         message = __('toctree contains reference to excluded document %r')\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/environment/adapters/toctree.py",
+          "line": 166,
+          "statement": "                except KeyError:"
+        }
+      ],
+      "reasoning": "The toctree resolution process raises a KeyError when a document is not found, and the existing code only logs a warning for all missing documents, without special handling for standard Sphinx indices like 'genindex', 'modindex', and 'search'.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

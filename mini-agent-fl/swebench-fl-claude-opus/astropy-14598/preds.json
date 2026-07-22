@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-14598": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "astropy__astropy-14598",
+    "model_patch": "diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py\nindex 1b3285ddc..f5effce8c 100644\n--- a/astropy/io/fits/card.py\n+++ b/astropy/io/fits/card.py\n@@ -871,7 +871,8 @@ class Card(_Verify):\n                 valuecomment = \"\".join(values)\n             else:\n                 # CONTINUE card\n-                valuecomment = f\"'{''.join(values)}' / {' '.join(comments)}\"\n+                value = \"\".join(values).replace(\"'\", \"''\")\n+                valuecomment = f\"'{value}' / {' '.join(comments)}\"\n             return keyword, valuecomment\n \n         if self.keyword in self._special_keywords:\n@@ -1059,6 +1060,24 @@ class Card(_Verify):\n         # do the value string\n         value = self._value.replace(\"'\", \"''\")\n         words = _words_group(value, value_length)\n+        # An escaped single quote '' must never be split across two words,\n+        # otherwise the two halves would each be interpreted as a distinct\n+        # (unescaped) single quote when the card is parsed back and the value\n+        # would be corrupted.  If a word ends with an odd number of quotes it\n+        # means _words_group broke such a pair, so drop the dangling quote from\n+        # the end of the word and re-group the rest of the value from that\n+        # point.  This keeps every word within value_length characters.\n+        idx = 0\n+        while idx < len(words) - 1:\n+            word = words[idx]\n+            n_trailing_quotes = len(word) - len(word.rstrip(\"'\"))\n+            if n_trailing_quotes % 2 == 1:\n+                # Drop the dangling quote and re-group everything after it so\n+                # that no word ever exceeds value_length characters.\n+                words[idx] = word[:-1]\n+                remainder = \"'\" + \"\".join(words[idx + 1 :])\n+                words[idx + 1 :] = _words_group(remainder, value_length)\n+            idx += 1\n         for idx, word in enumerate(words):\n             if idx == 0:\n                 headstr = \"{:{len}}= \".format(self.keyword, len=KEYWORD_LENGTH)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/io/fits/card.py",
+          "line": 874,
+          "statement": "                valuecomment = f\"'{''.join(values)}' / {' '.join(comments)}\""
+        },
+        {
+          "file": "astropy/io/fits/card.py",
+          "line": 1061,
+          "statement": "        words = _words_group(value, value_length)"
+        }
+      ],
+      "reasoning": "When reading back CONTINUE cards, each subcard value is unescaped ('' -> ') and then joined and re-wrapped in quotes without re-escaping (line 874), so literal quotes get corrupted on the next parse. Additionally, _words_group (line 1061) can split an escaped '' pair across two CONTINUE cards, turning one literal quote into two half-quotes; combined these cause the double single-quote mishandling.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

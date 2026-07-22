@@ -1,0 +1,45 @@
+2026-06-30 18:06:52,917 - INFO - Creating container for pytest-dev__pytest-10051...
+2026-06-30 18:06:52,990 - INFO - Container for pytest-dev__pytest-10051 created: 7bb017b66fe028e98a721156f4a4af2578a969734e16765e8d4e3e771952234d
+2026-06-30 18:06:53,372 - INFO - Container for pytest-dev__pytest-10051 started: 7bb017b66fe028e98a721156f4a4af2578a969734e16765e8d4e3e771952234d
+2026-06-30 18:06:53,377 - INFO - Intermediate patch for pytest-dev__pytest-10051 written to logs/run_evaluation/local-pytest-10051/openai__gpt-5.3-codex/pytest-dev__pytest-10051/patch.diff, now applying to container...
+2026-06-30 18:06:53,966 - INFO - >>>>> Applied Patch:
+Checking patch src/_pytest/logging.py...
+Applied patch src/_pytest/logging.py cleanly.
+
+2026-06-30 18:06:54,222 - INFO - Git diff before:
+diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py
+index a4f4214b1..b60465cb4 100644
+--- a/src/_pytest/logging.py
++++ b/src/_pytest/logging.py
+@@ -342,7 +342,7 @@ class LogCaptureHandler(logging_StreamHandler):
+         super().emit(record)
+ 
+     def reset(self) -> None:
+-        self.records = []
++        self.records.clear()
+         self.stream = StringIO()
+ 
+     def handleError(self, record: logging.LogRecord) -> None:
+2026-06-30 18:06:54,225 - INFO - Eval script for pytest-dev__pytest-10051 written to logs/run_evaluation/local-pytest-10051/openai__gpt-5.3-codex/pytest-dev__pytest-10051/eval.sh; copying to container...
+2026-06-30 18:07:00,266 - INFO - Test runtime: 5.73 seconds
+2026-06-30 18:07:00,269 - INFO - Test output for pytest-dev__pytest-10051 written to logs/run_evaluation/local-pytest-10051/openai__gpt-5.3-codex/pytest-dev__pytest-10051/test_output.txt
+2026-06-30 18:07:00,460 - INFO - Git diff after:
+diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py
+index a4f4214b1..b60465cb4 100644
+--- a/src/_pytest/logging.py
++++ b/src/_pytest/logging.py
+@@ -342,7 +342,7 @@ class LogCaptureHandler(logging_StreamHandler):
+         super().emit(record)
+ 
+     def reset(self) -> None:
+-        self.records = []
++        self.records.clear()
+         self.stream = StringIO()
+ 
+     def handleError(self, record: logging.LogRecord) -> None:
+2026-06-30 18:07:00,460 - INFO - Grading answer for pytest-dev__pytest-10051...
+2026-06-30 18:07:00,466 - INFO - report: {'pytest-dev__pytest-10051': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['testing/logging/test_fixture.py::test_clear_for_call_stage']}, 'PASS_TO_PASS': {'success': ['testing/logging/test_fixture.py::test_change_level', 'testing/logging/test_fixture.py::test_with_statement', 'testing/logging/test_fixture.py::test_log_access', 'testing/logging/test_fixture.py::test_messages', 'testing/logging/test_fixture.py::test_record_tuples', 'testing/logging/test_fixture.py::test_unicode', 'testing/logging/test_fixture.py::test_clear', 'testing/logging/test_fixture.py::test_fixture_help', 'testing/logging/test_fixture.py::test_change_level_undo', 'testing/logging/test_fixture.py::test_change_level_undos_handler_level', 'testing/logging/test_fixture.py::test_ini_controls_global_log_level', 'testing/logging/test_fixture.py::test_caplog_can_override_global_log_level', 'testing/logging/test_fixture.py::test_caplog_captures_despite_exception', 'testing/logging/test_fixture.py::test_log_report_captures_according_to_config_option_upon_failure'], 'failure': ['testing/logging/test_fixture.py::test_caplog_captures_for_all_stages']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for pytest-dev__pytest-10051: resolved: False
+2026-06-30 18:07:00,468 - INFO - Attempting to stop container sweb.eval.pytest-dev__pytest-10051.local-pytest-10051...
+2026-06-30 18:07:15,886 - INFO - Attempting to remove container sweb.eval.pytest-dev__pytest-10051.local-pytest-10051...
+2026-06-30 18:07:15,960 - INFO - Container sweb.eval.pytest-dev__pytest-10051.local-pytest-10051 removed.

@@ -1,0 +1,19 @@
+{
+  "django__django-13346": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13346",
+    "model_patch": "diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py\nindex fafc1beee8..83c40db627 100644\n--- a/django/db/models/fields/json.py\n+++ b/django/db/models/fields/json.py\n@@ -479,6 +479,28 @@ class KeyTransformGte(KeyTransformNumericLookupMixin, lookups.GreaterThanOrEqual\n     pass\n \n \n+class KeyTransformIn(lookups.In):\n+    def process_rhs(self, compiler, connection):\n+        rhs, rhs_params = super().process_rhs(compiler, connection)\n+        if not rhs_params:\n+            return rhs, rhs_params\n+        if connection.vendor == 'sqlite':\n+            func = [\"JSON_EXTRACT(%s, '$')\" if value != 'null' else '%s' for value in rhs_params]\n+            rhs = rhs % tuple(func)\n+        elif connection.vendor == 'oracle':\n+            func = []\n+            for value in rhs_params:\n+                value = json.loads(value)\n+                function = 'JSON_QUERY' if isinstance(value, (list, dict)) else 'JSON_VALUE'\n+                func.append(\"%s('%s', '$.value')\" % (\n+                    function,\n+                    json.dumps({'value': value}),\n+                ))\n+            rhs = rhs % tuple(func)\n+            rhs_params = []\n+        return rhs, rhs_params\n+\n+\n KeyTransform.register_lookup(KeyTransformExact)\n KeyTransform.register_lookup(KeyTransformIExact)\n KeyTransform.register_lookup(KeyTransformIsNull)\n@@ -494,6 +516,7 @@ KeyTransform.register_lookup(KeyTransformLt)\n KeyTransform.register_lookup(KeyTransformLte)\n KeyTransform.register_lookup(KeyTransformGt)\n KeyTransform.register_lookup(KeyTransformGte)\n+KeyTransform.register_lookup(KeyTransformIn)\n \n \n class KeyTransformFactory:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/json.py",
+          "line": 519,
+          "statement": "KeyTransform.register_lookup(KeyTransformIn)"
+        }
+      ],
+      "reasoning": "The KeyTransform class had no lookup registered for the 'in' lookup, so __in on key transforms fell back to the base Field In lookup. The base In lookup generated SQL like 'JSON_EXTRACT(col, $.\"key\") IN (0, 1)' where the rhs values are passed as raw values rather than wrapped in JSON_EXTRACT (or JSON_VALUE/JSON_QUERY for Oracle), causing the comparison to fail on SQLite, MySQL, and Oracle because raw integer values don't compare correctly to JSON-extracted values. A new KeyTransformIn class is needed that wraps the rhs values with the appropriate JSON extraction function for each database vendor, similar to KeyTransformExact.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "django__django-15572": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-15572",
+    "model_patch": "diff --git a/django/template/autoreload.py b/django/template/autoreload.py\nindex 84c8554165..e4586dd3c1 100644\n--- a/django/template/autoreload.py\n+++ b/django/template/autoreload.py\n@@ -17,7 +17,12 @@ def get_template_directories():\n         if not isinstance(backend, DjangoTemplates):\n             continue\n \n-        items.update(cwd / to_path(dir) for dir in backend.engine.dirs)\n+        for dir in backend.engine.dirs:\n+            if not dir:\n+                # Empty paths are a problem when the cwd may not be\n+                # in a trusted location.\n+                continue\n+            items.add(cwd / to_path(dir))\n \n         for loader in backend.engine.template_loaders:\n             if not hasattr(loader, \"get_dirs\"):\n@@ -25,7 +30,7 @@ def get_template_directories():\n             items.update(\n                 cwd / to_path(directory)\n                 for directory in loader.get_dirs()\n-                if not is_django_path(directory)\n+                if not is_django_path(directory) and directory\n             )\n     return items\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/template/autoreload.py",
+          "line": 20,
+          "statement": "        items.update(cwd / to_path(dir) for dir in backend.engine.dirs)"
+        }
+      ],
+      "reasoning": "The line that normalizes template DIRS using pathlib.Path does not filter out empty strings. When DIRS contains an empty string (e.g. [''] or the result of a misconfigured environment variable), `cwd / to_path('')` evaluates to `cwd`, meaning the entire project root is treated as a template directory. This causes `template_changed` to always return True for any file under the project, preventing the autoreload mechanism from triggering a reload when application code changes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

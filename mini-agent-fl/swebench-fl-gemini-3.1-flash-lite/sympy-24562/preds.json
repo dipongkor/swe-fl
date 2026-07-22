@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-24562": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-24562",
+    "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 52f7ea45ad..d8fc008849 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1627,10 +1627,8 @@ def __new__(cls, p, q=None, gcd=None):\n \n         if not isinstance(p, SYMPY_INTS):\n             p = Rational(p)\n-            q *= p.q\n+            q = Rational(q) * p.q\n             p = p.p\n-        else:\n-            p = int(p)\n \n         if not isinstance(q, SYMPY_INTS):\n             q = Rational(q)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1628,
+          "statement": "q *= p.q"
+        }
+      ],
+      "reasoning": "When p is a string like '0.5', Rational(p) returns 1/2. If q is a string like '100', the expression q *= p.q performs string multiplication ('100' * 2 = '100100') instead of numerical multiplication, leading to an incorrect denominator.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

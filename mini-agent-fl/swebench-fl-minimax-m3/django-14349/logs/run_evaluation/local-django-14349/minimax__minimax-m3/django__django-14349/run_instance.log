@@ -1,0 +1,51 @@
+2026-07-21 13:29:20,106 - INFO - Creating container for django__django-14349...
+2026-07-21 13:29:20,216 - INFO - Container for django__django-14349 created: 582c78bc19224df0452992b0993bde2d94c4fde03132fc5139b4422ad953a3ae
+2026-07-21 13:29:20,645 - INFO - Container for django__django-14349 started: 582c78bc19224df0452992b0993bde2d94c4fde03132fc5139b4422ad953a3ae
+2026-07-21 13:29:20,645 - INFO - Intermediate patch for django__django-14349 written to logs/run_evaluation/local-django-14349/minimax__minimax-m3/django__django-14349/patch.diff, now applying to container...
+2026-07-21 13:29:21,039 - INFO - >>>>> Applied Patch:
+Checking patch django/core/validators.py...
+Applied patch django/core/validators.py cleanly.
+
+2026-07-21 13:29:21,643 - INFO - Git diff before:
+diff --git a/django/core/validators.py b/django/core/validators.py
+index a385819510..cb6a835378 100644
+--- a/django/core/validators.py
++++ b/django/core/validators.py
+@@ -105,6 +105,11 @@ class URLValidator(RegexValidator):
+         scheme = value.split('://')[0].lower()
+         if scheme not in self.schemes:
+             raise ValidationError(self.message, code=self.code, params={'value': value})
++        # Reject URLs containing newlines, tabs, or carriage returns. These
++        # characters are stripped by urlsplit() on Python versions patched for
++        # bpo-43882, so the check must happen before calling urlsplit().
++        if '\n' in value or '\r' in value or '\t' in value:
++            raise ValidationError(self.message, code=self.code, params={'value': value})
+ 
+         # Then check full URL
+         try:
+2026-07-21 13:29:21,643 - INFO - Eval script for django__django-14349 written to logs/run_evaluation/local-django-14349/minimax__minimax-m3/django__django-14349/eval.sh; copying to container...
+2026-07-21 13:29:28,888 - INFO - Test runtime: 6.94 seconds
+2026-07-21 13:29:28,889 - INFO - Test output for django__django-14349 written to logs/run_evaluation/local-django-14349/minimax__minimax-m3/django__django-14349/test_output.txt
+2026-07-21 13:29:29,018 - INFO - Git diff after:
+diff --git a/django/core/validators.py b/django/core/validators.py
+index a385819510..cb6a835378 100644
+--- a/django/core/validators.py
++++ b/django/core/validators.py
+@@ -105,6 +105,11 @@ class URLValidator(RegexValidator):
+         scheme = value.split('://')[0].lower()
+         if scheme not in self.schemes:
+             raise ValidationError(self.message, code=self.code, params={'value': value})
++        # Reject URLs containing newlines, tabs, or carriage returns. These
++        # characters are stripped by urlsplit() on Python versions patched for
++        # bpo-43882, so the check must happen before calling urlsplit().
++        if '\n' in value or '\r' in value or '\t' in value:
++            raise ValidationError(self.message, code=self.code, params={'value': value})
+ 
+         # Then check full URL
+         try:
+2026-07-21 13:29:29,019 - INFO - Grading answer for django__django-14349...
+2026-07-21 13:29:29,020 - INFO - report: {'django__django-14349': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_validators (validators.tests.TestValidators)'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_domain_whitelist (validators.tests.DeprecationTests)', 'test_domain_whitelist_access_warning (validators.tests.DeprecationTests)', 'test_domain_whitelist_set_warning (validators.tests.DeprecationTests)', 'test_whitelist (validators.tests.DeprecationTests)', 'test_whitelist_warning (validators.tests.DeprecationTests)', 'test_basic_equality (validators.tests.TestValidatorEquality)', 'test_decimal_equality (validators.tests.TestValidatorEquality)', 'test_email_equality (validators.tests.TestValidatorEquality)', 'test_file_extension_equality (validators.tests.TestValidatorEquality)', 'test_prohibit_null_characters_validator_equality (validators.tests.TestValidatorEquality)', 'test_regex_equality (validators.tests.TestValidatorEquality)', 'test_regex_equality_blank (validators.tests.TestValidatorEquality)', 'test_regex_equality_nocache (validators.tests.TestValidatorEquality)', 'test_max_length_validator_message (validators.tests.TestValidators)', 'test_message_dict (validators.tests.TestValidators)', 'test_message_list (validators.tests.TestValidators)', 'test_regex_validator_flags (validators.tests.TestValidators)', 'test_single_message (validators.tests.TestValidators)'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14349: resolved: True
+2026-07-21 13:29:29,020 - INFO - Attempting to stop container sweb.eval.django__django-14349.local-django-14349...
+2026-07-21 13:29:44,431 - INFO - Attempting to remove container sweb.eval.django__django-14349.local-django-14349...
+2026-07-21 13:29:44,454 - INFO - Container sweb.eval.django__django-14349.local-django-14349 removed.

@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7236": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pytest-dev__pytest-7236",
+    "model_patch": "diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py\nindex 773f545af..57169bdc5 100644\n--- a/src/_pytest/unittest.py\n+++ b/src/_pytest/unittest.py\n@@ -220,7 +220,7 @@ class TestCaseFunction(Function):\n             # arguably we could always postpone tearDown(), but this changes the moment where the\n             # TestCase instance interacts with the results object, so better to only do it\n             # when absolutely needed\n-            if self.config.getoption(\"usepdb\"):\n+            if self.config.getoption(\"usepdb\") and not getattr(self._testcase, \"__unittest_skip__\", False):\n                 self._explicit_tearDown = self._testcase.tearDown\n                 setattr(self._testcase, \"tearDown\", lambda *args: None)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/unittest.py",
+          "line": 223,
+          "statement": "if self.config.getoption(\"usepdb\"):"
+        }
+      ],
+      "reasoning": "The code unconditionally sets up a wrapper for tearDown when --pdb is used, even if the test is skipped. This causes the tearDown to be executed (or at least the wrapper to be set up) for skipped tests.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

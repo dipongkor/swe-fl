@@ -1,0 +1,19 @@
+{
+  "django__django-13810": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13810",
+    "model_patch": "diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py\nindex 8e8c3da06a..7a6e6bd75d 100644\n--- a/django/core/handlers/base.py\n+++ b/django/core/handlers/base.py\n@@ -51,11 +51,12 @@ class BaseHandler:\n                 middleware_is_async = middleware_can_async\n             try:\n                 # Adapt handler, if needed.\n-                handler = self.adapt_method_mode(\n+                adapted_handler = self.adapt_method_mode(\n                     middleware_is_async, handler, handler_is_async,\n                     debug=settings.DEBUG, name='middleware %s' % middleware_path,\n                 )\n-                mw_instance = middleware(handler)\n+                mw_instance = middleware(adapted_handler)\n+                handler = adapted_handler\n             except MiddlewareNotUsed as exc:\n                 if settings.DEBUG:\n                     if str(exc):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/handlers/base.py",
+          "line": 54,
+          "statement": "                handler = self.adapt_method_mode("
+        }
+      ],
+      "reasoning": "In load_middleware, the handler variable is overwritten with the output of adapt_method_mode BEFORE checking whether middleware() raises MiddlewareNotUsed. When MiddlewareNotUsed is raised in the except block, the already-mutated handler persists, but handler_is_async is never updated. This causes the next iteration to misjudge the handler's async mode: adapt_method_mode is called with a stale handler_is_async value, leaving the handler in the wrong mode. For ASGI, this results in the middleware chain being incorrectly wrapped with async_to_sync, causing 'TypeError: object HttpResponse can\\'t be used in \\'await\\' expression' errors downstream.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

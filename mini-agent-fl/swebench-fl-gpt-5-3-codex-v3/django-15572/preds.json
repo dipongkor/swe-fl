@@ -1,0 +1,19 @@
+{
+  "django__django-15572": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-15572",
+    "model_patch": "diff --git a/django/template/autoreload.py b/django/template/autoreload.py\nindex 84c8554165..fdf137c1e7 100644\n--- a/django/template/autoreload.py\n+++ b/django/template/autoreload.py\n@@ -17,7 +17,7 @@ def get_template_directories():\n         if not isinstance(backend, DjangoTemplates):\n             continue\n \n-        items.update(cwd / to_path(dir) for dir in backend.engine.dirs)\n+        items.update(cwd / to_path(directory) for directory in backend.engine.dirs if directory)\n \n         for loader in backend.engine.template_loaders:\n             if not hasattr(loader, \"get_dirs\"):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/template/autoreload.py",
+          "line": 20,
+          "statement": "        items.update(cwd / to_path(directory) for directory in backend.engine.dirs if directory)"
+        }
+      ],
+      "reasoning": "Empty strings in template DIRS were normalized to the current directory and then watched, causing every file change to look like a template change and blocking normal code autoreload behavior.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

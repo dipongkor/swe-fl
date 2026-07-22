@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8056": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "model_patch": "diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py\nindex b3daa06f1..c1382328d 100644\n--- a/sphinx/ext/napoleon/docstring.py\n+++ b/sphinx/ext/napoleon/docstring.py\n@@ -392,15 +392,17 @@ class GoogleDocstring:\n         lines = []\n         for _name, _type, _desc in fields:\n             _desc = self._strip_empty(_desc)\n-            if any(_desc):\n-                _desc = self._fix_field_desc(_desc)\n-                field = ':%s %s: ' % (field_role, _name)\n-                lines.extend(self._format_block(field, _desc))\n-            else:\n-                lines.append(':%s %s:' % (field_role, _name))\n+            names = [n.strip() for n in _name.split(',')]\n+            for name in names:\n+                if any(_desc):\n+                    _desc = self._fix_field_desc(_desc)\n+                    field = ':%s %s: ' % (field_role, name)\n+                    lines.extend(self._format_block(field, _desc))\n+                else:\n+                    lines.append(':%s %s:' % (field_role, name))\n \n-            if _type:\n-                lines.append(':%s %s: %s' % (type_role, _name, _type))\n+                if _type:\n+                    lines.append(':%s %s: %s' % (type_role, name, _type))\n         return lines + ['']\n \n     def _format_field(self, _name: str, _type: str, _desc: List[str]) -> List[str]:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/napoleon/docstring.py",
+          "line": 393,
+          "statement": "for _name, _type, _desc in fields:"
+        }
+      ],
+      "reasoning": "The _format_docutils_params method was treating multiple parameters in a single field as a single parameter, leading to incorrect rendering. The fix is to split the parameter names and render each one individually.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

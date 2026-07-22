@@ -1,0 +1,19 @@
+{
+  "django__django-11885": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-11885",
+    "model_patch": "diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py\nindex ae82d26340..9c7cf42cdd 100644\n--- a/django/db/models/deletion.py\n+++ b/django/db/models/deletion.py\n@@ -310,9 +310,16 @@ class Collector:\n                     )\n \n             # fast deletes\n+            from collections import defaultdict\n+            grouped_fast_deletes = defaultdict(list)\n             for qs in self.fast_deletes:\n+                grouped_fast_deletes[qs.model].append(qs)\n+            for model, qss in grouped_fast_deletes.items():\n+                qs = qss[0]\n+                for next_qs in qss[1:]:\n+                    qs = qs | next_qs\n                 count = qs._raw_delete(using=self.using)\n-                deleted_counter[qs.model._meta.label] += count\n+                deleted_counter[model._meta.label] += count\n \n             # update fields\n             for model, instances_for_fieldvalues in self.field_updates.items():\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/deletion.py",
+          "line": 313,
+          "statement": "for qs in self.fast_deletes:"
+        }
+      ],
+      "reasoning": "The deletion.Collector iterates over fast_deletes and executes each query individually, leading to multiple roundtrips for the same table. Combining these queries by model using OR reduces the number of roundtrips.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

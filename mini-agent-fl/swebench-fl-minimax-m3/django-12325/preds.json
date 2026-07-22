@@ -1,0 +1,19 @@
+{
+  "django__django-12325": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-12325",
+    "model_patch": "diff --git a/django/db/models/base.py b/django/db/models/base.py\nindex 8ea6c05ef9..d7d3815f74 100644\n--- a/django/db/models/base.py\n+++ b/django/db/models/base.py\n@@ -204,7 +204,10 @@ class ModelBase(type):\n             for field in base._meta.local_fields:\n                 if isinstance(field, OneToOneField):\n                     related = resolve_relation(new_class, field.remote_field.model)\n-                    parent_links[make_model_tuple(related)] = field\n+                    key = make_model_tuple(related)\n+                    # Prefer parent_link fields over non-parent_link fields.\n+                    if key not in parent_links or field.remote_field.parent_link:\n+                        parent_links[key] = field\n \n         # Track fields inherited from base models.\n         inherited_attributes = set()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/base.py",
+          "line": 207,
+          "statement": "                    parent_links[make_model_tuple(related)] = field"
+        }
+      ],
+      "reasoning": "The parent_links dictionary is populated by iterating over all OneToOneField instances in local_fields and using the related model as the key. When there are multiple OneToOneField instances pointing to the same parent model, each subsequent field overwrites the previous one in the dictionary, causing the last OneToOneField to be used as the parent link regardless of whether it has parent_link=True. This means the order of field declaration matters, and the explicit parent_link=True marker is ignored when it's not the last OneToOneField.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "django__django-14349": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-14349",
+    "model_patch": "diff --git a/django/core/validators.py b/django/core/validators.py\nindex a385819510..c646179cd1 100644\n--- a/django/core/validators.py\n+++ b/django/core/validators.py\n@@ -106,6 +106,9 @@ class URLValidator(RegexValidator):\n         if scheme not in self.schemes:\n             raise ValidationError(self.message, code=self.code, params={'value': value})\n \n+        if '\\t' in value or '\\r' in value or '\\n' in value:\n+            raise ValidationError(self.message, code=self.code, params={'value': value})\n+\n         # Then check full URL\n         try:\n             super().__call__(value)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/validators.py",
+          "line": 116,
+          "statement": "                    scheme, netloc, path, query, fragment = urlsplit(value)"
+        }
+      ],
+      "reasoning": "Validation relied on urlsplit() behavior to preserve control characters so they could fail regex validation, but patched Python strips them before splitting, allowing malformed URLs through.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

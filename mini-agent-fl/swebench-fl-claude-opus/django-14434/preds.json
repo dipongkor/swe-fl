@@ -1,0 +1,19 @@
+{
+  "django__django-14434": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-14434",
+    "model_patch": "diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py\nindex ad2f5a7da1..19e1a976af 100644\n--- a/django/db/backends/base/schema.py\n+++ b/django/db/backends/base/schema.py\n@@ -1251,7 +1251,7 @@ class BaseDatabaseSchemaEditor:\n         else:\n             sql = self.sql_create_unique\n         if columns:\n-            columns = self._index_columns(table, columns, col_suffixes=(), opclasses=opclasses)\n+            columns = self._index_columns(table.table, columns, col_suffixes=(), opclasses=opclasses)\n         else:\n             columns = Expressions(model._meta.db_table, expressions, compiler, self.quote_value)\n         return Statement(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/base/schema.py",
+          "line": 1254,
+          "statement": "            columns = self._index_columns(table, columns, col_suffixes=(), opclasses=opclasses)"
+        }
+      ],
+      "reasoning": "In _create_unique_sql, `table` is a Table instance, but _index_columns/Columns expects the db_table string. Storing the Table instance as Columns.table makes TableColumns.references_column compare a Table instance against the db_table string, so it always returns False.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

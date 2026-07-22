@@ -1,0 +1,25 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+index efa34dd078..955728d065 100644
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1447,10 +1447,12 @@ or callable, default: value of *xycoords*
+             self.arrow_patch.set_patchA(patchA)
+ 
+     def draw(self, renderer):
++        renderer.open_group("annotationbbox", self.get_gid())
+         # docstring inherited
+         if renderer is not None:
+             self._renderer = renderer
+         if not self.get_visible() or not self._check_xy(renderer):
++            renderer.close_group("annotationbbox")
+             return
+         self.update_positions(renderer)
+         if self.arrow_patch is not None:
+@@ -1460,6 +1462,7 @@ or callable, default: value of *xycoords*
+         self.patch.draw(renderer)
+         self.offsetbox.draw(renderer)
+         self.stale = False
++        renderer.close_group("annotationbbox")
+ 
+ 
+ class DraggableBase:

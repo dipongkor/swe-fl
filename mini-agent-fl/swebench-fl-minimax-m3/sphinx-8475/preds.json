@@ -1,0 +1,24 @@
+{
+  "sphinx-doc__sphinx-8475": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "model_patch": "diff --git a/sphinx/builders/linkcheck.py b/sphinx/builders/linkcheck.py\nindex 1dc0337c3..4104fe658 100644\n--- a/sphinx/builders/linkcheck.py\n+++ b/sphinx/builders/linkcheck.py\n@@ -20,7 +20,7 @@ from urllib.parse import unquote, urlparse\n \n from docutils import nodes\n from docutils.nodes import Node\n-from requests.exceptions import HTTPError\n+from requests.exceptions import HTTPError, TooManyRedirects\n \n from sphinx.application import Sphinx\n from sphinx.builders import Builder\n@@ -172,7 +172,7 @@ class CheckExternalLinksBuilder(Builder):\n                                                  config=self.app.config, auth=auth_info,\n                                                  **kwargs)\n                         response.raise_for_status()\n-                    except HTTPError:\n+                    except (HTTPError, TooManyRedirects):\n                         # retry with GET request if that fails, some servers\n                         # don't like HEAD requests.\n                         response = requests.get(req_url, stream=True, config=self.app.config,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/builders/linkcheck.py",
+          "line": 175,
+          "statement": "                    except HTTPError:"
+        },
+        {
+          "file": "sphinx/builders/linkcheck.py",
+          "line": 23,
+          "statement": "from requests.exceptions import HTTPError"
+        }
+      ],
+      "reasoning": "The except clause in the HEAD-to-GET fallback only catches HTTPError, but TooManyRedirects (a subclass of RequestException/OSError) is raised by requests when HEAD requests cause infinite redirect loops. The fallback to GET is therefore skipped and the link is reported as broken. The missing import of TooManyRedirects is the second part of the bug.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

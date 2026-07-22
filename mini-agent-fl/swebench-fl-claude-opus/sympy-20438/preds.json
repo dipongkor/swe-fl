@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-20438": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-20438",
+    "model_patch": "diff --git a/sympy/core/relational.py b/sympy/core/relational.py\nindex e2e0b7fbcc..a097d00f8a 100644\n--- a/sympy/core/relational.py\n+++ b/sympy/core/relational.py\n@@ -557,7 +557,13 @@ def binary_symbols(self):\n \n     def _eval_simplify(self, **kwargs):\n         from .add import Add\n+        from sympy.core.expr import Expr\n         from sympy.solvers.solveset import linear_coeffs\n+        # If either side is not an Expr (e.g. a Set) then the generic\n+        # Relational simplification (which subtracts lhs - rhs) is not\n+        # applicable, so just simplify the two sides.\n+        if not all(isinstance(arg, Expr) for arg in self.args):\n+            return self.func(*[arg.simplify(**kwargs) for arg in self.args])\n         # standard simplify\n         e = super()._eval_simplify(**kwargs)\n         if not isinstance(e, Equality):\ndiff --git a/sympy/sets/handlers/issubset.py b/sympy/sets/handlers/issubset.py\nindex fdca06025a..ac3effe092 100644\n--- a/sympy/sets/handlers/issubset.py\n+++ b/sympy/sets/handlers/issubset.py\n@@ -1,7 +1,7 @@\n from sympy import S, Symbol\n from sympy.core.logic import fuzzy_and, fuzzy_bool, fuzzy_not, fuzzy_or\n from sympy.core.relational import Eq\n-from sympy.sets.sets import FiniteSet, Interval, Set, Union\n+from sympy.sets.sets import FiniteSet, Interval, Set, Union, ProductSet\n from sympy.sets.fancysets import Complexes, Reals, Range, Rationals\n from sympy.multipledispatch import dispatch\n \n@@ -133,3 +133,8 @@ def is_subset_sets(a, b): # noqa:F811\n @dispatch(Rationals, Range)  # type: ignore # noqa:F811\n def is_subset_sets(a, b): # noqa:F811\n     return False\n+\n+\n+@dispatch(ProductSet, FiniteSet)  # type: ignore # noqa:F811\n+def is_subset_sets(a_ps, b_fs): # noqa:F811\n+    return fuzzy_and(b_fs.contains(x) for x in a_ps)\ndiff --git a/sympy/sets/sets.py b/sympy/sets/sets.py\nindex 3c4aa86e36..de4298c82e 100644\n--- a/sympy/sets/sets.py\n+++ b/sympy/sets/sets.py\n@@ -801,6 +801,12 @@ def _contains(self, element):\n \n         return fuzzy_and(s._contains(e) for s, e in zip(self.sets, element))\n \n+    def _eval_rewrite_as_FiniteSet(self, *args, **kwargs):\n+        if self.is_iterable:\n+            return FiniteSet(*self)\n+        else:\n+            return self\n+\n     def as_relational(self, *symbols):\n         symbols = [_sympify(s) for s in symbols]\n         if len(symbols) != len(self.sets) or not all(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/sets/handlers/issubset.py",
+          "line": 13,
+          "statement": "    return None"
+        }
+      ],
+      "reasoning": "There was no multiple-dispatch is_subset_sets rule for (ProductSet, FiniteSet), so it fell through to the generic Set/Set handler returning None; hence a finite ProductSet's is_subset of an equal FiniteSet gave None instead of True. A ProductSet.is_subset FiniteSet handler (plus a ProductSet->FiniteSet rewrite and a guard in Equality._eval_simplify against non-Expr Set args) fixes the reported behavior.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

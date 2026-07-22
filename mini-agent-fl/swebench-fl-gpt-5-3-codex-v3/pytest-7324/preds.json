@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7324": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pytest-dev__pytest-7324",
+    "model_patch": "diff --git a/src/_pytest/mark/expression.py b/src/_pytest/mark/expression.py\nindex 04c73411a..c86f479c5 100644\n--- a/src/_pytest/mark/expression.py\n+++ b/src/_pytest/mark/expression.py\n@@ -161,6 +161,12 @@ def not_expr(s: Scanner) -> ast.expr:\n         return ret\n     ident = s.accept(TokenType.IDENT)\n     if ident:\n+        if ident.value == \"True\":\n+            return ast.NameConstant(True)\n+        if ident.value == \"False\":\n+            return ast.NameConstant(False)\n+        if ident.value == \"None\":\n+            return ast.NameConstant(None)\n         return ast.Name(ident.value, ast.Load())\n     s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/mark/expression.py",
+          "line": 156,
+          "statement": "        return ast.Name(ident.value, ast.Load())"
+        }
+      ],
+      "reasoning": "The parser always emitted identifiers as ast.Name nodes, including reserved constants like True/False/None. On Python 3.8+ debug builds, compiling Name nodes for these keywords triggers a compiler assertion and aborts.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

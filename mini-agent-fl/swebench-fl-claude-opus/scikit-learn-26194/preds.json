@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-26194": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "model_patch": "diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py\nindex 0cdead923..b4b3025bf 100644\n--- a/sklearn/metrics/_ranking.py\n+++ b/sklearn/metrics/_ranking.py\n@@ -1019,7 +1019,12 @@ def roc_curve(\n     thresholds : ndarray of shape = (n_thresholds,)\n         Decreasing thresholds on the decision function used to compute\n         fpr and tpr. `thresholds[0]` represents no instances being predicted\n-        and is arbitrarily set to `max(y_score) + 1`.\n+        and is arbitrarily set to `np.inf`.\n+\n+        .. versionchanged:: 1.3\n+            An arbitrary threshold at infinity (stored in `thresholds[0]`) is\n+            added to represent a classifier that always predicts the negative\n+            class, i.e. `fpr=0` and `tpr=0`.\n \n     See Also\n     --------\n@@ -1056,7 +1061,7 @@ def roc_curve(\n     >>> tpr\n     array([0. , 0.5, 0.5, 1. , 1. ])\n     >>> thresholds\n-    array([1.8 , 0.8 , 0.4 , 0.35, 0.1 ])\n+    array([ inf, 0.8 , 0.4 , 0.35, 0.1 ])\n     \"\"\"\n     fps, tps, thresholds = _binary_clf_curve(\n         y_true, y_score, pos_label=pos_label, sample_weight=sample_weight\n@@ -1083,7 +1088,7 @@ def roc_curve(\n     # to make sure that the curve starts at (0, 0)\n     tps = np.r_[0, tps]\n     fps = np.r_[0, fps]\n-    thresholds = np.r_[thresholds[0] + 1, thresholds]\n+    thresholds = np.r_[np.inf, thresholds]\n \n     if fps[-1] <= 0:\n         warnings.warn(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/metrics/_ranking.py",
+          "line": 1086,
+          "statement": "    thresholds = np.r_[thresholds[0] + 1, thresholds]"
+        }
+      ],
+      "reasoning": "The extra threshold added to force the ROC curve to start at (0, 0) was computed as `thresholds[0] + 1`. When y_score contains probability estimates in [0, 1], this produces a threshold greater than 1, which is meaningless for probabilities. Using np.inf unambiguously represents the point where no instances are predicted positive.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

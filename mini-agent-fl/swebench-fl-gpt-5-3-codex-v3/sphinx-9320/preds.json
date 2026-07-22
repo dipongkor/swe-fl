@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9320": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "model_patch": "diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py\nindex a40a21073..9bc277efc 100644\n--- a/sphinx/cmd/quickstart.py\n+++ b/sphinx/cmd/quickstart.py\n@@ -146,7 +146,7 @@ def do_prompt(text: str, default: str = None, validator: Callable[[str], Any] =\n         else:\n             prompt = colorize(COLOR_QUESTION, prompt, input_mode=False)\n         x = term_input(prompt).strip()\n-        if default and not x:\n+        if default is not None and not x:\n             x = default\n         try:\n             x = validator(x)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/cmd/quickstart.py",
+          "line": 149,
+          "statement": "        if default and not x:"
+        }
+      ],
+      "reasoning": "The prompt logic only substituted defaults when the default was truthy, so an empty-string default for the root path retry prompt was ignored and blank input was validated as a path, preventing the documented Enter-to-exit behavior.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

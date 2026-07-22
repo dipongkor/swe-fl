@@ -1,0 +1,24 @@
+{
+  "django__django-16315": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-16315",
+    "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 0562a71dd1..73e612e41b 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -1725,8 +1725,14 @@ class SQLInsertCompiler(SQLCompiler):\n         on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n             fields,\n             self.query.on_conflict,\n-            self.query.update_fields,\n-            self.query.unique_fields,\n+            [\n+                opts.get_field(update_field).column\n+                for update_field in self.query.update_fields\n+            ],\n+            [\n+                opts.get_field(unique_field).column\n+                for unique_field in self.query.unique_fields\n+            ],\n         )\n         if (\n             self.returning_fields\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/compiler.py",
+          "line": 1728,
+          "statement": "            self.query.update_fields,"
+        },
+        {
+          "file": "django/db/models/sql/compiler.py",
+          "line": 1729,
+          "statement": "            self.query.unique_fields,"
+        }
+      ],
+      "reasoning": "The compiler was passing field names (e.g., 'sectorid', 'blacklistid') to on_conflict_suffix_sql instead of database column names (e.g., 'SectorID', 'BlacklistID'). The on_conflict_suffix_sql methods (in postgresql, sqlite3, and mysql backends) treat these values as column names and apply quote_name() to them, leading to invalid SQL when fields use db_column with different case/naming. The fix converts the field names to their corresponding column names via opts.get_field(name).column before passing to on_conflict_suffix_sql.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

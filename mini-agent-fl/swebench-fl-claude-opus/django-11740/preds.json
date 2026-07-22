@@ -1,0 +1,19 @@
+{
+  "django__django-11740": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-11740",
+    "model_patch": "diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py\nindex 0dc1c77c53..ace4aab2b0 100644\n--- a/django/db/migrations/autodetector.py\n+++ b/django/db/migrations/autodetector.py\n@@ -963,6 +963,9 @@ class MigrationAutodetector:\n                             preserve_default = False\n                     else:\n                         field = new_field\n+                    dependencies = []\n+                    if hasattr(new_field, \"remote_field\") and getattr(new_field.remote_field, \"model\", None):\n+                        dependencies.extend(self._get_dependencies_for_foreign_key(new_field))\n                     self.add_operation(\n                         app_label,\n                         operations.AlterField(\n@@ -970,7 +973,8 @@ class MigrationAutodetector:\n                             name=field_name,\n                             field=field,\n                             preserve_default=preserve_default,\n-                        )\n+                        ),\n+                        dependencies=dependencies,\n                     )\n                 else:\n                     # We cannot alter between m2m and concrete fields\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/migrations/autodetector.py",
+          "line": 969,
+          "statement": "                    self.add_operation("
+        }
+      ],
+      "reasoning": "In generate_altered_fields, the AlterField operation was added without any dependencies, so when a field is changed into a ForeignKey the migration does not depend on the referenced model's app. Adding dependencies via _get_dependencies_for_foreign_key when the new field has a remote_field model fixes the missing dependency.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

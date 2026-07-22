@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-16597": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-16597",
+    "model_patch": "diff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py\nindex ce4dd30f2..443e792cf 100644\n--- a/sympy/core/assumptions.py\n+++ b/sympy/core/assumptions.py\n@@ -162,7 +162,7 @@\n \n _assume_rules = FactRules([\n \n-    'integer        ->  rational',\n+    'integer        ->  rational & finite',\n     'rational       ->  real',\n     'rational       ->  algebraic',\n     'algebraic      ->  complex',\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/assumptions.py",
+          "line": 165,
+          "statement": "    'integer        ->  rational',"
+        }
+      ],
+      "reasoning": "The assumption rule for 'integer' only implies 'rational' but not 'finite'. Since 'even' is equivalent to 'integer & !odd', an even number is an integer, and integers are always finite in mathematics. Without the 'finite' implication, a symbol with even=True has is_finite=None, which is incorrect. Adding 'finite' to the rule makes even (and all integer-based properties like odd, prime, composite) imply finite.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

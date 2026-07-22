@@ -1,0 +1,19 @@
+{
+  "django__django-14315": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-14315",
+    "model_patch": "diff --git a/django/db/backends/base/client.py b/django/db/backends/base/client.py\nindex 339f1e863c..335f7bcded 100644\n--- a/django/db/backends/base/client.py\n+++ b/django/db/backends/base/client.py\n@@ -21,6 +21,6 @@ class BaseDatabaseClient:\n \n     def runshell(self, parameters):\n         args, env = self.settings_to_cmd_args_env(self.connection.settings_dict, parameters)\n-        if env:\n+        if env is not None:\n             env = {**os.environ, **env}\n         subprocess.run(args, env=env, check=True)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/base/client.py",
+          "line": 24,
+          "statement": "if env:"
+        }
+      ],
+      "reasoning": "The check 'if env:' evaluates to False when 'env' is an empty dictionary, causing the subprocess to be executed with an empty environment instead of the current process's environment. Changing it to 'if env is not None:' ensures that an empty dictionary is correctly merged with the current environment.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

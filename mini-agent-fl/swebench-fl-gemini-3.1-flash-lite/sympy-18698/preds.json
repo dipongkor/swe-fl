@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-18698": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-18698",
+    "model_patch": "diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py\nindex c9e77a901f..7a21e14e4f 100644\n--- a/sympy/polys/polytools.py\n+++ b/sympy/polys/polytools.py\n@@ -5975,6 +5975,13 @@ def _generic_factor_list(expr, gens, args, method):\n \n     expr = sympify(expr)\n \n+    if method == \"sqf\":\n+        try:\n+            p = Poly(expr, *opt.gens)\n+            coeff, factors = p.sqf_list()\n+            return coeff, [(f.as_expr(), k) for f, k in factors]\n+        except:\n+            pass\n     if isinstance(expr, (Expr, Poly)):\n         if isinstance(expr, Poly):\n             numer, denom = expr, 1\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/polys/polytools.py",
+          "line": 5978,
+          "statement": "if method == \"sqf\":"
+        }
+      ],
+      "reasoning": "The _generic_factor_list function was splitting expressions into factors before calling sqf_list, which prevented the combination of different factors with the same multiplicity. Adding a direct call to Poly.sqf_list() for polynomials fixes this.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

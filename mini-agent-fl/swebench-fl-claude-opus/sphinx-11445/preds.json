@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-11445": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sphinx-doc__sphinx-11445",
+    "model_patch": "diff --git a/sphinx/util/rst.py b/sphinx/util/rst.py\nindex 7a1538325..cb9624265 100644\n--- a/sphinx/util/rst.py\n+++ b/sphinx/util/rst.py\n@@ -26,6 +26,8 @@ except ImportError:\n logger = logging.getLogger(__name__)\n \n docinfo_re = re.compile(':\\\\w+:.*?')\n+# a line consisting solely of a single reST section adornment character\n+section_title_re = re.compile(r'^([!-/:-@\\[-`{-~])\\1+\\s*$')\n symbols_re = re.compile(r'([!-\\-/:-@\\[-`{-~])')  # symbols without dot(0x2e)\n SECTIONING_CHARS = ['=', '-', '~']\n \n@@ -79,12 +81,21 @@ def prepend_prolog(content: StringList, prolog: str) -> None:\n     \"\"\"Prepend a string to content body as prolog.\"\"\"\n     if prolog:\n         pos = 0\n-        for line in content:\n-            if docinfo_re.match(line):\n-                pos += 1\n-            else:\n+        # Skip over docinfo fields at the top of the document.  A line that\n+        # matches ``docinfo_re`` but is immediately followed by a section\n+        # title underline is actually the document title itself (e.g. a\n+        # heading defined via a domain role such as ``:mod:`name```) and must\n+        # not be treated as docinfo.\n+        for docinfo_lineno, line in enumerate(content):\n+            if not docinfo_re.match(line):\n                 break\n \n+            next_line = content[docinfo_lineno + 1] if docinfo_lineno + 1 < len(content) else ''\n+            if section_title_re.match(next_line):\n+                break\n+\n+            pos += 1\n+\n         if pos > 0:\n             # insert a blank line after docinfo\n             content.insert(pos, '', '<generated>', 0)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/util/rst.py",
+          "line": 83,
+          "statement": "            if docinfo_re.match(line):"
+        }
+      ],
+      "reasoning": "prepend_prolog treated any leading line matching docinfo_re (':\\w+:.*') as a docinfo field, so a top-level heading defined by a domain role such as ':mod:`mypackage2`' was mistaken for docinfo and the rst_prolog was inserted between the heading text and its underline, breaking the heading. The fix stops treating such a line as docinfo when the following line is a section-title underline.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

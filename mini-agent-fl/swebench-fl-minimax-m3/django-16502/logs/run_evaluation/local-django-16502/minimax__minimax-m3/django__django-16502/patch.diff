@@ -1,0 +1,34 @@
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..a1a0381cd5 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -147,6 +147,29 @@ class ServerHandler(simple_server.ServerHandler):
+         self.get_stdin().read()
+         super().close()
+ 
++    def write(self, data):
++        """write() callable as specified by PEP 3333"""
++
++        assert type(data) is bytes, "write() argument must be a bytes instance"
++
++        if not self.status:
++            raise AssertionError("write() before start_response()")
++
++        elif not self.headers_sent:
++            # Before the first output, send the stored headers
++            self.bytes_sent = len(data)    # make sure we know content-length
++            self.send_headers()
++        else:
++            self.bytes_sent += len(data)
++
++        # Don't write the body for HEAD requests. The Content-Length header
++        # is set correctly by the wsgiref handlers (if it can be determined
++        # from the result, e.g. for a list with a single element), so the
++        # client knows the size of the body that would have been sent.
++        if self.environ["REQUEST_METHOD"] != "HEAD":
++            self._write(data)
++        self._flush()
++
+ 
+ class WSGIRequestHandler(simple_server.WSGIRequestHandler):
+     protocol_version = "HTTP/1.1"

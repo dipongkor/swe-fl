@@ -1,0 +1,185 @@
+2026-07-01 05:01:59,430 - INFO - Creating container for sympy__sympy-16792...
+2026-07-01 05:01:59,514 - INFO - Container for sympy__sympy-16792 created: 631ff304d2f5b63ceca2a02423aa6e31492a440cb95358bb9c08ea918c74bef0
+2026-07-01 05:01:59,955 - INFO - Container for sympy__sympy-16792 started: 631ff304d2f5b63ceca2a02423aa6e31492a440cb95358bb9c08ea918c74bef0
+2026-07-01 05:01:59,958 - INFO - Intermediate patch for sympy__sympy-16792 written to logs/run_evaluation/local-sympy-16792/gemini__gemini-3.1-flash-lite/sympy__sympy-16792/patch.diff, now applying to container...
+2026-07-01 05:02:00,467 - INFO - >>>>> Applied Patch:
+Checking patch sympy/utilities/autowrap.py...
+Checking patch sympy/utilities/codegen.py...
+Applied patch sympy/utilities/autowrap.py cleanly.
+Applied patch sympy/utilities/codegen.py cleanly.
+
+2026-07-01 05:02:00,979 - INFO - Git diff before:
+diff --git a/sympy/utilities/autowrap.py b/sympy/utilities/autowrap.py
+index bd6afb12d..a8dee4137 100644
+--- a/sympy/utilities/autowrap.py
++++ b/sympy/utilities/autowrap.py
+@@ -72,6 +72,7 @@
+ import shutil
+ import tempfile
+ from subprocess import STDOUT, CalledProcessError, check_output
++from sympy.matrices.expressions.matexpr import MatrixSymbol
+ from string import Template
+ from warnings import warn
+ 
+@@ -438,17 +439,21 @@ def _partition_args(self, args):
+ 
+     def _prototype_arg(self, arg):
+         mat_dec = "np.ndarray[{mtype}, ndim={ndim}] {name}"
+-        np_types = {'double': 'np.double_t',
+-                    'int': 'np.int_t'}
+-        t = arg.get_datatype('c')
++        np_types = {"double": "np.double_t",
++                    "int": "np.int_t"}
++        t = arg.get_datatype("c")
+         if arg.dimensions:
+             self._need_numpy = True
+             ndim = len(arg.dimensions)
+             mtype = np_types[t]
+             return mat_dec.format(mtype=mtype, ndim=ndim, name=self._string_var(arg.name))
++        elif isinstance(arg.name, MatrixSymbol):
++            self._need_numpy = True
++            ndim = len(arg.name.shape)
++            mtype = np_types[t]
++            return mat_dec.format(mtype=mtype, ndim=ndim, name=self._string_var(arg.name))
+         else:
+             return "%s %s" % (t, self._string_var(arg.name))
+-
+     def _declare_arg(self, arg):
+         proto = self._prototype_arg(arg)
+         if arg.dimensions:
+@@ -458,8 +463,8 @@ def _declare_arg(self, arg):
+             return proto + " = 0"
+ 
+     def _call_arg(self, arg):
+-        if arg.dimensions:
+-            t = arg.get_datatype('c')
++        if arg.dimensions or isinstance(arg.name, MatrixSymbol):
++            t = arg.get_datatype("c")
+             return "<{0}*> {1}.data".format(t, self._string_var(arg.name))
+         elif isinstance(arg, ResultBase):
+             return "&{0}".format(self._string_var(arg.name))
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..fe1e538cc 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -652,6 +652,11 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+                 new_symbols.remove(symbol)
+         symbols = new_symbols
+ 
++        # Ensure all arguments in argument_sequence are in symbols
++        if argument_sequence is not None:
++            for arg in argument_sequence:
++                if isinstance(arg, (Symbol, MatrixSymbol)):
++                    symbols.add(arg)
+         # Decide whether to use output argument or return value
+         return_val = []
+         output_args = []
+@@ -696,11 +701,11 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+ 
+         # setup input argument list
+         array_symbols = {}
+-        for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed):
+-            array_symbols[array.base.label] = array
+-        for array in expressions.atoms(MatrixSymbol) | local_expressions.atoms(MatrixSymbol):
+-            array_symbols[array] = array
+-
++        for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed) | symbols:
++            if isinstance(array, Indexed):
++                array_symbols[array.base.label] = array
++            elif isinstance(array, MatrixSymbol):
++                array_symbols[array] = array
+         for symbol in sorted(symbols, key=str):
+             if symbol in array_symbols:
+                 dims = []
+2026-07-01 05:02:00,984 - INFO - Eval script for sympy__sympy-16792 written to logs/run_evaluation/local-sympy-16792/gemini__gemini-3.1-flash-lite/sympy__sympy-16792/eval.sh; copying to container...
+2026-07-01 05:02:07,790 - INFO - Test runtime: 6.49 seconds
+2026-07-01 05:02:07,793 - INFO - Test output for sympy__sympy-16792 written to logs/run_evaluation/local-sympy-16792/gemini__gemini-3.1-flash-lite/sympy__sympy-16792/test_output.txt
+2026-07-01 05:02:08,048 - INFO - Git diff after:
+diff --git a/sympy/utilities/autowrap.py b/sympy/utilities/autowrap.py
+index bd6afb12d..a8dee4137 100644
+--- a/sympy/utilities/autowrap.py
++++ b/sympy/utilities/autowrap.py
+@@ -72,6 +72,7 @@
+ import shutil
+ import tempfile
+ from subprocess import STDOUT, CalledProcessError, check_output
++from sympy.matrices.expressions.matexpr import MatrixSymbol
+ from string import Template
+ from warnings import warn
+ 
+@@ -438,17 +439,21 @@ def _partition_args(self, args):
+ 
+     def _prototype_arg(self, arg):
+         mat_dec = "np.ndarray[{mtype}, ndim={ndim}] {name}"
+-        np_types = {'double': 'np.double_t',
+-                    'int': 'np.int_t'}
+-        t = arg.get_datatype('c')
++        np_types = {"double": "np.double_t",
++                    "int": "np.int_t"}
++        t = arg.get_datatype("c")
+         if arg.dimensions:
+             self._need_numpy = True
+             ndim = len(arg.dimensions)
+             mtype = np_types[t]
+             return mat_dec.format(mtype=mtype, ndim=ndim, name=self._string_var(arg.name))
++        elif isinstance(arg.name, MatrixSymbol):
++            self._need_numpy = True
++            ndim = len(arg.name.shape)
++            mtype = np_types[t]
++            return mat_dec.format(mtype=mtype, ndim=ndim, name=self._string_var(arg.name))
+         else:
+             return "%s %s" % (t, self._string_var(arg.name))
+-
+     def _declare_arg(self, arg):
+         proto = self._prototype_arg(arg)
+         if arg.dimensions:
+@@ -458,8 +463,8 @@ def _declare_arg(self, arg):
+             return proto + " = 0"
+ 
+     def _call_arg(self, arg):
+-        if arg.dimensions:
+-            t = arg.get_datatype('c')
++        if arg.dimensions or isinstance(arg.name, MatrixSymbol):
++            t = arg.get_datatype("c")
+             return "<{0}*> {1}.data".format(t, self._string_var(arg.name))
+         elif isinstance(arg, ResultBase):
+             return "&{0}".format(self._string_var(arg.name))
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..fe1e538cc 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -652,6 +652,11 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+                 new_symbols.remove(symbol)
+         symbols = new_symbols
+ 
++        # Ensure all arguments in argument_sequence are in symbols
++        if argument_sequence is not None:
++            for arg in argument_sequence:
++                if isinstance(arg, (Symbol, MatrixSymbol)):
++                    symbols.add(arg)
+         # Decide whether to use output argument or return value
+         return_val = []
+         output_args = []
+@@ -696,11 +701,11 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+ 
+         # setup input argument list
+         array_symbols = {}
+-        for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed):
+-            array_symbols[array.base.label] = array
+-        for array in expressions.atoms(MatrixSymbol) | local_expressions.atoms(MatrixSymbol):
+-            array_symbols[array] = array
+-
++        for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed) | symbols:
++            if isinstance(array, Indexed):
++                array_symbols[array.base.label] = array
++            elif isinstance(array, MatrixSymbol):
++                array_symbols[array] = array
+         for symbol in sorted(symbols, key=str):
+             if symbol in array_symbols:
+                 dims = []
+2026-07-01 05:02:08,048 - INFO - Grading answer for sympy__sympy-16792...
+2026-07-01 05:02:08,056 - INFO - report: {'sympy__sympy-16792': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_ccode_unused_array_arg'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_Routine_argument_order', 'test_empty_c_code', 'test_empty_c_code_with_comment', 'test_empty_c_header', 'test_simple_c_code', 'test_c_code_reserved_words', 'test_numbersymbol_c_code', 'test_c_code_argument_order', 'test_simple_c_header', 'test_simple_c_codegen', 'test_multiple_results_c', 'test_no_results_c', 'test_ansi_math1_codegen', 'test_ansi_math2_codegen', 'test_complicated_codegen', 'test_loops_c', 'test_dummy_loops_c', 'test_partial_loops_c', 'test_output_arg_c', 'test_output_arg_c_reserved_words', 'test_ccode_results_named_ordered', 'test_ccode_matrixsymbol_slice', 'test_ccode_cse', 'test_empty_f_code', 'test_empty_f_code_with_header', 'test_empty_f_header', 'test_simple_f_code', 'test_numbersymbol_f_code', 'test_erf_f_code', 'test_f_code_argument_order', 'test_simple_f_header', 'test_simple_f_codegen', 'test_multiple_results_f', 'test_no_results_f', 'test_intrinsic_math_codegen', 'test_intrinsic_math2_codegen', 'test_complicated_codegen_f95', 'test_loops', 'test_dummy_loops_f95', 'test_loops_InOut', 'test_partial_loops_f', 'test_output_arg_f', 'test_inline_function', 'test_f_code_call_signature_wrap', 'test_check_case', 'test_check_case_false_positive', 'test_c_fortran_omit_routine_name', 'test_fcode_matrix_output', 'test_fcode_results_named_ordered', 'test_fcode_matrixsymbol_slice', 'test_fcode_matrixsymbol_slice_autoname', 'test_global_vars', 'test_custom_codegen', 'test_c_with_printer'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-16792: resolved: True
+2026-07-01 05:02:08,061 - INFO - Attempting to stop container sweb.eval.sympy__sympy-16792.local-sympy-16792...
+2026-07-01 05:02:23,519 - INFO - Attempting to remove container sweb.eval.sympy__sympy-16792.local-sympy-16792...
+2026-07-01 05:02:23,598 - INFO - Container sweb.eval.sympy__sympy-16792.local-sympy-16792 removed.

@@ -1,0 +1,93 @@
+2026-06-30 23:18:01,061 - INFO - Creating container for astropy__astropy-8707...
+2026-06-30 23:18:01,149 - INFO - Container for astropy__astropy-8707 created: 10b5f2efa0bff63d36f30f363e639931514b75be54b78b00688d1d095ea012e8
+2026-06-30 23:18:01,597 - INFO - Container for astropy__astropy-8707 started: 10b5f2efa0bff63d36f30f363e639931514b75be54b78b00688d1d095ea012e8
+2026-06-30 23:18:01,603 - INFO - Intermediate patch for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/openai__gpt-5.3-codex/astropy__astropy-8707/patch.diff, now applying to container...
+2026-06-30 23:18:02,092 - INFO - >>>>> Applied Patch:
+Checking patch astropy/io/fits/card.py...
+Checking patch astropy/io/fits/header.py...
+Applied patch astropy/io/fits/card.py cleanly.
+Applied patch astropy/io/fits/header.py cleanly.
+
+2026-06-30 23:18:02,669 - INFO - Git diff before:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..1ce974a87 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -5,7 +5,7 @@ import warnings
+ 
+ import numpy as np
+ 
+-from .util import _str_to_num, _is_int, translate, _words_group
++from .util import _str_to_num, _is_int, translate, _words_group, decode_ascii
+ from .verify import _Verify, _ErrList, VerifyError, VerifyWarning
+ 
+ from . import conf
+@@ -554,7 +554,7 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
+-        card._image = _pad(image)
++        card._image = _pad(decode_ascii(image))
+         card._verified = False
+         return card
+ 
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..69c3f234f 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -348,6 +348,9 @@ class Header:
+             A new `Header` instance.
+         """
+ 
++        data = decode_ascii(data)
++        sep = decode_ascii(sep)
++
+         cards = []
+ 
+         # If the card separator contains characters that may validly appear in
+2026-06-30 23:18:02,672 - INFO - Eval script for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/openai__gpt-5.3-codex/astropy__astropy-8707/eval.sh; copying to container...
+2026-06-30 23:18:50,210 - INFO - Test runtime: 47.23 seconds
+2026-06-30 23:18:50,222 - INFO - Test output for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/openai__gpt-5.3-codex/astropy__astropy-8707/test_output.txt
+2026-06-30 23:18:50,431 - INFO - Git diff after:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..1ce974a87 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -5,7 +5,7 @@ import warnings
+ 
+ import numpy as np
+ 
+-from .util import _str_to_num, _is_int, translate, _words_group
++from .util import _str_to_num, _is_int, translate, _words_group, decode_ascii
+ from .verify import _Verify, _ErrList, VerifyError, VerifyWarning
+ 
+ from . import conf
+@@ -554,7 +554,7 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
+-        card._image = _pad(image)
++        card._image = _pad(decode_ascii(image))
+         card._verified = False
+         return card
+ 
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..69c3f234f 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -348,6 +348,9 @@ class Header:
+             A new `Header` instance.
+         """
+ 
++        data = decode_ascii(data)
++        sep = decode_ascii(sep)
++
+         cards = []
+ 
+         # If the card separator contains characters that may validly appear in
+2026-06-30 23:18:50,431 - INFO - Grading answer for astropy__astropy-8707...
+2026-06-30 23:18:50,587 - INFO - report: {'astropy__astropy-8707': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_from_bytes']}, 'PASS_TO_PASS': {'success': ['astropy/io/fits/tests/test_header.py::test_shallow_copy', 'astropy/io/fits/tests/test_header.py::test_init_with_header', 'astropy/io/fits/tests/test_header.py::test_init_with_dict', 'astropy/io/fits/tests/test_header.py::test_init_with_ordereddict'], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_rename_keyword', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_constructor_default_args', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_string_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_boolean_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_integer_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_floating_point_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_complex_value_card']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-8707: resolved: False
+2026-06-30 23:18:50,590 - INFO - Attempting to stop container sweb.eval.astropy__astropy-8707.local-astropy-8707...
+2026-06-30 23:19:05,972 - INFO - Attempting to remove container sweb.eval.astropy__astropy-8707.local-astropy-8707...
+2026-06-30 23:19:06,048 - INFO - Container sweb.eval.astropy__astropy-8707.local-astropy-8707 removed.

@@ -1,0 +1,19 @@
+{
+  "django__django-16901": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-16901",
+    "model_patch": "diff --git a/django/db/models/sql/where.py b/django/db/models/sql/where.py\nindex aaab1730b7..945ed7a222 100644\n--- a/django/db/models/sql/where.py\n+++ b/django/db/models/sql/where.py\n@@ -129,14 +129,13 @@ class WhereNode(tree.Node):\n             # Convert if the database doesn't support XOR:\n             #   a XOR b XOR c XOR ...\n             # to:\n-            #   (a OR b OR c OR ...) AND (a + b + c + ...) == 1\n-            lhs = self.__class__(self.children, OR)\n+            #   (a + b + c + ...) & 1 = 1\n             rhs_sum = reduce(\n                 operator.add,\n                 (Case(When(c, then=1), default=0) for c in self.children),\n             )\n-            rhs = Exact(1, rhs_sum)\n-            return self.__class__([lhs, rhs], AND, self.negated).as_sql(\n+            rhs = Exact(1, rhs_sum.bitand(1))\n+            return self.__class__([rhs], AND, self.negated).as_sql(\n                 compiler, connection\n             )\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/where.py",
+          "line": 138,
+          "statement": "            rhs = Exact(1, rhs_sum)"
+        }
+      ],
+      "reasoning": "The fallback SQL for the logical XOR connector on databases that don't support it was constructed as (a OR b OR c OR ...) AND (a + b + c + ...) == 1, which checks 'exactly one is true' rather than the correct parity check 'an odd number are true' required for XOR with 3+ arguments. The fix uses bitwise AND with 1: (a + b + c + ...) & 1 = 1 to perform a parity check, and removes the redundant (a OR b OR c OR ...) term.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

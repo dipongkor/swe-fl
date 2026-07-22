@@ -1,0 +1,19 @@
+{
+  "django__django-13449": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-13449",
+    "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 90d90119d0..c25a612852 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -23,7 +23,7 @@ class SQLiteNumericMixin:\n     def as_sqlite(self, compiler, connection, **extra_context):\n         sql, params = self.as_sql(compiler, connection, **extra_context)\n         try:\n-            if self.output_field.get_internal_type() == 'DecimalField':\n+            if self.output_field.get_internal_type() == 'DecimalField' and not getattr(self, 'is_inside_window', False):\n                 sql = 'CAST(%s AS NUMERIC)' % sql\n         except FieldError:\n             pass\n@@ -1299,6 +1299,7 @@ class Window(Expression):\n         self.source_expression, self.partition_by, self.order_by, self.frame = exprs\n \n     def as_sql(self, compiler, connection, template=None):\n+        self.source_expression.is_inside_window = True\n         connection.ops.check_expression_support(self)\n         if not connection.features.supports_over_clause:\n             raise NotSupportedError('This backend does not support window expressions.')\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/expressions.py",
+          "line": 26,
+          "statement": "if self.output_field.get_internal_type() == 'DecimalField':"
+        }
+      ],
+      "reasoning": "The SQLiteNumericMixin automatically casts DecimalField expressions to NUMERIC, which breaks when the expression is used inside a Window function's OVER clause in SQLite. We need to prevent this cast when the expression is part of a Window function.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

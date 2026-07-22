@@ -1,0 +1,19 @@
+{
+  "pylint-dev__pylint-4604": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pylint-dev__pylint-4604",
+    "model_patch": "diff --git a/pylint/checkers/variables.py b/pylint/checkers/variables.py\nindex 3ddafd59..44801f5c 100644\n--- a/pylint/checkers/variables.py\n+++ b/pylint/checkers/variables.py\n@@ -1826,6 +1826,12 @@ class VariablesChecker(BaseChecker):\n             self._type_annotation_names.append(type_annotation.name)\n             return\n \n+        if isinstance(type_annotation, astroid.Attribute) and isinstance(\n+            type_annotation.expr, astroid.Name\n+        ):\n+            self._type_annotation_names.append(type_annotation.expr.name)\n+            return\n+\n         if not isinstance(type_annotation, astroid.Subscript):\n             return\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "pylint/checkers/variables.py",
+          "line": 1835,
+          "statement": "        if not isinstance(type_annotation, astroid.Subscript):"
+        }
+      ],
+      "reasoning": "Type comments like abc.ABC produce Attribute nodes, but only Name and Subscript annotations were tracked, so module imports used through attribute type comments were not marked as consumed.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

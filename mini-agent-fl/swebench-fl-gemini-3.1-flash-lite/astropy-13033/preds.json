@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-13033": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "astropy__astropy-13033",
+    "model_patch": "diff --git a/astropy/timeseries/core.py b/astropy/timeseries/core.py\nindex c279f35f8..c65e423e0 100644\n--- a/astropy/timeseries/core.py\n+++ b/astropy/timeseries/core.py\n@@ -75,10 +75,9 @@ class BaseTimeSeries(QTable):\n                                  .format(self.__class__.__name__, required_columns[0], plural))\n \n             elif self.colnames[:len(required_columns)] != required_columns:\n-\n-                raise ValueError(\"{} object is invalid - expected '{}' \"\n-                                 \"as the first column{} but found '{}'\"\n-                                 .format(self.__class__.__name__, required_columns[0], plural, self.colnames[0]))\n+                missing = [c for c in required_columns if c not in self.colnames]\n+                raise ValueError(\"{} object is invalid - missing required column{}: {}\"\n+                                 .format(self.__class__.__name__, \"s\" if len(missing) > 1 else \"\", \", \".join(missing)))\n \n             if (self._required_columns_relax\n                     and self._required_columns == self.colnames[:len(self._required_columns)]):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/timeseries/core.py",
+          "line": 77,
+          "statement": "elif self.colnames[:len(required_columns)] != required_columns:"
+        }
+      ],
+      "reasoning": "The original code only checked if the first columns matched the required columns, which produced a misleading error message when a required column was removed from the middle or end of the list. The fix now identifies the missing columns and reports them explicitly.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

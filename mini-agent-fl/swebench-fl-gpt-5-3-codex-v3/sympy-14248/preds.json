@@ -1,0 +1,29 @@
+{
+  "sympy__sympy-14248": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-14248",
+    "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex 8253b2f68..fe08ed812 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -1477,9 +1477,7 @@ def _print_Adjoint(self, expr):\n             return r\"%s^\\dagger\" % self._print(mat)\n \n     def _print_MatAdd(self, expr):\n-        terms = list(expr.args)\n-        tex = \" + \".join(map(self._print, terms))\n-        return tex\n+        return self._print_Add(expr)\n \n     def _print_MatMul(self, expr):\n         from sympy import Add, MatAdd, HadamardProduct\ndiff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py\nindex db24f4c61..ad927840a 100644\n--- a/sympy/printing/pretty/pretty.py\n+++ b/sympy/printing/pretty/pretty.py\n@@ -819,7 +819,7 @@ def _print_BlockMatrix(self, B):\n         return self._print(B.blocks)\n \n     def _print_MatAdd(self, expr):\n-        return self._print_seq(expr.args, None, None, ' + ')\n+        return self._print_Add(expr)\n \n     def _print_MatMul(self, expr):\n         args = list(expr.args)\ndiff --git a/sympy/printing/str.py b/sympy/printing/str.py\nindex 0baefe0f7..95d7f2e3e 100644\n--- a/sympy/printing/str.py\n+++ b/sympy/printing/str.py\n@@ -312,8 +312,7 @@ def _print_HadamardProduct(self, expr):\n             for arg in expr.args])\n \n     def _print_MatAdd(self, expr):\n-        return ' + '.join([self.parenthesize(arg, precedence(expr))\n-            for arg in expr.args])\n+        return self._print_Add(expr)\n \n     def _print_NaN(self, expr):\n         return 'nan'\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/str.py",
+          "line": 315,
+          "statement": "        return self._print_Add(expr)"
+        },
+        {
+          "file": "sympy/printing/pretty/pretty.py",
+          "line": 822,
+          "statement": "        return self._print_Add(expr)"
+        },
+        {
+          "file": "sympy/printing/latex.py",
+          "line": 1480,
+          "statement": "        return self._print_Add(expr)"
+        }
+      ],
+      "reasoning": "Matrix addition had custom printer paths that joined terms with '+' directly, bypassing Add sign handling, so negative matrix terms rendered as '+ (-1)*...'. Reusing the generic Add printer fixes subtraction formatting consistently.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

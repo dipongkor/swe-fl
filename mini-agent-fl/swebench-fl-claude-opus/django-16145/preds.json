@@ -1,0 +1,19 @@
+{
+  "django__django-16145": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-16145",
+    "model_patch": "diff --git a/django/core/management/commands/runserver.py b/django/core/management/commands/runserver.py\nindex 3c39f57e4d..730a550825 100644\n--- a/django/core/management/commands/runserver.py\n+++ b/django/core/management/commands/runserver.py\n@@ -99,6 +99,8 @@ class Command(BaseCommand):\n             if not self.port.isdigit():\n                 raise CommandError(\"%r is not a valid port number.\" % self.port)\n             if self.addr:\n+                if self.addr == \"0\":\n+                    self.addr = \"0.0.0.0\"\n                 if _ipv6:\n                     self.addr = self.addr[1:-1]\n                     self.use_ipv6 = True\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/management/commands/runserver.py",
+          "line": 101,
+          "statement": "            if self.addr:"
+        }
+      ],
+      "reasoning": "When '0:8000' is passed, the address '0' is parsed and stored in self.addr without being expanded to '0.0.0.0', so the 'Starting development server at http://0:8000/' message shows the unusable address. Expanding '0' to '0.0.0.0' after parsing the address fixes it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

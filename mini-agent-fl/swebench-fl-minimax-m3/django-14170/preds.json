@@ -1,0 +1,19 @@
+{
+  "django__django-14170": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-14170",
+    "model_patch": "diff --git a/django/db/models/functions/datetime.py b/django/db/models/functions/datetime.py\nindex 90e6f41be0..07fc094a07 100644\n--- a/django/db/models/functions/datetime.py\n+++ b/django/db/models/functions/datetime.py\n@@ -330,3 +330,9 @@ class TruncSecond(TruncBase):\n \n DateTimeField.register_lookup(TruncDate)\n DateTimeField.register_lookup(TruncTime)\n+\n+# Add ExtractIsoYear to YearLookupClasses to prevent the BETWEEN optimization\n+# from being used for iso_year lookups (the bounds differ from calendar years).\n+from django.db.models import lookups\n+lookups.YearLookupClasses = lookups.YearLookupClasses((ExtractIsoYear,))\n+\ndiff --git a/django/db/models/lookups.py b/django/db/models/lookups.py\nindex 916478d075..0cc5e55723 100644\n--- a/django/db/models/lookups.py\n+++ b/django/db/models/lookups.py\n@@ -13,6 +13,10 @@ from django.utils.functional import cached_property\n from django.utils.hashable import make_hashable\n \n \n+class YearLookupClasses(tuple):\n+    pass\n+\n+\n class Lookup:\n     lookup_name = None\n     prepare_rhs = True\n@@ -549,7 +553,9 @@ class YearLookup(Lookup):\n     def as_sql(self, compiler, connection):\n         # Avoid the extract operation if the rhs is a direct value to allow\n         # indexes to be used.\n-        if self.rhs_is_direct_value():\n+        if self.rhs_is_direct_value() and not isinstance(\n+            self.lhs, YearLookupClasses\n+        ):\n             # Skip the extract part by directly using the originating field,\n             # that is self.lhs.lhs.\n             lhs_sql, params = self.process_lhs(compiler, connection, self.lhs.lhs)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/lookups.py",
+          "line": 552,
+          "statement": "        if self.rhs_is_direct_value():"
+        }
+      ],
+      "reasoning": "The YearLookup.as_sql method applies the BETWEEN optimization (using calendar year bounds Jan 1 - Dec 31) to all lookups including __iso_year. This is incorrect because ISO years don't align with calendar years - an ISO year can start in late December of the previous year and end in early January of the next year. The fix is to skip the BETWEEN optimization for ExtractIsoYear lookups, falling back to the standard EXTRACT operation.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

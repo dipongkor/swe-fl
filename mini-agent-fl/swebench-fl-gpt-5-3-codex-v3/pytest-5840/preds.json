@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-5840": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pytest-dev__pytest-5840",
+    "model_patch": "diff --git a/src/_pytest/pathlib.py b/src/_pytest/pathlib.py\nindex 0403b6947..5b23a0c6a 100644\n--- a/src/_pytest/pathlib.py\n+++ b/src/_pytest/pathlib.py\n@@ -11,7 +11,6 @@ from functools import partial\n from os.path import expanduser\n from os.path import expandvars\n from os.path import isabs\n-from os.path import normcase\n from os.path import sep\n from posixpath import sep as posix_sep\n \n@@ -343,4 +342,4 @@ def unique_path(path):\n \n     This is needed only for ``py.path.local``; ``pathlib.Path`` handles this\n     natively with ``resolve()``.\"\"\"\n-    return type(path)(normcase(str(path.realpath())))\n+    return path.realpath()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/pathlib.py",
+          "line": 346,
+          "statement": "    return type(path)(normcase(str(path.realpath())))"
+        }
+      ],
+      "reasoning": "Applying normcase lowercases paths on Windows, which can alter package import resolution and lead to conftest import failures when directory casing is significant for module discovery.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

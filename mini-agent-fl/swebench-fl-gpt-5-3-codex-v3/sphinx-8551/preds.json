@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8551": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 79d7e4f46..1c35acaec 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -1280,11 +1280,11 @@ class PythonDomain(Domain):\n                 return []\n             elif classname and classname + '.' + name in self.objects:\n                 newname = classname + '.' + name\n-            elif modname and modname + '.' + name in self.objects:\n-                newname = modname + '.' + name\n             elif modname and classname and \\\n                     modname + '.' + classname + '.' + name in self.objects:\n                 newname = modname + '.' + classname + '.' + name\n+            elif modname and modname + '.' + name in self.objects:\n+                newname = modname + '.' + name\n         if newname is not None:\n             matches.append((newname, self.objects[newname]))\n         return matches\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 1281,
+          "statement": "            elif modname and modname + '.' + name in self.objects:"
+        }
+      ],
+      "reasoning": "In exact-match mode, module-level lookup was performed before the more specific current module+class namespace lookup, causing unqualified names in nested modules to resolve to parent module objects and emit ambiguous warnings.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

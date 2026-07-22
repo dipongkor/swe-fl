@@ -1,0 +1,19 @@
+{
+  "psf__requests-2931": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "psf__requests-2931",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 9c624d3..917ec7d 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -81,7 +81,7 @@ class RequestEncodingMixin(object):\n         \"\"\"\n \n         if isinstance(data, (str, bytes)):\n-            return to_native_string(data)\n+            return to_native_string(data, \"utf-8\")\n         elif hasattr(data, 'read'):\n             return data\n         elif hasattr(data, '__iter__'):\n@@ -165,10 +165,10 @@ class RequestHooksMixin(object):\n         if event not in self.hooks:\n             raise ValueError('Unsupported event specified, with event name \"%s\"' % (event))\n \n-        if isinstance(hook, collections.Callable):\n+        if isinstance(hook, collections.abc.Callable):\n             self.hooks[event].append(hook)\n         elif hasattr(hook, '__iter__'):\n-            self.hooks[event].extend(h for h in hook if isinstance(h, collections.Callable))\n+            self.hooks[event].extend(h for h in hook if isinstance(h, collections.abc.Callable))\n \n     def deregister_hook(self, event, hook):\n         \"\"\"Deregister a previously registered hook.\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 84,
+          "statement": "return to_native_string(data)"
+        }
+      ],
+      "reasoning": "The _encode_params method was calling to_native_string(data) with the default encoding 'ascii', which fails for binary payloads containing non-ASCII characters. Changing it to use 'utf-8' allows it to handle such payloads correctly.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

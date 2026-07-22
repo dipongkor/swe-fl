@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-20801": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-20801",
+    "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 79f6a7d165..a2557d5251 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1386,10 +1386,10 @@ def __eq__(self, other):\n             other = _sympify(other)\n         except SympifyError:\n             return NotImplemented\n-        if not self:\n-            return not other\n         if isinstance(other, Boolean):\n             return False\n+        if not self:\n+            return not other\n         if other.is_NumberSymbol:\n             if other.is_irrational:\n                 return False\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1389,
+          "statement": "        if not self:"
+        }
+      ],
+      "reasoning": "In Float.__eq__, the `if not self: return not other` check ran before the `isinstance(other, Boolean)` check, so Float(0.0) == S.false returned `not S.false` (True) instead of False; moving the Boolean check before the zero-check makes it consistent with Integer/Rational and with the reversed comparison.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

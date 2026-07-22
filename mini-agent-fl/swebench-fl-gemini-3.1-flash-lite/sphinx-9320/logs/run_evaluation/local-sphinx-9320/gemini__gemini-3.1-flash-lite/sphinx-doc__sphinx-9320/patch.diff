@@ -1,0 +1,11 @@
+--- sphinx/cmd/quickstart.py.bak	2026-07-01 07:02:51.139687200 +0000
++++ sphinx/cmd/quickstart.py	2026-07-01 07:02:51.159687200 +0000
+@@ -146,6 +146,8 @@
+         else:
+             prompt = colorize(COLOR_QUESTION, prompt, input_mode=False)
+         x = term_input(prompt).strip()
++        if not x:
++            return False
+         if default and not x:
+             x = default
+         try:

@@ -1,0 +1,24 @@
+{
+  "matplotlib__matplotlib-25122": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "matplotlib__matplotlib-25122",
+    "model_patch": "diff --git a/lib/matplotlib/mlab.py b/lib/matplotlib/mlab.py\nindex 3552904c3d..2eec639960 100644\n--- a/lib/matplotlib/mlab.py\n+++ b/lib/matplotlib/mlab.py\n@@ -424,10 +424,10 @@ def _spectral_helper(x, y=None, NFFT=None, Fs=None, detrend_func=None,\n             result /= Fs\n             # Scale the spectrum by the norm of the window to compensate for\n             # windowing loss; see Bendat & Piersol Sec 11.5.2.\n-            result /= (np.abs(window)**2).sum()\n+            result /= (window**2).sum()\n         else:\n             # In this case, preserve power in the segment, not amplitude\n-            result /= np.abs(window).sum()**2\n+            result /= window.sum()**2\n \n     t = np.arange(NFFT/2, len(x) - NFFT/2 + 1, NFFT - noverlap)/Fs\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/mlab.py",
+          "line": 427,
+          "statement": "            result /= (np.abs(window)**2).sum()"
+        },
+        {
+          "file": "lib/matplotlib/mlab.py",
+          "line": 430,
+          "statement": "            result /= np.abs(window).sum()**2"
+        }
+      ],
+      "reasoning": "The windowing normalization in PSD mode incorrectly applies np.abs() to the window before summing/squaring. For windows containing negative values (e.g., flattop), np.abs(window).sum() differs from window.sum(), producing wrong results. The correct behavior (as in scipy.signal) is to use the signed sum and sum of squares of the window without taking absolute values.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-24562": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-24562",
+    "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 52f7ea45ad..88744b4389 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1626,6 +1626,8 @@ def __new__(cls, p, q=None, gcd=None):\n             gcd = 1\n \n         if not isinstance(p, SYMPY_INTS):\n+            if isinstance(p, str):\n+                p = fractions.Fraction(p)\n             p = Rational(p)\n             q *= p.q\n             p = p.p\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1629,
+          "statement": "            if isinstance(p, str):"
+        }
+      ],
+      "reasoning": "When a string numerator is provided with a separate denominator, the generic Rational(p) path interpreted the string in a way that led to incorrect scaling. Parsing string p as Fraction before constructing Rational preserves the intended numerator/denominator value.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

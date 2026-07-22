@@ -1,0 +1,24 @@
+{
+  "django__django-16631": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-16631",
+    "model_patch": "diff --git a/django/contrib/auth/__init__.py b/django/contrib/auth/__init__.py\nindex 155330c596..d57731081b 100644\n--- a/django/contrib/auth/__init__.py\n+++ b/django/contrib/auth/__init__.py\n@@ -199,8 +199,12 @@ def get_user(request):\n             # Verify the session\n             if hasattr(user, \"get_session_auth_hash\"):\n                 session_hash = request.session.get(HASH_SESSION_KEY)\n-                session_hash_verified = session_hash and constant_time_compare(\n-                    session_hash, user.get_session_auth_hash()\n+                session_hashes = [user.get_session_auth_hash()] + [\n+                    user.get_session_auth_hash(secret=fallback)\n+                    for fallback in settings.SECRET_KEY_FALLBACKS\n+                ]\n+                session_hash_verified = session_hash and any(\n+                    constant_time_compare(session_hash, h) for h in session_hashes\n                 )\n                 if not session_hash_verified:\n                     request.session.flush()\ndiff --git a/django/contrib/auth/base_user.py b/django/contrib/auth/base_user.py\nindex 5ee30bf59c..eb802d9244 100644\n--- a/django/contrib/auth/base_user.py\n+++ b/django/contrib/auth/base_user.py\n@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import (\n     make_password,\n )\n from django.db import models\n+from django.conf import settings\n from django.utils.crypto import get_random_string, salted_hmac\n from django.utils.deprecation import RemovedInDjango51Warning\n from django.utils.translation import gettext_lazy as _\n@@ -131,7 +132,7 @@ class AbstractBaseUser(models.Model):\n         \"\"\"\n         return is_password_usable(self.password)\n \n-    def get_session_auth_hash(self):\n+    def get_session_auth_hash(self, secret=None):\n         \"\"\"\n         Return an HMAC of the password field.\n         \"\"\"\n@@ -139,6 +140,7 @@ class AbstractBaseUser(models.Model):\n         return salted_hmac(\n             key_salt,\n             self.password,\n+            secret=secret or settings.SECRET_KEY,\n             algorithm=\"sha256\",\n         ).hexdigest()\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/auth/base_user.py",
+          "line": 134,
+          "statement": "def get_session_auth_hash(self):"
+        },
+        {
+          "file": "django/contrib/auth/__init__.py",
+          "line": 202,
+          "statement": "session_hash_verified = session_hash and constant_time_compare("
+        }
+      ],
+      "reasoning": "The get_session_auth_hash method only used the current SECRET_KEY, and get_user did not check against SECRET_KEY_FALLBACKS, causing sessions to be invalidated upon key rotation.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

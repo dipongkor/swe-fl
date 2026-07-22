@@ -1,0 +1,59 @@
+{
+  "sympy__sympy-13091": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-13091",
+    "model_patch": "diff --git a/sympy/core/basic.py b/sympy/core/basic.py\nindex db4e97184..006673862 100644\n--- a/sympy/core/basic.py\n+++ b/sympy/core/basic.py\n@@ -313,7 +313,7 @@ def __eq__(self, other):\n             try:\n                 other = _sympify(other)\n             except SympifyError:\n-                return False    # sympy != other\n+                return NotImplemented\n \n             if type(self) != type(other):\n                 return False\n@@ -329,7 +329,7 @@ def __ne__(self, other):\n \n            but faster\n         \"\"\"\n-        return not self.__eq__(other)\n+        return not self == other\n \n     def dummy_eq(self, other, symbol=None):\n         \"\"\"\ndiff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 864d05508..d36a9f433 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1258,7 +1258,7 @@ def __eq__(self, other):\n         try:\n             other = _sympify(other)\n         except SympifyError:\n-            return False    # sympy != other  -->  not ==\n+            return NotImplemented\n         if isinstance(other, NumberSymbol):\n             if other.is_irrational:\n                 return False\n@@ -1276,7 +1276,7 @@ def __eq__(self, other):\n         return False    # Float != non-Number\n \n     def __ne__(self, other):\n-        return not self.__eq__(other)\n+        return not self == other\n \n     def __gt__(self, other):\n         try:\n@@ -1719,7 +1719,7 @@ def __eq__(self, other):\n         try:\n             other = _sympify(other)\n         except SympifyError:\n-            return False    # sympy != other  -->  not ==\n+            return NotImplemented\n         if isinstance(other, NumberSymbol):\n             if other.is_irrational:\n                 return False\n@@ -1734,7 +1734,7 @@ def __eq__(self, other):\n         return False\n \n     def __ne__(self, other):\n-        return not self.__eq__(other)\n+        return not self == other\n \n     def __gt__(self, other):\n         try:\n@@ -2112,7 +2112,7 @@ def __eq__(self, other):\n         return Rational.__eq__(self, other)\n \n     def __ne__(self, other):\n-        return not self.__eq__(other)\n+        return not self == other\n \n     def __gt__(self, other):\n         try:\n@@ -3339,7 +3339,7 @@ def __eq__(self, other):\n         try:\n             other = _sympify(other)\n         except SympifyError:\n-            return False    # sympy != other  -->  not ==\n+            return NotImplemented\n         if self is other:\n             return True\n         if isinstance(other, Number) and self.is_irrational:\n@@ -3348,7 +3348,7 @@ def __eq__(self, other):\n         return False    # NumberSymbol != non-(Number|self)\n \n     def __ne__(self, other):\n-        return not self.__eq__(other)\n+        return not self == other\n \n     def __lt__(self, other):\n         try:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/basic.py",
+          "line": 316,
+          "statement": "                return False    # sympy != other"
+        },
+        {
+          "file": "sympy/core/basic.py",
+          "line": 332,
+          "statement": "        return not self.__eq__(other)"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1261,
+          "statement": "            return False    # sympy != other  -->  not =="
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1279,
+          "statement": "        return not self.__eq__(other)"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1722,
+          "statement": "            return False    # sympy != other  -->  not =="
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1737,
+          "statement": "        return not self.__eq__(other)"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 2115,
+          "statement": "        return not self.__eq__(other)"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 3342,
+          "statement": "            return False    # sympy != other  -->  not =="
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 3351,
+          "statement": "        return not self.__eq__(other)"
+        }
+      ],
+      "reasoning": "When comparing sympy objects with custom types, the __eq__ methods were returning False (instead of NotImplemented) when they couldn't sympify the other object. This breaks the Python convention for rich comparisons, which requires returning NotImplemented so that Python can try the reflected method on the other operand. The __ne__ methods were also using `return not self.__eq__(other)`, which incorrectly evaluates `not NotImplemented` to False instead of returning NotImplemented. The fix is to return NotImplemented in __eq__ when unable to handle the type, and to use `return not self == other` in __ne__ so that NotImplemented is properly propagated.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

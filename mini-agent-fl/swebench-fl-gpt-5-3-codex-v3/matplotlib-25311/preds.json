@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25311": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-25311",
+    "model_patch": "diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py\nindex 1dee8a23d9..993dd57581 100644\n--- a/lib/matplotlib/offsetbox.py\n+++ b/lib/matplotlib/offsetbox.py\n@@ -1505,8 +1505,12 @@ class DraggableBase:\n         if not ref_artist.pickable():\n             ref_artist.set_picker(True)\n         self.got_artist = False\n+        self._use_blit = use_blit\n+        self._connect_canvas()\n+\n+    def _connect_canvas(self):\n         self.canvas = self.ref_artist.figure.canvas\n-        self._use_blit = use_blit and self.canvas.supports_blit\n+        self._use_blit = self._use_blit and self.canvas.supports_blit\n         self.cids = [\n             self.canvas.callbacks._connect_picklable(\n                 'pick_event', self.on_pick),\n@@ -1514,6 +1518,18 @@ class DraggableBase:\n                 'button_release_event', self.on_release),\n         ]\n \n+    def __getstate__(self):\n+        state = self.__dict__.copy()\n+        state.pop('canvas', None)\n+        state.pop('cids', None)\n+        state.pop('_c1', None)\n+        state.pop('background', None)\n+        return state\n+\n+    def __setstate__(self, state):\n+        self.__dict__ = state\n+        self._connect_canvas()\n+\n     def on_motion(self, evt):\n         if self._check_still_parented() and self.got_artist:\n             dx = evt.x - self.mouse_x\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/offsetbox.py",
+          "line": 1514,
+          "statement": "        self.canvas = self.ref_artist.figure.canvas"
+        }
+      ],
+      "reasoning": "Draggable helpers stored a direct canvas reference (and callback ids), which pulls in backend canvas objects that are not picklable when legends/annotations are draggable. Making this state transient during pickle avoids serializing the canvas.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

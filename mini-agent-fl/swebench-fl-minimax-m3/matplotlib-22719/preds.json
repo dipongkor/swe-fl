@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-22719": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "matplotlib__matplotlib-22719",
+    "model_patch": "diff --git a/lib/matplotlib/category.py b/lib/matplotlib/category.py\nindex c823b68fd9..a3012dd89d 100644\n--- a/lib/matplotlib/category.py\n+++ b/lib/matplotlib/category.py\n@@ -58,7 +58,7 @@ class StrCategoryConverter(units.ConversionInterface):\n             is_numlike = all(units.ConversionInterface.is_numlike(v)\n                              and not isinstance(v, (str, bytes))\n                              for v in values)\n-        if is_numlike:\n+        if is_numlike and values.size:\n             _api.warn_deprecated(\n                 \"3.5\", message=\"Support for passing numbers through unit \"\n                 \"converters is deprecated since %(since)s and support will be \"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/category.py",
+          "line": 61,
+          "statement": "        if is_numlike:"
+        }
+      ],
+      "reasoning": "In StrCategoryConverter.convert, the check for whether to issue a deprecation warning treats an empty list as 'is_numlike' (because Python's all() returns True for empty iterables), causing a misleading deprecation warning when an empty data structure is passed to axes that use category units. The fix adds a check for the values being non-empty (values.size) before issuing the warning.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

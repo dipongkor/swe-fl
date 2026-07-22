@@ -1,0 +1,53 @@
+2026-06-30 21:42:05,710 - INFO - Creating container for django__django-16502...
+2026-06-30 21:42:05,793 - INFO - Container for django__django-16502 created: 4e0b43be5bf79c0519ec0103219e597112466ae5c6cae20f4d99c3be04141851
+2026-06-30 21:42:06,202 - INFO - Container for django__django-16502 started: 4e0b43be5bf79c0519ec0103219e597112466ae5c6cae20f4d99c3be04141851
+2026-06-30 21:42:06,206 - INFO - Intermediate patch for django__django-16502 written to logs/run_evaluation/local-django-16502/openai__gpt-5.3-codex/django__django-16502/patch.diff, now applying to container...
+2026-06-30 21:42:07,609 - INFO - >>>>> Applied Patch:
+Checking patch django/core/servers/basehttp.py...
+Applied patch django/core/servers/basehttp.py cleanly.
+
+2026-06-30 21:42:08,511 - INFO - Git diff before:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..ea4bd66bc7 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,12 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++
++    def finish_response(self):
++        if self.environ.get("REQUEST_METHOD") == "HEAD":
++            self.result = []
++        return super().finish_response()
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()
+2026-06-30 21:42:08,514 - INFO - Eval script for django__django-16502 written to logs/run_evaluation/local-django-16502/openai__gpt-5.3-codex/django__django-16502/eval.sh; copying to container...
+2026-06-30 21:42:15,574 - INFO - Test runtime: 6.75 seconds
+2026-06-30 21:42:15,577 - INFO - Test output for django__django-16502 written to logs/run_evaluation/local-django-16502/openai__gpt-5.3-codex/django__django-16502/test_output.txt
+2026-06-30 21:42:15,802 - INFO - Git diff after:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..ea4bd66bc7 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,12 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++
++    def finish_response(self):
++        if self.environ.get("REQUEST_METHOD") == "HEAD":
++            self.result = []
++        return super().finish_response()
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()
+2026-06-30 21:42:15,803 - INFO - Grading answer for django__django-16502...
+2026-06-30 21:42:15,807 - INFO - report: {'django__django-16502': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_no_body_returned_for_head_requests (servers.test_basehttp.WSGIRequestHandlerTestCase.test_no_body_returned_for_head_requests)']}, 'PASS_TO_PASS': {'success': ['test_https (servers.test_basehttp.WSGIRequestHandlerTestCase.test_https)', 'test_log_message (servers.test_basehttp.WSGIRequestHandlerTestCase.test_log_message)', 'WSGIRequestHandler ignores headers containing underscores.', 'WSGIServer handles broken pipe errors.'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-16502: resolved: False
+2026-06-30 21:42:15,810 - INFO - Attempting to stop container sweb.eval.django__django-16502.local-django-16502...
+2026-06-30 21:42:31,244 - INFO - Attempting to remove container sweb.eval.django__django-16502.local-django-16502...
+2026-06-30 21:42:31,319 - INFO - Container sweb.eval.django__django-16502.local-django-16502 removed.

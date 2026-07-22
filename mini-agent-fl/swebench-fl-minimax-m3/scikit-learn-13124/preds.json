@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-13124": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "model_patch": "diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py\nindex 24394f869..74259de7d 100644\n--- a/sklearn/model_selection/_split.py\n+++ b/sklearn/model_selection/_split.py\n@@ -620,7 +620,7 @@ class StratifiedKFold(_BaseKFold):\n         super().__init__(n_splits, shuffle, random_state)\n \n     def _make_test_folds(self, X, y=None):\n-        rng = self.random_state\n+        rng = check_random_state(self.random_state)\n         y = np.asarray(y)\n         type_of_target_y = type_of_target(y)\n         allowed_target_types = ('binary', 'multiclass')\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 623,
+          "statement": "        rng = self.random_state"
+        }
+      ],
+      "reasoning": "When `random_state` is an integer (e.g., `random_state=1`), the same integer is passed to each per-class `KFold` instance. Since `check_random_state` in `KFold._iter_test_indices` creates a new `RandomState` from the integer seed, every KFold instance produces the IDENTICAL shuffle. This means the i-th index in every class is always assigned to the same test fold, making the shuffling useless for cross-validation. The fix is to convert `self.random_state` to a `RandomState` instance once at the start of `_make_test_folds` so that the state is properly advanced between calls to per-class KFold instances.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

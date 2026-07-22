@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8593": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sphinx-doc__sphinx-8593",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py\nindex 76265f5be..12c11a28a 100644\n--- a/sphinx/ext/autodoc/__init__.py\n+++ b/sphinx/ext/autodoc/__init__.py\n@@ -737,6 +737,14 @@ class Documenter:\n                 isprivate = False\n             else:\n                 isprivate = membername.startswith('_')\n+                if (namespace, membername) in attr_docs:\n+                    # take variable comment into account for metadata\n+                    attr_doc = '\\n'.join(attr_docs[namespace, membername])\n+                    attr_metadata = extract_metadata(attr_doc)\n+                    if 'private' in attr_metadata:\n+                        isprivate = True\n+                    elif 'public' in attr_metadata:\n+                        isprivate = False\n \n             keep = False\n             if safe_getattr(member, '__sphinx_mock__', None) is not None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/__init__.py",
+          "line": 731,
+          "statement": "            metadata = extract_metadata(doc)"
+        }
+      ],
+      "reasoning": "In Documenter.filter_members, member metadata (like :meta public:) is only extracted from the object's __doc__ via getdoc(). For module/class variables the documentation lives in the variable comment stored in attr_docs, so :meta public:/:meta private: in those comments is never considered, causing public-marked private variables to stay hidden.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

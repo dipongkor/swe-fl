@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7910": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "model_patch": "diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py\nindex 10b1ff3a3..bdda20ff7 100644\n--- a/sphinx/ext/napoleon/__init__.py\n+++ b/sphinx/ext/napoleon/__init__.py\n@@ -426,7 +426,8 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,\n     if name != '__weakref__' and has_doc and is_member:\n         cls_is_owner = False\n         if what == 'class' or what == 'exception':\n-            qualname = getattr(obj, '__qualname__', '')\n+            imported_obj = inspect.unwrap(obj)\n+            qualname = getattr(imported_obj, '__qualname__', '')\n             cls_path, _, _ = qualname.rpartition('.')\n             if cls_path:\n                 try:\n@@ -434,11 +435,11 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,\n                         import importlib\n                         import functools\n \n-                        mod = importlib.import_module(obj.__module__)\n+                        mod = importlib.import_module(imported_obj.__module__)\n                         mod_path = cls_path.split('.')\n                         cls = functools.reduce(getattr, mod_path, mod)\n                     else:\n-                        cls = obj.__globals__[cls_path]\n+                        cls = imported_obj.__globals__[cls_path]\n                 except Exception:\n                     cls_is_owner = False\n                 else:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/napoleon/__init__.py",
+          "line": 441,
+          "statement": "                        cls = obj.__globals__[cls_path]"
+        }
+      ],
+      "reasoning": "Owner class detection relied on the decorated function object's globals, which may not include the defining class; this causes decorated __init__ methods to be misclassified and skipped.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

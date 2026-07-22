@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-7671": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "astropy__astropy-7671",
+    "model_patch": "diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py\nindex 3e784f9fc..3bbd3fc26 100644\n--- a/astropy/utils/introspection.py\n+++ b/astropy/utils/introspection.py\n@@ -6,7 +6,8 @@\n import inspect\n import types\n import importlib\n-from distutils.version import LooseVersion\n+\n+from pkg_resources import parse_version\n \n \n __all__ = ['resolve_name', 'minversion', 'find_current_module',\n@@ -140,9 +141,9 @@ def minversion(module, version, inclusive=True, version_path='__version__'):\n         have_version = resolve_name(module.__name__, version_path)\n \n     if inclusive:\n-        return LooseVersion(have_version) >= LooseVersion(version)\n+        return parse_version(have_version) >= parse_version(version)\n     else:\n-        return LooseVersion(have_version) > LooseVersion(version)\n+        return parse_version(have_version) > parse_version(version)\n \n \n def find_current_module(depth=1, finddiff=False):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/utils/introspection.py",
+          "line": 143,
+          "statement": "        return LooseVersion(have_version) >= LooseVersion(version)"
+        },
+        {
+          "file": "astropy/utils/introspection.py",
+          "line": 145,
+          "statement": "        return LooseVersion(have_version) > LooseVersion(version)"
+        }
+      ],
+      "reasoning": "distutils.version.LooseVersion raises a TypeError when comparing versions like '1.14.3' and '1.14dev' due to mixed int/str components (bug bpo-30272). Replacing LooseVersion with pkg_resources.parse_version, which follows PEP 440 and handles such comparisons correctly, fixes minversion.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

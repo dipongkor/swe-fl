@@ -1,0 +1,49 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index 90d90119d0..ab8f53f033 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1298,11 +1298,18 @@ class Window(Expression):
+     def set_source_expressions(self, exprs):
+         self.source_expression, self.partition_by, self.order_by, self.frame = exprs
+ 
++    def _compile_source_expression(self, compiler, connection):
++        # Compile the source expression using as_sql directly to avoid
++        # vendor-specific wrappers (e.g., SQLiteNumericMixin casting a
++        # DecimalField output) being placed inside the OVER clause, which
++        # would result in invalid SQL.
++        return self.source_expression.as_sql(compiler, connection)
++
+     def as_sql(self, compiler, connection, template=None):
+         connection.ops.check_expression_support(self)
+         if not connection.features.supports_over_clause:
+             raise NotSupportedError('This backend does not support window expressions.')
+-        expr_sql, params = compiler.compile(self.source_expression)
++        expr_sql, params = self._compile_source_expression(compiler, connection)
+         window_sql, window_params = [], []
+ 
+         if self.partition_by is not None:
+@@ -1327,10 +1334,22 @@ class Window(Expression):
+         params.extend(window_params)
+         template = template or self.template
+ 
+-        return template % {
++        sql = template % {
+             'expression': expr_sql,
+             'window': ''.join(window_sql).strip()
+-        }, params
++        }
++        # On SQLite, expressions with a DecimalField output must be cast
++        # to NUMERIC to be properly compared. The CAST must wrap the
++        # entire window function call (e.g., ``CAST(LAG(...) OVER (...)
++        # AS NUMERIC)``) rather than just the function (e.g.,
++        # ``CAST(LAG(...) AS NUMERIC) OVER (...)`` which is invalid SQL).
++        if connection.vendor == 'sqlite':
++            try:
++                if self.source_expression.output_field.get_internal_type() == 'DecimalField':
++                    sql = 'CAST(%s AS NUMERIC)' % sql
++            except FieldError:
++                pass
++        return sql, params
+ 
+     def __str__(self):
+         return '{} OVER ({}{}{})'.format(

@@ -1,0 +1,77 @@
+2026-06-30 16:23:20,636 - INFO - Creating container for sphinx-doc__sphinx-8056...
+2026-06-30 16:23:20,711 - INFO - Container for sphinx-doc__sphinx-8056 created: f17845253fd8e4b88a8be3db434f00eecde5190066bc61e79524561d0136b023
+2026-06-30 16:23:21,122 - INFO - Container for sphinx-doc__sphinx-8056 started: f17845253fd8e4b88a8be3db434f00eecde5190066bc61e79524561d0136b023
+2026-06-30 16:23:21,126 - INFO - Intermediate patch for sphinx-doc__sphinx-8056 written to logs/run_evaluation/local-sphinx-8056/openai__gpt-5.3-codex/sphinx-doc__sphinx-8056/patch.diff, now applying to container...
+2026-06-30 16:23:21,620 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/ext/napoleon/docstring.py...
+Applied patch sphinx/ext/napoleon/docstring.py cleanly.
+
+2026-06-30 16:23:22,023 - INFO - Git diff before:
+diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py
+index b3daa06f1..3260ebec6 100644
+--- a/sphinx/ext/napoleon/docstring.py
++++ b/sphinx/ext/napoleon/docstring.py
+@@ -1095,15 +1095,20 @@ class NumpyDocstring(GoogleDocstring):
+         else:
+             _name, _type = line, ''
+         _name, _type = _name.strip(), _type.strip()
+-        _name = self._escape_args_and_kwargs(_name)
++
++        if prefer_type and not _type:
++            _type, _name = _name, _type
++
++        names = [_name]
++        if _name and ',' in _name:
++            names = [name.strip() for name in _name.split(',') if name.strip()]
++
++        _name = ', '.join(self._escape_args_and_kwargs(name) for name in names)
+         _type = _convert_numpy_type_spec(
+             _type,
+             location=self._get_location(),
+             translations=self._config.napoleon_type_aliases or {},
+         )
+-
+-        if prefer_type and not _type:
+-            _type, _name = _name, _type
+         indent = self._get_indent(line) + 1
+         _desc = self._dedent(self._consume_indented_block(indent))
+         _desc = self.__class__(_desc, self._config).lines()
+2026-06-30 16:23:22,027 - INFO - Eval script for sphinx-doc__sphinx-8056 written to logs/run_evaluation/local-sphinx-8056/openai__gpt-5.3-codex/sphinx-doc__sphinx-8056/eval.sh; copying to container...
+2026-06-30 16:23:26,591 - INFO - Test runtime: 4.29 seconds
+2026-06-30 16:23:26,595 - INFO - Test output for sphinx-doc__sphinx-8056 written to logs/run_evaluation/local-sphinx-8056/openai__gpt-5.3-codex/sphinx-doc__sphinx-8056/test_output.txt
+2026-06-30 16:23:26,835 - INFO - Git diff after:
+diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py
+index b3daa06f1..3260ebec6 100644
+--- a/sphinx/ext/napoleon/docstring.py
++++ b/sphinx/ext/napoleon/docstring.py
+@@ -1095,15 +1095,20 @@ class NumpyDocstring(GoogleDocstring):
+         else:
+             _name, _type = line, ''
+         _name, _type = _name.strip(), _type.strip()
+-        _name = self._escape_args_and_kwargs(_name)
++
++        if prefer_type and not _type:
++            _type, _name = _name, _type
++
++        names = [_name]
++        if _name and ',' in _name:
++            names = [name.strip() for name in _name.split(',') if name.strip()]
++
++        _name = ', '.join(self._escape_args_and_kwargs(name) for name in names)
+         _type = _convert_numpy_type_spec(
+             _type,
+             location=self._get_location(),
+             translations=self._config.napoleon_type_aliases or {},
+         )
+-
+-        if prefer_type and not _type:
+-            _type, _name = _name, _type
+         indent = self._get_indent(line) + 1
+         _desc = self._dedent(self._consume_indented_block(indent))
+         _desc = self.__class__(_desc, self._config).lines()
+2026-06-30 16:23:26,835 - INFO - Grading answer for sphinx-doc__sphinx-8056...
+2026-06-30 16:23:26,843 - INFO - report: {'sphinx-doc__sphinx-8056': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_multiple_parameters']}, 'PASS_TO_PASS': {'success': ['tests/test_ext_napoleon_docstring.py::NamedtupleSubclassTest::test_attributes_docstring', 'tests/test_ext_napoleon_docstring.py::InlineAttributeTest::test_class_data_member', 'tests/test_ext_napoleon_docstring.py::InlineAttributeTest::test_class_data_member_inline', 'tests/test_ext_napoleon_docstring.py::InlineAttributeTest::test_class_data_member_inline_no_type', 'tests/test_ext_napoleon_docstring.py::InlineAttributeTest::test_class_data_member_inline_ref_in_type', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_attributes_with_class_reference', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_code_block_in_returns_section', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_colon_in_return_type', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_custom_generic_sections', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_docstrings', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_keywords_with_types', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_kwargs_in_arguments', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_list_in_parameter_description', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_noindex', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_parameters_with_class_reference', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_raises_types', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_section_header_formatting', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_sphinx_admonitions', 'tests/test_ext_napoleon_docstring.py::GoogleDocstringTest::test_xrefs_in_return_type', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_colon_in_return_type', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_convert_numpy_type_spec', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_list_in_parameter_description', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_parameter_types', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_parameters_with_class_reference', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_parameters_without_class_reference', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_recombine_set_tokens', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_recombine_set_tokens_invalid', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_section_header_underline_length', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_see_also_refs', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_sphinx_admonitions', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_token_type', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_tokenize_type_spec', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_underscore_in_attribute', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_underscore_in_attribute_strip_signature_backslash', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_xrefs_in_return_type', 'tests/test_ext_napoleon_docstring.py::TestNumpyDocstring::test_escape_args_and_kwargs[x,', 'tests/test_ext_napoleon_docstring.py::TestNumpyDocstring::test_escape_args_and_kwargs[*args,', 'tests/test_ext_napoleon_docstring.py::TestNumpyDocstring::test_escape_args_and_kwargs[*x,'], 'failure': ['tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_docstrings', 'tests/test_ext_napoleon_docstring.py::NumpyDocstringTest::test_raises_types']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-8056: resolved: False
+2026-06-30 16:23:26,846 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-8056.local-sphinx-8056...
+2026-06-30 16:23:42,323 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-8056.local-sphinx-8056...
+2026-06-30 16:23:42,391 - INFO - Container sweb.eval.sphinx-doc__sphinx-8056.local-sphinx-8056 removed.

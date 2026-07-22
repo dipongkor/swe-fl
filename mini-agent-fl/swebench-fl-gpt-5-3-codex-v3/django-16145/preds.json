@@ -1,0 +1,19 @@
+{
+  "django__django-16145": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-16145",
+    "model_patch": "diff --git a/django/core/management/commands/runserver.py b/django/core/management/commands/runserver.py\nindex 3c39f57e4d..78db4fef08 100644\n--- a/django/core/management/commands/runserver.py\n+++ b/django/core/management/commands/runserver.py\n@@ -105,6 +105,8 @@ class Command(BaseCommand):\n                     self._raw_ipv6 = True\n                 elif self.use_ipv6 and not _fqdn:\n                     raise CommandError('\"%s\" is not a valid IPv6 address.' % self.addr)\n+                elif _ipv4 and self.addr == \"0\":\n+                    self.addr = \"0.0.0.0\"\n         if not self.addr:\n             self.addr = self.default_addr_ipv6 if self.use_ipv6 else self.default_addr\n             self._raw_ipv6 = self.use_ipv6\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/management/commands/runserver.py",
+          "line": 98,
+          "statement": "            self.addr, _ipv4, _ipv6, _fqdn, self.port = m.groups()"
+        }
+      ],
+      "reasoning": "The parsed IPv4 host token is used directly for display and binding; when given '0:8000', addr remains '0' and is printed as http://0:8000/ instead of normalizing to the documented equivalent 0.0.0.0.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

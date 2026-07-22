@@ -1,0 +1,19 @@
+{
+  "django__django-14315": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-14315",
+    "model_patch": "diff --git a/django/db/backends/base/client.py b/django/db/backends/base/client.py\nindex 339f1e863c..335f7bcded 100644\n--- a/django/db/backends/base/client.py\n+++ b/django/db/backends/base/client.py\n@@ -21,6 +21,6 @@ class BaseDatabaseClient:\n \n     def runshell(self, parameters):\n         args, env = self.settings_to_cmd_args_env(self.connection.settings_dict, parameters)\n-        if env:\n+        if env is not None:\n             env = {**os.environ, **env}\n         subprocess.run(args, env=env, check=True)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/base/client.py",
+          "line": 24,
+          "statement": "        if env:"
+        }
+      ],
+      "reasoning": "The `if env:` check treats an empty dict `{}` as falsy, so when the postgresql client returns an empty dict (no password/ssl/service options set), the merge with os.environ is skipped and subprocess.run is called with env={}, meaning an empty environment is passed to the subprocess. Changing the check to `if env is not None:` ensures that an empty dict is still merged with os.environ, while still allowing None to bypass the merge (so the subprocess inherits the parent's environment).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

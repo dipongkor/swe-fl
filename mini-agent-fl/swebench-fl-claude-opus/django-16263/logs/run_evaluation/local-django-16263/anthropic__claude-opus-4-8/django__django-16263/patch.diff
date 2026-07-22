@@ -1,0 +1,137 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index 86a3a92f07..67c6336fcd 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -428,6 +428,13 @@ class BaseExpression:
+             cols.extend(source.get_group_by_cols())
+         return cols
+ 
++    def get_refs(self):
++        refs = set()
++        for expr in self.get_source_expressions():
++            if expr is not None:
++                refs |= expr.get_refs()
++        return refs
++
+     def get_source_fields(self):
+         """Return the underlying field types used by this aggregate."""
+         return [e._output_field_or_none for e in self.get_source_expressions()]
+@@ -1160,6 +1167,9 @@ class Ref(Expression):
+     def set_source_expressions(self, exprs):
+         (self.source,) = exprs
+ 
++    def get_refs(self):
++        return {self.refs}
++
+     def resolve_expression(
+         self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False
+     ):
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index 9735ce10c8..2f94d59e1b 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -441,10 +441,65 @@ class Query(BaseExpression):
+         """
+         if not self.annotation_select:
+             return {}
++        added_aggregate_names = set(added_aggregate_names)
++        # Mask any annotations that are not referenced by the added aggregates,
++        # filters, ordering, or (transitively) by other referenced annotations.
++        # Such annotations only contribute to the SELECT clause and can be
++        # safely excluded, which allows e.g. QuerySet.count() to skip computing
++        # unused annotations.
++        referenced_aliases = set()
++        for alias in added_aggregate_names:
++            referenced_aliases |= self.annotations[alias].get_refs()
++        if self.where:
++            referenced_aliases |= self.where.get_refs()
++        for expr in self.order_by:
++            if hasattr(expr, "get_refs"):
++                referenced_aliases |= expr.get_refs()
++            elif isinstance(expr, str):
++                referenced_aliases.add(expr.lstrip("-"))
++        if isinstance(self.group_by, tuple):
++            for expr in self.group_by:
++                if hasattr(expr, "get_refs"):
++                    referenced_aliases |= expr.get_refs()
++        # Follow references between annotations transitively.
++        to_visit = list(referenced_aliases)
++        while to_visit:
++            alias = to_visit.pop()
++            annotation = self.annotations.get(alias)
++            if annotation is None:
++                continue
++            for ref in annotation.get_refs():
++                if ref not in referenced_aliases:
++                    referenced_aliases.add(ref)
++                    to_visit.append(ref)
++        # Whether the query uses any existing (i.e. not added) aggregate
++        # annotation must be determined before masking as masked aggregate
++        # annotations still require grouping by the primary key to avoid
++        # multiplied rows from multivalued relations.
++        has_existing_aggregate_annotations = any(
++            getattr(annotation, "contains_aggregate", True)
++            for alias, annotation in self.annotations.items()
++            if alias not in added_aggregate_names
++        )
++        # Filtering against window functions is required to be performed in a
++        # subquery that includes the referenced annotations, so masking is
++        # unsafe in that case as the window expressions are inlined in the
++        # WHERE clause rather than referenced by alias.
++        can_mask = not self.where.contains_over_clause
++        if can_mask:
++            annotation_mask = {
++                alias
++                for alias in self.annotation_select
++                if alias in added_aggregate_names or alias in referenced_aliases
++            }
++        else:
++            annotation_mask = set(self.annotation_select)
++        if annotation_mask != set(self.annotation_select):
++            self.set_annotation_mask(annotation_mask)
+         existing_annotations = [
+             annotation
+             for alias, annotation in self.annotations.items()
+-            if alias not in added_aggregate_names
++            if alias not in added_aggregate_names and alias in annotation_mask
+         ]
+         # Decide if we need to use a subquery.
+         #
+@@ -461,6 +516,7 @@ class Query(BaseExpression):
+             isinstance(self.group_by, tuple)
+             or self.is_sliced
+             or existing_annotations
++            or has_existing_aggregate_annotations
+             or self.distinct
+             or self.combinator
+         ):
+@@ -482,11 +538,6 @@ class Query(BaseExpression):
+                 # query is grouped by the main model's primary key. However,
+                 # clearing the select clause can alter results if distinct is
+                 # used.
+-                has_existing_aggregate_annotations = any(
+-                    annotation
+-                    for annotation in existing_annotations
+-                    if getattr(annotation, "contains_aggregate", True)
+-                )
+                 if inner_query.default_cols and has_existing_aggregate_annotations:
+                     inner_query.group_by = (
+                         self.model._meta.pk.get_col(inner_query.get_initial_alias()),
+diff --git a/django/db/models/sql/where.py b/django/db/models/sql/where.py
+index 1928ba91b8..da0898c189 100644
+--- a/django/db/models/sql/where.py
++++ b/django/db/models/sql/where.py
+@@ -194,6 +194,13 @@ class WhereNode(tree.Node):
+         assert len(children) == len(self.children)
+         self.children = children
+ 
++    def get_refs(self):
++        refs = set()
++        for child in self.children:
++            if hasattr(child, "get_refs"):
++                refs |= child.get_refs()
++        return refs
++
+     def relabel_aliases(self, change_map):
+         """
+         Relabel the alias values of any children. 'change_map' is a dictionary

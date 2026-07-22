@@ -1,0 +1,19 @@
+{
+  "psf__requests-2931": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "psf__requests-2931",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 9c624d3..157e2b5 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -80,7 +80,9 @@ class RequestEncodingMixin(object):\n         if parameters are supplied as a dict.\n         \"\"\"\n \n-        if isinstance(data, (str, bytes)):\n+        if isinstance(data, bytes):\n+            return data\n+        elif isinstance(data, str):\n             return to_native_string(data)\n         elif hasattr(data, 'read'):\n             return data\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 84,
+          "statement": "            return to_native_string(data)"
+        }
+      ],
+      "reasoning": "Binary request bodies were passed through to_native_string, which decodes bytes using ASCII and fails for non-ASCII payloads. Raw bytes should be sent unchanged.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

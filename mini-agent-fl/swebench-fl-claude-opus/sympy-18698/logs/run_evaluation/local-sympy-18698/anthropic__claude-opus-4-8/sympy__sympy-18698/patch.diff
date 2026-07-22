@@ -1,0 +1,24 @@
+diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py
+index c9e77a901f..733af9200f 100644
+--- a/sympy/polys/polytools.py
++++ b/sympy/polys/polytools.py
+@@ -2,7 +2,8 @@
+ 
+ from __future__ import print_function, division
+ 
+-from functools import wraps
++from functools import reduce, wraps
++from operator import mul
+ 
+ from sympy.core import (
+     S, Basic, Expr, I, Integer, Add, Mul, Dummy, Tuple
+@@ -5949,6 +5950,9 @@ def _symbolic_factor_list(expr, opt, method):
+                         other.append((f, k))
+ 
+                 factors.append((_factors_product(other), exp))
++    if method == 'sqf':
++        factors = [(reduce(mul, (f for f, _ in factors if _ == k)), k)
++                   for k in set(i for _, i in factors)]
+ 
+     return coeff, factors
+ 

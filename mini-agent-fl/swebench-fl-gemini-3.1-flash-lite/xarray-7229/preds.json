@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-7229": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pydata__xarray-7229",
+    "model_patch": "diff --git a/xarray/core/computation.py b/xarray/core/computation.py\nindex 3f7e8f74..5695661f 100644\n--- a/xarray/core/computation.py\n+++ b/xarray/core/computation.py\n@@ -1860,7 +1860,7 @@ def where(cond, x, y, keep_attrs=None):\n     if keep_attrs is True:\n         # keep the attributes of x, the second parameter, by default to\n         # be consistent with the `where` method of `DataArray` and `Dataset`\n-        keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})\n+        keep_attrs = True\n \n     # alignment for three arguments is complicated, so don't support it yet\n     return apply_ufunc(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/computation.py",
+          "line": 1863,
+          "statement": "keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})"
+        }
+      ],
+      "reasoning": "The lambda function in keep_attrs incorrectly returns the attributes of the DataArray (x) for all variables, including coordinates, which causes coordinate attributes to be overwritten by DataArray attributes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

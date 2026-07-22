@@ -1,0 +1,13 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index 280cb967b4..d6bbf1208c 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -1699,7 +1699,7 @@ class Window(SQLiteNumericMixin, Expression):
+     # Although the main expression may either be an aggregate or an
+     # expression with an aggregate function, the GROUP BY that will
+     # be introduced in the query as a result is not desired.
+-    contains_aggregate = False
++    contains_aggregate = True
+     contains_over_clause = True
+ 
+     def __init__(

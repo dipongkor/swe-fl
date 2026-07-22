@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-8872": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "astropy__astropy-8872",
+    "model_patch": "diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py\nindex ded609cbe..e6378f41d 100644\n--- a/astropy/units/quantity.py\n+++ b/astropy/units/quantity.py\n@@ -296,7 +296,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):\n                 if not copy:\n                     return value\n \n-                if not (np.can_cast(np.float32, value.dtype) or\n+                if not (np.can_cast(np.float16, value.dtype) or\n                         value.dtype.fields):\n                     dtype = float\n \n@@ -377,7 +377,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):\n                             \"Numpy numeric type.\")\n \n         # by default, cast any integer, boolean, etc., to float\n-        if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n+        if dtype is None and (not (np.can_cast(np.float16, value.dtype)\n                                    or value.dtype.fields)\n                               or value.dtype.kind == 'O'):\n             value = value.astype(float)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/units/quantity.py",
+          "line": 380,
+          "statement": "        if dtype is None and (not (np.can_cast(np.float32, value.dtype)"
+        },
+        {
+          "file": "astropy/units/quantity.py",
+          "line": 299,
+          "statement": "                if not (np.can_cast(np.float32, value.dtype) or"
+        }
+      ],
+      "reasoning": "The check np.can_cast(np.float32, value.dtype) is used to decide whether to leave floating-point data as-is or cast to float64. For a float16 dtype, np.can_cast(np.float32, np.float16) returns False (float16 cannot losslessly hold a float32), so float16 quantities are incorrectly upgraded to float64. Using np.float16 as the source type preserves all float and complex dtypes while still casting ints/bools to float.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-16597": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-16597",
+    "model_patch": "diff --git a/sympy/assumptions/ask_generated.py b/sympy/assumptions/ask_generated.py\nindex 3d9772a1d..696e5ae79 100644\n--- a/sympy/assumptions/ask_generated.py\n+++ b/sympy/assumptions/ask_generated.py\n@@ -25,6 +25,7 @@ def get_known_facts_cnf():\n         Q.even | ~Q.zero,\n         Q.extended_real | ~Q.infinite,\n         Q.extended_real | ~Q.real,\n+        Q.finite | ~Q.even,\n         Q.fullrank | ~Q.invertible,\n         Q.hermitian | ~Q.real,\n         Q.integer | ~Q.even,\n@@ -98,7 +99,7 @@ def get_known_facts_dict():\n         Q.diagonal: set([Q.diagonal, Q.lower_triangular, Q.normal, Q.square,\n         Q.symmetric, Q.triangular, Q.upper_triangular]),\n         Q.even: set([Q.algebraic, Q.complex, Q.even, Q.extended_real,\n-        Q.hermitian, Q.integer, Q.rational, Q.real]),\n+        Q.finite, Q.hermitian, Q.integer, Q.rational, Q.real]),\n         Q.extended_real: set([Q.extended_real]),\n         Q.finite: set([Q.finite]),\n         Q.fullrank: set([Q.fullrank]),\n@@ -148,6 +149,6 @@ def get_known_facts_dict():\n         Q.unitary]),\n         Q.upper_triangular: set([Q.triangular, Q.upper_triangular]),\n         Q.zero: set([Q.algebraic, Q.complex, Q.even, Q.extended_real,\n-        Q.hermitian, Q.integer, Q.nonnegative, Q.nonpositive,\n-        Q.rational, Q.real, Q.zero]),\n+        Q.finite, Q.hermitian, Q.integer, Q.nonnegative,\n+        Q.nonpositive, Q.rational, Q.real, Q.zero]),\n     }\ndiff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py\nindex ce4dd30f2..78666f7e2 100644\n--- a/sympy/core/assumptions.py\n+++ b/sympy/core/assumptions.py\n@@ -168,6 +168,10 @@\n     'algebraic      ->  complex',\n     'real           ->  complex',\n     'real           ->  hermitian',\n+    'even           ->  finite',\n+    'odd            ->  finite',\n+    'integer        ->  finite',\n+    'rational       ->  finite',\n     'imaginary      ->  complex',\n     'imaginary      ->  antihermitian',\n     'complex        ->  commutative',\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/assumptions.py",
+          "line": 143,
+          "statement": "'real           ->  hermitian',"
+        }
+      ],
+      "reasoning": "The assumption system lacked the implication that even, odd, integer, and rational numbers are finite. Adding these implications ensures that these properties correctly imply finiteness.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

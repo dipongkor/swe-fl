@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-8707": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "astropy__astropy-8707",
+    "model_patch": "diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py\nindex 8c1ac5d73..1ce974a87 100644\n--- a/astropy/io/fits/card.py\n+++ b/astropy/io/fits/card.py\n@@ -5,7 +5,7 @@ import warnings\n \n import numpy as np\n \n-from .util import _str_to_num, _is_int, translate, _words_group\n+from .util import _str_to_num, _is_int, translate, _words_group, decode_ascii\n from .verify import _Verify, _ErrList, VerifyError, VerifyWarning\n \n from . import conf\n@@ -554,7 +554,7 @@ class Card(_Verify):\n         \"\"\"\n \n         card = cls()\n-        card._image = _pad(image)\n+        card._image = _pad(decode_ascii(image))\n         card._verified = False\n         return card\n \ndiff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py\nindex ad07e6d52..69c3f234f 100644\n--- a/astropy/io/fits/header.py\n+++ b/astropy/io/fits/header.py\n@@ -348,6 +348,9 @@ class Header:\n             A new `Header` instance.\n         \"\"\"\n \n+        data = decode_ascii(data)\n+        sep = decode_ascii(sep)\n+\n         cards = []\n \n         # If the card separator contains characters that may validly appear in\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/io/fits/header.py",
+          "line": 361,
+          "statement": "        require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)"
+        },
+        {
+          "file": "astropy/io/fits/card.py",
+          "line": 557,
+          "statement": "        card._image = _pad(decode_ascii(image))"
+        }
+      ],
+      "reasoning": "Header.fromstring and Card.fromstring treated input as text and performed string operations directly, which fails or behaves inconsistently for Python 3 bytes. Decoding bytes to ASCII text at method boundaries makes behavior consistent with fromfile and existing parsing logic.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

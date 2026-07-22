@@ -1,0 +1,121 @@
+2026-06-30 04:53:39,091 - INFO - Creating container for astropy__astropy-8707...
+2026-06-30 04:53:39,175 - INFO - Container for astropy__astropy-8707 created: cdc4457816fcd1b49c0792d49de248aa349348e77ca8b53d1c15babbbf96de38
+2026-06-30 04:53:39,601 - INFO - Container for astropy__astropy-8707 started: cdc4457816fcd1b49c0792d49de248aa349348e77ca8b53d1c15babbbf96de38
+2026-06-30 04:53:39,605 - INFO - Intermediate patch for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/anthropic__claude-opus-4-8/astropy__astropy-8707/patch.diff, now applying to container...
+2026-06-30 04:53:40,069 - INFO - >>>>> Applied Patch:
+Checking patch astropy/io/fits/card.py...
+Checking patch astropy/io/fits/header.py...
+Applied patch astropy/io/fits/card.py cleanly.
+Applied patch astropy/io/fits/header.py cleanly.
+
+2026-06-30 04:53:40,767 - INFO - Git diff before:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..50ea30a96 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -554,6 +554,13 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
++        if isinstance(image, bytes):
++            # FITS supports only ASCII, but decode as latin1 so that any
++            # invalid bytes that might appear in malformatted FITS files can be
++            # retained (rather than raising an exception, as would happen if we
++            # decoded as ASCII).
++            image = image.decode('latin1')
++
+         card._image = _pad(image)
+         card._verified = False
+         return card
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..a18849ba3 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -334,8 +334,11 @@ class Header:
+ 
+         Parameters
+         ----------
+-        data : str
+-           String containing the entire header.
++        data : str or bytes
++           String or bytes containing the entire header.  In the case of bytes
++           they will be decoded using latin-1 (only plain ASCII characters are
++           allowed in FITS headers but latin-1 allows us to retain any invalid
++           bytes that might appear in malformatted FITS files).
+ 
+         sep : str, optional
+             The string separating cards from each other, such as a newline.  By
+@@ -357,6 +360,13 @@ class Header:
+         # immediately at the separator
+         require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
+ 
++        if isinstance(data, bytes):
++            # FITS supports only ASCII, but decode as latin1 so that any
++            # invalid bytes that might appear in malformatted FITS files can be
++            # retained (rather than raising an exception, as would happen if we
++            # decoded as ASCII).
++            data = data.decode('latin1')
++
+         # Split the header into individual cards
+         idx = 0
+         image = []
+2026-06-30 04:53:40,771 - INFO - Eval script for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/anthropic__claude-opus-4-8/astropy__astropy-8707/eval.sh; copying to container...
+2026-06-30 04:54:24,192 - INFO - Test runtime: 43.15 seconds
+2026-06-30 04:54:24,202 - INFO - Test output for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/anthropic__claude-opus-4-8/astropy__astropy-8707/test_output.txt
+2026-06-30 04:54:24,417 - INFO - Git diff after:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..50ea30a96 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -554,6 +554,13 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
++        if isinstance(image, bytes):
++            # FITS supports only ASCII, but decode as latin1 so that any
++            # invalid bytes that might appear in malformatted FITS files can be
++            # retained (rather than raising an exception, as would happen if we
++            # decoded as ASCII).
++            image = image.decode('latin1')
++
+         card._image = _pad(image)
+         card._verified = False
+         return card
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..a18849ba3 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -334,8 +334,11 @@ class Header:
+ 
+         Parameters
+         ----------
+-        data : str
+-           String containing the entire header.
++        data : str or bytes
++           String or bytes containing the entire header.  In the case of bytes
++           they will be decoded using latin-1 (only plain ASCII characters are
++           allowed in FITS headers but latin-1 allows us to retain any invalid
++           bytes that might appear in malformatted FITS files).
+ 
+         sep : str, optional
+             The string separating cards from each other, such as a newline.  By
+@@ -357,6 +360,13 @@ class Header:
+         # immediately at the separator
+         require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
+ 
++        if isinstance(data, bytes):
++            # FITS supports only ASCII, but decode as latin1 so that any
++            # invalid bytes that might appear in malformatted FITS files can be
++            # retained (rather than raising an exception, as would happen if we
++            # decoded as ASCII).
++            data = data.decode('latin1')
++
+         # Split the header into individual cards
+         idx = 0
+         image = []
+2026-06-30 04:54:24,417 - INFO - Grading answer for astropy__astropy-8707...
+2026-06-30 04:54:24,569 - INFO - report: {'astropy__astropy-8707': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_from_bytes']}, 'PASS_TO_PASS': {'success': ['astropy/io/fits/tests/test_header.py::test_shallow_copy', 'astropy/io/fits/tests/test_header.py::test_init_with_header', 'astropy/io/fits/tests/test_header.py::test_init_with_dict', 'astropy/io/fits/tests/test_header.py::test_init_with_ordereddict'], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_rename_keyword', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_constructor_default_args', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_string_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_boolean_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_integer_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_floating_point_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_complex_value_card']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-8707: resolved: False
+2026-06-30 04:54:24,572 - INFO - Attempting to stop container sweb.eval.astropy__astropy-8707.local-astropy-8707...
+2026-06-30 04:54:40,052 - INFO - Attempting to remove container sweb.eval.astropy__astropy-8707.local-astropy-8707...
+2026-06-30 04:54:40,133 - INFO - Container sweb.eval.astropy__astropy-8707.local-astropy-8707 removed.

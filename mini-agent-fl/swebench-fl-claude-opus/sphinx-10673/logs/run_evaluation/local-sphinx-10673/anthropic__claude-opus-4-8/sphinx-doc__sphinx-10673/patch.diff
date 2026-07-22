@@ -1,0 +1,63 @@
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 35e16e623..831a985f8 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -118,6 +118,11 @@ class TocTree(SphinxDirective):
+                 docname = docname_join(self.env.docname, docname)
+                 if url_re.match(ref) or ref == 'self':
+                     toctree['entries'].append((title, ref))
++                elif docname in ('genindex', 'modindex', 'search'):
++                    # add these special docnames to the toctree without
++                    # complaint (they will be rendered as links to the
++                    # generated index/search pages)
++                    toctree['entries'].append((title, ref))
+                 elif docname not in self.env.found_docs:
+                     if excluded(self.env.doc2path(docname, False)):
+                         message = __('toctree contains reference to excluded document %r')
+diff --git a/sphinx/environment/adapters/toctree.py b/sphinx/environment/adapters/toctree.py
+index 9678e3c7c..ad9e5d523 100644
+--- a/sphinx/environment/adapters/toctree.py
++++ b/sphinx/environment/adapters/toctree.py
+@@ -6,7 +6,7 @@ from docutils import nodes
+ from docutils.nodes import Element, Node
+ 
+ from sphinx import addnodes
+-from sphinx.locale import __
++from sphinx.locale import _, __
+ from sphinx.util import logging, url_re
+ from sphinx.util.matching import Matcher
+ from sphinx.util.nodes import clean_astext, process_only_nodes
+@@ -139,6 +139,17 @@ class TocTree:
+                         item = nodes.list_item('', para)
+                         # don't show subitems
+                         toc = nodes.bullet_list('', item)
++                    elif ref in ('genindex', 'modindex', 'search'):
++                        # add a reference to the special generated pages
++                        # (general index, module index and search page)
++                        if title is None:
++                            title = self._toctree_special_page_title(ref)
++                        reference = nodes.reference('', '', internal=True,
++                                                    refuri=ref, anchorname='',
++                                                    *[nodes.Text(title)])
++                        para = addnodes.compact_paragraph('', '', reference)
++                        item = nodes.list_item('', para)
++                        toc = nodes.bullet_list('', item)
+                     else:
+                         if ref in parents:
+                             logger.warning(__('circular toctree references '
+@@ -258,6 +269,15 @@ class TocTree:
+                     docname, refnode['refuri']) + refnode['anchorname']
+         return newnode
+ 
++    @staticmethod
++    def _toctree_special_page_title(ref: str) -> str:
++        """Return the default title for a special generated page."""
++        return {
++            'genindex': _('Index'),
++            'modindex': _('Module Index'),
++            'search': _('Search Page'),
++        }[ref]
++
+     def get_toctree_ancestors(self, docname: str) -> List[str]:
+         parent = {}
+         for p, children in self.env.toctree_includes.items():

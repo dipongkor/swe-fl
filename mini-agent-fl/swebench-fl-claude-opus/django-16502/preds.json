@@ -1,0 +1,19 @@
+{
+  "django__django-16502": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-16502",
+    "model_patch": "diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py\nindex fef5532e58..bf32ec13bb 100644\n--- a/django/core/servers/basehttp.py\n+++ b/django/core/servers/basehttp.py\n@@ -143,6 +143,19 @@ class ServerHandler(simple_server.ServerHandler):\n         if self.headers.get(\"Connection\") == \"close\":\n             self.request_handler.close_connection = True\n \n+    def finish_response(self):\n+        # For compliance with RFC 2616, section 4.3, don't return a response\n+        # body for HEAD requests (the common WSGI servers already do this so\n+        # Django doesn't strip it; but runserver must handle it itself).\n+        if self.environ[\"REQUEST_METHOD\"] != \"HEAD\":\n+            super().finish_response()\n+        else:\n+            try:\n+                # Close the iterable, if any, and send the headers only.\n+                self.finish_content()\n+            finally:\n+                self.close()\n+\n     def close(self):\n         self.get_stdin().read()\n         super().close()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/servers/basehttp.py",
+          "line": 113,
+          "statement": "class ServerHandler(simple_server.ServerHandler):"
+        }
+      ],
+      "reasoning": "runserver's ServerHandler inherited wsgiref's finish_response, which unconditionally writes the response body for every request including HEAD; after #26052 Django no longer strips bodies, so ServerHandler must skip the body for HEAD requests to comply with RFC 2616 section 4.3.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

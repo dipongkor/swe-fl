@@ -1,0 +1,19 @@
+{
+  "psf__requests-2317": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "psf__requests-2317",
+    "model_patch": "diff --git a/requests/sessions.py b/requests/sessions.py\nindex d701ff2..6f3a845 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -425,7 +425,10 @@ class Session(SessionRedirectMixin):\n             If Tuple, ('cert', 'key') pair.\n         \"\"\"\n \n-        method = builtin_str(method)\n+        if isinstance(method, bytes):\n+            method = method.decode('utf-8')\n+        else:\n+            method = builtin_str(method)\n \n         # Create the Request.\n         req = Request(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/sessions.py",
+          "line": 428,
+          "statement": "method = builtin_str(method)"
+        }
+      ],
+      "reasoning": "The use of builtin_str(method) on a bytes object in Python 3 converts it to a string representation like \"b'GET'\" instead of decoding it, which causes invalid HTTP methods.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

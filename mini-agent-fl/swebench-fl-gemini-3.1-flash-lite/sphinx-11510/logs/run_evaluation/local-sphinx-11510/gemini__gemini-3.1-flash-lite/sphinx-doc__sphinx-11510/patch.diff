@@ -1,0 +1,26 @@
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 19f7c0a8d..38487d741 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -369,14 +369,19 @@ class Include(BaseInclude, SphinxDirective):
+     """
+ 
+     def run(self) -> list[Node]:
+-        if self.arguments[0].startswith('<') and \
+-           self.arguments[0].endswith('>'):
++        if self.arguments[0].startswith('<') and            self.arguments[0].endswith('>'):
+             # docutils "standard" includes, do not do path processing
+             return super().run()
+         rel_filename, filename = self.env.relfn2path(self.arguments[0])
+         self.arguments[0] = filename
+         self.env.note_included(filename)
+         return super().run()
++    
++    def read_file(self, path: str) -> str:
++        content = super().read_file(path)
++        arg = [content]
++        self.env.app.emit('source-read', path, arg)
++        return arg[0]
+ 
+ 
+ def setup(app: Sphinx) -> dict[str, Any]:

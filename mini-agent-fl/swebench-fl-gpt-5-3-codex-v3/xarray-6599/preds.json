@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-6599": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pydata__xarray-6599",
+    "model_patch": "diff --git a/xarray/core/computation.py b/xarray/core/computation.py\nindex 823cbe02..2d1737d9 100644\n--- a/xarray/core/computation.py\n+++ b/xarray/core/computation.py\n@@ -1933,7 +1933,7 @@ def _ensure_numeric(data: T_Xarray) -> T_Xarray:\n     from .dataset import Dataset\n \n     def to_floatable(x: DataArray) -> DataArray:\n-        if x.dtype.kind in \"mM\":\n+        if x.dtype.kind == \"M\":\n             return x.copy(\n                 data=datetime_to_numeric(\n                     x.data,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/computation.py",
+          "line": 1935,
+          "statement": "        if x.dtype.kind in \"mM\":"
+        }
+      ],
+      "reasoning": "_ensure_numeric converted timedelta64 values to numeric timestamps using a datetime epoch, which changed polynomial evaluation scale and produced incorrect results for timedelta coordinates. Only datetime64 should be converted here.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

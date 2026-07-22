@@ -1,0 +1,17 @@
+diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py
+index 773f545af..b399183a7 100644
+--- a/src/_pytest/unittest.py
++++ b/src/_pytest/unittest.py
+@@ -222,7 +222,11 @@ class TestCaseFunction(Function):
+             # when absolutely needed
+             if self.config.getoption("usepdb"):
+                 self._explicit_tearDown = self._testcase.tearDown
+-                setattr(self._testcase, "tearDown", lambda *args: None)
++
++                def tearDown(*args):
++                    pass
++
++                setattr(self._testcase, "tearDown", tearDown)
+ 
+             # we need to update the actual bound method with self.obj, because
+             # wrap_pytest_function_for_tracing replaces self.obj by a wrapper

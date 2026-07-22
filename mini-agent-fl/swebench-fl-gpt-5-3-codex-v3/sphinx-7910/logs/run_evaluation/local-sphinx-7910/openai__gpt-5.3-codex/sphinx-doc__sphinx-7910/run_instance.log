@@ -1,0 +1,75 @@
+2026-06-30 16:15:29,509 - INFO - Creating container for sphinx-doc__sphinx-7910...
+2026-06-30 16:15:29,604 - INFO - Container for sphinx-doc__sphinx-7910 created: f992952459978e5a5b4c8c06340503a766ce8f03435d6bc15e82c0f4a1ce96ab
+2026-06-30 16:15:30,037 - INFO - Container for sphinx-doc__sphinx-7910 started: f992952459978e5a5b4c8c06340503a766ce8f03435d6bc15e82c0f4a1ce96ab
+2026-06-30 16:15:30,040 - INFO - Intermediate patch for sphinx-doc__sphinx-7910 written to logs/run_evaluation/local-sphinx-7910/openai__gpt-5.3-codex/sphinx-doc__sphinx-7910/patch.diff, now applying to container...
+2026-06-30 16:15:30,511 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/ext/napoleon/__init__.py...
+Applied patch sphinx/ext/napoleon/__init__.py cleanly.
+
+2026-06-30 16:15:30,922 - INFO - Git diff before:
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+index 10b1ff3a3..bdda20ff7 100644
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -426,7 +426,8 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+     if name != '__weakref__' and has_doc and is_member:
+         cls_is_owner = False
+         if what == 'class' or what == 'exception':
+-            qualname = getattr(obj, '__qualname__', '')
++            imported_obj = inspect.unwrap(obj)
++            qualname = getattr(imported_obj, '__qualname__', '')
+             cls_path, _, _ = qualname.rpartition('.')
+             if cls_path:
+                 try:
+@@ -434,11 +435,11 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+                         import importlib
+                         import functools
+ 
+-                        mod = importlib.import_module(obj.__module__)
++                        mod = importlib.import_module(imported_obj.__module__)
+                         mod_path = cls_path.split('.')
+                         cls = functools.reduce(getattr, mod_path, mod)
+                     else:
+-                        cls = obj.__globals__[cls_path]
++                        cls = imported_obj.__globals__[cls_path]
+                 except Exception:
+                     cls_is_owner = False
+                 else:
+2026-06-30 16:15:30,925 - INFO - Eval script for sphinx-doc__sphinx-7910 written to logs/run_evaluation/local-sphinx-7910/openai__gpt-5.3-codex/sphinx-doc__sphinx-7910/eval.sh; copying to container...
+2026-06-30 16:15:35,306 - INFO - Test runtime: 4.09 seconds
+2026-06-30 16:15:35,310 - INFO - Test output for sphinx-doc__sphinx-7910 written to logs/run_evaluation/local-sphinx-7910/openai__gpt-5.3-codex/sphinx-doc__sphinx-7910/test_output.txt
+2026-06-30 16:15:35,509 - INFO - Git diff after:
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+index 10b1ff3a3..bdda20ff7 100644
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -426,7 +426,8 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+     if name != '__weakref__' and has_doc and is_member:
+         cls_is_owner = False
+         if what == 'class' or what == 'exception':
+-            qualname = getattr(obj, '__qualname__', '')
++            imported_obj = inspect.unwrap(obj)
++            qualname = getattr(imported_obj, '__qualname__', '')
+             cls_path, _, _ = qualname.rpartition('.')
+             if cls_path:
+                 try:
+@@ -434,11 +435,11 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+                         import importlib
+                         import functools
+ 
+-                        mod = importlib.import_module(obj.__module__)
++                        mod = importlib.import_module(imported_obj.__module__)
+                         mod_path = cls_path.split('.')
+                         cls = functools.reduce(getattr, mod_path, mod)
+                     else:
+-                        cls = obj.__globals__[cls_path]
++                        cls = imported_obj.__globals__[cls_path]
+                 except Exception:
+                     cls_is_owner = False
+                 else:
+2026-06-30 16:15:35,509 - INFO - Grading answer for sphinx-doc__sphinx-7910...
+2026-06-30 16:15:35,520 - INFO - report: {'sphinx-doc__sphinx-7910': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['tests/test_ext_napoleon.py::SkipMemberTest::test_class_decorated_doc']}, 'PASS_TO_PASS': {'success': ['tests/test_ext_napoleon.py::ProcessDocstringTest::test_modify_in_place', 'tests/test_ext_napoleon.py::SetupTest::test_add_config_values', 'tests/test_ext_napoleon.py::SetupTest::test_unknown_app_type', 'tests/test_ext_napoleon.py::SkipMemberTest::test_class_private_undoc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_class_special_undoc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_exception_private_undoc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_exception_special_undoc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_module_private_doc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_module_private_undoc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_module_special_doc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_module_special_undoc'], 'failure': ['tests/test_ext_napoleon.py::SkipMemberTest::test_class_private_doc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_class_special_doc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_exception_private_doc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_exception_special_doc', 'tests/test_ext_napoleon.py::SkipMemberTest::test_namedtuple']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-7910: resolved: False
+2026-06-30 16:15:35,523 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-7910.local-sphinx-7910...
+2026-06-30 16:15:50,931 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-7910.local-sphinx-7910...
+2026-06-30 16:15:50,991 - INFO - Container sweb.eval.sphinx-doc__sphinx-7910.local-sphinx-7910 removed.

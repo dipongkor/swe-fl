@@ -1,0 +1,63 @@
+2026-06-30 15:20:49,534 - INFO - Creating container for sympy__sympy-13031...
+2026-06-30 15:20:49,615 - INFO - Container for sympy__sympy-13031 created: 138f1d6d01e5c7255adfa5bfe1ac95b49da887a3b4a874b10a1bdde32f808886
+2026-06-30 15:20:50,032 - INFO - Container for sympy__sympy-13031 started: 138f1d6d01e5c7255adfa5bfe1ac95b49da887a3b4a874b10a1bdde32f808886
+2026-06-30 15:20:50,039 - INFO - Intermediate patch for sympy__sympy-13031 written to logs/run_evaluation/local-sympy-13031/openai__gpt-5.3-codex/sympy__sympy-13031/patch.diff, now applying to container...
+2026-06-30 15:20:50,557 - INFO - >>>>> Applied Patch:
+Checking patch sympy/matrices/common.py...
+Applied patch sympy/matrices/common.py cleanly.
+
+2026-06-30 15:20:50,978 - INFO - Git diff before:
+diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py
+index 7ef51bc84..802f8b6fc 100644
+--- a/sympy/matrices/common.py
++++ b/sympy/matrices/common.py
+@@ -378,7 +378,7 @@ def hstack(cls, *args):
+             return cls._new()
+ 
+         kls = type(args[0])
+-        return reduce(kls.row_join, args)
++        return reduce(kls.row_join, args[1:], args[0])
+ 
+     def reshape(self, rows, cols):
+         """Reshape the matrix. Total number of elements must remain the same.
+@@ -601,7 +601,7 @@ def vstack(cls, *args):
+             return cls._new()
+ 
+         kls = type(args[0])
+-        return reduce(kls.col_join, args)
++        return reduce(kls.col_join, args[1:], args[0])
+ 
+ 
+ class MatrixSpecial(MatrixRequired):
+2026-06-30 15:20:50,982 - INFO - Eval script for sympy__sympy-13031 written to logs/run_evaluation/local-sympy-13031/openai__gpt-5.3-codex/sympy__sympy-13031/eval.sh; copying to container...
+2026-06-30 15:20:55,379 - INFO - Test runtime: 4.13 seconds
+2026-06-30 15:20:55,382 - INFO - Test output for sympy__sympy-13031 written to logs/run_evaluation/local-sympy-13031/openai__gpt-5.3-codex/sympy__sympy-13031/test_output.txt
+2026-06-30 15:20:55,597 - INFO - Git diff after:
+diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py
+index 7ef51bc84..802f8b6fc 100644
+--- a/sympy/matrices/common.py
++++ b/sympy/matrices/common.py
+@@ -378,7 +378,7 @@ def hstack(cls, *args):
+             return cls._new()
+ 
+         kls = type(args[0])
+-        return reduce(kls.row_join, args)
++        return reduce(kls.row_join, args[1:], args[0])
+ 
+     def reshape(self, rows, cols):
+         """Reshape the matrix. Total number of elements must remain the same.
+@@ -601,7 +601,7 @@ def vstack(cls, *args):
+             return cls._new()
+ 
+         kls = type(args[0])
+-        return reduce(kls.col_join, args)
++        return reduce(kls.col_join, args[1:], args[0])
+ 
+ 
+ class MatrixSpecial(MatrixRequired):
+2026-06-30 15:20:55,597 - INFO - Grading answer for sympy__sympy-13031...
+2026-06-30 15:20:55,601 - INFO - report: {'sympy__sympy-13031': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_sparse_matrix']}, 'PASS_TO_PASS': {'success': ['test_transpose', 'test_trace', 'test_CL_RL', 'test_add', 'test_errors', 'test_len', 'test_sparse_zeros_sparse_eye', 'test_copyin', 'test_sparse_solve'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-13031: resolved: False
+2026-06-30 15:20:55,604 - INFO - Attempting to stop container sweb.eval.sympy__sympy-13031.local-sympy-13031...
+2026-06-30 15:21:11,023 - INFO - Attempting to remove container sweb.eval.sympy__sympy-13031.local-sympy-13031...
+2026-06-30 15:21:11,110 - INFO - Container sweb.eval.sympy__sympy-13031.local-sympy-13031 removed.

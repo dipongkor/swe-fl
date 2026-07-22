@@ -1,0 +1,34 @@
+diff --git a/sympy/simplify/trigsimp.py b/sympy/simplify/trigsimp.py
+index da40be8521..5ad33df817 100644
+--- a/sympy/simplify/trigsimp.py
++++ b/sympy/simplify/trigsimp.py
+@@ -12,7 +12,7 @@
+ from sympy.functions.elementary.trigonometric import TrigonometricFunction
+ from sympy.polys import Poly, factor, cancel, parallel_poly_from_expr
+ from sympy.polys.domains import ZZ
+-from sympy.polys.polyerrors import PolificationFailed
++from sympy.polys.polyerrors import PolificationFailed, PolynomialError
+ from sympy.polys.polytools import groebner
+ from sympy.simplify.cse_main import cse
+ from sympy.strategies.core import identity
+@@ -354,7 +354,7 @@ def analyse_gens(gens, hints):
+     num, denom = cancel(expr).as_numer_denom()
+     try:
+         (pnum, pdenom), opt = parallel_poly_from_expr([num, denom])
+-    except PolificationFailed:
++    except (PolificationFailed, PolynomialError):
+         return expr
+     debug('initial gens:', opt.gens)
+     ideal, freegens, gens = analyse_gens(opt.gens, hints)
+@@ -377,7 +377,10 @@ def analyse_gens(gens, hints):
+         num = Poly(num, gens=gens+freegens).eject(*gens)
+         res = []
+         for monom, coeff in num.terms():
+-            ourgens = set(parallel_poly_from_expr([coeff, denom])[1].gens)
++            try:
++                ourgens = set(parallel_poly_from_expr([coeff, denom])[1].gens)
++            except (PolificationFailed, PolynomialError):
++                return expr
+             # We compute the transitive closure of all generators that can
+             # be reached from our generators through relations in the ideal.
+             changed = True

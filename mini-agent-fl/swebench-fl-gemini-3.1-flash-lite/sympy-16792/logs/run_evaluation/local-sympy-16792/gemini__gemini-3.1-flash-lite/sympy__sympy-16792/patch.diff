@@ -1,0 +1,82 @@
+diff --git a/sympy/utilities/autowrap.py b/sympy/utilities/autowrap.py
+index bd6afb12d..a8dee4137 100644
+--- a/sympy/utilities/autowrap.py
++++ b/sympy/utilities/autowrap.py
+@@ -72,6 +72,7 @@
+ import shutil
+ import tempfile
+ from subprocess import STDOUT, CalledProcessError, check_output
++from sympy.matrices.expressions.matexpr import MatrixSymbol
+ from string import Template
+ from warnings import warn
+ 
+@@ -438,17 +439,21 @@ def _partition_args(self, args):
+ 
+     def _prototype_arg(self, arg):
+         mat_dec = "np.ndarray[{mtype}, ndim={ndim}] {name}"
+-        np_types = {'double': 'np.double_t',
+-                    'int': 'np.int_t'}
+-        t = arg.get_datatype('c')
++        np_types = {"double": "np.double_t",
++                    "int": "np.int_t"}
++        t = arg.get_datatype("c")
+         if arg.dimensions:
+             self._need_numpy = True
+             ndim = len(arg.dimensions)
+             mtype = np_types[t]
+             return mat_dec.format(mtype=mtype, ndim=ndim, name=self._string_var(arg.name))
++        elif isinstance(arg.name, MatrixSymbol):
++            self._need_numpy = True
++            ndim = len(arg.name.shape)
++            mtype = np_types[t]
++            return mat_dec.format(mtype=mtype, ndim=ndim, name=self._string_var(arg.name))
+         else:
+             return "%s %s" % (t, self._string_var(arg.name))
+-
+     def _declare_arg(self, arg):
+         proto = self._prototype_arg(arg)
+         if arg.dimensions:
+@@ -458,8 +463,8 @@ def _declare_arg(self, arg):
+             return proto + " = 0"
+ 
+     def _call_arg(self, arg):
+-        if arg.dimensions:
+-            t = arg.get_datatype('c')
++        if arg.dimensions or isinstance(arg.name, MatrixSymbol):
++            t = arg.get_datatype("c")
+             return "<{0}*> {1}.data".format(t, self._string_var(arg.name))
+         elif isinstance(arg, ResultBase):
+             return "&{0}".format(self._string_var(arg.name))
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..fe1e538cc 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -652,6 +652,11 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+                 new_symbols.remove(symbol)
+         symbols = new_symbols
+ 
++        # Ensure all arguments in argument_sequence are in symbols
++        if argument_sequence is not None:
++            for arg in argument_sequence:
++                if isinstance(arg, (Symbol, MatrixSymbol)):
++                    symbols.add(arg)
+         # Decide whether to use output argument or return value
+         return_val = []
+         output_args = []
+@@ -696,11 +701,11 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+ 
+         # setup input argument list
+         array_symbols = {}
+-        for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed):
+-            array_symbols[array.base.label] = array
+-        for array in expressions.atoms(MatrixSymbol) | local_expressions.atoms(MatrixSymbol):
+-            array_symbols[array] = array
+-
++        for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed) | symbols:
++            if isinstance(array, Indexed):
++                array_symbols[array.base.label] = array
++            elif isinstance(array, MatrixSymbol):
++                array_symbols[array] = array
+         for symbol in sorted(symbols, key=str):
+             if symbol in array_symbols:
+                 dims = []

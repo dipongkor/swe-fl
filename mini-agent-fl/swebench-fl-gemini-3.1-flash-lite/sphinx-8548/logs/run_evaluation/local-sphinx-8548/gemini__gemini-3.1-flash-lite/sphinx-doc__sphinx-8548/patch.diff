@@ -1,0 +1,24 @@
+diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py
+index d6e73d36a..4a770cd0b 100644
+--- a/sphinx/ext/autodoc/importer.py
++++ b/sphinx/ext/autodoc/importer.py
+@@ -309,12 +309,13 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
+ 
+     if analyzer:
+         # append instance attributes (cf. self.attr1) if analyzer knows
+-        namespace = '.'.join(objpath)
+-        for (ns, name), docstring in analyzer.attr_docs.items():
+-            if namespace == ns and name not in members:
+-                members[name] = ClassAttribute(subject, name, INSTANCEATTR,
+-                                               '\n'.join(docstring))
+-
++        for cls in subject.__mro__:
++            if cls is object:
++                continue
++            for (ns, name), docstring in analyzer.attr_docs.items():
++                if ns == cls.__name__ and name not in members:
++                    members[name] = ClassAttribute(subject, name, INSTANCEATTR,
++                                                   "\n".join(docstring))
+     return members
+ 
+ 

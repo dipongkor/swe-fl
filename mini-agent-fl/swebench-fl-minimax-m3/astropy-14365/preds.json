@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-14365": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "astropy__astropy-14365",
+    "model_patch": "diff --git a/astropy/io/ascii/qdp.py b/astropy/io/ascii/qdp.py\nindex 83a4f004a..e01148ab1 100644\n--- a/astropy/io/ascii/qdp.py\n+++ b/astropy/io/ascii/qdp.py\n@@ -60,7 +60,7 @@ def _line_type(line, delimiter=None):\n     ValueError: Unrecognized QDP line...\n     \"\"\"\n     _decimal_re = r\"[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?\"\n-    _command_re = r\"READ [TS]ERR(\\s+[0-9]+)+\"\n+    _command_re = r\"(?i:READ [TS]ERR(\\s+[0-9]+)+)\"\n \n     sep = delimiter\n     if delimiter is None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/io/ascii/qdp.py",
+          "line": 63,
+          "statement": "    _command_re = r\"READ [TS]ERR(\\s+[0-9]+)+\""
+        }
+      ],
+      "reasoning": "The regex used to match QDP commands like 'READ SERR' or 'READ TERR' is hard-coded to only match uppercase letters, but the QDP format specification says commands are case-insensitive. This causes a ValueError when users write commands in lowercase (e.g., 'read serr 1 2'). The fix adds an inline case-insensitive flag (?i:...) to the command regex group.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

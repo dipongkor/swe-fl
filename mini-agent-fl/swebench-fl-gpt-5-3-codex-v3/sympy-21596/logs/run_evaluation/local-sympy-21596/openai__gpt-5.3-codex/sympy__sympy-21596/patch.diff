@@ -1,0 +1,13 @@
+diff --git a/sympy/sets/handlers/functions.py b/sympy/sets/handlers/functions.py
+index d492bb9655..56baab2c08 100644
+--- a/sympy/sets/handlers/functions.py
++++ b/sympy/sets/handlers/functions.py
+@@ -254,4 +254,7 @@ def _set_function(f, self): # noqa:F811
+     expr = f.expr
+     if not isinstance(expr, Expr):
+         return
+-    return _set_function(f, Interval(-oo, oo))
++    # Mapping over Reals can only be simplified safely when we can prove
++    # the image is real-valued. Otherwise keep it unevaluated.
++    if expr.is_real is True:
++        return _set_function(f, Interval(-oo, oo))

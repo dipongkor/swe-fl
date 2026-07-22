@@ -1,0 +1,19 @@
+{
+  "pylint-dev__pylint-4604": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pylint-dev__pylint-4604",
+    "model_patch": "diff --git a/pylint/checkers/variables.py b/pylint/checkers/variables.py\nindex 3ddafd59..c68be339 100644\n--- a/pylint/checkers/variables.py\n+++ b/pylint/checkers/variables.py\n@@ -1826,11 +1826,12 @@ class VariablesChecker(BaseChecker):\n             self._type_annotation_names.append(type_annotation.name)\n             return\n \n-        if not isinstance(type_annotation, astroid.Subscript):\n+        if not isinstance(type_annotation, (astroid.Subscript, astroid.Attribute)):\n             return\n \n         if (\n-            isinstance(type_annotation.value, astroid.Attribute)\n+            isinstance(type_annotation, astroid.Subscript)\n+            and isinstance(type_annotation.value, astroid.Attribute)\n             and isinstance(type_annotation.value.expr, astroid.Name)\n             and type_annotation.value.expr.name == TYPING_MODULE\n         ):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "pylint/checkers/variables.py",
+          "line": 1829,
+          "statement": "        if not isinstance(type_annotation, astroid.Subscript):"
+        }
+      ],
+      "reasoning": "The early return in _store_type_annotation_node only allowed astroid.Subscript type annotations to be processed. When a type annotation was an astroid.Attribute (e.g., `abc.ABC` used in a type comment), the function would return early without storing the root name (`abc`) in _type_annotation_names, causing the import to be incorrectly flagged as unused. The fix is to also allow astroid.Attribute to fall through to the nodes_of_class branch which correctly extracts the leftmost name.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

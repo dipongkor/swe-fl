@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-6197": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pytest-dev__pytest-6197",
+    "model_patch": "diff --git a/src/_pytest/python.py b/src/_pytest/python.py\nindex 306e5f217..7e6391c67 100644\n--- a/src/_pytest/python.py\n+++ b/src/_pytest/python.py\n@@ -639,7 +639,6 @@ class Package(Module):\n         return path in self.session._initialpaths\n \n     def collect(self):\n-        self._mount_obj_if_needed()\n         this_path = self.fspath.dirpath()\n         init_module = this_path.join(\"__init__.py\")\n         if init_module.check(file=1) and path_matches_patterns(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/python.py",
+          "line": 642,
+          "statement": "        self._mount_obj_if_needed()"
+        }
+      ],
+      "reasoning": "In Package.collect(), the unconditional call to self._mount_obj_if_needed() (added in 5.2.3) forces importing the package's __init__.py during collection even when it is not a test module, causing arbitrary/broken __init__.py files to be executed. Removing this call restores the pre-5.2.3 lazy-import behavior while __init__.py files matching python_files are still collected.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

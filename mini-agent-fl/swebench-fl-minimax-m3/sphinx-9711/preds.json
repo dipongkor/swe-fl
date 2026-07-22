@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9711": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "model_patch": "diff --git a/sphinx/extension.py b/sphinx/extension.py\nindex 7ec6c8518..586ff1fd1 100644\n--- a/sphinx/extension.py\n+++ b/sphinx/extension.py\n@@ -10,6 +10,8 @@\n \n from typing import TYPE_CHECKING, Any, Dict\n \n+from packaging.version import InvalidVersion, Version\n+\n from sphinx.config import Config\n from sphinx.errors import VersionRequirementError\n from sphinx.locale import __\n@@ -51,11 +53,22 @@ def verify_needs_extensions(app: \"Sphinx\", config: Config) -> None:\n                               'but it is not loaded.'), extname)\n             continue\n \n-        if extension.version == 'unknown version' or reqversion > extension.version:\n-            raise VersionRequirementError(__('This project needs the extension %s at least in '\n-                                             'version %s and therefore cannot be built with '\n-                                             'the loaded version (%s).') %\n-                                          (extname, reqversion, extension.version))\n+        if extension.version == 'unknown version':\n+            logger.warning(__('The %s extension used by this project needs at least version %s, '\n+                              'but no version information is provided by the extension.'),\n+                           extname, reqversion)\n+        else:\n+            try:\n+                if Version(reqversion) > Version(extension.version):\n+                    raise VersionRequirementError(\n+                        __('This project needs the extension %s at least in '\n+                           'version %s and therefore cannot be built with '\n+                           'the loaded version (%s).') %\n+                        (extname, reqversion, extension.version))\n+            except InvalidVersion:\n+                logger.warning(__('The %s extension used by this project needs to be at least '\n+                                  '%s, but the version information is faulty: %s'),\n+                               extname, reqversion, extension.version)\n \n \n def setup(app: \"Sphinx\") -> Dict[str, Any]:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/extension.py",
+          "line": 54,
+          "statement": "        if extension.version == 'unknown version' or reqversion > extension.version:"
+        }
+      ],
+      "reasoning": "The condition uses Python string comparison (reqversion > extension.version) to compare version strings, which gives incorrect results for multi-digit version components (e.g., '0.6' > '0.10' as strings, but '0.6' < '0.10' as versions). The fix uses packaging.version.Version to do proper PEP 440 version comparison.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

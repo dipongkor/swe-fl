@@ -1,0 +1,24 @@
+{
+  "sympy__sympy-21847": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-21847",
+    "model_patch": "diff --git a/sympy/polys/monomials.py b/sympy/polys/monomials.py\nindex 0e84403307..d2cd3451e5 100644\n--- a/sympy/polys/monomials.py\n+++ b/sympy/polys/monomials.py\n@@ -127,7 +127,7 @@ def itermonomials(variables, max_degrees, min_degrees=None):\n                 for variable in item:\n                     if variable != 1:\n                         powers[variable] += 1\n-                if max(powers.values()) >= min_degree:\n+                if sum(powers.values()) >= min_degree:\n                     monomials_list_comm.append(Mul(*item))\n             yield from set(monomials_list_comm)\n         else:\n@@ -139,7 +139,7 @@ def itermonomials(variables, max_degrees, min_degrees=None):\n                 for variable in item:\n                     if variable != 1:\n                         powers[variable] += 1\n-                if max(powers.values()) >= min_degree:\n+                if sum(powers.values()) >= min_degree:\n                     monomials_list_non_comm.append(Mul(*item))\n             yield from set(monomials_list_non_comm)\n     else:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/polys/monomials.py",
+          "line": 130,
+          "statement": "                if max(powers.values()) >= min_degree:"
+        },
+        {
+          "file": "sympy/polys/monomials.py",
+          "line": 142,
+          "statement": "                if max(powers.values()) >= min_degree:"
+        }
+      ],
+      "reasoning": "In the total-degree branch of itermonomials, the min_degree filter used max(powers.values()) (the largest exponent of a single variable) instead of sum(powers.values()) (the total degree). This wrongly excluded valid monomials like x1*x2**2 whose total degree equals min_degree but whose individual exponents are all smaller.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-18199": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-18199",
+    "model_patch": "diff --git a/sympy/ntheory/residue_ntheory.py b/sympy/ntheory/residue_ntheory.py\nindex 9a3052d4c3..3b36779a6a 100644\n--- a/sympy/ntheory/residue_ntheory.py\n+++ b/sympy/ntheory/residue_ntheory.py\n@@ -776,6 +776,10 @@ def nthroot_mod(a, n, p, all_roots=False):\n     if not isprime(p):\n         raise NotImplementedError(\"Not implemented for composite p\")\n \n+    if a % p == 0:\n+        # x**n = 0 (mod p) => x = 0 (mod p)\n+        return [0] if all_roots else 0\n+\n     if (p - 1) % n == 0:\n         return _nthroot_mod1(a, n, p, all_roots)\n     # The roots of ``x**n - a = 0 (mod p)`` are roots of\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/ntheory/residue_ntheory.py",
+          "line": 783,
+          "statement": "    if (p - 1) % n == 0:"
+        }
+      ],
+      "reasoning": "nthroot_mod proceeds to compute roots via _nthroot_mod1/gcd logic without first handling the case a % p == 0, where x = 0 (mod p) is a valid root that gets dropped. Adding an explicit check before this branch fixes the missing 0 root.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

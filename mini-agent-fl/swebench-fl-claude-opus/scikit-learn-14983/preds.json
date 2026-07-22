@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14983": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "scikit-learn__scikit-learn-14983",
+    "model_patch": "diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py\nindex c49a3ce6a..ceee1a081 100644\n--- a/sklearn/model_selection/_split.py\n+++ b/sklearn/model_selection/_split.py\n@@ -1163,6 +1163,9 @@ class _RepeatedSplits(metaclass=ABCMeta):\n                      **self.cvargs)\n         return cv.get_n_splits(X, y, groups) * self.n_repeats\n \n+    def __repr__(self):\n+        return _build_repr(self)\n+\n \n class RepeatedKFold(_RepeatedSplits):\n     \"\"\"Repeated K-Fold cross validator.\n@@ -2158,6 +2161,8 @@ def _build_repr(self):\n         try:\n             with warnings.catch_warnings(record=True) as w:\n                 value = getattr(self, key, None)\n+                if value is None and hasattr(self, 'cvargs'):\n+                    value = self.cvargs.get(key, None)\n             if len(w) and w[0].category == DeprecationWarning:\n                 # if the parameter is deprecated, don't show it\n                 continue\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 1066,
+          "statement": "class _RepeatedSplits(metaclass=ABCMeta):"
+        }
+      ],
+      "reasoning": "The base class _RepeatedSplits (parent of RepeatedKFold and RepeatedStratifiedKFold) did not define a __repr__ method, so the default object repr was used. Additionally, n_splits is stored in self.cvargs rather than as a direct attribute, so _build_repr could not read it; both a __repr__ method and a cvargs fallback in _build_repr are needed.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-13031": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-13031",
+    "model_patch": "diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py\nindex 7ef51bc84..802f8b6fc 100644\n--- a/sympy/matrices/common.py\n+++ b/sympy/matrices/common.py\n@@ -378,7 +378,7 @@ def hstack(cls, *args):\n             return cls._new()\n \n         kls = type(args[0])\n-        return reduce(kls.row_join, args)\n+        return reduce(kls.row_join, args[1:], args[0])\n \n     def reshape(self, rows, cols):\n         \"\"\"Reshape the matrix. Total number of elements must remain the same.\n@@ -601,7 +601,7 @@ def vstack(cls, *args):\n             return cls._new()\n \n         kls = type(args[0])\n-        return reduce(kls.col_join, args)\n+        return reduce(kls.col_join, args[1:], args[0])\n \n \n class MatrixSpecial(MatrixRequired):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/matrices/common.py",
+          "line": 381,
+          "statement": "        return reduce(kls.row_join, args[1:], args[0])"
+        }
+      ],
+      "reasoning": "Using reduce without an explicit initializer can discard dimensional information when the first matrix is empty-like, causing hstack/vstack with zero-sized dimensions to produce incorrect shapes. Initializing reduction with the first argument preserves all operands consistently.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-8707": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "astropy__astropy-8707",
+    "model_patch": "diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py\nindex 8c1ac5d73..50ea30a96 100644\n--- a/astropy/io/fits/card.py\n+++ b/astropy/io/fits/card.py\n@@ -554,6 +554,13 @@ class Card(_Verify):\n         \"\"\"\n \n         card = cls()\n+        if isinstance(image, bytes):\n+            # FITS supports only ASCII, but decode as latin1 so that any\n+            # invalid bytes that might appear in malformatted FITS files can be\n+            # retained (rather than raising an exception, as would happen if we\n+            # decoded as ASCII).\n+            image = image.decode('latin1')\n+\n         card._image = _pad(image)\n         card._verified = False\n         return card\ndiff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py\nindex ad07e6d52..a18849ba3 100644\n--- a/astropy/io/fits/header.py\n+++ b/astropy/io/fits/header.py\n@@ -334,8 +334,11 @@ class Header:\n \n         Parameters\n         ----------\n-        data : str\n-           String containing the entire header.\n+        data : str or bytes\n+           String or bytes containing the entire header.  In the case of bytes\n+           they will be decoded using latin-1 (only plain ASCII characters are\n+           allowed in FITS headers but latin-1 allows us to retain any invalid\n+           bytes that might appear in malformatted FITS files).\n \n         sep : str, optional\n             The string separating cards from each other, such as a newline.  By\n@@ -357,6 +360,13 @@ class Header:\n         # immediately at the separator\n         require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)\n \n+        if isinstance(data, bytes):\n+            # FITS supports only ASCII, but decode as latin1 so that any\n+            # invalid bytes that might appear in malformatted FITS files can be\n+            # retained (rather than raising an exception, as would happen if we\n+            # decoded as ASCII).\n+            data = data.decode('latin1')\n+\n         # Split the header into individual cards\n         idx = 0\n         image = []\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/io/fits/header.py",
+          "line": 360,
+          "statement": "        # Split the header into individual cards"
+        },
+        {
+          "file": "astropy/io/fits/card.py",
+          "line": 557,
+          "statement": "        card._image = _pad(image)"
+        }
+      ],
+      "reasoning": "Header.fromstring and Card.fromstring only handled unicode str input and assumed the data was already a str; when given Python 3 bytes they would fail (e.g. comparisons like next_image[:8] == 'CONTINUE' and string joins). Decoding incoming bytes to str (using latin-1) at the start of each method makes them accept both str and bytes as the docs describe.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

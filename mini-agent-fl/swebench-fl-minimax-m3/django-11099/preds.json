@@ -1,0 +1,24 @@
+{
+  "django__django-11099": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-11099",
+    "model_patch": "diff --git a/django/contrib/auth/validators.py b/django/contrib/auth/validators.py\nindex b4878cfd45..1304f20a60 100644\n--- a/django/contrib/auth/validators.py\n+++ b/django/contrib/auth/validators.py\n@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _\n \n @deconstructible\n class ASCIIUsernameValidator(validators.RegexValidator):\n-    regex = r'^[\\w.@+-]+$'\n+    regex = r'\\A[\\w.@+-]+\\Z'\n     message = _(\n         'Enter a valid username. This value may contain only English letters, '\n         'numbers, and @/./+/-/_ characters.'\n@@ -17,7 +17,7 @@ class ASCIIUsernameValidator(validators.RegexValidator):\n \n @deconstructible\n class UnicodeUsernameValidator(validators.RegexValidator):\n-    regex = r'^[\\w.@+-]+$'\n+    regex = r'\\A[\\w.@+-]+\\Z'\n     message = _(\n         'Enter a valid username. This value may contain only letters, '\n         'numbers, and @/./+/-/_ characters.'\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/auth/validators.py",
+          "line": 10,
+          "statement": "    regex = r'\\A[\\w.@+-]+\\Z'"
+        },
+        {
+          "file": "django/contrib/auth/validators.py",
+          "line": 20,
+          "statement": "    regex = r'\\A[\\w.@+-]+\\Z'"
+        }
+      ],
+      "reasoning": "The ASCIIUsernameValidator and UnicodeUsernameValidator used the regex r'^[\\w.@+-]+$'. In Python regex, $ matches at the end of the string OR before a trailing newline, so usernames ending with a newline character were incorrectly accepted. Changing ^ and $ to \\A and \\Z ensures the regex only matches the very start and end of the string, properly rejecting usernames with trailing newlines.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

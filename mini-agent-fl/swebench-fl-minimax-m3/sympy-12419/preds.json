@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-12419": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-12419",
+    "model_patch": "diff --git a/sympy/matrices/expressions/matexpr.py b/sympy/matrices/expressions/matexpr.py\nindex b4d759836..058558444 100644\n--- a/sympy/matrices/expressions/matexpr.py\n+++ b/sympy/matrices/expressions/matexpr.py\n@@ -7,6 +7,8 @@\n from sympy.core.compatibility import range\n from sympy.core.sympify import SympifyError, sympify\n from sympy.functions import conjugate, adjoint\n+from sympy.functions.special.tensor_functions import KroneckerDelta\n+from sympy.core.relational import Eq\n from sympy.matrices import ShapeError\n from sympy.simplify import simplify\n \n@@ -476,10 +478,12 @@ def conjugate(self):\n         return self\n \n     def _entry(self, i, j):\n-        if i == j:\n+        eq = Eq(i, j)\n+        if eq is S.true:\n             return S.One\n-        else:\n+        elif eq is S.false:\n             return S.Zero\n+        return KroneckerDelta(i, j)\n \n     def _eval_determinant(self):\n         return S.One\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/matrices/expressions/matexpr.py",
+          "line": 480,
+          "statement": "    def _entry(self, i, j):"
+        }
+      ],
+      "reasoning": "The Identity._entry method uses Python's == operator (i == j) to determine the entry, which returns False for symbolic indices, causing it to always return 0 for symbolic i != j. The fix uses Eq to properly check symbolic equality and returns KroneckerDelta(i, j) when the equality is indeterminate, allowing the entry to be symbolically correct.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

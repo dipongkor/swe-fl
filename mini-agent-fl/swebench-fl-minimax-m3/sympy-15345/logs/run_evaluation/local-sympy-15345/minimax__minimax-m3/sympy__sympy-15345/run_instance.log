@@ -1,0 +1,51 @@
+2026-07-02 13:37:27,524 - INFO - Creating container for sympy__sympy-15345...
+2026-07-02 13:37:27,643 - INFO - Container for sympy__sympy-15345 created: 6906b86e6395bf492c6201e1cfd835df4cf0ee37ef521dba6ff19d8907ae3702
+2026-07-02 13:37:28,083 - INFO - Container for sympy__sympy-15345 started: 6906b86e6395bf492c6201e1cfd835df4cf0ee37ef521dba6ff19d8907ae3702
+2026-07-02 13:37:28,083 - INFO - Intermediate patch for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/minimax__minimax-m3/sympy__sympy-15345/patch.diff, now applying to container...
+2026-07-02 13:37:28,515 - INFO - >>>>> Applied Patch:
+Checking patch sympy/printing/mathematica.py...
+Applied patch sympy/printing/mathematica.py cleanly.
+
+2026-07-02 13:37:28,838 - INFO - Git diff before:
+diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py
+index ea7e3a2d9..e014cf571 100644
+--- a/sympy/printing/mathematica.py
++++ b/sympy/printing/mathematica.py
+@@ -101,6 +101,11 @@ def _print_Function(self, expr):
+                     return "%s[%s]" % (mfunc, self.stringify(expr.args, ", "))
+         return expr.func.__name__ + "[%s]" % self.stringify(expr.args, ", ")
+ 
++    _print_Expr = _print_Function
++
++    def _print_LatticeOp(self, expr):
++        return expr.func.__name__ + "[%s]" % self.stringify(expr.args, ", ")
++
+     def _print_Integral(self, expr):
+         if len(expr.variables) == 1 and not expr.limits[0][1:]:
+             args = [expr.args[0], expr.variables[0]]
+2026-07-02 13:37:28,838 - INFO - Eval script for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/minimax__minimax-m3/sympy__sympy-15345/eval.sh; copying to container...
+2026-07-02 13:37:32,782 - INFO - Test runtime: 3.72 seconds
+2026-07-02 13:37:32,782 - INFO - Test output for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/minimax__minimax-m3/sympy__sympy-15345/test_output.txt
+2026-07-02 13:37:32,898 - INFO - Git diff after:
+diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py
+index ea7e3a2d9..e014cf571 100644
+--- a/sympy/printing/mathematica.py
++++ b/sympy/printing/mathematica.py
+@@ -101,6 +101,11 @@ def _print_Function(self, expr):
+                     return "%s[%s]" % (mfunc, self.stringify(expr.args, ", "))
+         return expr.func.__name__ + "[%s]" % self.stringify(expr.args, ", ")
+ 
++    _print_Expr = _print_Function
++
++    def _print_LatticeOp(self, expr):
++        return expr.func.__name__ + "[%s]" % self.stringify(expr.args, ", ")
++
+     def _print_Integral(self, expr):
+         if len(expr.variables) == 1 and not expr.limits[0][1:]:
+             args = [expr.args[0], expr.variables[0]]
+2026-07-02 13:37:32,898 - INFO - Grading answer for sympy__sympy-15345...
+2026-07-02 13:37:32,899 - INFO - report: {'sympy__sympy-15345': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_Function'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_Integer', 'test_Rational', 'test_Pow', 'test_Mul', 'test_constants', 'test_containers', 'test_Integral', 'test_Derivative'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-15345: resolved: True
+2026-07-02 13:37:32,899 - INFO - Attempting to stop container sweb.eval.sympy__sympy-15345.local-sympy-15345...
+2026-07-02 13:37:48,340 - INFO - Attempting to remove container sweb.eval.sympy__sympy-15345.local-sympy-15345...
+2026-07-02 13:37:48,387 - INFO - Container sweb.eval.sympy__sympy-15345.local-sympy-15345 removed.

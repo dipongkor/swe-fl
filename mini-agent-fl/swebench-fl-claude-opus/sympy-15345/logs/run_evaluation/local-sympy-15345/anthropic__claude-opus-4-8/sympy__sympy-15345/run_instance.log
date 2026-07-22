@@ -1,0 +1,53 @@
+2026-06-29 18:27:43,677 - INFO - Creating container for sympy__sympy-15345...
+2026-06-29 18:27:43,756 - INFO - Container for sympy__sympy-15345 created: 0a1193e9ded0f25e14793f07e479012ffaa7c9bbc96d4ae3e86720319fea5c02
+2026-06-29 18:27:44,167 - INFO - Container for sympy__sympy-15345 started: 0a1193e9ded0f25e14793f07e479012ffaa7c9bbc96d4ae3e86720319fea5c02
+2026-06-29 18:27:44,170 - INFO - Intermediate patch for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/anthropic__claude-opus-4-8/sympy__sympy-15345/patch.diff, now applying to container...
+2026-06-29 18:27:44,810 - INFO - >>>>> Applied Patch:
+Checking patch sympy/printing/mathematica.py...
+Applied patch sympy/printing/mathematica.py cleanly.
+
+2026-06-29 18:27:45,305 - INFO - Git diff before:
+diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py
+index ea7e3a2d9..5f248c3aa 100644
+--- a/sympy/printing/mathematica.py
++++ b/sympy/printing/mathematica.py
+@@ -101,6 +101,12 @@ def _print_Function(self, expr):
+                     return "%s[%s]" % (mfunc, self.stringify(expr.args, ", "))
+         return expr.func.__name__ + "[%s]" % self.stringify(expr.args, ", ")
+ 
++    def _print_Max(self, expr):
++        return "Max[%s]" % self.stringify(expr.args, ", ")
++
++    def _print_Min(self, expr):
++        return "Min[%s]" % self.stringify(expr.args, ", ")
++
+     def _print_Integral(self, expr):
+         if len(expr.variables) == 1 and not expr.limits[0][1:]:
+             args = [expr.args[0], expr.variables[0]]
+2026-06-29 18:27:45,309 - INFO - Eval script for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/anthropic__claude-opus-4-8/sympy__sympy-15345/eval.sh; copying to container...
+2026-06-29 18:27:49,975 - INFO - Test runtime: 4.36 seconds
+2026-06-29 18:27:49,977 - INFO - Test output for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/anthropic__claude-opus-4-8/sympy__sympy-15345/test_output.txt
+2026-06-29 18:27:50,197 - INFO - Git diff after:
+diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py
+index ea7e3a2d9..5f248c3aa 100644
+--- a/sympy/printing/mathematica.py
++++ b/sympy/printing/mathematica.py
+@@ -101,6 +101,12 @@ def _print_Function(self, expr):
+                     return "%s[%s]" % (mfunc, self.stringify(expr.args, ", "))
+         return expr.func.__name__ + "[%s]" % self.stringify(expr.args, ", ")
+ 
++    def _print_Max(self, expr):
++        return "Max[%s]" % self.stringify(expr.args, ", ")
++
++    def _print_Min(self, expr):
++        return "Min[%s]" % self.stringify(expr.args, ", ")
++
+     def _print_Integral(self, expr):
+         if len(expr.variables) == 1 and not expr.limits[0][1:]:
+             args = [expr.args[0], expr.variables[0]]
+2026-06-29 18:27:50,198 - INFO - Grading answer for sympy__sympy-15345...
+2026-06-29 18:27:50,200 - INFO - report: {'sympy__sympy-15345': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_Function'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_Integer', 'test_Rational', 'test_Pow', 'test_Mul', 'test_constants', 'test_containers', 'test_Integral', 'test_Derivative'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-15345: resolved: True
+2026-06-29 18:27:50,202 - INFO - Attempting to stop container sweb.eval.sympy__sympy-15345.local-sympy-15345...
+2026-06-29 18:28:05,667 - INFO - Attempting to remove container sweb.eval.sympy__sympy-15345.local-sympy-15345...
+2026-06-29 18:28:05,769 - INFO - Container sweb.eval.sympy__sympy-15345.local-sympy-15345 removed.

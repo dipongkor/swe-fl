@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14629": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "scikit-learn__scikit-learn-14629",
+    "model_patch": "diff --git a/sklearn/multioutput.py b/sklearn/multioutput.py\nindex 463b72d40..281bbac9e 100644\n--- a/sklearn/multioutput.py\n+++ b/sklearn/multioutput.py\n@@ -320,11 +320,36 @@ class MultiOutputClassifier(MultiOutputEstimator, ClassifierMixin):\n     ----------\n     estimators_ : list of ``n_output`` estimators\n         Estimators used for predictions.\n+\n+    classes_ : array, shape = (n_classes,)\n+        Class labels.\n     \"\"\"\n \n     def __init__(self, estimator, n_jobs=None):\n         super().__init__(estimator, n_jobs)\n \n+    def fit(self, X, Y, sample_weight=None):\n+        \"\"\"Fit the model to data matrix X and targets Y.\n+\n+        Parameters\n+        ----------\n+        X : {array-like, sparse matrix}, shape (n_samples, n_features)\n+            The input data.\n+        Y : array-like, shape (n_samples, n_classes)\n+            The target values.\n+        sample_weight : array-like, shape (n_samples,) or None\n+            Sample weights. If None, then samples are equally weighted.\n+            Only supported if the underlying classifier supports sample\n+            weights.\n+\n+        Returns\n+        -------\n+        self : object\n+        \"\"\"\n+        super().fit(X, Y, sample_weight)\n+        self.classes_ = [estimator.classes_ for estimator in self.estimators_]\n+        return self\n+\n     def predict_proba(self, X):\n         \"\"\"Probability estimates.\n         Returns prediction probabilities for each class of each output.\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/multioutput.py",
+          "line": 328,
+          "statement": "    def predict_proba(self, X):"
+        }
+      ],
+      "reasoning": "MultiOutputClassifier defined predict_proba but never set a `classes_` attribute, so cross_val_predict's use of `estimator.classes_[i_label]` raised AttributeError. Adding a fit override that sets `classes_` from the sub-estimators fixes it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

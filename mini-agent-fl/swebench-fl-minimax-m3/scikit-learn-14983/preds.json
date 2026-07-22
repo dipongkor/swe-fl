@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14983": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-14983",
+    "model_patch": "diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py\nindex c49a3ce6a..09afe7deb 100644\n--- a/sklearn/model_selection/_split.py\n+++ b/sklearn/model_selection/_split.py\n@@ -1103,6 +1103,9 @@ class _RepeatedSplits(metaclass=ABCMeta):\n         self.random_state = random_state\n         self.cvargs = cvargs\n \n+    def __repr__(self):\n+        return _build_repr(self)\n+\n     def split(self, X, y=None, groups=None):\n         \"\"\"Generates indices to split data into training and test set.\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 1105,
+          "statement": "        self.cvargs = cvargs"
+        }
+      ],
+      "reasoning": "The _RepeatedSplits base class (parent of RepeatedKFold and RepeatedStratifiedKFold) does not define a __repr__ method. As a result, both subclasses inherit Python's default object.__repr__ which returns the object's memory address. Adding a __repr__ method to _RepeatedSplits (right after __init__ at this line) that calls _build_repr resolves the issue.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

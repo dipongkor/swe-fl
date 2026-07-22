@@ -1,0 +1,19 @@
+{
+  "django__django-17084": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-17084",
+    "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 280cb967b4..d6bbf1208c 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -1699,7 +1699,7 @@ class Window(SQLiteNumericMixin, Expression):\n     # Although the main expression may either be an aggregate or an\n     # expression with an aggregate function, the GROUP BY that will\n     # be introduced in the query as a result is not desired.\n-    contains_aggregate = False\n+    contains_aggregate = True\n     contains_over_clause = True\n \n     def __init__(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/expressions.py",
+          "line": 1702,
+          "statement": "contains_aggregate = False"
+        }
+      ],
+      "reasoning": "The Window expression was incorrectly marked as not containing an aggregate, which prevented Django from correctly identifying that it needed to use a subquery when aggregating over it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

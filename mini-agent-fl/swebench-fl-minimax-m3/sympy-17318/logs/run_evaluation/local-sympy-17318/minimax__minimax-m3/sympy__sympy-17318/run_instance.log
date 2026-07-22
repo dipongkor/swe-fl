@@ -1,0 +1,45 @@
+2026-07-02 15:30:19,409 - INFO - Creating container for sympy__sympy-17318...
+2026-07-02 15:30:19,532 - INFO - Container for sympy__sympy-17318 created: 6dd1551232d3f0eaa8fd7c015dfe9532081e209dfa1e3ca83259b38a826509f2
+2026-07-02 15:30:19,954 - INFO - Container for sympy__sympy-17318 started: 6dd1551232d3f0eaa8fd7c015dfe9532081e209dfa1e3ca83259b38a826509f2
+2026-07-02 15:30:19,955 - INFO - Intermediate patch for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/minimax__minimax-m3/sympy__sympy-17318/patch.diff, now applying to container...
+2026-07-02 15:30:20,329 - INFO - >>>>> Applied Patch:
+Checking patch sympy/simplify/radsimp.py...
+Applied patch sympy/simplify/radsimp.py cleanly.
+
+2026-07-02 15:30:20,660 - INFO - Git diff before:
+diff --git a/sympy/simplify/radsimp.py b/sympy/simplify/radsimp.py
+index 216ae26204..5b134d3bfc 100644
+--- a/sympy/simplify/radsimp.py
++++ b/sympy/simplify/radsimp.py
+@@ -1077,7 +1077,7 @@ def split_surds(expr):
+     coeff_muls = [x.as_coeff_Mul() for x in args]
+     surds = [x[1]**2 for x in coeff_muls if x[1].is_Pow]
+     surds.sort(key=default_sort_key)
+-    g, b1, b2 = _split_gcd(*surds)
++    g, b1, b2 = _split_gcd(*surds) if surds else (S.One, [], [])
+     g2 = g
+     if not b2 and len(b1) >= 2:
+         b1n = [x/g for x in b1]
+2026-07-02 15:30:20,661 - INFO - Eval script for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/minimax__minimax-m3/sympy__sympy-17318/eval.sh; copying to container...
+2026-07-02 15:30:43,048 - INFO - Test runtime: 22.09 seconds
+2026-07-02 15:30:43,048 - INFO - Test output for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/minimax__minimax-m3/sympy__sympy-17318/test_output.txt
+2026-07-02 15:30:43,156 - INFO - Git diff after:
+diff --git a/sympy/simplify/radsimp.py b/sympy/simplify/radsimp.py
+index 216ae26204..5b134d3bfc 100644
+--- a/sympy/simplify/radsimp.py
++++ b/sympy/simplify/radsimp.py
+@@ -1077,7 +1077,7 @@ def split_surds(expr):
+     coeff_muls = [x.as_coeff_Mul() for x in args]
+     surds = [x[1]**2 for x in coeff_muls if x[1].is_Pow]
+     surds.sort(key=default_sort_key)
+-    g, b1, b2 = _split_gcd(*surds)
++    g, b1, b2 = _split_gcd(*surds) if surds else (S.One, [], [])
+     g2 = g
+     if not b2 and len(b1) >= 2:
+         b1n = [x/g for x in b1]
+2026-07-02 15:30:43,157 - INFO - Grading answer for sympy__sympy-17318...
+2026-07-02 15:30:43,157 - INFO - report: {'sympy__sympy-17318': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_issue_12420']}, 'PASS_TO_PASS': {'success': ['test_sqrtdenest', 'test_sqrtdenest2', 'test_sqrtdenest_rec', 'test_issue_6241', 'test_sqrtdenest3', 'test_sqrtdenest4', 'test_sqrt_symbolic_denest', 'test_issue_5857', 'test_subsets', 'test_issue_5653'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-17318: resolved: False
+2026-07-02 15:30:43,158 - INFO - Attempting to stop container sweb.eval.sympy__sympy-17318.local-sympy-17318...
+2026-07-02 15:30:58,582 - INFO - Attempting to remove container sweb.eval.sympy__sympy-17318.local-sympy-17318...
+2026-07-02 15:30:58,629 - INFO - Container sweb.eval.sympy__sympy-17318.local-sympy-17318 removed.

@@ -1,0 +1,19 @@
+{
+  "pylint-dev__pylint-6386": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pylint-dev__pylint-6386",
+    "model_patch": "diff --git a/pylint/lint/base_options.py b/pylint/lint/base_options.py\nindex c793cc85..b9d302e9 100644\n--- a/pylint/lint/base_options.py\n+++ b/pylint/lint/base_options.py\n@@ -538,8 +538,8 @@ def _make_run_options(self: Run) -> Options:\n         (\n             \"verbose\",\n             {\n-                \"action\": _DoNothingAction,\n-                \"kwargs\": {},\n+                \"action\": \"store_true\",\n+                \"default\": False,\n                 \"short\": \"v\",\n                 \"help\": \"In verbose mode, extra non-checker-related info \"\n                 \"will be displayed.\",\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "pylint/lint/base_options.py",
+          "line": 541,
+          "statement": "                \"action\": \"store_true\","
+        }
+      ],
+      "reasoning": "The verbose option was configured with a custom action that made argparse treat -v as requiring a value; defining it as a boolean store_true flag ensures both --verbose and -v are argument-less toggles.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

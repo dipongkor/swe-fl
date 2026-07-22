@@ -1,0 +1,22 @@
+diff --git a/sphinx/environment/adapters/toctree.py b/sphinx/environment/adapters/toctree.py
+index 9678e3c7c..0ba6947a9 100644
+--- a/sphinx/environment/adapters/toctree.py
++++ b/sphinx/environment/adapters/toctree.py
+@@ -164,6 +164,17 @@ class TocTree:
+                                           'doesn\'t have a title: no link will be generated'),
+                                        ref, location=toctreenode)
+                 except KeyError:
++                    if ref in ['genindex', 'modindex', 'search']:
++                        reference = nodes.reference('', '', internal=True, refuri=ref, anchorname='',
++                                                    *[nodes.Text(title or ref)])
++                        para = addnodes.compact_paragraph('', '', reference)
++                        item = nodes.list_item('', para)
++                        toc = nodes.bullet_list('', item)
++                        if separate:
++                            entries.append(toc)
++                        else:
++                            entries.extend(toc.children)
++                        continue
+                     # this is raised if the included file does not exist
+                     if excluded(self.env.doc2path(ref, False)):
+                         message = __('toctree contains reference to excluded document %r')

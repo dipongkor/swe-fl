@@ -1,0 +1,19 @@
+{
+  "django__django-16454": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-16454",
+    "model_patch": "diff --git a/django/core/management/base.py b/django/core/management/base.py\nindex abc6f79a15..dfe8794ee8 100644\n--- a/django/core/management/base.py\n+++ b/django/core/management/base.py\n@@ -70,6 +70,15 @@ class CommandParser(ArgumentParser):\n             super().error(message)\n         else:\n             raise CommandError(\"Error: %s\" % message)\n+    def add_subparsers(self, **kwargs):\n+        if \"parser_class\" not in kwargs:\n+            def parser_factory(*args, **parser_kwargs):\n+                if \"called_from_command_line\" not in parser_kwargs:\n+                    parser_kwargs[\"called_from_command_line\"] = self.called_from_command_line\n+                return self.__class__(*args, **parser_kwargs)\n+            kwargs[\"parser_class\"] = parser_factory\n+        return super().add_subparsers(**kwargs)\n+\n \n \n def handle_default_options(options):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/management/base.py",
+          "line": 73,
+          "statement": "def add_subparsers(self, **kwargs):"
+        }
+      ],
+      "reasoning": "The CommandParser class did not override add_subparsers to ensure that subparsers are also instances of CommandParser and inherit the 'called_from_command_line' attribute, leading to incorrect error handling in subparsers.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

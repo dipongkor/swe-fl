@@ -1,0 +1,19 @@
+{
+  "django__django-16454": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-16454",
+    "model_patch": "diff --git a/django/core/management/base.py b/django/core/management/base.py\nindex abc6f79a15..43f05b3c31 100644\n--- a/django/core/management/base.py\n+++ b/django/core/management/base.py\n@@ -3,6 +3,7 @@ Base classes for writing management commands (named commands which can\n be executed through ``django-admin`` or ``manage.py``).\n \"\"\"\n import argparse\n+from functools import partial\n import os\n import sys\n from argparse import ArgumentParser, HelpFormatter\n@@ -71,6 +72,15 @@ class CommandParser(ArgumentParser):\n         else:\n             raise CommandError(\"Error: %s\" % message)\n \n+    def add_subparsers(self, **kwargs):\n+        parser_class = kwargs.get(\"parser_class\", type(self))\n+        if issubclass(parser_class, CommandParser):\n+            kwargs.setdefault(\"parser_class\", partial(\n+                parser_class,\n+                called_from_command_line=self.called_from_command_line,\n+            ))\n+        return super().add_subparsers(**kwargs)\n+\n \n def handle_default_options(options):\n     \"\"\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/management/base.py",
+          "line": 73,
+          "statement": "            raise CommandError(\"Error: %s\" % message)"
+        }
+      ],
+      "reasoning": "Subparsers were instantiated without propagating called_from_command_line into CommandParser, causing their error() path to raise CommandError instead of argparse's CLI-formatted usage output.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

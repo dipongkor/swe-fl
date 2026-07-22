@@ -1,0 +1,43 @@
+2026-07-03 07:02:40,392 - INFO - Creating container for django__django-14315...
+2026-07-03 07:02:40,536 - INFO - Container for django__django-14315 created: 8cc33bd9f4edef88ca6f20810b968122695c8f2b33cf82ec064a40cd59b8ee00
+2026-07-03 07:02:40,942 - INFO - Container for django__django-14315 started: 8cc33bd9f4edef88ca6f20810b968122695c8f2b33cf82ec064a40cd59b8ee00
+2026-07-03 07:02:40,943 - INFO - Intermediate patch for django__django-14315 written to logs/run_evaluation/local-django-14315/minimax__minimax-m3/django__django-14315/patch.diff, now applying to container...
+2026-07-03 07:02:41,327 - INFO - >>>>> Applied Patch:
+Checking patch django/db/backends/base/client.py...
+Applied patch django/db/backends/base/client.py cleanly.
+
+2026-07-03 07:02:41,916 - INFO - Git diff before:
+diff --git a/django/db/backends/base/client.py b/django/db/backends/base/client.py
+index 339f1e863c..335f7bcded 100644
+--- a/django/db/backends/base/client.py
++++ b/django/db/backends/base/client.py
+@@ -21,6 +21,6 @@ class BaseDatabaseClient:
+ 
+     def runshell(self, parameters):
+         args, env = self.settings_to_cmd_args_env(self.connection.settings_dict, parameters)
+-        if env:
++        if env is not None:
+             env = {**os.environ, **env}
+         subprocess.run(args, env=env, check=True)
+2026-07-03 07:02:41,916 - INFO - Eval script for django__django-14315 written to logs/run_evaluation/local-django-14315/minimax__minimax-m3/django__django-14315/eval.sh; copying to container...
+2026-07-03 07:02:48,842 - INFO - Test runtime: 6.67 seconds
+2026-07-03 07:02:48,842 - INFO - Test output for django__django-14315 written to logs/run_evaluation/local-django-14315/minimax__minimax-m3/django__django-14315/test_output.txt
+2026-07-03 07:02:48,925 - INFO - Git diff after:
+diff --git a/django/db/backends/base/client.py b/django/db/backends/base/client.py
+index 339f1e863c..335f7bcded 100644
+--- a/django/db/backends/base/client.py
++++ b/django/db/backends/base/client.py
+@@ -21,6 +21,6 @@ class BaseDatabaseClient:
+ 
+     def runshell(self, parameters):
+         args, env = self.settings_to_cmd_args_env(self.connection.settings_dict, parameters)
+-        if env:
++        if env is not None:
+             env = {**os.environ, **env}
+         subprocess.run(args, env=env, check=True)
+2026-07-03 07:02:48,925 - INFO - Grading answer for django__django-14315...
+2026-07-03 07:02:48,927 - INFO - report: {'django__django-14315': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_accent (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_basic (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_column (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_crash_password_does_not_leak (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_passfile (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_service (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_ssl_certificate (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)'], 'failure': ['test_runshell_use_environ (backends.base.test_client.SimpleDatabaseClientTests)', 'test_settings_to_cmd_args_env (backends.base.test_client.SimpleDatabaseClientTests)', 'test_nopass (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_parameters (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)']}, 'PASS_TO_PASS': {'success': [], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14315: resolved: False
+2026-07-03 07:02:48,927 - INFO - Attempting to stop container sweb.eval.django__django-14315.local-django-14315...
+2026-07-03 07:03:04,370 - INFO - Attempting to remove container sweb.eval.django__django-14315.local-django-14315...
+2026-07-03 07:03:04,411 - INFO - Container sweb.eval.django__django-14315.local-django-14315 removed.

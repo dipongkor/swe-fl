@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7440": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sphinx-doc__sphinx-7440",
+    "model_patch": "diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py\nindex d820cfe5c..9bb6c0ca6 100644\n--- a/sphinx/domains/std.py\n+++ b/sphinx/domains/std.py\n@@ -305,7 +305,7 @@ def make_glossary_term(env: \"BuildEnvironment\", textnodes: Iterable[Node], index\n         term['ids'].append(node_id)\n \n     std = cast(StandardDomain, env.get_domain('std'))\n-    std.note_object('term', termtext.lower(), node_id, location=term)\n+    std.note_object('term', termtext, node_id, location=term)\n \n     # add an index entry too\n     indexnode = addnodes.index()\n@@ -565,7 +565,7 @@ class StandardDomain(Domain):\n         # links to tokens in grammar productions\n         'token':   TokenXRefRole(),\n         # links to terms in glossary\n-        'term':    XRefRole(lowercase=True, innernodeclass=nodes.inline,\n+        'term':    XRefRole(innernodeclass=nodes.inline,\n                             warn_dangling=True),\n         # links to headings or arbitrary labels\n         'ref':     XRefRole(lowercase=True, innernodeclass=nodes.inline,\n@@ -928,8 +928,12 @@ class StandardDomain(Domain):\n                           node: pending_xref, contnode: Element) -> Element:\n         objtypes = self.objtypes_for_role(typ) or []\n         for objtype in objtypes:\n-            if (objtype, target) in self.objects:\n-                docname, labelid = self.objects[objtype, target]\n+            if objtype == 'term':\n+                key = self._get_term_key(target)\n+            else:\n+                key = (objtype, target)\n+            if key in self.objects:\n+                docname, labelid = self.objects[key]\n                 break\n         else:\n             docname, labelid = '', ''\n@@ -938,6 +942,16 @@ class StandardDomain(Domain):\n         return make_refnode(builder, fromdocname, docname,\n                             labelid, contnode)\n \n+    def _get_term_key(self, target: str) -> Tuple[str, str]:\n+        # Terms are stored with their original case but should be looked up\n+        # in a case-insensitive manner.\n+        if ('term', target) in self.objects:\n+            return ('term', target)\n+        for objtype, name in self.objects:\n+            if objtype == 'term' and name.lower() == target.lower():\n+                return ('term', name)\n+        return ('term', target)\n+\n     def resolve_any_xref(self, env: \"BuildEnvironment\", fromdocname: str,\n                          builder: \"Builder\", target: str, node: pending_xref,\n                          contnode: Element) -> List[Tuple[str, Element]]:\n@@ -953,7 +967,7 @@ class StandardDomain(Domain):\n         for objtype in self.object_types:\n             key = (objtype, target)\n             if objtype == 'term':\n-                key = (objtype, ltarget)\n+                key = self._get_term_key(target)\n             if key in self.objects:\n                 docname, labelid = self.objects[key]\n                 results.append(('std:' + self.role_for_objtype(objtype),\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/std.py",
+          "line": 308,
+          "statement": "    std.note_object('term', termtext.lower(), node_id, location=term)"
+        }
+      ],
+      "reasoning": "make_glossary_term registered each glossary term using its lowercased text, so terms differing only in case (e.g. 'MySQL' and 'mysql') mapped to the same key and triggered a 'duplicate term description' warning. Storing the original-case text (with case-insensitive lookup at resolve time) fixes the collision.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,55 @@
+2026-06-30 23:01:42,196 - INFO - Creating container for django__django-14011...
+2026-06-30 23:01:42,273 - INFO - Container for django__django-14011 created: f1e6d3b89f53248f055a2c4d58c06f04742b765b8b5cdf69c3988e20e98ab118
+2026-06-30 23:01:42,747 - INFO - Container for django__django-14011 started: f1e6d3b89f53248f055a2c4d58c06f04742b765b8b5cdf69c3988e20e98ab118
+2026-06-30 23:01:42,750 - INFO - Intermediate patch for django__django-14011 written to logs/run_evaluation/local-django-14011/openai__gpt-5.3-codex/django__django-14011/patch.diff, now applying to container...
+2026-06-30 23:01:43,245 - INFO - >>>>> Applied Patch:
+Checking patch django/core/servers/basehttp.py...
+Applied patch django/core/servers/basehttp.py cleanly.
+
+2026-06-30 23:01:44,120 - INFO - Git diff before:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index 14dab517c9..17f394ffe1 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -81,6 +81,13 @@ class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):
+     """A threaded version of the WSGIServer"""
+     daemon_threads = True
+ 
++    def process_request_thread(self, request, client_address):
++        """Close database connections at the end of each request thread."""
++        from django.db import connections
++
++        super().process_request_thread(request, client_address)
++        connections.close_all()
++
+ 
+ class ServerHandler(simple_server.ServerHandler):
+     http_version = '1.1'
+2026-06-30 23:01:44,124 - INFO - Eval script for django__django-14011 written to logs/run_evaluation/local-django-14011/openai__gpt-5.3-codex/django__django-14011/eval.sh; copying to container...
+2026-06-30 23:01:52,142 - INFO - Test runtime: 7.75 seconds
+2026-06-30 23:01:52,146 - INFO - Test output for django__django-14011 written to logs/run_evaluation/local-django-14011/openai__gpt-5.3-codex/django__django-14011/test_output.txt
+2026-06-30 23:01:52,432 - INFO - Git diff after:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index 14dab517c9..17f394ffe1 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -81,6 +81,13 @@ class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):
+     """A threaded version of the WSGIServer"""
+     daemon_threads = True
+ 
++    def process_request_thread(self, request, client_address):
++        """Close database connections at the end of each request thread."""
++        from django.db import connections
++
++        super().process_request_thread(request, client_address)
++        connections.close_all()
++
+ 
+ class ServerHandler(simple_server.ServerHandler):
+     http_version = '1.1'
+2026-06-30 23:01:52,437 - INFO - Grading answer for django__django-14011...
+2026-06-30 23:01:52,443 - INFO - report: {'django__django-14011': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_live_server_url_is_class_property (servers.tests.LiveServerAddress)', 'Data written to the database by a view can be read.', 'Fixtures are properly loaded and visible to the live server thread.', 'test_check_model_instance_from_subview (servers.tests.LiveServerThreadedTests)', 'test_view_calls_subview (servers.tests.LiveServerThreadedTests)', 'test_404 (servers.tests.LiveServerViews)', 'A HTTP 1.1 server is supposed to support keep-alive. Since our', 'test_environ (servers.tests.LiveServerViews)', 'test_keep_alive_connection_clears_previous_request_data (servers.tests.LiveServerViews)', 'See `test_closes_connection_without_content_length` for details. This', 'test_media_files (servers.tests.LiveServerViews)', 'LiveServerTestCase reports a 404 status code when HTTP client', 'Launched server serves with HTTP 1.1.', 'test_static_files (servers.tests.LiveServerViews)', 'test_view (servers.tests.LiveServerViews)', 'Each LiveServerTestCase binds to a unique port or fails to start a', "LiveServerTestCase.port customizes the server's port."]}, 'PASS_TO_PASS': {'success': ['test_set_up_class (servers.tests.LiveServerTestCaseSetupTest)', 'Contrast to'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14011: resolved: False
+2026-06-30 23:01:52,446 - INFO - Attempting to stop container sweb.eval.django__django-14011.local-django-14011...
+2026-06-30 23:02:07,924 - INFO - Attempting to remove container sweb.eval.django__django-14011.local-django-14011...
+2026-06-30 23:02:07,999 - INFO - Container sweb.eval.django__django-14011.local-django-14011 removed.

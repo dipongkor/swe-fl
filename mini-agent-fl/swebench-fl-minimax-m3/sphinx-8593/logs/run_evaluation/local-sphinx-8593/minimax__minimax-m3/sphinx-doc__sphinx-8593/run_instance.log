@@ -1,0 +1,53 @@
+2026-07-02 19:27:12,837 - INFO - Creating container for sphinx-doc__sphinx-8593...
+2026-07-02 19:27:12,945 - INFO - Container for sphinx-doc__sphinx-8593 created: 6409673383d8df387603188a34c598a08a350f2a88d6528e5475e247647cd5e5
+2026-07-02 19:27:13,418 - INFO - Container for sphinx-doc__sphinx-8593 started: 6409673383d8df387603188a34c598a08a350f2a88d6528e5475e247647cd5e5
+2026-07-02 19:27:13,418 - INFO - Intermediate patch for sphinx-doc__sphinx-8593 written to logs/run_evaluation/local-sphinx-8593/minimax__minimax-m3/sphinx-doc__sphinx-8593/patch.diff, now applying to container...
+2026-07-02 19:27:13,814 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/ext/autodoc/__init__.py...
+Applied patch sphinx/ext/autodoc/__init__.py cleanly.
+
+2026-07-02 19:27:14,065 - INFO - Git diff before:
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index 76265f5be..ba48a43a7 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -726,7 +726,12 @@ class Documenter:
+                 # hack for ClassDocumenter to inject docstring via ObjectMember
+                 doc = obj.docstring
+ 
++            # check the existence of attribute docstring
++            # (only attributes listed in attr_docs are considered)
+             has_doc = bool(doc)
++            if (namespace, membername) in attr_docs:
++                doc = '\n'.join(attr_docs[namespace, membername])
++                has_doc = bool(doc)
+ 
+             metadata = extract_metadata(doc)
+             if 'private' in metadata:
+2026-07-02 19:27:14,065 - INFO - Eval script for sphinx-doc__sphinx-8593 written to logs/run_evaluation/local-sphinx-8593/minimax__minimax-m3/sphinx-doc__sphinx-8593/eval.sh; copying to container...
+2026-07-02 19:27:18,659 - INFO - Test runtime: 4.31 seconds
+2026-07-02 19:27:18,659 - INFO - Test output for sphinx-doc__sphinx-8593 written to logs/run_evaluation/local-sphinx-8593/minimax__minimax-m3/sphinx-doc__sphinx-8593/test_output.txt
+2026-07-02 19:27:18,741 - INFO - Git diff after:
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index 76265f5be..ba48a43a7 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -726,7 +726,12 @@ class Documenter:
+                 # hack for ClassDocumenter to inject docstring via ObjectMember
+                 doc = obj.docstring
+ 
++            # check the existence of attribute docstring
++            # (only attributes listed in attr_docs are considered)
+             has_doc = bool(doc)
++            if (namespace, membername) in attr_docs:
++                doc = '\n'.join(attr_docs[namespace, membername])
++                has_doc = bool(doc)
+ 
+             metadata = extract_metadata(doc)
+             if 'private' in metadata:
+2026-07-02 19:27:18,741 - INFO - Grading answer for sphinx-doc__sphinx-8593...
+2026-07-02 19:27:18,742 - INFO - report: {'sphinx-doc__sphinx-8593': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_ext_autodoc_private_members.py::test_private_field', 'tests/test_ext_autodoc_private_members.py::test_private_members'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_ext_autodoc_private_members.py::test_private_field_and_private_members'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-8593: resolved: True
+2026-07-02 19:27:18,743 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-8593.local-sphinx-8593...
+2026-07-02 19:27:34,166 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-8593.local-sphinx-8593...
+2026-07-02 19:27:34,204 - INFO - Container sweb.eval.sphinx-doc__sphinx-8593.local-sphinx-8593 removed.

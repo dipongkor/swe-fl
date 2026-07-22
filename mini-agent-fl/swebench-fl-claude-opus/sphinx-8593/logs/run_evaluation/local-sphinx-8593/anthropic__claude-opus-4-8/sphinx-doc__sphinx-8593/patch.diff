@@ -1,0 +1,19 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index 76265f5be..12c11a28a 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -737,6 +737,14 @@ class Documenter:
+                 isprivate = False
+             else:
+                 isprivate = membername.startswith('_')
++                if (namespace, membername) in attr_docs:
++                    # take variable comment into account for metadata
++                    attr_doc = '\n'.join(attr_docs[namespace, membername])
++                    attr_metadata = extract_metadata(attr_doc)
++                    if 'private' in attr_metadata:
++                        isprivate = True
++                    elif 'public' in attr_metadata:
++                        isprivate = False
+ 
+             keep = False
+             if safe_getattr(member, '__sphinx_mock__', None) is not None:

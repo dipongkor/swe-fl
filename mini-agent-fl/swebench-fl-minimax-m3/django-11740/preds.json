@@ -1,0 +1,19 @@
+{
+  "django__django-11740": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-11740",
+    "model_patch": "diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py\nindex 0dc1c77c53..261ba14199 100644\n--- a/django/db/migrations/autodetector.py\n+++ b/django/db/migrations/autodetector.py\n@@ -963,6 +963,9 @@ class MigrationAutodetector:\n                             preserve_default = False\n                     else:\n                         field = new_field\n+                    dependencies = []\n+                    if field.remote_field and field.remote_field.model:\n+                        dependencies.extend(self._get_dependencies_for_foreign_key(field))\n                     self.add_operation(\n                         app_label,\n                         operations.AlterField(\n@@ -970,7 +973,8 @@ class MigrationAutodetector:\n                             name=field_name,\n                             field=field,\n                             preserve_default=preserve_default,\n-                        )\n+                        ),\n+                        dependencies=dependencies,\n                     )\n                 else:\n                     # We cannot alter between m2m and concrete fields\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/migrations/autodetector.py",
+          "line": 966,
+          "statement": "                    self.add_operation("
+        }
+      ],
+      "reasoning": "In the generate_altered_fields method, when an AlterField operation is created for a field that was changed to a ForeignKey, the self.add_operation call does not pass a dependencies argument, so no dependency is created for the related model. This causes the migration to fail because it cannot resolve the related model.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

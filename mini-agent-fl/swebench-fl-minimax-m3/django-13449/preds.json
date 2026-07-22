@@ -1,0 +1,19 @@
+{
+  "django__django-13449": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13449",
+    "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 90d90119d0..ab8f53f033 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -1298,11 +1298,18 @@ class Window(Expression):\n     def set_source_expressions(self, exprs):\n         self.source_expression, self.partition_by, self.order_by, self.frame = exprs\n \n+    def _compile_source_expression(self, compiler, connection):\n+        # Compile the source expression using as_sql directly to avoid\n+        # vendor-specific wrappers (e.g., SQLiteNumericMixin casting a\n+        # DecimalField output) being placed inside the OVER clause, which\n+        # would result in invalid SQL.\n+        return self.source_expression.as_sql(compiler, connection)\n+\n     def as_sql(self, compiler, connection, template=None):\n         connection.ops.check_expression_support(self)\n         if not connection.features.supports_over_clause:\n             raise NotSupportedError('This backend does not support window expressions.')\n-        expr_sql, params = compiler.compile(self.source_expression)\n+        expr_sql, params = self._compile_source_expression(compiler, connection)\n         window_sql, window_params = [], []\n \n         if self.partition_by is not None:\n@@ -1327,10 +1334,22 @@ class Window(Expression):\n         params.extend(window_params)\n         template = template or self.template\n \n-        return template % {\n+        sql = template % {\n             'expression': expr_sql,\n             'window': ''.join(window_sql).strip()\n-        }, params\n+        }\n+        # On SQLite, expressions with a DecimalField output must be cast\n+        # to NUMERIC to be properly compared. The CAST must wrap the\n+        # entire window function call (e.g., ``CAST(LAG(...) OVER (...)\n+        # AS NUMERIC)``) rather than just the function (e.g.,\n+        # ``CAST(LAG(...) AS NUMERIC) OVER (...)`` which is invalid SQL).\n+        if connection.vendor == 'sqlite':\n+            try:\n+                if self.source_expression.output_field.get_internal_type() == 'DecimalField':\n+                    sql = 'CAST(%s AS NUMERIC)' % sql\n+            except FieldError:\n+                pass\n+        return sql, params\n \n     def __str__(self):\n         return '{} OVER ({}{}{})'.format(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/expressions.py",
+          "line": 1306,
+          "statement": "        expr_sql, params = compiler.compile(self.source_expression)"
+        }
+      ],
+      "reasoning": "When a window function (e.g., Lag) with a DecimalField output is used on SQLite, the source expression's as_sqlite method (from SQLiteNumericMixin) wraps the function call in CAST(... AS NUMERIC). The Window.as_sql then appends the OVER clause after the CAST, producing invalid SQL like 'CAST(LAG(...) AS NUMERIC) OVER (...)'. The fix is to compile the source expression using as_sql directly (bypassing the vendor-specific CAST wrapper) and apply the CAST around the entire window function call at the Window level for SQLite with DecimalField outputs.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,17 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index 76265f5be..ba48a43a7 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -726,7 +726,12 @@ class Documenter:
+                 # hack for ClassDocumenter to inject docstring via ObjectMember
+                 doc = obj.docstring
+ 
++            # check the existence of attribute docstring
++            # (only attributes listed in attr_docs are considered)
+             has_doc = bool(doc)
++            if (namespace, membername) in attr_docs:
++                doc = '\n'.join(attr_docs[namespace, membername])
++                has_doc = bool(doc)
+ 
+             metadata = extract_metadata(doc)
+             if 'private' in metadata:

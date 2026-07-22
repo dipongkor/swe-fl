@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7324": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-7324",
+    "model_patch": "diff --git a/src/_pytest/mark/expression.py b/src/_pytest/mark/expression.py\nindex 04c73411a..964f5dc33 100644\n--- a/src/_pytest/mark/expression.py\n+++ b/src/_pytest/mark/expression.py\n@@ -161,7 +161,14 @@ def not_expr(s: Scanner) -> ast.expr:\n         return ret\n     ident = s.accept(TokenType.IDENT)\n     if ident:\n-        return ast.Name(ident.value, ast.Load())\n+        if ident.value == \"True\":\n+            return ast.NameConstant(True)\n+        elif ident.value == \"False\":\n+            return ast.NameConstant(False)\n+        elif ident.value == \"None\":\n+            return ast.NameConstant(None)\n+        else:\n+            return ast.Name(ident.value, ast.Load())\n     s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))\n \n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/mark/expression.py",
+          "line": 164,
+          "statement": "        return ast.Name(ident.value, ast.Load())"
+        }
+      ],
+      "reasoning": "When the user provides 'True', 'False', or 'None' as an identifier in a match expression, the code creates an ast.Name node with that identifier. In Python 3.8+, the compiler asserts that these names cannot be used as identifiers (they are constants), causing a crash on debug builds or a ValueError on non-debug builds. The fix uses ast.NameConstant for these special values to avoid the crash.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

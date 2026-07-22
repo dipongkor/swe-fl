@@ -1,0 +1,14 @@
+diff --git a/sphinx/util/docfields.py b/sphinx/util/docfields.py
+index 404bb127f..cb27ccbc8 100644
+--- a/sphinx/util/docfields.py
++++ b/sphinx/util/docfields.py
+@@ -72,6 +72,9 @@ class Field:
+             return contnode or innernode(target, target)
+         refnode = addnodes.pending_xref('', refdomain=domain, refexplicit=False,
+                                         reftype=rolename, reftarget=target)
++        if env:
++            refnode["py:module"] = env.ref_context.get("py:module")
++            refnode["py:class"] = env.ref_context.get("py:class")
+         refnode += contnode or innernode(target, target)
+         if env:
+             env.get_domain(domain).process_field_xref(refnode)

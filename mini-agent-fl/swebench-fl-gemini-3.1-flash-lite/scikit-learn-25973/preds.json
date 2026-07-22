@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-25973": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "model_patch": "diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py\nindex e983c55de..184cc131d 100644\n--- a/sklearn/feature_selection/_sequential.py\n+++ b/sklearn/feature_selection/_sequential.py\n@@ -8,11 +8,12 @@ import numpy as np\n import warnings\n \n from ._base import SelectorMixin\n-from ..base import BaseEstimator, MetaEstimatorMixin, clone\n+from ..base import BaseEstimator, MetaEstimatorMixin, clone, is_classifier\n from ..utils._param_validation import HasMethods, Hidden, Interval, StrOptions\n from ..utils._param_validation import RealNotInt\n from ..utils._tags import _safe_tags\n from ..utils.validation import check_is_fitted\n+from ..model_selection import check_cv\n from ..model_selection import cross_val_score\n from ..metrics import get_scorer_names\n \n@@ -262,6 +263,7 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator\n         cloned_estimator = clone(self.estimator)\n \n         # the current mask corresponds to the set of features:\n+        self.cv_ = check_cv(self.cv, y, classifier=is_classifier(self.estimator))\n         # - that we have already *selected* if we do forward selection\n         # - that we have already *excluded* if we do backward selection\n         current_mask = np.zeros(shape=n_features, dtype=bool)\n@@ -309,7 +311,7 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator\n                 estimator,\n                 X_new,\n                 y,\n-                cv=self.cv,\n+                cv=self.cv_,\n                 scoring=self.scoring,\n                 n_jobs=self.n_jobs,\n             ).mean()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/feature_selection/_sequential.py",
+          "line": 312,
+          "statement": "cv=self.cv,"
+        }
+      ],
+      "reasoning": "The SequentialFeatureSelector passes the raw cv parameter to cross_val_score in each iteration. If cv is an iterator, it gets exhausted after the first iteration, causing an IndexError in subsequent iterations.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,7 @@
+2026-06-30 00:45:35,524 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-06-30 00:45:36,858 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-06-30 00:45:36,860 - minisweagent - INFO - Running on 1 instances...
+2026-06-30 00:45:36,862 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-06-30 00:45:40,061 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-bde41516 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-14623:latest sleep 2h
+2026-06-30 00:47:32,779 - minisweagent.environment - INFO - Started container minisweagent-bde41516 with ID b23c2138ab264d86ac8fb9a2b24e1e73f79674b84b40f0753de150803ede149a
+2026-06-30 00:50:10,884 - minisweagent - INFO - Saved trajectory to 'swebench-fl-claude-opus/matplotlib-14623/matplotlib__matplotlib-14623/matplotlib__matplotlib-14623.traj.json'

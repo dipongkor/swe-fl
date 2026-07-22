@@ -1,0 +1,19 @@
+{
+  "django__django-16502": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-16502",
+    "model_patch": "diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py\nindex fef5532e58..c33bd45cda 100644\n--- a/django/core/servers/basehttp.py\n+++ b/django/core/servers/basehttp.py\n@@ -143,6 +143,17 @@ class ServerHandler(simple_server.ServerHandler):\n         if self.headers.get(\"Connection\") == \"close\":\n             self.request_handler.close_connection = True\n \n+\n+    def send_headers(self):\n+        self.is_sending_headers = True\n+        super().send_headers()\n+        self.is_sending_headers = False\n+\n+    def _write(self, data):\n+        if self.environ['REQUEST_METHOD'] == 'HEAD' and not getattr(self, 'is_sending_headers', False):\n+            return\n+        super()._write(data)\n+\n     def close(self):\n         self.get_stdin().read()\n         super().close()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/servers/basehttp.py",
+          "line": 145,
+          "statement": "def send_headers(self):"
+        }
+      ],
+      "reasoning": "The runserver's WSGI handler (ServerHandler) was not stripping the response body for HEAD requests, which is required by RFC 2616. By overriding send_headers and _write, we can ensure that the body is not sent for HEAD requests.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

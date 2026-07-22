@@ -1,0 +1,7 @@
+2026-06-30 01:29:09,455 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-06-30 01:29:10,757 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-06-30 01:29:10,761 - minisweagent - INFO - Running on 1 instances...
+2026-06-30 01:29:10,762 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-06-30 01:29:13,564 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-e8e386e2 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-12155:latest sleep 2h
+2026-06-30 01:29:59,300 - minisweagent.environment - INFO - Started container minisweagent-e8e386e2 with ID b60e7526c04d8046af21229066e7195c79b6e0d73ba650de0833f2d0cde7f573
+2026-06-30 01:30:38,373 - minisweagent - INFO - Saved trajectory to 'swebench-fl-claude-opus/django-12155/django__django-12155/django__django-12155.traj.json'

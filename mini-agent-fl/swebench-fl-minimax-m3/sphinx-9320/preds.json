@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9320": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "model_patch": "diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py\nindex a40a21073..302a83df5 100644\n--- a/sphinx/cmd/quickstart.py\n+++ b/sphinx/cmd/quickstart.py\n@@ -95,6 +95,13 @@ def is_path(x: str) -> str:\n     return x\n \n \n+def is_path_or_empty(x: str) -> str:\n+    x = path.expanduser(x)\n+    if x and not path.isdir(x):\n+        raise ValidationError(__(\"Please enter a valid path name.\"))\n+    return x\n+\n+\n def allow_empty(x: str) -> str:\n     return x\n \n@@ -223,7 +230,7 @@ def ask_user(d: Dict) -> None:\n         print(__('sphinx-quickstart will not overwrite existing Sphinx projects.'))\n         print()\n         d['path'] = do_prompt(__('Please enter a new root path (or just Enter to exit)'),\n-                              '', is_path)\n+                              '', is_path_or_empty)\n         if not d['path']:\n             sys.exit(1)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/cmd/quickstart.py",
+          "line": 93,
+          "statement": "    if not path.isdir(x):"
+        }
+      ],
+      "reasoning": "The is_path validator at line 93 raises ValidationError on empty input because path.isdir('') returns False. This validator was used for the 'Please enter a new root path (or just Enter to exit)' prompt, which needs to allow empty input to let the user exit. A new is_path_or_empty validator was introduced that permits empty strings while still validating non-empty paths, and the call was updated to use it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

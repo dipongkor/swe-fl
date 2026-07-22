@@ -1,0 +1,73 @@
+2026-06-29 21:44:25,736 - INFO - Creating container for pytest-dev__pytest-5840...
+2026-06-29 21:44:25,815 - INFO - Container for pytest-dev__pytest-5840 created: 7872690832cbbb9c81e2624fd0d802213912dbc2861ac4f83bce29cd9d4f873f
+2026-06-29 21:44:26,551 - INFO - Container for pytest-dev__pytest-5840 started: 7872690832cbbb9c81e2624fd0d802213912dbc2861ac4f83bce29cd9d4f873f
+2026-06-29 21:44:26,553 - INFO - Intermediate patch for pytest-dev__pytest-5840 written to logs/run_evaluation/local-pytest-5840/anthropic__claude-opus-4-8/pytest-dev__pytest-5840/patch.diff, now applying to container...
+2026-06-29 21:44:27,001 - INFO - >>>>> Applied Patch:
+Checking patch src/_pytest/pathlib.py...
+Applied patch src/_pytest/pathlib.py cleanly.
+
+2026-06-29 21:44:27,235 - INFO - Git diff before:
+diff --git a/src/_pytest/pathlib.py b/src/_pytest/pathlib.py
+index 0403b6947..101ed9e7a 100644
+--- a/src/_pytest/pathlib.py
++++ b/src/_pytest/pathlib.py
+@@ -11,7 +11,6 @@ from functools import partial
+ from os.path import expanduser
+ from os.path import expandvars
+ from os.path import isabs
+-from os.path import normcase
+ from os.path import sep
+ from posixpath import sep as posix_sep
+ 
+@@ -342,5 +341,12 @@ def unique_path(path):
+     systems such as Windows.
+ 
+     This is needed only for ``py.path.local``; ``pathlib.Path`` handles this
+-    natively with ``resolve()``."""
+-    return type(path)(normcase(str(path.realpath())))
++    natively with ``resolve()``.
++
++    ``resolve()`` is used here (instead of ``py.path.local.realpath()`` +
++    ``normcase``) because it resolves the path to the *correct* case on
++    case-insensitive but case-preserving file systems such as Windows, while
++    also deduplicating paths that only differ in case. Lowercasing the path
++    (as ``normcase`` does) would break importing modules from folders whose
++    real name is not all lowercase (see #5792)."""
++    return type(path)(Path(str(path)).resolve())
+2026-06-29 21:44:27,238 - INFO - Eval script for pytest-dev__pytest-5840 written to logs/run_evaluation/local-pytest-5840/anthropic__claude-opus-4-8/pytest-dev__pytest-5840/eval.sh; copying to container...
+2026-06-29 21:44:35,933 - INFO - Test runtime: 8.40 seconds
+2026-06-29 21:44:35,938 - INFO - Test output for pytest-dev__pytest-5840 written to logs/run_evaluation/local-pytest-5840/anthropic__claude-opus-4-8/pytest-dev__pytest-5840/test_output.txt
+2026-06-29 21:44:36,134 - INFO - Git diff after:
+diff --git a/src/_pytest/pathlib.py b/src/_pytest/pathlib.py
+index 0403b6947..101ed9e7a 100644
+--- a/src/_pytest/pathlib.py
++++ b/src/_pytest/pathlib.py
+@@ -11,7 +11,6 @@ from functools import partial
+ from os.path import expanduser
+ from os.path import expandvars
+ from os.path import isabs
+-from os.path import normcase
+ from os.path import sep
+ from posixpath import sep as posix_sep
+ 
+@@ -342,5 +341,12 @@ def unique_path(path):
+     systems such as Windows.
+ 
+     This is needed only for ``py.path.local``; ``pathlib.Path`` handles this
+-    natively with ``resolve()``."""
+-    return type(path)(normcase(str(path.realpath())))
++    natively with ``resolve()``.
++
++    ``resolve()`` is used here (instead of ``py.path.local.realpath()`` +
++    ``normcase``) because it resolves the path to the *correct* case on
++    case-insensitive but case-preserving file systems such as Windows, while
++    also deduplicating paths that only differ in case. Lowercasing the path
++    (as ``normcase`` does) would break importing modules from folders whose
++    real name is not all lowercase (see #5792)."""
++    return type(path)(Path(str(path)).resolve())
+2026-06-29 21:44:36,135 - INFO - Grading answer for pytest-dev__pytest-5840...
+2026-06-29 21:44:36,149 - INFO - report: {'pytest-dev__pytest-5840': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['testing/test_conftest.py::test_setinitial_conftest_subdirs[test]', 'testing/test_conftest.py::test_setinitial_conftest_subdirs[tests]']}, 'PASS_TO_PASS': {'success': ['testing/test_conftest.py::TestConftestValueAccessGlobal::test_basic_init[global]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_immediate_initialiation_and_incremental_are_the_same[global]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_not_existing[global]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_by_path[global]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_with_confmod[global]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_basic_init[inpackage]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_immediate_initialiation_and_incremental_are_the_same[inpackage]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_not_existing[inpackage]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_by_path[inpackage]', 'testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_with_confmod[inpackage]', 'testing/test_conftest.py::test_conftest_in_nonpkg_with_init', 'testing/test_conftest.py::test_doubledash_considered', 'testing/test_conftest.py::test_issue151_load_all_conftests', 'testing/test_conftest.py::test_conftest_global_import', 'testing/test_conftest.py::test_conftestcutdir', 'testing/test_conftest.py::test_conftestcutdir_inplace_considered', 'testing/test_conftest.py::test_setinitial_conftest_subdirs[whatever]', 'testing/test_conftest.py::test_setinitial_conftest_subdirs[.dotdir]', 'testing/test_conftest.py::test_conftest_confcutdir', 'testing/test_conftest.py::test_conftest_symlink', 'testing/test_conftest.py::test_conftest_symlink_files', 'testing/test_conftest.py::test_conftest_uppercase', 'testing/test_conftest.py::test_no_conftest', 'testing/test_conftest.py::test_conftest_existing_resultlog', 'testing/test_conftest.py::test_conftest_existing_junitxml', 'testing/test_conftest.py::test_conftest_import_order', 'testing/test_conftest.py::test_fixture_dependency', 'testing/test_conftest.py::test_conftest_found_with_double_dash', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-..-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-..-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-../..-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-../..-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-../package-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-.-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-..-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-..-3]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-../package/swc-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-./swc-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-.-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-../swc-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-../package/snc-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-./snc-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-../snc-1]', 'testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-.-1]', 'testing/test_conftest.py::test_search_conftest_up_to_inifile[.-2-0]', 'testing/test_conftest.py::test_search_conftest_up_to_inifile[src-1-1]', 'testing/test_conftest.py::test_search_conftest_up_to_inifile[None-1-1]', 'testing/test_conftest.py::test_issue1073_conftest_special_objects', 'testing/test_conftest.py::test_conftest_exception_handling', 'testing/test_conftest.py::test_hook_proxy', 'testing/test_conftest.py::test_required_option_help'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for pytest-dev__pytest-5840: resolved: False
+2026-06-29 21:44:36,152 - INFO - Attempting to stop container sweb.eval.pytest-dev__pytest-5840.local-pytest-5840...
+2026-06-29 21:44:51,581 - INFO - Attempting to remove container sweb.eval.pytest-dev__pytest-5840.local-pytest-5840...
+2026-06-29 21:44:51,665 - INFO - Container sweb.eval.pytest-dev__pytest-5840.local-pytest-5840 removed.

@@ -1,0 +1,85 @@
+2026-07-01 21:21:44,695 - INFO - Creating container for astropy__astropy-7671...
+2026-07-01 21:21:44,770 - INFO - Container for astropy__astropy-7671 created: 417a921ccebbd1dee751866f4d77f04b81e51066364bf477ea4ea8e9d8da614c
+2026-07-01 21:21:45,163 - INFO - Container for astropy__astropy-7671 started: 417a921ccebbd1dee751866f4d77f04b81e51066364bf477ea4ea8e9d8da614c
+2026-07-01 21:21:45,171 - INFO - Intermediate patch for astropy__astropy-7671 written to logs/run_evaluation/local-astropy-7671/gemini__gemini-3.1-flash-lite/astropy__astropy-7671/patch.diff, now applying to container...
+2026-07-01 21:21:45,615 - INFO - >>>>> Applied Patch:
+Checking patch astropy/utils/introspection.py...
+Applied patch astropy/utils/introspection.py cleanly.
+
+2026-07-01 21:21:46,175 - INFO - Git diff before:
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..55e1d3024 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -7,6 +7,7 @@ import inspect
+ import types
+ import importlib
+ from distutils.version import LooseVersion
++from packaging.version import parse as parse_version
+ 
+ 
+ __all__ = ['resolve_name', 'minversion', 'find_current_module',
+@@ -139,10 +140,16 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+     else:
+         have_version = resolve_name(module.__name__, version_path)
+ 
+-    if inclusive:
+-        return LooseVersion(have_version) >= LooseVersion(version)
+-    else:
+-        return LooseVersion(have_version) > LooseVersion(version)
++    try:
++        if inclusive:
++            return parse_version(have_version) >= parse_version(version)
++        else:
++            return parse_version(have_version) > parse_version(version)
++    except Exception:
++        if inclusive:
++            return LooseVersion(have_version) >= LooseVersion(version)
++        else:
++            return LooseVersion(have_version) > LooseVersion(version)
+ 
+ 
+ def find_current_module(depth=1, finddiff=False):
+2026-07-01 21:21:46,180 - INFO - Eval script for astropy__astropy-7671 written to logs/run_evaluation/local-astropy-7671/gemini__gemini-3.1-flash-lite/astropy__astropy-7671/eval.sh; copying to container...
+2026-07-01 21:21:51,990 - INFO - Test runtime: 5.52 seconds
+2026-07-01 21:21:51,995 - INFO - Test output for astropy__astropy-7671 written to logs/run_evaluation/local-astropy-7671/gemini__gemini-3.1-flash-lite/astropy__astropy-7671/test_output.txt
+2026-07-01 21:21:52,210 - INFO - Git diff after:
+diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py
+index 3e784f9fc..55e1d3024 100644
+--- a/astropy/utils/introspection.py
++++ b/astropy/utils/introspection.py
+@@ -7,6 +7,7 @@ import inspect
+ import types
+ import importlib
+ from distutils.version import LooseVersion
++from packaging.version import parse as parse_version
+ 
+ 
+ __all__ = ['resolve_name', 'minversion', 'find_current_module',
+@@ -139,10 +140,16 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
+     else:
+         have_version = resolve_name(module.__name__, version_path)
+ 
+-    if inclusive:
+-        return LooseVersion(have_version) >= LooseVersion(version)
+-    else:
+-        return LooseVersion(have_version) > LooseVersion(version)
++    try:
++        if inclusive:
++            return parse_version(have_version) >= parse_version(version)
++        else:
++            return parse_version(have_version) > parse_version(version)
++    except Exception:
++        if inclusive:
++            return LooseVersion(have_version) >= LooseVersion(version)
++        else:
++            return LooseVersion(have_version) > LooseVersion(version)
+ 
+ 
+ def find_current_module(depth=1, finddiff=False):
+2026-07-01 21:21:52,211 - INFO - Grading answer for astropy__astropy-7671...
+2026-07-01 21:21:52,218 - INFO - report: {'astropy__astropy-7671': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['astropy/utils/tests/test_introspection.py::test_minversion'], 'failure': []}, 'PASS_TO_PASS': {'success': ['astropy/utils/tests/test_introspection.py::test_pkg_finder', 'astropy/utils/tests/test_introspection.py::test_find_current_mod', 'astropy/utils/tests/test_introspection.py::test_find_mod_objs'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-7671: resolved: True
+2026-07-01 21:21:52,221 - INFO - Attempting to stop container sweb.eval.astropy__astropy-7671.local-astropy-7671...
+2026-07-01 21:22:07,620 - INFO - Attempting to remove container sweb.eval.astropy__astropy-7671.local-astropy-7671...
+2026-07-01 21:22:07,681 - INFO - Container sweb.eval.astropy__astropy-7671.local-astropy-7671 removed.

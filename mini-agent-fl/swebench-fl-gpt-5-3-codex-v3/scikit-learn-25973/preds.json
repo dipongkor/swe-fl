@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-25973": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "model_patch": "diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py\nindex e983c55de..cc822f14c 100644\n--- a/sklearn/feature_selection/_sequential.py\n+++ b/sklearn/feature_selection/_sequential.py\n@@ -260,6 +260,9 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator\n             raise ValueError(\"tol must be positive when doing forward selection\")\n \n         cloned_estimator = clone(self.estimator)\n+        cv = self.cv\n+        if hasattr(cv, \"__iter__\") and not hasattr(cv, \"split\"):\n+            cv = list(cv)\n \n         # the current mask corresponds to the set of features:\n         # - that we have already *selected* if we do forward selection\n@@ -309,7 +312,7 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator\n                 estimator,\n                 X_new,\n                 y,\n-                cv=self.cv,\n+                cv=cv,\n                 scoring=self.scoring,\n                 n_jobs=self.n_jobs,\n             ).mean()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/feature_selection/_sequential.py",
+          "line": 309,
+          "statement": "                cv=self.cv,"
+        }
+      ],
+      "reasoning": "SequentialFeatureSelector reuses cross-validation repeatedly while evaluating many candidate features; when cv is a one-shot iterable of splits, passing it directly exhausts it after the first use and later scoring gets no folds.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

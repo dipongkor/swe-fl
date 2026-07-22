@@ -1,0 +1,24 @@
+{
+  "django__django-15503": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-15503",
+    "model_patch": "diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py\nindex fdca700c9d..8765517c2c 100644\n--- a/django/db/models/fields/json.py\n+++ b/django/db/models/fields/json.py\n@@ -129,13 +129,11 @@ class JSONField(CheckFieldDefaultMixin, Field):\n def compile_json_path(key_transforms, include_root=True):\n     path = [\"$\"] if include_root else []\n     for key_transform in key_transforms:\n-        try:\n-            num = int(key_transform)\n-        except ValueError:  # non-integer\n+        if isinstance(key_transform, int):\n+            path.append(\"[%s]\" % key_transform)\n+        else:\n             path.append(\".\")\n             path.append(json.dumps(key_transform))\n-        else:\n-            path.append(\"[%s]\" % num)\n     return \"\".join(path)\n \n \n@@ -307,7 +305,7 @@ class KeyTransform(Transform):\n \n     def __init__(self, key_name, *args, **kwargs):\n         super().__init__(*args, **kwargs)\n-        self.key_name = str(key_name)\n+        self.key_name = key_name\n \n     def preprocess_lhs(self, compiler, connection):\n         key_transforms = [self.key_name]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/json.py",
+          "line": 132,
+          "statement": "        try:\n            num = int(key_transform)\n        except ValueError:  # non-integer"
+        },
+        {
+          "file": "django/db/models/fields/json.py",
+          "line": 310,
+          "statement": "        self.key_name = str(key_name)"
+        }
+      ],
+      "reasoning": "The compile_json_path function uses int(key_transform) to convert numeric strings to integers for array indexing, which incorrectly treats string keys like '1111' as array indices instead of object keys. The KeyTransform.__init__ converts key_name to str, losing the original type information needed to distinguish between integer indices and string keys.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

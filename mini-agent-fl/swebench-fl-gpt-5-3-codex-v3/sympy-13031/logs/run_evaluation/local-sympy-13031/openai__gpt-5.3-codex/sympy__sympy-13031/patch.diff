@@ -1,0 +1,22 @@
+diff --git a/sympy/matrices/common.py b/sympy/matrices/common.py
+index 7ef51bc84..802f8b6fc 100644
+--- a/sympy/matrices/common.py
++++ b/sympy/matrices/common.py
+@@ -378,7 +378,7 @@ def hstack(cls, *args):
+             return cls._new()
+ 
+         kls = type(args[0])
+-        return reduce(kls.row_join, args)
++        return reduce(kls.row_join, args[1:], args[0])
+ 
+     def reshape(self, rows, cols):
+         """Reshape the matrix. Total number of elements must remain the same.
+@@ -601,7 +601,7 @@ def vstack(cls, *args):
+             return cls._new()
+ 
+         kls = type(args[0])
+-        return reduce(kls.col_join, args)
++        return reduce(kls.col_join, args[1:], args[0])
+ 
+ 
+ class MatrixSpecial(MatrixRequired):

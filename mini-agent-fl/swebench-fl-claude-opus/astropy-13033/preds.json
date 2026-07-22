@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-13033": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "astropy__astropy-13033",
+    "model_patch": "diff --git a/astropy/timeseries/core.py b/astropy/timeseries/core.py\nindex c279f35f8..032b8b8e7 100644\n--- a/astropy/timeseries/core.py\n+++ b/astropy/timeseries/core.py\n@@ -76,6 +76,17 @@ class BaseTimeSeries(QTable):\n \n             elif self.colnames[:len(required_columns)] != required_columns:\n \n+                if len(self.colnames) < len(required_columns) \\\n+                        and required_columns[:len(self.colnames)] == self.colnames:\n+\n+                    missing_columns = required_columns[len(self.colnames):]\n+                    missing_plural = 's' if len(missing_columns) > 1 else ''\n+\n+                    raise ValueError(\"{} object is invalid - missing required column{}: {}\"\n+                                     .format(self.__class__.__name__, missing_plural,\n+                                             \", \".join(\"'{}'\".format(name)\n+                                                       for name in missing_columns)))\n+\n                 raise ValueError(\"{} object is invalid - expected '{}' \"\n                                  \"as the first column{} but found '{}'\"\n                                  .format(self.__class__.__name__, required_columns[0], plural, self.colnames[0]))\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/timeseries/core.py",
+          "line": 79,
+          "statement": "                raise ValueError(\"{} object is invalid - expected '{}' \""
+        }
+      ],
+      "reasoning": "When a required column is removed, colnames is still a valid prefix of required_columns, so the check on line 77 fails and produces the misleading 'expected X as first column but found X' message instead of reporting the missing required column.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

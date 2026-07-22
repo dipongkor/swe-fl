@@ -1,0 +1,40 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..d5ed30c35 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -122,8 +122,11 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         elif isinstance(node, ast.Constant):  # type: ignore
+             if node.value is Ellipsis:
+                 return [addnodes.desc_sig_punctuation('', "...")]
++            elif node.value is None:
++                return [nodes.Text('None')]
+             else:
+-                return [nodes.Text(node.value)]
++                # e.g. Literal values such as True, False, 1, 'foo'
++                return [nodes.literal('', nodes.Text(repr(node.value)))]
+         elif isinstance(node, ast.Expr):
+             return unparse(node.value)
+         elif isinstance(node, ast.Index):
+@@ -167,7 +170,10 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+                 if isinstance(node, ast.Ellipsis):
+                     return [addnodes.desc_sig_punctuation('', "...")]
+                 elif isinstance(node, ast.NameConstant):
+-                    return [nodes.Text(node.value)]
++                    if node.value is None:
++                        return [nodes.Text(str(node.value))]
++                    else:
++                        return [nodes.literal('', nodes.Text(repr(node.value)))]
+ 
+             raise SyntaxError  # unsupported syntax
+ 
+@@ -179,7 +185,9 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         tree = ast_parse(annotation)
+         result = unparse(tree)
+         for i, node in enumerate(result):
+-            if isinstance(node, nodes.Text) and node.strip():
++            if isinstance(node, nodes.literal):
++                result[i] = node[0]
++            elif isinstance(node, nodes.Text) and node.strip():
+                 result[i] = type_to_xref(str(node), env)
+         return result
+     except SyntaxError:

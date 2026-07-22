@@ -1,0 +1,14 @@
+2026-06-30 03:14:25,146 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-06-30 03:14:26,499 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-06-30 03:14:26,502 - minisweagent - INFO - Running on 1 instances...
+2026-06-30 03:14:26,503 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-06-30 03:14:30,043 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-04e7c6ef -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-13344:latest sleep 2h
+2026-06-30 03:14:45,588 - minisweagent.environment - INFO - Started container minisweagent-04e7c6ef with ID b2ec1893e1403de0ff49cde06ba79f4106f6d288e650c1e361560f98b9dda39c
+2026-06-30 03:19:02,867 - minisweagent - INFO - Cancelling all pending jobs. Press ^C again to exit immediately.
+2026-06-30 03:39:26,960 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-06-30 03:39:28,505 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-06-30 03:39:28,507 - minisweagent - INFO - Running on 1 instances...
+2026-06-30 03:39:28,508 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-06-30 03:39:31,885 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-60813a9c -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-13344:latest sleep 2h
+2026-06-30 03:40:58,021 - minisweagent.environment - INFO - Started container minisweagent-60813a9c with ID a64c0fa090b94f26d8114f79b562e63b136a76fa166b44af5ff92bc38adc2d23
+2026-06-30 03:45:22,602 - minisweagent - INFO - Saved trajectory to 'swebench-fl-claude-opus/django-13344/django__django-13344/django__django-13344.traj.json'

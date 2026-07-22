@@ -1,0 +1,24 @@
+{
+  "django__django-14376": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-14376",
+    "model_patch": "diff --git a/django/db/backends/mysql/base.py b/django/db/backends/mysql/base.py\nindex 2c62182d31..8b28a60485 100644\n--- a/django/db/backends/mysql/base.py\n+++ b/django/db/backends/mysql/base.py\n@@ -200,9 +200,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):\n         if settings_dict['USER']:\n             kwargs['user'] = settings_dict['USER']\n         if settings_dict['NAME']:\n-            kwargs['db'] = settings_dict['NAME']\n+            kwargs['database'] = settings_dict['NAME']\n         if settings_dict['PASSWORD']:\n-            kwargs['passwd'] = settings_dict['PASSWORD']\n+            kwargs['password'] = settings_dict['PASSWORD']\n         if settings_dict['HOST'].startswith('/'):\n             kwargs['unix_socket'] = settings_dict['HOST']\n         elif settings_dict['HOST']:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/mysql/base.py",
+          "line": 203,
+          "statement": "kwargs['db'] = settings_dict['NAME']"
+        },
+        {
+          "file": "django/db/backends/mysql/base.py",
+          "line": 205,
+          "statement": "kwargs['passwd'] = settings_dict['PASSWORD']"
+        }
+      ],
+      "reasoning": "The 'db' and 'passwd' keyword arguments are deprecated in mysqlclient in favor of 'database' and 'password'.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

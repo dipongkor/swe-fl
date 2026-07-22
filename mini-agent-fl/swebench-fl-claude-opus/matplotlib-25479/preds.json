@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25479": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "matplotlib__matplotlib-25479",
+    "model_patch": "diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py\nindex 58ce4c03fa..89cfe52ac7 100644\n--- a/lib/matplotlib/pyplot.py\n+++ b/lib/matplotlib/pyplot.py\n@@ -2278,9 +2278,13 @@ def set_cmap(cmap: Colormap | str) -> None:\n     matplotlib.cm.register_cmap\n     matplotlib.cm.get_cmap\n     \"\"\"\n-    cmap = get_cmap(cmap)\n+    # Set the rcParam to the requested name (which for a string input is the\n+    # name under which the colormap is registered and may differ from\n+    # ``cmap.name``), so that it can be looked up again from the registry.\n+    name = cmap if isinstance(cmap, str) else cmap.name\n+    cmap = colormaps[cmap] if isinstance(cmap, str) else cmap\n \n-    rc('image', cmap=cmap.name)\n+    rc('image', cmap=name)\n     im = gci()\n \n     if im is not None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/pyplot.py",
+          "line": 2283,
+          "statement": "    rc('image', cmap=cmap.name)"
+        }
+      ],
+      "reasoning": "pyplot.set_cmap looked up the colormap object from the registry but then wrote the internal cmap.name (which can differ from the registered name) into rcParams['image.cmap']. Later lookups by that name fail because only the registered name is a valid key, so imshow raises 'Colormap ... is not recognized'. Using the name actually requested/registered fixes the mismatch.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

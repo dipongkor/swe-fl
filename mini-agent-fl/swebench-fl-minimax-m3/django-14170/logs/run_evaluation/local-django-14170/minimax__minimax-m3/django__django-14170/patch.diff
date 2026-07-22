@@ -1,0 +1,40 @@
+diff --git a/django/db/models/functions/datetime.py b/django/db/models/functions/datetime.py
+index 90e6f41be0..07fc094a07 100644
+--- a/django/db/models/functions/datetime.py
++++ b/django/db/models/functions/datetime.py
+@@ -330,3 +330,9 @@ class TruncSecond(TruncBase):
+ 
+ DateTimeField.register_lookup(TruncDate)
+ DateTimeField.register_lookup(TruncTime)
++
++# Add ExtractIsoYear to YearLookupClasses to prevent the BETWEEN optimization
++# from being used for iso_year lookups (the bounds differ from calendar years).
++from django.db.models import lookups
++lookups.YearLookupClasses = lookups.YearLookupClasses((ExtractIsoYear,))
++
+diff --git a/django/db/models/lookups.py b/django/db/models/lookups.py
+index 916478d075..0cc5e55723 100644
+--- a/django/db/models/lookups.py
++++ b/django/db/models/lookups.py
+@@ -13,6 +13,10 @@ from django.utils.functional import cached_property
+ from django.utils.hashable import make_hashable
+ 
+ 
++class YearLookupClasses(tuple):
++    pass
++
++
+ class Lookup:
+     lookup_name = None
+     prepare_rhs = True
+@@ -549,7 +553,9 @@ class YearLookup(Lookup):
+     def as_sql(self, compiler, connection):
+         # Avoid the extract operation if the rhs is a direct value to allow
+         # indexes to be used.
+-        if self.rhs_is_direct_value():
++        if self.rhs_is_direct_value() and not isinstance(
++            self.lhs, YearLookupClasses
++        ):
+             # Skip the extract part by directly using the originating field,
+             # that is self.lhs.lhs.
+             lhs_sql, params = self.process_lhs(compiler, connection, self.lhs.lhs)

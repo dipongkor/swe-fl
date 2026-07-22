@@ -1,0 +1,19 @@
+{
+  "django__django-15554": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-15554",
+    "model_patch": "diff --git a/django/db/models/sql/datastructures.py b/django/db/models/sql/datastructures.py\nindex 1edf040e82..0949a67acf 100644\n--- a/django/db/models/sql/datastructures.py\n+++ b/django/db/models/sql/datastructures.py\n@@ -162,8 +162,7 @@ class Join:\n         return hash(self.identity)\n \n     def equals(self, other):\n-        # Ignore filtered_relation in equality check.\n-        return self.identity[:-1] == other.identity[:-1]\n+        return self.identity == other.identity\n \n     def demote(self):\n         new = self.relabeled_clone({})\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/datastructures.py",
+          "line": 166,
+          "statement": "        return self.identity[:-1] == other.identity[:-1]"
+        }
+      ],
+      "reasoning": "Join reuse compared joins while intentionally ignoring filtered_relation, causing distinct FilteredRelation joins on the same relation path to be treated as identical and one alias reused.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,45 @@
+2026-07-01 07:11:30,861 - INFO - Creating container for sphinx-doc__sphinx-7440...
+2026-07-01 07:11:31,009 - INFO - Container for sphinx-doc__sphinx-7440 created: ab01b332c6c0d955689a2c0050ccb6c6b19b4c3785b289925fcab8a859e48bdd
+2026-07-01 07:11:31,424 - INFO - Container for sphinx-doc__sphinx-7440 started: ab01b332c6c0d955689a2c0050ccb6c6b19b4c3785b289925fcab8a859e48bdd
+2026-07-01 07:11:31,427 - INFO - Intermediate patch for sphinx-doc__sphinx-7440 written to logs/run_evaluation/local-sphinx-7440/gemini__gemini-3.1-flash-lite/sphinx-doc__sphinx-7440/patch.diff, now applying to container...
+2026-07-01 07:11:31,987 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/domains/std.py...
+Applied patch sphinx/domains/std.py cleanly.
+
+2026-07-01 07:11:32,349 - INFO - Git diff before:
+diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py
+index d820cfe5c..edc110d2a 100644
+--- a/sphinx/domains/std.py
++++ b/sphinx/domains/std.py
+@@ -305,7 +305,7 @@ def make_glossary_term(env: "BuildEnvironment", textnodes: Iterable[Node], index
+         term['ids'].append(node_id)
+ 
+     std = cast(StandardDomain, env.get_domain('std'))
+-    std.note_object('term', termtext.lower(), node_id, location=term)
++    std.note_object('term', termtext, node_id, location=term)
+ 
+     # add an index entry too
+     indexnode = addnodes.index()
+2026-07-01 07:11:32,352 - INFO - Eval script for sphinx-doc__sphinx-7440 written to logs/run_evaluation/local-sphinx-7440/gemini__gemini-3.1-flash-lite/sphinx-doc__sphinx-7440/eval.sh; copying to container...
+2026-07-01 07:11:37,622 - INFO - Test runtime: 5.01 seconds
+2026-07-01 07:11:37,629 - INFO - Test output for sphinx-doc__sphinx-7440 written to logs/run_evaluation/local-sphinx-7440/gemini__gemini-3.1-flash-lite/sphinx-doc__sphinx-7440/test_output.txt
+2026-07-01 07:11:37,829 - INFO - Git diff after:
+diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py
+index d820cfe5c..edc110d2a 100644
+--- a/sphinx/domains/std.py
++++ b/sphinx/domains/std.py
+@@ -305,7 +305,7 @@ def make_glossary_term(env: "BuildEnvironment", textnodes: Iterable[Node], index
+         term['ids'].append(node_id)
+ 
+     std = cast(StandardDomain, env.get_domain('std'))
+-    std.note_object('term', termtext.lower(), node_id, location=term)
++    std.note_object('term', termtext, node_id, location=term)
+ 
+     # add an index entry too
+     indexnode = addnodes.index()
+2026-07-01 07:11:37,830 - INFO - Grading answer for sphinx-doc__sphinx-7440...
+2026-07-01 07:11:37,840 - INFO - report: {'sphinx-doc__sphinx-7440': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_domain_std.py::test_glossary'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_domain_std.py::test_process_doc_handle_figure_caption', 'tests/test_domain_std.py::test_process_doc_handle_table_title', 'tests/test_domain_std.py::test_get_full_qualified_name', 'tests/test_domain_std.py::test_glossary_warning', 'tests/test_domain_std.py::test_glossary_comment', 'tests/test_domain_std.py::test_glossary_comment2', 'tests/test_domain_std.py::test_glossary_sorted', 'tests/test_domain_std.py::test_glossary_alphanumeric', 'tests/test_domain_std.py::test_glossary_conflicted_labels', 'tests/test_domain_std.py::test_cmdoption', 'tests/test_domain_std.py::test_multiple_cmdoptions', 'tests/test_domain_std.py::test_disabled_docref'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-7440: resolved: True
+2026-07-01 07:11:37,842 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-7440.local-sphinx-7440...
+2026-07-01 07:11:53,282 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-7440.local-sphinx-7440...
+2026-07-01 07:11:53,347 - INFO - Container sweb.eval.sphinx-doc__sphinx-7440.local-sphinx-7440 removed.

@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-6938": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pydata__xarray-6938",
+    "model_patch": "diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py\nindex c775d05c..b8070cd9 100644\n--- a/xarray/core/dataset.py\n+++ b/xarray/core/dataset.py\n@@ -3773,6 +3773,7 @@ class Dataset(\n             dims = tuple(dims_dict.get(dim, dim) for dim in v.dims)\n             if k in result_dims:\n                 var = v.to_index_variable()\n+                var = var.copy(deep=False)\n                 var.dims = dims\n                 if k in self._indexes:\n                     indexes[k] = self._indexes[k]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/dataset.py",
+          "line": 3775,
+          "statement": "                var = v.to_index_variable()"
+        }
+      ],
+      "reasoning": "IndexVariable.to_index_variable() returns self (the same object) for IndexVariable instances, rather than creating a new IndexVariable object. This means that when the subsequent line 'var.dims = dims' mutates the variable's _dims attribute, it mutates the original variable stored in the dataset. The fix is to make a shallow copy of the variable via var.copy(deep=False) before mutating its dims, ensuring the original is not modified.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

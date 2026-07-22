@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7462": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 3ca730e30..52b670ad4 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -114,11 +114,16 @@ def _parse_annotation(annotation: str) -> List[Node]:\n             result.append(addnodes.desc_sig_punctuation('', ']'))\n             return result\n         elif isinstance(node, ast.Tuple):\n-            result = []\n-            for elem in node.elts:\n-                result.extend(unparse(elem))\n-                result.append(addnodes.desc_sig_punctuation('', ', '))\n-            result.pop()\n+            if node.elts:\n+                result = []\n+                for elem in node.elts:\n+                    result.extend(unparse(elem))\n+                    result.append(addnodes.desc_sig_punctuation('', ', '))\n+                result.pop()\n+            else:\n+                result = [addnodes.desc_sig_punctuation('', '('),\n+                          addnodes.desc_sig_punctuation('', ')')]\n+\n             return result\n         else:\n             raise SyntaxError  # unsupported syntax\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 121,
+          "statement": "            result.pop()"
+        }
+      ],
+      "reasoning": "In the ast.Tuple branch of unparse(), result.pop() is called unconditionally to remove the trailing separator; for an empty tuple annotation like Tuple[()], node.elts is empty so result is empty and pop() raises IndexError.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

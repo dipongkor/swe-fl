@@ -1,0 +1,29 @@
+{
+  "scikit-learn__scikit-learn-14496": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-14496",
+    "model_patch": "diff --git a/sklearn/cluster/optics_.py b/sklearn/cluster/optics_.py\nindex 4f7eb11ab..18d00ff5b 100755\n--- a/sklearn/cluster/optics_.py\n+++ b/sklearn/cluster/optics_.py\n@@ -437,7 +437,7 @@ if metric=\u2019precomputed\u2019.\n     n_samples = X.shape[0]\n     _validate_size(min_samples, n_samples, 'min_samples')\n     if min_samples <= 1:\n-        min_samples = max(2, min_samples * n_samples)\n+        min_samples = max(2, int(min_samples * n_samples))\n \n     # Start all points as 'unprocessed' ##\n     reachability_ = np.empty(n_samples)\n@@ -619,12 +619,12 @@ def cluster_optics_xi(reachability, predecessor, ordering, min_samples,\n     n_samples = len(reachability)\n     _validate_size(min_samples, n_samples, 'min_samples')\n     if min_samples <= 1:\n-        min_samples = max(2, min_samples * n_samples)\n+        min_samples = max(2, int(min_samples * n_samples))\n     if min_cluster_size is None:\n         min_cluster_size = min_samples\n     _validate_size(min_cluster_size, n_samples, 'min_cluster_size')\n     if min_cluster_size <= 1:\n-        min_cluster_size = max(2, min_cluster_size * n_samples)\n+        min_cluster_size = max(2, int(min_cluster_size * n_samples))\n \n     clusters = _xi_cluster(reachability[ordering], predecessor[ordering],\n                            ordering, xi,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/cluster/optics_.py",
+          "line": 440,
+          "statement": "        min_samples = max(2, min_samples * n_samples)"
+        },
+        {
+          "file": "sklearn/cluster/optics_.py",
+          "line": 622,
+          "statement": "        min_samples = max(2, min_samples * n_samples)"
+        },
+        {
+          "file": "sklearn/cluster/optics_.py",
+          "line": 627,
+          "statement": "        min_cluster_size = max(2, min_cluster_size * n_samples)"
+        }
+      ],
+      "reasoning": "When min_samples (or min_cluster_size) is a float between 0 and 1, the code rescales it to be in integer range, but does not convert the result to an int. The result is then passed to NearestNeighbors which requires n_neighbors to be an integer, causing a TypeError.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

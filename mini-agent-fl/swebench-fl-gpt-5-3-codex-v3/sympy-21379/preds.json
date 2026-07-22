@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-21379": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-21379",
+    "model_patch": "diff --git a/sympy/simplify/trigsimp.py b/sympy/simplify/trigsimp.py\nindex da40be8521..5ad33df817 100644\n--- a/sympy/simplify/trigsimp.py\n+++ b/sympy/simplify/trigsimp.py\n@@ -12,7 +12,7 @@\n from sympy.functions.elementary.trigonometric import TrigonometricFunction\n from sympy.polys import Poly, factor, cancel, parallel_poly_from_expr\n from sympy.polys.domains import ZZ\n-from sympy.polys.polyerrors import PolificationFailed\n+from sympy.polys.polyerrors import PolificationFailed, PolynomialError\n from sympy.polys.polytools import groebner\n from sympy.simplify.cse_main import cse\n from sympy.strategies.core import identity\n@@ -354,7 +354,7 @@ def analyse_gens(gens, hints):\n     num, denom = cancel(expr).as_numer_denom()\n     try:\n         (pnum, pdenom), opt = parallel_poly_from_expr([num, denom])\n-    except PolificationFailed:\n+    except (PolificationFailed, PolynomialError):\n         return expr\n     debug('initial gens:', opt.gens)\n     ideal, freegens, gens = analyse_gens(opt.gens, hints)\n@@ -377,7 +377,10 @@ def analyse_gens(gens, hints):\n         num = Poly(num, gens=gens+freegens).eject(*gens)\n         res = []\n         for monom, coeff in num.terms():\n-            ourgens = set(parallel_poly_from_expr([coeff, denom])[1].gens)\n+            try:\n+                ourgens = set(parallel_poly_from_expr([coeff, denom])[1].gens)\n+            except (PolificationFailed, PolynomialError):\n+                return expr\n             # We compute the transitive closure of all generators that can\n             # be reached from our generators through relations in the ideal.\n             changed = True\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/simplify/trigsimp.py",
+          "line": 357,
+          "statement": "    except (PolificationFailed, PolynomialError):"
+        }
+      ],
+      "reasoning": "trigsimp_groebner can invoke polynomial conversion during subs-triggered simplification, and Piecewise-containing generators raise PolynomialError that was previously uncaught, leaking an unexpected exception instead of safely bailing out.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

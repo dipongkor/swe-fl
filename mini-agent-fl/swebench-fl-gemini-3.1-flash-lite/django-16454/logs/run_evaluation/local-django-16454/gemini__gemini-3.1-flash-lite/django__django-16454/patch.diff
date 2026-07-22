@@ -1,0 +1,20 @@
+diff --git a/django/core/management/base.py b/django/core/management/base.py
+index abc6f79a15..dfe8794ee8 100644
+--- a/django/core/management/base.py
++++ b/django/core/management/base.py
+@@ -70,6 +70,15 @@ class CommandParser(ArgumentParser):
+             super().error(message)
+         else:
+             raise CommandError("Error: %s" % message)
++    def add_subparsers(self, **kwargs):
++        if "parser_class" not in kwargs:
++            def parser_factory(*args, **parser_kwargs):
++                if "called_from_command_line" not in parser_kwargs:
++                    parser_kwargs["called_from_command_line"] = self.called_from_command_line
++                return self.__class__(*args, **parser_kwargs)
++            kwargs["parser_class"] = parser_factory
++        return super().add_subparsers(**kwargs)
++
+ 
+ 
+ def handle_default_options(options):

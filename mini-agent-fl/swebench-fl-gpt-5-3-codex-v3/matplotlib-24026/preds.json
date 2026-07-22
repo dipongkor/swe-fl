@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-24026": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-24026",
+    "model_patch": "diff --git a/lib/matplotlib/stackplot.py b/lib/matplotlib/stackplot.py\nindex c580043eeb..47a76ea6af 100644\n--- a/lib/matplotlib/stackplot.py\n+++ b/lib/matplotlib/stackplot.py\n@@ -6,9 +6,12 @@ https://stackoverflow.com/q/2225995/\n (https://stackoverflow.com/users/66549/doug)\n \"\"\"\n \n+import itertools\n+\n import numpy as np\n \n from matplotlib import _api\n+from matplotlib import colors as mcolors\n \n __all__ = ['stackplot']\n \n@@ -69,8 +72,10 @@ def stackplot(axes, x, *args,\n     y = np.row_stack(args)\n \n     labels = iter(labels)\n-    if colors is not None:\n-        axes.set_prop_cycle(color=colors)\n+    if colors is None:\n+        color_cycle = axes._get_lines.get_next_color\n+    else:\n+        color_cycle = itertools.cycle(mcolors.to_rgba_array(colors))\n \n     # Assume data passed has not been 'stacked', so stack it here.\n     # We'll need a float buffer for the upcoming calculations.\n@@ -108,7 +113,7 @@ def stackplot(axes, x, *args,\n         stack += first_line\n \n     # Color between x = 0 and the first array.\n-    color = axes._get_lines.get_next_color()\n+    color = next(color_cycle)\n     coll = axes.fill_between(x, first_line, stack[0, :],\n                              facecolor=color, label=next(labels, None),\n                              **kwargs)\n@@ -117,7 +122,7 @@ def stackplot(axes, x, *args,\n \n     # Color between array i-1 and array i\n     for i in range(len(y) - 1):\n-        color = axes._get_lines.get_next_color()\n+        color = next(color_cycle)\n         r.append(axes.fill_between(x, stack[i, :], stack[i + 1, :],\n                                    facecolor=color, label=next(labels, None),\n                                    **kwargs))\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/stackplot.py",
+          "line": 76,
+          "statement": "        axes.set_prop_cycle(color=colors)"
+        }
+      ],
+      "reasoning": "stackplot mutates the Axes property cycle to apply user colors, which both rejects CN references in prop_cycle validation and unexpectedly changes subsequent plot colors.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

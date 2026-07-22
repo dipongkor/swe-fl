@@ -1,0 +1,19 @@
+{
+  "psf__requests-1724": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "psf__requests-1724",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex f82f56a..2d49061 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -307,7 +307,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):\n         \"\"\"Prepares the given HTTP method.\"\"\"\n         self.method = method\n         if self.method is not None:\n-            self.method = self.method.upper()\n+            self.method = to_native_string(self.method.upper())\n \n     def prepare_url(self, url, params):\n         \"\"\"Prepares the given HTTP URL.\"\"\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 310,
+          "statement": "            self.method = to_native_string(self.method.upper())"
+        }
+      ],
+      "reasoning": "HTTP method values could remain unicode on Python 2, which then interacted badly with byte request bodies in httplib and triggered UnicodeDecodeError. Normalizing the uppercased method to native string prevents unicode leakage into low-level request construction.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

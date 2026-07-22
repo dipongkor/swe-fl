@@ -1,0 +1,55 @@
+2026-07-01 09:34:21,998 - INFO - Creating container for scikit-learn__scikit-learn-25931...
+2026-07-01 09:34:22,399 - INFO - Container for scikit-learn__scikit-learn-25931 created: 1261e96e0460ce26c4af88d5c1b0af0f077199531879ca1a2b35208aef5d2f4d
+2026-07-01 09:34:22,843 - INFO - Container for scikit-learn__scikit-learn-25931 started: 1261e96e0460ce26c4af88d5c1b0af0f077199531879ca1a2b35208aef5d2f4d
+2026-07-01 09:34:22,847 - INFO - Intermediate patch for scikit-learn__scikit-learn-25931 written to logs/run_evaluation/local-scikit-learn-25931/gemini__gemini-3.1-flash-lite/scikit-learn__scikit-learn-25931/patch.diff, now applying to container...
+2026-07-01 09:34:23,362 - INFO - >>>>> Applied Patch:
+Checking patch sklearn/ensemble/_iforest.py...
+Applied patch sklearn/ensemble/_iforest.py cleanly.
+
+2026-07-01 09:34:23,992 - INFO - Git diff before:
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..583a6c57e 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -345,6 +345,13 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             return self
+ 
+         # else, define offset_ wrt contamination parameter
++        # We use the fitted feature names to avoid warnings when calling score_samples
++        # on the training data.
++        feature_names_in = getattr(self, "feature_names_in_", None)
++        if feature_names_in is not None:
++            import pandas as pd
++            X = pd.DataFrame(X, columns=feature_names_in)
++
+         self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
+ 
+         return self
+2026-07-01 09:34:23,995 - INFO - Eval script for scikit-learn__scikit-learn-25931 written to logs/run_evaluation/local-scikit-learn-25931/gemini__gemini-3.1-flash-lite/scikit-learn__scikit-learn-25931/eval.sh; copying to container...
+2026-07-01 09:34:36,540 - INFO - Test runtime: 12.22 seconds
+2026-07-01 09:34:36,544 - INFO - Test output for scikit-learn__scikit-learn-25931 written to logs/run_evaluation/local-scikit-learn-25931/gemini__gemini-3.1-flash-lite/scikit-learn__scikit-learn-25931/test_output.txt
+2026-07-01 09:34:36,788 - INFO - Git diff after:
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..583a6c57e 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -345,6 +345,13 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             return self
+ 
+         # else, define offset_ wrt contamination parameter
++        # We use the fitted feature names to avoid warnings when calling score_samples
++        # on the training data.
++        feature_names_in = getattr(self, "feature_names_in_", None)
++        if feature_names_in is not None:
++            import pandas as pd
++            X = pd.DataFrame(X, columns=feature_names_in)
++
+         self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
+ 
+         return self
+2026-07-01 09:34:36,790 - INFO - Grading answer for scikit-learn__scikit-learn-25931...
+2026-07-01 09:34:36,795 - INFO - report: {'scikit-learn__scikit-learn-25931': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['sklearn/ensemble/tests/test_iforest.py::test_iforest_preserve_feature_names'], 'failure': []}, 'PASS_TO_PASS': {'success': ['sklearn/ensemble/tests/test_iforest.py::test_iforest[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_sparse[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_error', 'sklearn/ensemble/tests/test_iforest.py::test_recalculate_max_depth', 'sklearn/ensemble/tests/test_iforest.py::test_max_samples_attribute', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_parallel_regression[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_performance[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_works[42-0.25]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_works[42-auto]', 'sklearn/ensemble/tests/test_iforest.py::test_max_samples_consistency', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_subsampled_features', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_average_path_length', 'sklearn/ensemble/tests/test_iforest.py::test_score_samples', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_warm_start', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works1[42-0.25-3]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works1[42-auto-2]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works2[42-0.25-3]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works2[42-auto-2]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_with_uniform_data', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_with_n_jobs_does_not_segfault', 'sklearn/ensemble/tests/test_iforest.py::test_base_estimator_property_deprecated'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for scikit-learn__scikit-learn-25931: resolved: True
+2026-07-01 09:34:36,797 - INFO - Attempting to stop container sweb.eval.scikit-learn__scikit-learn-25931.local-scikit-learn-25931...
+2026-07-01 09:34:52,269 - INFO - Attempting to remove container sweb.eval.scikit-learn__scikit-learn-25931.local-scikit-learn-25931...
+2026-07-01 09:34:52,331 - INFO - Container sweb.eval.scikit-learn__scikit-learn-25931.local-scikit-learn-25931 removed.

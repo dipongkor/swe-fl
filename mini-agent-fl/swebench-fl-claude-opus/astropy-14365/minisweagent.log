@@ -1,0 +1,7 @@
+2026-06-30 04:38:24,322 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-06-30 04:38:25,665 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-06-30 04:38:25,668 - minisweagent - INFO - Running on 1 instances...
+2026-06-30 04:38:25,669 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-06-30 04:38:28,659 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-f2fe1f0e -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-14365:latest sleep 2h
+2026-06-30 04:39:55,869 - minisweagent.environment - INFO - Started container minisweagent-f2fe1f0e with ID 6165ac9ce5c6b1ff792dba34b9323faa654501ccbde3cee94ea9c9827b8afe36
+2026-06-30 04:40:50,971 - minisweagent - INFO - Saved trajectory to 'swebench-fl-claude-opus/astropy-14365/astropy__astropy-14365/astropy__astropy-14365.traj.json'

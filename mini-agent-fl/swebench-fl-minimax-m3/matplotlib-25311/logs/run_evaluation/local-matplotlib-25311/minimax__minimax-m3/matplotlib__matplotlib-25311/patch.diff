@@ -1,0 +1,35 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+index 1dee8a23d9..f3763153ee 100644
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1505,7 +1505,6 @@ class DraggableBase:
+         if not ref_artist.pickable():
+             ref_artist.set_picker(True)
+         self.got_artist = False
+-        self.canvas = self.ref_artist.figure.canvas
+         self._use_blit = use_blit and self.canvas.supports_blit
+         self.cids = [
+             self.canvas.callbacks._connect_picklable(
+@@ -1571,6 +1570,22 @@ class DraggableBase:
+         else:
+             self.canvas.mpl_disconnect(c1)
+ 
++    @property
++    def canvas(self):
++        # Lazily look up the canvas from the ref_artist's figure.  This
++        # way the canvas reference is never stored in ``__dict__`` and so
++        # is not pickled; after unpickling the property transparently
++        # returns the (new) canvas of the restored figure.
++        return self.ref_artist.figure.canvas
++
++    def __getstate__(self):
++        state = self.__dict__.copy()
++        # The canvas belongs to a GUI backend (e.g. QtAgg) and is not
++        # picklable.  Drop it from the state; it can be re-derived from
++        # ``self.ref_artist.figure.canvas`` after unpickling.
++        state.pop("canvas", None)
++        return state
++
+     def save_offset(self):
+         pass
+ 

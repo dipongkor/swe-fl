@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-15345": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-15345",
+    "model_patch": "diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py\nindex ea7e3a2d9..4b7aefc23 100644\n--- a/sympy/printing/mathematica.py\n+++ b/sympy/printing/mathematica.py\n@@ -111,6 +111,12 @@ def _print_Integral(self, expr):\n     def _print_Sum(self, expr):\n         return \"Hold[Sum[\" + ', '.join(self.doprint(a) for a in expr.args) + \"]]\"\n \n+    def _print_Max(self, expr):\n+        return \"Max[%s]\" % self.stringify(expr.args, \", \")\n+\n+    def _print_Min(self, expr):\n+        return \"Min[%s]\" % self.stringify(expr.args, \", \")\n+\n     def _print_Derivative(self, expr):\n         dexpr = expr.expr\n         dvars = [i[0] if i[1] == 1 else i for i in expr.variable_count]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/mathematica.py",
+          "line": 114,
+          "statement": "def _print_Max(self, expr):"
+        }
+      ],
+      "reasoning": "The MCodePrinter was missing explicit _print_Max and _print_Min methods, causing it to fall back to the default string representation which uses parentheses instead of the square brackets required by Mathematica.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

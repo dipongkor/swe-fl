@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-10297": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "model_patch": "diff --git a/sklearn/linear_model/ridge.py b/sklearn/linear_model/ridge.py\nindex 911c74ae3..e1c8c18b7 100644\n--- a/sklearn/linear_model/ridge.py\n+++ b/sklearn/linear_model/ridge.py\n@@ -1300,6 +1300,11 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):\n         The \"balanced\" mode uses the values of y to automatically adjust\n         weights inversely proportional to class frequencies in the input data\n         as ``n_samples / (n_classes * np.bincount(y))``\n+    store_cv_values : boolean, optional, default False\n+        Flag indicating if the cross-validation values corresponding to\n+        each alpha should be stored in the `cv_values_` attribute. This\n+        parameter is only compatible with `cv=None` (i.e. using Generalized\n+        Cross-Validation).\n \n     Attributes\n     ----------\n@@ -1333,11 +1338,12 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):\n     advantage of the multi-variate response support in Ridge.\n     \"\"\"\n     def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\n-                 normalize=False, scoring=None, cv=None, class_weight=None):\n+                 normalize=False, scoring=None, cv=None, class_weight=None, store_cv_values=False):\n         super(RidgeClassifierCV, self).__init__(\n             alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n-            scoring=scoring, cv=cv)\n+            scoring=scoring, cv=cv, store_cv_values=store_cv_values)\n         self.class_weight = class_weight\n+        self.store_cv_values = store_cv_values\n \n     def fit(self, X, y, sample_weight=None):\n         \"\"\"Fit the ridge classifier.\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/linear_model/ridge.py",
+          "line": 1336,
+          "statement": "def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,"
+        }
+      ],
+      "reasoning": "RidgeClassifierCV did not accept the store_cv_values parameter in its constructor, even though it was supported by the underlying _BaseRidgeCV class.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

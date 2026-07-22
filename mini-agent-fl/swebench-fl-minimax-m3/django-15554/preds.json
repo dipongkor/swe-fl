@@ -1,0 +1,19 @@
+{
+  "django__django-15554": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-15554",
+    "model_patch": "diff --git a/django/db/models/sql/datastructures.py b/django/db/models/sql/datastructures.py\nindex 1edf040e82..302b337f07 100644\n--- a/django/db/models/sql/datastructures.py\n+++ b/django/db/models/sql/datastructures.py\n@@ -162,8 +162,17 @@ class Join:\n         return hash(self.identity)\n \n     def equals(self, other):\n-        # Ignore filtered_relation in equality check.\n-        return self.identity[:-1] == other.identity[:-1]\n+        \"\"\"\n+        Two joins are considered equal if everything but the filtered_relation\n+        is the same, or if both filtered_relations match. A join with no\n+        filtered_relation can be matched to one with a filtered_relation to\n+        enable reuse of the filtered_relation's alias.\n+        \"\"\"\n+        if self.filtered_relation is None and other.filtered_relation is not None:\n+            return self.identity[:-1] == other.identity[:-1]\n+        if self.filtered_relation is not None and other.filtered_relation is None:\n+            return self.identity[:-1] == other.identity[:-1]\n+        return self.identity == other.identity\n \n     def demote(self):\n         new = self.relabeled_clone({})\ndiff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 54f3258eac..a45ec29f6e 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -805,7 +805,11 @@ class Query(BaseExpression):\n \n         # Create a new alias for this table.\n         if alias_list:\n-            alias = \"%s%d\" % (self.alias_prefix, len(self.alias_map) + 1)\n+            if filtered_relation is not None:\n+                # Use the filtered_relation's alias.\n+                alias = filtered_relation.alias\n+            else:\n+                alias = \"%s%d\" % (self.alias_prefix, len(self.alias_map) + 1)\n             alias_list.append(alias)\n         else:\n             # The first occurrence of a table uses the table name directly.\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/datastructures.py",
+          "line": 166,
+          "statement": "        return self.identity[:-1] == other.identity[:-1]"
+        }
+      ],
+      "reasoning": "The original Join.equals() method returned `self.identity[:-1] == other.identity[:-1]`, which explicitly excluded the filtered_relation from the equality check. This caused joins with different FilteredRelation objects on the same relation to be considered equal, leading the second FilteredRelation's join to incorrectly reuse the first one's alias, making the second FilteredRelation invisible in the generated SQL. The fix modifies the logic to only ignore filtered_relation when comparing a join with no filtered_relation to one with a filtered_relation (allowing the non-filtered condition's join to reuse the filtered join's alias), but require exact match when both joins have filtered_relations. A complementary fix in Query.table_alias() ensures the new alias uses the FilteredRelation's custom alias when present, rather than an auto-generated one.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

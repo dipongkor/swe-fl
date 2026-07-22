@@ -1,0 +1,51 @@
+diff --git a/lib/matplotlib/figure.py b/lib/matplotlib/figure.py
+index dab2bc4a5a..d3f48dc6bf 100644
+--- a/lib/matplotlib/figure.py
++++ b/lib/matplotlib/figure.py
+@@ -2274,12 +2274,40 @@ class SubFigure(FigureBase):
+             return
+         # need to figure out *where* this subplotspec is.
+         gs = self._subplotspec.get_gridspec()
+-        wr = np.asarray(gs.get_width_ratios())
+-        hr = np.asarray(gs.get_height_ratios())
+-        dx = wr[self._subplotspec.colspan].sum() / wr.sum()
+-        dy = hr[self._subplotspec.rowspan].sum() / hr.sum()
+-        x0 = wr[:self._subplotspec.colspan.start].sum() / wr.sum()
+-        y0 = 1 - hr[:self._subplotspec.rowspan.stop].sum() / hr.sum()
++        nrows, ncols = gs.get_geometry()
++        row_ratios = gs.get_height_ratios()
++        if row_ratios is None:
++            row_ratios = [1] * nrows
++        col_ratios = gs.get_width_ratios()
++        if col_ratios is None:
++            col_ratios = [1] * ncols
++        params = gs.get_subplot_params(None)
++        wspace = params.wspace
++        hspace = params.hspace
++        tot_width = 1.0
++        tot_height = 1.0
++        cell_h = tot_height / (nrows + hspace*(nrows-1))
++        sep_h = hspace * cell_h
++        norm_h = cell_h * nrows / sum(row_ratios)
++        cell_heights = [r * norm_h for r in row_ratios]
++        sep_heights = [0] + ([sep_h] * (nrows-1))
++        cell_hs = np.cumsum(np.column_stack([sep_heights, cell_heights]).flat)
++        bottoms = cell_hs[0::2]
++        tops = cell_hs[1::2]
++        cell_w = tot_width / (ncols + wspace*(ncols-1))
++        sep_w = wspace * cell_w
++        norm_w = cell_w * ncols / sum(col_ratios)
++        cell_widths = [r * norm_w for r in col_ratios]
++        sep_widths = [0] + ([sep_w] * (ncols-1))
++        cell_ws = np.cumsum(np.column_stack([sep_widths, cell_widths]).flat)
++        lefts = cell_ws[0::2]
++        rights = cell_ws[1::2]
++        y0 = 1.0 - tops[self._subplotspec.rowspan.stop-1]
++        y1 = 1.0 - bottoms[self._subplotspec.rowspan.start]
++        x0 = lefts[self._subplotspec.colspan.start]
++        x1 = rights[self._subplotspec.colspan.stop-1]
++        dx = x1 - x0
++        dy = y1 - y0
+         if self.bbox_relative is None:
+             self.bbox_relative = Bbox.from_bounds(x0, y0, dx, dy)
+         else:

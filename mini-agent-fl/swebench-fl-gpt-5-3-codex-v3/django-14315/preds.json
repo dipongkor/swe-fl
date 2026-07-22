@@ -1,0 +1,19 @@
+{
+  "django__django-14315": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-14315",
+    "model_patch": "diff --git a/django/db/backends/postgresql/client.py b/django/db/backends/postgresql/client.py\nindex 3effab65a8..360622951f 100644\n--- a/django/db/backends/postgresql/client.py\n+++ b/django/db/backends/postgresql/client.py\n@@ -36,20 +36,27 @@ class DatabaseClient(BaseDatabaseClient):\n             args += [dbname]\n         args.extend(parameters)\n \n-        env = {}\n+        env = None\n         if passwd:\n+            env = {} if env is None else env\n             env['PGPASSWORD'] = str(passwd)\n         if service:\n+            env = {} if env is None else env\n             env['PGSERVICE'] = str(service)\n         if sslmode:\n+            env = {} if env is None else env\n             env['PGSSLMODE'] = str(sslmode)\n         if sslrootcert:\n+            env = {} if env is None else env\n             env['PGSSLROOTCERT'] = str(sslrootcert)\n         if sslcert:\n+            env = {} if env is None else env\n             env['PGSSLCERT'] = str(sslcert)\n         if sslkey:\n+            env = {} if env is None else env\n             env['PGSSLKEY'] = str(sslkey)\n         if passfile:\n+            env = {} if env is None else env\n             env['PGPASSFILE'] = str(passfile)\n         return args, env\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/postgresql/client.py",
+          "line": 39,
+          "statement": "        env = None"
+        }
+      ],
+      "reasoning": "The PostgreSQL client previously initialized env as an empty dict, which is falsy and caused BaseDatabaseClient.runshell() to skip merging os.environ and pass an empty environment to subprocess. Initializing to None and only creating a dict when needed preserves inherited environment variables.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,137 @@
+2026-06-30 04:10:55,302 - INFO - Creating container for django__django-10554...
+2026-06-30 04:10:55,389 - INFO - Container for django__django-10554 created: 678f8f39b2e90f1d59a29355f93504fd67239596b942f9e430324a08934375d4
+2026-06-30 04:10:55,809 - INFO - Container for django__django-10554 started: 678f8f39b2e90f1d59a29355f93504fd67239596b942f9e430324a08934375d4
+2026-06-30 04:10:55,814 - INFO - Intermediate patch for django__django-10554 written to logs/run_evaluation/local-django-10554/anthropic__claude-opus-4-8/django__django-10554/patch.diff, now applying to container...
+2026-06-30 04:10:56,295 - INFO - >>>>> Applied Patch:
+Checking patch django/db/models/sql/compiler.py...
+Checking patch django/db/models/sql/query.py...
+Applied patch django/db/models/sql/compiler.py cleanly.
+Applied patch django/db/models/sql/query.py cleanly.
+
+2026-06-30 04:10:57,169 - INFO - Git diff before:
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index a791908caf..aa0f879b25 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -5,7 +5,7 @@ from itertools import chain
+ 
+ from django.core.exceptions import EmptyResultSet, FieldError
+ from django.db.models.constants import LOOKUP_SEP
+-from django.db.models.expressions import OrderBy, Random, RawSQL, Ref, Value
++from django.db.models.expressions import F, OrderBy, Random, RawSQL, Ref, Value
+ from django.db.models.functions import Cast
+ from django.db.models.query_utils import QueryWrapper, select_related_descend
+ from django.db.models.sql.constants import (
+@@ -344,19 +344,27 @@ class SQLCompiler:
+             resolved = expr.resolve_expression(self.query, allow_joins=True, reuse=None)
+             if self.query.combinator:
+                 src = resolved.get_source_expressions()[0]
++                expr_src = expr.get_source_expressions()[0]
+                 # Relabel order by columns to raw numbers if this is a combined
+                 # query; necessary since the columns can't be referenced by the
+                 # fully qualified name and the simple column names may collide.
+                 for idx, (sel_expr, _, col_alias) in enumerate(self.select):
+                     if is_ref and col_alias == src.refs:
+                         src = src.source
+-                    elif col_alias:
++                    elif col_alias and not (
++                        isinstance(expr_src, F) and col_alias == expr_src.name
++                    ):
+                         continue
+                     if src == sel_expr:
+                         resolved.set_source_expressions([RawSQL('%d' % (idx + 1), ())])
+                         break
+                 else:
+-                    raise DatabaseError('ORDER BY term does not match any column in the result set.')
++                    if col_alias:
++                        raise DatabaseError('ORDER BY term does not match any column in the result set.')
++                    # Add column used in ORDER BY clause without an alias to
++                    # the selected columns.
++                    self.query.add_select_col(src)
++                    resolved.set_source_expressions([RawSQL('%d' % len(self.query.select), ())])
+             sql, params = self.compile(resolved)
+             # Don't add the same column twice, but the order direction is
+             # not taken into account so we strip it. When this entire method
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index 08d7faf194..201b1b4cba 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1778,6 +1778,10 @@ class Query(BaseExpression):
+         self.default_cols = False
+         self.select = tuple(cols)
+ 
++    def add_select_col(self, col):
++        self.select += col,
++        self.values_select += col.output_field.name,
++
+     def add_distinct_fields(self, *field_names):
+         """
+         Add and resolve the given fields to the query's "distinct on" clause.
+2026-06-30 04:10:57,180 - INFO - Eval script for django__django-10554 written to logs/run_evaluation/local-django-10554/anthropic__claude-opus-4-8/django__django-10554/eval.sh; copying to container...
+2026-06-30 04:11:04,687 - INFO - Test runtime: 7.18 seconds
+2026-06-30 04:11:04,689 - INFO - Test output for django__django-10554 written to logs/run_evaluation/local-django-10554/anthropic__claude-opus-4-8/django__django-10554/test_output.txt
+2026-06-30 04:11:04,916 - INFO - Git diff after:
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index a791908caf..aa0f879b25 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -5,7 +5,7 @@ from itertools import chain
+ 
+ from django.core.exceptions import EmptyResultSet, FieldError
+ from django.db.models.constants import LOOKUP_SEP
+-from django.db.models.expressions import OrderBy, Random, RawSQL, Ref, Value
++from django.db.models.expressions import F, OrderBy, Random, RawSQL, Ref, Value
+ from django.db.models.functions import Cast
+ from django.db.models.query_utils import QueryWrapper, select_related_descend
+ from django.db.models.sql.constants import (
+@@ -344,19 +344,27 @@ class SQLCompiler:
+             resolved = expr.resolve_expression(self.query, allow_joins=True, reuse=None)
+             if self.query.combinator:
+                 src = resolved.get_source_expressions()[0]
++                expr_src = expr.get_source_expressions()[0]
+                 # Relabel order by columns to raw numbers if this is a combined
+                 # query; necessary since the columns can't be referenced by the
+                 # fully qualified name and the simple column names may collide.
+                 for idx, (sel_expr, _, col_alias) in enumerate(self.select):
+                     if is_ref and col_alias == src.refs:
+                         src = src.source
+-                    elif col_alias:
++                    elif col_alias and not (
++                        isinstance(expr_src, F) and col_alias == expr_src.name
++                    ):
+                         continue
+                     if src == sel_expr:
+                         resolved.set_source_expressions([RawSQL('%d' % (idx + 1), ())])
+                         break
+                 else:
+-                    raise DatabaseError('ORDER BY term does not match any column in the result set.')
++                    if col_alias:
++                        raise DatabaseError('ORDER BY term does not match any column in the result set.')
++                    # Add column used in ORDER BY clause without an alias to
++                    # the selected columns.
++                    self.query.add_select_col(src)
++                    resolved.set_source_expressions([RawSQL('%d' % len(self.query.select), ())])
+             sql, params = self.compile(resolved)
+             # Don't add the same column twice, but the order direction is
+             # not taken into account so we strip it. When this entire method
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index 08d7faf194..201b1b4cba 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1778,6 +1778,10 @@ class Query(BaseExpression):
+         self.default_cols = False
+         self.select = tuple(cols)
+ 
++    def add_select_col(self, col):
++        self.select += col,
++        self.values_select += col.output_field.name,
++
+     def add_distinct_fields(self, *field_names):
+         """
+         Add and resolve the given fields to the query's "distinct on" clause.
+2026-06-30 04:11:04,917 - INFO - Grading answer for django__django-10554...
+2026-06-30 04:11:04,922 - INFO - report: {'django__django-10554': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_union_with_values_list_and_order (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_union_with_values_list_on_annotated_and_unannotated (queries.test_qs_combinators.QuerySetSetOperationTests)'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_combining_multiple_models (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_count_difference (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_count_intersection (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_count_union (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_count_union_empty_result (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_difference_with_empty_qs (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_difference_with_values (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_intersection_with_empty_qs (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_intersection_with_values (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_limits (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_order_raises_on_non_selected_column (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_ordering (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_ordering_by_f_expression (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_qs_with_subcompound_qs (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_simple_difference (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_simple_intersection (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_simple_union (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_union_distinct (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_union_with_empty_qs (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_union_with_extra_and_values_list (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_union_with_two_annotated_values_list (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_union_with_values (queries.test_qs_combinators.QuerySetSetOperationTests)', 'test_unsupported_ordering_slicing_raises_db_error (queries.test_qs_combinators.QuerySetSetOperationTests)'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-10554: resolved: True
+2026-06-30 04:11:04,925 - INFO - Attempting to stop container sweb.eval.django__django-10554.local-django-10554...
+2026-06-30 04:11:20,413 - INFO - Attempting to remove container sweb.eval.django__django-10554.local-django-10554...
+2026-06-30 04:11:20,489 - INFO - Container sweb.eval.django__django-10554.local-django-10554 removed.

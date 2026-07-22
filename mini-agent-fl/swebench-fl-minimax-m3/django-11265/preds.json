@@ -1,0 +1,19 @@
+{
+  "django__django-11265": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-11265",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex d69c24419b..405f54774c 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -1666,6 +1666,7 @@ class Query(BaseExpression):\n             filter_expr = (filter_lhs, OuterRef(filter_rhs.name))\n         # Generate the inner query.\n         query = Query(self.model)\n+        query._filtered_relations = self._filtered_relations\n         query.add_filter(filter_expr)\n         query.clear_ordering(True)\n         # Try to have as simple as possible subquery -> trim leading joins from\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 1668,
+          "statement": "        query = Query(self.model)"
+        }
+      ],
+      "reasoning": "The split_exclude method creates a new Query object for the subquery but does not copy the _filtered_relations dictionary from the original query. This causes the FieldError when the filter expression references a FilteredRelation alias, because the new query cannot resolve the alias in names_to_path.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

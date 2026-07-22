@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25479": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-25479",
+    "model_patch": "diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py\nindex 58ce4c03fa..415a574c7a 100644\n--- a/lib/matplotlib/pyplot.py\n+++ b/lib/matplotlib/pyplot.py\n@@ -2278,9 +2278,10 @@ def set_cmap(cmap: Colormap | str) -> None:\n     matplotlib.cm.register_cmap\n     matplotlib.cm.get_cmap\n     \"\"\"\n+    cmap_name = cmap if isinstance(cmap, str) else None\n     cmap = get_cmap(cmap)\n \n-    rc('image', cmap=cmap.name)\n+    rc('image', cmap=cmap_name or cmap.name)\n     im = gci()\n \n     if im is not None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/pyplot.py",
+          "line": 2280,
+          "statement": "    rc('image', cmap=cmap.name)"
+        }
+      ],
+      "reasoning": "set_cmap always persisted the colormap object's internal name to rcParams, discarding the registry key used by the caller. If a cmap is registered under a different name than cmap.name, subsequent default lookup fails.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

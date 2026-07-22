@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-11445": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-11445",
+    "model_patch": "diff --git a/sphinx/util/rst.py b/sphinx/util/rst.py\nindex 7a1538325..214e38488 100644\n--- a/sphinx/util/rst.py\n+++ b/sphinx/util/rst.py\n@@ -25,7 +25,7 @@ except ImportError:\n \n logger = logging.getLogger(__name__)\n \n-docinfo_re = re.compile(':\\\\w+:.*?')\n+docinfo_re = re.compile(r'^:[^:`\\s]+:\\s+.*')\n symbols_re = re.compile(r'([!-\\-/:-@\\[-`{-~])')  # symbols without dot(0x2e)\n SECTIONING_CHARS = ['=', '-', '~']\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/util/rst.py",
+          "line": 28,
+          "statement": "docinfo_re = re.compile(':\\\\w+:.*?')"
+        }
+      ],
+      "reasoning": "The docinfo detection regex was overly broad and matched inline domain-role titles like :mod:`name`, causing prepend_prolog() to treat the first heading line as docinfo and insert a separating blank line that breaks section title parsing and toctree title extraction.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

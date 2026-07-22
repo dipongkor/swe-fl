@@ -1,0 +1,19 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index 35f3c5e1ea..a5a1349c9d 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1702,7 +1702,13 @@ class Query(BaseExpression):
+         handle.
+         """
+         filter_lhs, filter_rhs = filter_expr
+-        if isinstance(filter_rhs, F):
++        if isinstance(filter_rhs, OuterRef):
++            # If the filter's right-hand side is a reference to an outer query
++            # (i.e. exclude() or ~Q() contains an OuterRef()), it must be
++            # wrapped in another OuterRef() so that it climbs the extra level of
++            # nesting introduced by the subquery generated below.
++            filter_expr = (filter_lhs, OuterRef(filter_rhs))
++        elif isinstance(filter_rhs, F):
+             filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
+         # Generate the inner query.
+         query = Query(self.model)

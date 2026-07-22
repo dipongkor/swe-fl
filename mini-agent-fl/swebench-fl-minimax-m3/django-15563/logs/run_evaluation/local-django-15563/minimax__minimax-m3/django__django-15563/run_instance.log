@@ -1,0 +1,159 @@
+2026-07-21 12:14:20,917 - INFO - Creating container for django__django-15563...
+2026-07-21 12:14:21,009 - INFO - Container for django__django-15563 created: 539c5330e5146208769bea83656753ecc78a0d9f470c1f9c5725269beccbc1e9
+2026-07-21 12:14:21,451 - INFO - Container for django__django-15563 started: 539c5330e5146208769bea83656753ecc78a0d9f470c1f9c5725269beccbc1e9
+2026-07-21 12:14:21,451 - INFO - Intermediate patch for django__django-15563 written to logs/run_evaluation/local-django-15563/minimax__minimax-m3/django__django-15563/patch.diff, now applying to container...
+2026-07-21 12:14:21,790 - INFO - >>>>> Applied Patch:
+Checking patch django/db/models/sql/compiler.py...
+Checking patch django/db/models/sql/subqueries.py...
+Applied patch django/db/models/sql/compiler.py cleanly.
+Applied patch django/db/models/sql/subqueries.py cleanly.
+
+2026-07-21 12:14:22,379 - INFO - Git diff before:
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 59a5d6abbb..c0e1925bef 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1836,7 +1836,23 @@ class SQLUpdateCompiler(SQLCompiler):
+         query.clear_ordering(force=True)
+         query.extra = {}
+         query.select = []
+-        query.add_fields([query.get_meta().pk.name])
++        meta = query.get_meta()
++        fields = [meta.pk.name]
++        related_ids_index = []
++        for related in self.query.related_updates:
++            if all(
++                path.join_field.primary_key for path in meta.get_path_to_parent(related)
++            ):
++                # If a primary key chain exists to the targeted related update,
++                # then the meta.pk value can be used for it.
++                related_ids_index.append((related, 0))
++            else:
++                # This branch will only be reached when updating a field of an
++                # ancestor that is not part of the primary key chain of a MTI
++                # tree.
++                related_ids_index.append((related, len(fields)))
++                fields.append(meta.parents[related].name)
++        query.add_fields(fields)
+         super().pre_sql_setup()
+ 
+         must_pre_select = (
+@@ -1851,10 +1867,14 @@ class SQLUpdateCompiler(SQLCompiler):
+             # don't want them to change), or the db backend doesn't support
+             # selecting from the updating table (e.g. MySQL).
+             idents = []
++            related_ids = collections.defaultdict(list)
+             for rows in query.get_compiler(self.using).execute_sql(MULTI):
+                 idents.extend(r[0] for r in rows)
++                for parent, index in related_ids_index:
++                    related_ids[parent].extend(r[index] for r in rows)
+             self.query.add_filter("pk__in", idents)
+             self.query.related_ids = idents
++            self.query.related_updates_ids = related_ids
+         else:
+             # The fast path. Filters and updates in one query.
+             self.query.add_filter("pk__in", query)
+diff --git a/django/db/models/sql/subqueries.py b/django/db/models/sql/subqueries.py
+index 04063f73bc..b7c6f83abd 100644
+--- a/django/db/models/sql/subqueries.py
++++ b/django/db/models/sql/subqueries.py
+@@ -62,10 +62,12 @@ class UpdateQuery(Query):
+         self.values = []
+         self.related_ids = None
+         self.related_updates = {}
++        self.related_updates_ids = {}
+ 
+     def clone(self):
+         obj = super().clone()
+         obj.related_updates = self.related_updates.copy()
++        obj.related_updates_ids = self.related_updates_ids.copy()
+         return obj
+ 
+     def update_batch(self, pk_list, values, using):
+@@ -134,7 +136,7 @@ class UpdateQuery(Query):
+             query = UpdateQuery(model)
+             query.values = values
+             if self.related_ids is not None:
+-                query.add_filter("pk__in", self.related_ids)
++                query.add_filter("pk__in", self.related_updates_ids[model])
+             result.append(query)
+         return result
+2026-07-21 12:14:22,379 - INFO - Eval script for django__django-15563 written to logs/run_evaluation/local-django-15563/minimax__minimax-m3/django__django-15563/eval.sh; copying to container...
+2026-07-21 12:14:30,726 - INFO - Test runtime: 8.08 seconds
+2026-07-21 12:14:30,726 - INFO - Test output for django__django-15563 written to logs/run_evaluation/local-django-15563/minimax__minimax-m3/django__django-15563/test_output.txt
+2026-07-21 12:14:30,812 - INFO - Git diff after:
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 59a5d6abbb..c0e1925bef 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1836,7 +1836,23 @@ class SQLUpdateCompiler(SQLCompiler):
+         query.clear_ordering(force=True)
+         query.extra = {}
+         query.select = []
+-        query.add_fields([query.get_meta().pk.name])
++        meta = query.get_meta()
++        fields = [meta.pk.name]
++        related_ids_index = []
++        for related in self.query.related_updates:
++            if all(
++                path.join_field.primary_key for path in meta.get_path_to_parent(related)
++            ):
++                # If a primary key chain exists to the targeted related update,
++                # then the meta.pk value can be used for it.
++                related_ids_index.append((related, 0))
++            else:
++                # This branch will only be reached when updating a field of an
++                # ancestor that is not part of the primary key chain of a MTI
++                # tree.
++                related_ids_index.append((related, len(fields)))
++                fields.append(meta.parents[related].name)
++        query.add_fields(fields)
+         super().pre_sql_setup()
+ 
+         must_pre_select = (
+@@ -1851,10 +1867,14 @@ class SQLUpdateCompiler(SQLCompiler):
+             # don't want them to change), or the db backend doesn't support
+             # selecting from the updating table (e.g. MySQL).
+             idents = []
++            related_ids = collections.defaultdict(list)
+             for rows in query.get_compiler(self.using).execute_sql(MULTI):
+                 idents.extend(r[0] for r in rows)
++                for parent, index in related_ids_index:
++                    related_ids[parent].extend(r[index] for r in rows)
+             self.query.add_filter("pk__in", idents)
+             self.query.related_ids = idents
++            self.query.related_updates_ids = related_ids
+         else:
+             # The fast path. Filters and updates in one query.
+             self.query.add_filter("pk__in", query)
+diff --git a/django/db/models/sql/subqueries.py b/django/db/models/sql/subqueries.py
+index 04063f73bc..b7c6f83abd 100644
+--- a/django/db/models/sql/subqueries.py
++++ b/django/db/models/sql/subqueries.py
+@@ -62,10 +62,12 @@ class UpdateQuery(Query):
+         self.values = []
+         self.related_ids = None
+         self.related_updates = {}
++        self.related_updates_ids = {}
+ 
+     def clone(self):
+         obj = super().clone()
+         obj.related_updates = self.related_updates.copy()
++        obj.related_updates_ids = self.related_updates_ids.copy()
+         return obj
+ 
+     def update_batch(self, pk_list, values, using):
+@@ -134,7 +136,7 @@ class UpdateQuery(Query):
+             query = UpdateQuery(model)
+             query.values = values
+             if self.related_ids is not None:
+-                query.add_filter("pk__in", self.related_ids)
++                query.add_filter("pk__in", self.related_updates_ids[model])
+             result.append(query)
+         return result
+2026-07-21 12:14:30,812 - INFO - Grading answer for django__django-15563...
+2026-07-21 12:14:30,815 - INFO - report: {'django__django-15563': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_mti_update_parent_through_child (model_inheritance_regress.tests.ModelInheritanceTest)'], 'failure': ['test_mti_update_grand_parent_through_child (model_inheritance_regress.tests.ModelInheritanceTest)']}, 'PASS_TO_PASS': {'success': ['test_abstract_base_class_m2m_relation_inheritance (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_abstract_base_class_m2m_relation_inheritance_manager_reused (model_inheritance_regress.tests.ModelInheritanceTest)', 'verbose_name_plural correctly inherited from ABC if inheritance chain', 'Regression tests for #7588', 'Primary key set correctly with concrete->abstract->concrete inheritance.', 'test_create_new_instance_with_pk_equals_none (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_create_new_instance_with_pk_equals_none_multi_inheritance (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_filter_with_parent_fk (model_inheritance_regress.tests.ModelInheritanceTest)', 'Regression tests for #8076', 'test_id_field_update_on_ancestor_change (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_inheritance_joins (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_inheritance_resolve_columns (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_inheritance_select_related (model_inheritance_regress.tests.ModelInheritanceTest)', 'Regression test for #8825 and #9390', 'test_inherited_nullable_exclude (model_inheritance_regress.tests.ModelInheritanceTest)', 'A model which has different primary key for the parent model passes', 'Regression test for #11764', 'test_issue_21554 (model_inheritance_regress.tests.ModelInheritanceTest)', 'Regression test for #6755', 'test_issue_7105 (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_issue_7276 (model_inheritance_regress.tests.ModelInheritanceTest)', 'Regression test for #7853', 'test_model_inheritance (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_ptr_accessor_assigns_state (model_inheritance_regress.tests.ModelInheritanceTest)', 'test_queries_on_parent_access (model_inheritance_regress.tests.ModelInheritanceTest)', 'Regression test for #10362', 'test_related_filtering_query_efficiency_ticket_15844 (model_inheritance_regress.tests.ModelInheritanceTest)', 'The connector from child to parent need not be the pk on the child.', 'test_use_explicit_o2o_to_parent_from_abstract_model (model_inheritance_regress.tests.ModelInheritanceTest)'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-15563: resolved: False
+2026-07-21 12:14:30,816 - INFO - Attempting to stop container sweb.eval.django__django-15563.local-django-15563...
+2026-07-21 12:14:46,270 - INFO - Attempting to remove container sweb.eval.django__django-15563.local-django-15563...
+2026-07-21 12:14:46,309 - INFO - Container sweb.eval.django__django-15563.local-django-15563 removed.

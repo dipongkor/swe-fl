@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-13124": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "model_patch": "diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py\nindex 24394f869..22d2ec6d1 100644\n--- a/sklearn/model_selection/_split.py\n+++ b/sklearn/model_selection/_split.py\n@@ -657,17 +657,20 @@ class StratifiedKFold(_BaseKFold):\n             for count in y_counts]\n \n         test_folds = np.zeros(n_samples, dtype=np.int)\n-        for test_fold_indices, per_cls_splits in enumerate(zip(*per_cls_cvs)):\n-            for cls, (_, test_split) in zip(unique_y, per_cls_splits):\n-                cls_test_folds = test_folds[y == cls]\n+        rng = check_random_state(self.random_state)\n+        for cls, per_cls_splits in zip(unique_y, per_cls_cvs):\n+            cls_y_indices = np.where(y == cls)[0]\n+            if self.shuffle:\n+                rng.shuffle(cls_y_indices)\n+\n+            for test_fold_indices, (_, test_split) in enumerate(per_cls_splits):\n                 # the test split can be too big because we used\n                 # KFold(...).split(X[:max(c, n_splits)]) when data is not 100%\n                 # stratifiable for all the classes\n                 # (we use a warning instead of raising an exception)\n                 # If this is the case, let's trim it:\n-                test_split = test_split[test_split < len(cls_test_folds)]\n-                cls_test_folds[test_split] = test_fold_indices\n-                test_folds[y == cls] = cls_test_folds\n+                test_split = test_split[test_split < len(cls_y_indices)]\n+                test_folds[cls_y_indices[test_split]] = test_fold_indices\n \n         return test_folds\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 673,
+          "statement": "                test_folds[cls_y_indices[test_split]] = test_fold_indices"
+        }
+      ],
+      "reasoning": "The previous implementation assigned fold ids to class-relative positions without permuting class sample indices, so shuffle only changed fold iteration order. Introducing shuffled class index mapping makes shuffle affect which samples from each class are placed in each fold.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

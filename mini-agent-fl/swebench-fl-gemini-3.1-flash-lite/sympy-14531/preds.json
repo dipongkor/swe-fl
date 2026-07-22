@@ -1,0 +1,24 @@
+{
+  "sympy__sympy-14531": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-14531",
+    "model_patch": "diff --git a/sympy/printing/str.py b/sympy/printing/str.py\nindex cc1d19fcc..d64f41521 100644\n--- a/sympy/printing/str.py\n+++ b/sympy/printing/str.py\n@@ -216,7 +216,7 @@ def _print_LatticeOp(self, expr):\n     def _print_Limit(self, expr):\n         e, z, z0, dir = expr.args\n         if str(dir) == \"+\":\n-            return \"Limit(%s, %s, %s)\" % (e, z, z0)\n+            return \"Limit(%s, %s, %s)\" % (self._print(e), self._print(z), self._print(z0))\n         else:\n             return \"Limit(%s, %s, %s, dir='%s')\" % (e, z, z0, dir)\n \n@@ -630,7 +630,7 @@ def _print_Relational(self, expr):\n         }\n \n         if expr.rel_op in charmap:\n-            return '%s(%s, %s)' % (charmap[expr.rel_op], expr.lhs, expr.rhs)\n+            return '%s(%s, %s)' % (charmap[expr.rel_op], self._print(expr.lhs), self._print(expr.rhs))\n \n         return '%s %s %s' % (self.parenthesize(expr.lhs, precedence(expr)),\n                            self._relationals.get(expr.rel_op) or expr.rel_op,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/str.py",
+          "line": 45,
+          "statement": "return '%s(%s, %s)' % (charmap[expr.rel_op], expr.lhs, expr.rhs)"
+        },
+        {
+          "file": "sympy/printing/str.py",
+          "line": 125,
+          "statement": "return \"Limit(%s, %s, %s)\" % (e, z, z0)"
+        }
+      ],
+      "reasoning": "The _print_Relational and _print_Limit methods in StrPrinter were using str(expr.lhs) and str(expr.rhs) (or similar) instead of self._print(expr.lhs) and self._print(expr.rhs), which caused the printer settings to be ignored for subexpressions.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,43 @@
+2026-06-30 21:29:40,338 - INFO - Creating container for django__django-12155...
+2026-06-30 21:29:40,419 - INFO - Container for django__django-12155 created: 368cbdc601713b5712cf28358af0ba294d1b269be4c327cfc181ae674c199b76
+2026-06-30 21:29:40,842 - INFO - Container for django__django-12155 started: 368cbdc601713b5712cf28358af0ba294d1b269be4c327cfc181ae674c199b76
+2026-06-30 21:29:40,846 - INFO - Intermediate patch for django__django-12155 written to logs/run_evaluation/local-django-12155/openai__gpt-5.3-codex/django__django-12155/patch.diff, now applying to container...
+2026-06-30 21:29:41,298 - INFO - >>>>> Applied Patch:
+Checking patch django/contrib/admindocs/utils.py...
+Applied patch django/contrib/admindocs/utils.py cleanly.
+
+2026-06-30 21:29:42,175 - INFO - Git diff before:
+diff --git a/django/contrib/admindocs/utils.py b/django/contrib/admindocs/utils.py
+index 4c0e7e2a56..aeec9fae5c 100644
+--- a/django/contrib/admindocs/utils.py
++++ b/django/contrib/admindocs/utils.py
+@@ -34,7 +34,7 @@ def trim_docstring(docstring):
+         return ''
+     # Convert tabs to spaces and split into lines
+     lines = docstring.expandtabs().splitlines()
+-    indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())
++    indent = min(len(line) - len(line.lstrip()) for line in lines[1:] if line.lstrip())
+     trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]
+     return "\n".join(trimmed).strip()
+2026-06-30 21:29:42,182 - INFO - Eval script for django__django-12155 written to logs/run_evaluation/local-django-12155/openai__gpt-5.3-codex/django__django-12155/eval.sh; copying to container...
+2026-06-30 21:29:49,944 - INFO - Test runtime: 7.45 seconds
+2026-06-30 21:29:49,948 - INFO - Test output for django__django-12155 written to logs/run_evaluation/local-django-12155/openai__gpt-5.3-codex/django__django-12155/test_output.txt
+2026-06-30 21:29:50,164 - INFO - Git diff after:
+diff --git a/django/contrib/admindocs/utils.py b/django/contrib/admindocs/utils.py
+index 4c0e7e2a56..aeec9fae5c 100644
+--- a/django/contrib/admindocs/utils.py
++++ b/django/contrib/admindocs/utils.py
+@@ -34,7 +34,7 @@ def trim_docstring(docstring):
+         return ''
+     # Convert tabs to spaces and split into lines
+     lines = docstring.expandtabs().splitlines()
+-    indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())
++    indent = min(len(line) - len(line.lstrip()) for line in lines[1:] if line.lstrip())
+     trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]
+     return "\n".join(trimmed).strip()
+2026-06-30 21:29:50,165 - INFO - Grading answer for django__django-12155...
+2026-06-30 21:29:50,169 - INFO - report: {'django__django-12155': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_parse_rst_with_docstring_no_leading_line_feed (admin_docs.test_utils.TestUtils)'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_description_output (admin_docs.test_utils.TestUtils)', 'test_initial_header_level (admin_docs.test_utils.TestUtils)', 'test_parse_docstring (admin_docs.test_utils.TestUtils)', 'test_parse_rst (admin_docs.test_utils.TestUtils)', 'test_publish_parts (admin_docs.test_utils.TestUtils)', 'test_title_output (admin_docs.test_utils.TestUtils)'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-12155: resolved: True
+2026-06-30 21:29:50,172 - INFO - Attempting to stop container sweb.eval.django__django-12155.local-django-12155...
+2026-06-30 21:30:05,623 - INFO - Attempting to remove container sweb.eval.django__django-12155.local-django-12155...
+2026-06-30 21:30:05,710 - INFO - Container sweb.eval.django__django-12155.local-django-12155 removed.

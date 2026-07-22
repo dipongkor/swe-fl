@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-8872": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "astropy__astropy-8872",
+    "model_patch": "diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py\nindex ded609cbe..e1d8b89ea 100644\n--- a/astropy/units/quantity.py\n+++ b/astropy/units/quantity.py\n@@ -296,7 +296,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):\n                 if not copy:\n                     return value\n \n-                if not (np.can_cast(np.float32, value.dtype) or\n+                if not (np.can_cast(np.float32, value.dtype, casting='same_kind') or\n                         value.dtype.fields):\n                     dtype = float\n \n@@ -377,7 +377,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):\n                             \"Numpy numeric type.\")\n \n         # by default, cast any integer, boolean, etc., to float\n-        if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n+        if dtype is None and (not (np.can_cast(np.float32, value.dtype, casting='same_kind')\n                                    or value.dtype.fields)\n                               or value.dtype.kind == 'O'):\n             value = value.astype(float)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/units/quantity.py",
+          "line": 299,
+          "statement": "                if not (np.can_cast(np.float32, value.dtype) or"
+        },
+        {
+          "file": "astropy/units/quantity.py",
+          "line": 380,
+          "statement": "        if dtype is None and (not (np.can_cast(np.float32, value.dtype)"
+        }
+      ],
+      "reasoning": "The check `np.can_cast(np.float32, value.dtype)` uses the default 'safe' casting rule, which returns False for float16 because float32 cannot be safely cast to float16 (float16 is narrower). This causes float16 values to be unnecessarily cast to float64. The fix is to use `casting='same_kind'`, which allows casting within the same kind (e.g., float32 to float16) but not across kinds (e.g., int to float).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

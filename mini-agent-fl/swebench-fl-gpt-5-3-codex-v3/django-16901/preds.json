@@ -1,0 +1,19 @@
+{
+  "django__django-16901": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-16901",
+    "model_patch": "diff --git a/django/db/models/sql/where.py b/django/db/models/sql/where.py\nindex aaab1730b7..783e79490d 100644\n--- a/django/db/models/sql/where.py\n+++ b/django/db/models/sql/where.py\n@@ -129,13 +129,13 @@ class WhereNode(tree.Node):\n             # Convert if the database doesn't support XOR:\n             #   a XOR b XOR c XOR ...\n             # to:\n-            #   (a OR b OR c OR ...) AND (a + b + c + ...) == 1\n+            #   (a OR b OR c OR ...) AND MOD(a + b + c + ..., 2) == 1\n             lhs = self.__class__(self.children, OR)\n             rhs_sum = reduce(\n                 operator.add,\n                 (Case(When(c, then=1), default=0) for c in self.children),\n             )\n-            rhs = Exact(1, rhs_sum)\n+            rhs = Exact(1, Mod(rhs_sum, 2))\n             return self.__class__([lhs, rhs], AND, self.negated).as_sql(\n                 compiler, connection\n             )\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/where.py",
+          "line": 138,
+          "statement": "            rhs = Exact(1, Mod(rhs_sum, 2))"
+        }
+      ],
+      "reasoning": "The XOR fallback previously compared the sum of truthy operands to 1, which encodes exactly-one semantics rather than odd-parity semantics for chained XOR. The fix applies modulo 2 before comparison to match logical XOR parity for any operand count.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

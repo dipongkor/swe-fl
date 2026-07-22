@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14496": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "scikit-learn__scikit-learn-14496",
+    "model_patch": "diff --git a/sklearn/cluster/optics_.py b/sklearn/cluster/optics_.py\nindex 4f7eb11ab..b565cf0a0 100755\n--- a/sklearn/cluster/optics_.py\n+++ b/sklearn/cluster/optics_.py\n@@ -437,7 +437,7 @@ if metric=\u2019precomputed\u2019.\n     n_samples = X.shape[0]\n     _validate_size(min_samples, n_samples, 'min_samples')\n     if min_samples <= 1:\n-        min_samples = max(2, min_samples * n_samples)\n+        min_samples = int(round(max(2, min_samples * n_samples)))\n \n     # Start all points as 'unprocessed' ##\n     reachability_ = np.empty(n_samples)\n@@ -619,12 +619,13 @@ def cluster_optics_xi(reachability, predecessor, ordering, min_samples,\n     n_samples = len(reachability)\n     _validate_size(min_samples, n_samples, 'min_samples')\n     if min_samples <= 1:\n-        min_samples = max(2, min_samples * n_samples)\n+        min_samples = int(round(max(2, min_samples * n_samples)))\n     if min_cluster_size is None:\n         min_cluster_size = min_samples\n     _validate_size(min_cluster_size, n_samples, 'min_cluster_size')\n     if min_cluster_size <= 1:\n-        min_cluster_size = max(2, min_cluster_size * n_samples)\n+        min_cluster_size = int(round(max(2, min_cluster_size *\n+                                       n_samples)))\n \n     clusters = _xi_cluster(reachability[ordering], predecessor[ordering],\n                            ordering, xi,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/cluster/optics_.py",
+          "line": 440,
+          "statement": "        min_samples = max(2, min_samples * n_samples)"
+        }
+      ],
+      "reasoning": "When min_samples is a float <= 1, it is scaled to a value in sample range but left as a float, which is later passed to NearestNeighbors that requires an integer n_neighbors, raising a TypeError. Wrapping in int(round(...)) fixes it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

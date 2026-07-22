@@ -1,0 +1,132 @@
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+index 87707d48f..5eae1df29 100644
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -116,14 +116,14 @@ def restify(cls: Optional[Type]) -> str:
+         elif isinstance(cls, str):
+             return cls
+         elif cls in INVALID_BUILTIN_CLASSES:
+-            return ':py:class:`%s`' % INVALID_BUILTIN_CLASSES[cls]
++            return ':py:class:\`%s\`' % INVALID_BUILTIN_CLASSES[cls]
+         elif inspect.isNewType(cls):
+             if sys.version_info > (3, 10):
+                 # newtypes have correct module info since Python 3.10+
+                 print(cls, type(cls), dir(cls))
+-                return ':py:class:`%s.%s`' % (cls.__module__, cls.__name__)
++                return ':py:class:\`%s.%s\`' % (cls.__module__, cls.__name__)
+             else:
+-                return ':py:class:`%s`' % cls.__name__
++                return ':py:class:\`%s\`' % cls.__name__
+         elif UnionType and isinstance(cls, UnionType):
+             if len(cls.__args__) > 1 and None in cls.__args__:
+                 args = ' | '.join(restify(a) for a in cls.__args__ if a)
+@@ -132,12 +132,12 @@ def restify(cls: Optional[Type]) -> str:
+                 return ' | '.join(restify(a) for a in cls.__args__)
+         elif cls.__module__ in ('__builtin__', 'builtins'):
+             if hasattr(cls, '__args__'):
+-                return ':py:class:`%s`\\ [%s]' % (
++                return ':py:class:\`%s\`\\ [%s]' % (
+                     cls.__name__,
+                     ', '.join(restify(arg) for arg in cls.__args__),
+                 )
+             else:
+-                return ':py:class:`%s`' % cls.__name__
++                return ':py:class:\`%s\`' % cls.__name__
+         else:
+             if sys.version_info >= (3, 7):  # py37+
+                 return _restify_py37(cls)
+@@ -168,9 +168,9 @@ def _restify_py37(cls: Optional[Type]) -> str:
+             text = restify(cls.__origin__)  # type: ignore
+         elif getattr(cls, '_name', None):
+             if cls.__module__ == 'typing':
+-                text = ':py:class:`~%s.%s`' % (cls.__module__, cls._name)
++                text = ':py:class:\`~%s.%s\`' % (cls.__module__, cls._name)
+             else:
+-                text = ':py:class:`%s.%s`' % (cls.__module__, cls._name)
++                text = ':py:class:\`%s.%s\`' % (cls.__module__, cls._name)
+         else:
+             text = restify(cls.__origin__)
+ 
+@@ -190,21 +190,21 @@ def _restify_py37(cls: Optional[Type]) -> str:
+ 
+         return text
+     elif isinstance(cls, typing._SpecialForm):
+-        return ':py:obj:`~%s.%s`' % (cls.__module__, cls._name)
++        return ':py:obj:\`~%s.%s\`' % (cls.__module__, cls._name)
+     elif hasattr(cls, '__qualname__'):
++        qualname = cls.__qualname__
++        if not qualname and hasattr(cls, '__name__'):
++            qualname = cls.__name__
+         if cls.__module__ == 'typing':
+-            return ':py:class:`~%s.%s`' % (cls.__module__, cls.__qualname__)
+-        else:
+-            return ':py:class:`%s.%s`' % (cls.__module__, cls.__qualname__)
+-    elif isinstance(cls, ForwardRef):
+-        return ':py:class:`%s`' % cls.__forward_arg__
+-    else:
+-        # not a class (ex. TypeVar)
+-        if cls.__module__ == 'typing':
+-            return ':py:obj:`~%s.%s`' % (cls.__module__, cls.__name__)
++            if qualname:
++                return ':py:class:`~%s.%s`' % (cls.__module__, qualname)
++            else:
++                return ':py:class:`~%s`' % cls.__module__
+         else:
+-            return ':py:obj:`%s.%s`' % (cls.__module__, cls.__name__)
+-
++            if qualname:
++                return ':py:class:`%s.%s`' % (cls.__module__, qualname)
++            else:
++                return ':py:class:`%s`' % cls.__module__
+ 
+ def _restify_py36(cls: Optional[Type]) -> str:
+     module = getattr(cls, '__module__', None)
+@@ -229,7 +229,7 @@ def _restify_py36(cls: Optional[Type]) -> str:
+         if module == 'typing':
+             reftext = ':py:class:`~typing.%s`' % qualname
+         else:
+-            reftext = ':py:class:`%s`' % qualname
++            reftext = ':py:class:\`%s\`' % qualname
+ 
+         params = cls.__args__
+         if params:
+@@ -241,7 +241,7 @@ def _restify_py36(cls: Optional[Type]) -> str:
+         if module == 'typing':
+             reftext = ':py:class:`~typing.%s`' % qualname
+         else:
+-            reftext = ':py:class:`%s`' % qualname
++            reftext = ':py:class:\`%s\`' % qualname
+ 
+         if cls.__args__ is None or len(cls.__args__) <= 2:
+             params = cls.__args__
+@@ -275,25 +275,25 @@ def _restify_py36(cls: Optional[Type]) -> str:
+             return ':py:obj:`Union`'
+     elif hasattr(cls, '__qualname__'):
+         if cls.__module__ == 'typing':
+-            return ':py:class:`~%s.%s`' % (cls.__module__, cls.__qualname__)
++            return ':py:class:\`~%s.%s\`' % (cls.__module__, cls.__qualname__)
+         else:
+-            return ':py:class:`%s.%s`' % (cls.__module__, cls.__qualname__)
++            return ':py:class:\`%s.%s\`' % (cls.__module__, cls.__qualname__)
+     elif hasattr(cls, '_name'):
+         # SpecialForm
+         if cls.__module__ == 'typing':
+-            return ':py:obj:`~%s.%s`' % (cls.__module__, cls._name)
++            return ':py:obj:\`~%s.%s\`' % (cls.__module__, cls._name)
+         else:
+             return ':py:obj:`%s.%s`' % (cls.__module__, cls._name)
+     elif hasattr(cls, '__name__'):
+         # not a class (ex. TypeVar)
+         if cls.__module__ == 'typing':
+-            return ':py:obj:`~%s.%s`' % (cls.__module__, cls.__name__)
++            return ':py:obj:\`~%s.%s\`' % (cls.__module__, cls.__name__)
+         else:
+             return ':py:obj:`%s.%s`' % (cls.__module__, cls.__name__)
+     else:
+         # others (ex. Any)
+         if cls.__module__ == 'typing':
+-            return ':py:obj:`~%s.%s`' % (cls.__module__, qualname)
++            return ':py:obj:\`~%s.%s\`' % (cls.__module__, qualname)
+         else:
+             return ':py:obj:`%s.%s`' % (cls.__module__, qualname)
+ 

@@ -1,0 +1,19 @@
+{
+  "psf__requests-2317": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "psf__requests-2317",
+    "model_patch": "diff --git a/requests/sessions.py b/requests/sessions.py\nindex d701ff2..adcfbac 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -425,7 +425,7 @@ class Session(SessionRedirectMixin):\n             If Tuple, ('cert', 'key') pair.\n         \"\"\"\n \n-        method = builtin_str(method)\n+        method = to_native_string(method)\n \n         # Create the Request.\n         req = Request(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/sessions.py",
+          "line": 428,
+          "statement": "        method = builtin_str(method)"
+        }
+      ],
+      "reasoning": "In Python 3, builtin_str is str, so builtin_str(b'GET') returns the repr string \"b'GET'\" instead of decoding the bytes to 'GET'. Using to_native_string properly decodes byte strings to a native str, avoiding the malformed method value that caused 404 responses.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

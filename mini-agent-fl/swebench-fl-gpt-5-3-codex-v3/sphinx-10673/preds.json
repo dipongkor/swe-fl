@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-10673": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-10673",
+    "model_patch": "diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py\nindex 35e16e623..5ae11c250 100644\n--- a/sphinx/directives/other.py\n+++ b/sphinx/directives/other.py\n@@ -118,7 +118,7 @@ class TocTree(SphinxDirective):\n                 docname = docname_join(self.env.docname, docname)\n                 if url_re.match(ref) or ref == 'self':\n                     toctree['entries'].append((title, ref))\n-                elif docname not in self.env.found_docs:\n+                elif docname not in self.env.found_docs and ref not in ('genindex', 'modindex', 'search'):\n                     if excluded(self.env.doc2path(docname, False)):\n                         message = __('toctree contains reference to excluded document %r')\n                         subtype = 'excluded'\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/directives/other.py",
+          "line": 121,
+          "statement": "                elif docname not in self.env.found_docs and ref not in ('genindex', 'modindex', 'search'):"
+        }
+      ],
+      "reasoning": "The toctree parser treated special generated pages as missing source documents and emitted warnings. Allowing these known synthetic targets bypasses the nonexisting-document warning path.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

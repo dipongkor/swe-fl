@@ -1,0 +1,34 @@
+{
+  "sympy__sympy-24562": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-24562",
+    "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 52f7ea45ad..f160469b87 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1627,13 +1627,16 @@ def __new__(cls, p, q=None, gcd=None):\n \n         if not isinstance(p, SYMPY_INTS):\n             p = Rational(p)\n+        if not isinstance(q, SYMPY_INTS):\n+            q = Rational(q)\n+\n+        if isinstance(p, Rational):\n             q *= p.q\n             p = p.p\n         else:\n             p = int(p)\n \n-        if not isinstance(q, SYMPY_INTS):\n-            q = Rational(q)\n+        if isinstance(q, Rational):\n             p *= q.q\n             q = q.p\n         else:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1628,
+          "statement": "        if not isinstance(p, SYMPY_INTS):"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1629,
+          "statement": "            p = Rational(p)"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1630,
+          "statement": "            q *= p.q"
+        },
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1631,
+          "statement": "            p = p.p"
+        }
+      ],
+      "reasoning": "When Rational('0.5', '100') is called, the code first converts p='0.5' to Rational(1, 2), then does q *= p.q where q is still the string '100'. This results in string repetition ('100' * 2 = '100100') instead of integer multiplication (100 * 2 = 200), giving 1/100100 instead of the correct 1/200. The fix is to convert both p and q to Rationals first (if they are not ints), then perform the multiplication.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

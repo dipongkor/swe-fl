@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7590": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-7590",
+    "model_patch": "diff --git a/sphinx/domains/cpp.py b/sphinx/domains/cpp.py\nindex fe52d881d..86329be1c 100644\n--- a/sphinx/domains/cpp.py\n+++ b/sphinx/domains/cpp.py\n@@ -4664,6 +4664,8 @@ class DefinitionParser(BaseParser):\n             if self.match(regex):\n                 while self.current_char in 'uUlLfF':\n                     self.pos += 1\n+                if self.current_char == '_' and self.match(r'_[a-zA-Z_]\\w*'):\n+                    pass\n                 return ASTNumberLiteral(self.definition[pos:self.pos])\n \n         string = self._parse_string()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/cpp.py",
+          "line": 4665,
+          "statement": "                while self.current_char in 'uUlLfF':"
+        }
+      ],
+      "reasoning": "Numeric literal parsing only consumed built-in suffix letters and returned immediately, so user-defined literal suffixes (which start with an underscore) were left unparsed and caused trailing-token errors.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

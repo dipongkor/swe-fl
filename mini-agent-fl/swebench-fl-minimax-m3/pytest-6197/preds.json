@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-6197": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-6197",
+    "model_patch": "diff --git a/src/_pytest/python.py b/src/_pytest/python.py\nindex 306e5f217..7e6391c67 100644\n--- a/src/_pytest/python.py\n+++ b/src/_pytest/python.py\n@@ -639,7 +639,6 @@ class Package(Module):\n         return path in self.session._initialpaths\n \n     def collect(self):\n-        self._mount_obj_if_needed()\n         this_path = self.fspath.dirpath()\n         init_module = this_path.join(\"__init__.py\")\n         if init_module.check(file=1) and path_matches_patterns(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/python.py",
+          "line": 642,
+          "statement": "        self._mount_obj_if_needed()"
+        }
+      ],
+      "reasoning": "The Package.collect() method was calling self._mount_obj_if_needed() at the start, which causes the __init__.py of every package to be imported, even packages that are not being collected as tests. This caused a regression where pytest would try to import __init__.py files of arbitrary packages (e.g., a Windows-only package on Linux), failing with an AssertionError. The fix is to remove this call, so that __init__.py is only imported if it matches the python_files patterns (i.e., is going to be collected as a test).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

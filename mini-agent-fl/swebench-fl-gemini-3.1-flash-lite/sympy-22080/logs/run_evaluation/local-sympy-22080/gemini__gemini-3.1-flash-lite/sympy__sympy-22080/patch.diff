@@ -1,0 +1,12 @@
+diff --git a/sympy/printing/precedence.py b/sympy/printing/precedence.py
+index 47ff463faf..8505f30ac8 100644
+--- a/sympy/printing/precedence.py
++++ b/sympy/printing/precedence.py
+@@ -36,6 +36,7 @@
+     "Sub": PRECEDENCE["Add"],
+     "Not": PRECEDENCE["Not"],
+     "Function" : PRECEDENCE["Func"],
++    "Mod": 40,
+     "NegativeInfinity": PRECEDENCE["Add"],
+     "MatAdd": PRECEDENCE["Add"],
+     "MatPow": PRECEDENCE["Pow"],

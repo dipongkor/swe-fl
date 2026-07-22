@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7236": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pytest-dev__pytest-7236",
+    "model_patch": "diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py\nindex 773f545af..b399183a7 100644\n--- a/src/_pytest/unittest.py\n+++ b/src/_pytest/unittest.py\n@@ -222,7 +222,11 @@ class TestCaseFunction(Function):\n             # when absolutely needed\n             if self.config.getoption(\"usepdb\"):\n                 self._explicit_tearDown = self._testcase.tearDown\n-                setattr(self._testcase, \"tearDown\", lambda *args: None)\n+\n+                def tearDown(*args):\n+                    pass\n+\n+                setattr(self._testcase, \"tearDown\", tearDown)\n \n             # we need to update the actual bound method with self.obj, because\n             # wrap_pytest_function_for_tracing replaces self.obj by a wrapper\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/unittest.py",
+          "line": 225,
+          "statement": "                setattr(self._testcase, \"tearDown\", lambda *args: None)"
+        }
+      ],
+      "reasoning": "Replacing tearDown with a lambda causes unittest to classify the method as a test function by name and run it on skipped tests under --pdb; using a normal def avoids this unintended discovery/execution path.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

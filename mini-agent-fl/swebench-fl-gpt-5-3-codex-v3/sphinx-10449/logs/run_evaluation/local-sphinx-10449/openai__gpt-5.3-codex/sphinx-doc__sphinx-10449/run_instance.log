@@ -1,0 +1,45 @@
+2026-06-30 16:17:52,259 - INFO - Creating container for sphinx-doc__sphinx-10449...
+2026-06-30 16:17:52,332 - INFO - Container for sphinx-doc__sphinx-10449 created: f89c23545624224e0b6639806f37a0690cb42549cb1098ba742232a1429cd661
+2026-06-30 16:17:52,750 - INFO - Container for sphinx-doc__sphinx-10449 started: f89c23545624224e0b6639806f37a0690cb42549cb1098ba742232a1429cd661
+2026-06-30 16:17:52,753 - INFO - Intermediate patch for sphinx-doc__sphinx-10449 written to logs/run_evaluation/local-sphinx-10449/openai__gpt-5.3-codex/sphinx-doc__sphinx-10449/patch.diff, now applying to container...
+2026-06-30 16:17:53,317 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/ext/autodoc/__init__.py...
+Applied patch sphinx/ext/autodoc/__init__.py cleanly.
+
+2026-06-30 16:17:53,720 - INFO - Git diff before:
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index e16ab8ce5..eb30e3651 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -1578,7 +1578,7 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type:
+         if self.config.autodoc_typehints_format == "short":
+             kwargs.setdefault('unqualified_typehints', True)
+ 
+-        sig = super().format_signature()
++        sig = super().format_signature(**kwargs)
+         sigs = []
+ 
+         overloads = self.get_overloaded_signatures()
+2026-06-30 16:17:53,723 - INFO - Eval script for sphinx-doc__sphinx-10449 written to logs/run_evaluation/local-sphinx-10449/openai__gpt-5.3-codex/sphinx-doc__sphinx-10449/eval.sh; copying to container...
+2026-06-30 16:18:00,948 - INFO - Test runtime: 6.95 seconds
+2026-06-30 16:18:00,952 - INFO - Test output for sphinx-doc__sphinx-10449 written to logs/run_evaluation/local-sphinx-10449/openai__gpt-5.3-codex/sphinx-doc__sphinx-10449/test_output.txt
+2026-06-30 16:18:01,145 - INFO - Git diff after:
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index e16ab8ce5..eb30e3651 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -1578,7 +1578,7 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type:
+         if self.config.autodoc_typehints_format == "short":
+             kwargs.setdefault('unqualified_typehints', True)
+ 
+-        sig = super().format_signature()
++        sig = super().format_signature(**kwargs)
+         sigs = []
+ 
+         overloads = self.get_overloaded_signatures()
+2026-06-30 16:18:01,147 - INFO - Grading answer for sphinx-doc__sphinx-10449...
+2026-06-30 16:18:01,157 - INFO - report: {'sphinx-doc__sphinx-10449': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_with_documented_init']}, 'PASS_TO_PASS': {'success': ['tests/test_ext_autodoc_configs.py::test_autoclass_content_class', 'tests/test_ext_autodoc_configs.py::test_autoclass_content_init', 'tests/test_ext_autodoc_configs.py::test_autodoc_class_signature_mixed', 'tests/test_ext_autodoc_configs.py::test_autodoc_class_signature_separated_init', 'tests/test_ext_autodoc_configs.py::test_autodoc_class_signature_separated_new', 'tests/test_ext_autodoc_configs.py::test_autoclass_content_both', 'tests/test_ext_autodoc_configs.py::test_autodoc_inherit_docstrings', 'tests/test_ext_autodoc_configs.py::test_autodoc_docstring_signature', 'tests/test_ext_autodoc_configs.py::test_autoclass_content_and_docstring_signature_class', 'tests/test_ext_autodoc_configs.py::test_autoclass_content_and_docstring_signature_init', 'tests/test_ext_autodoc_configs.py::test_autoclass_content_and_docstring_signature_both', 'tests/test_ext_autodoc_configs.py::test_mocked_module_imports', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_signature', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_none', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_none_for_overload', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_no_undoc', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_no_undoc_doc_rtype', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_with_documented_init_no_undoc', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_with_documented_init_no_undoc_doc_rtype', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_for_invalid_node', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_both', 'tests/test_ext_autodoc_configs.py::test_autodoc_type_aliases', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description_and_type_aliases', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_format_fully_qualified', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_format_fully_qualified_for_class_alias', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_format_fully_qualified_for_generic_alias', 'tests/test_ext_autodoc_configs.py::test_autodoc_typehints_format_fully_qualified_for_newtype_alias', 'tests/test_ext_autodoc_configs.py::test_autodoc_default_options', 'tests/test_ext_autodoc_configs.py::test_autodoc_default_options_with_values'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-10449: resolved: False
+2026-06-30 16:18:01,159 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-10449.local-sphinx-10449...
+2026-06-30 16:18:16,607 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-10449.local-sphinx-10449...
+2026-06-30 16:18:16,680 - INFO - Container sweb.eval.sphinx-doc__sphinx-10449.local-sphinx-10449 removed.

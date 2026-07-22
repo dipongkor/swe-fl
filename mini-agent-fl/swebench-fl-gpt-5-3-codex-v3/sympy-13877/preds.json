@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-13877": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-13877",
+    "model_patch": "diff --git a/sympy/matrices/matrices.py b/sympy/matrices/matrices.py\nindex 97cde62e2..215e68f7f 100644\n--- a/sympy/matrices/matrices.py\n+++ b/sympy/matrices/matrices.py\n@@ -208,7 +208,7 @@ def bareiss(mat, cumm=1):\n             def entry(i, j):\n                 ret = (pivot_val*tmp_mat[i, j + 1] - mat[pivot_pos, j + 1]*tmp_mat[i, 0]) / cumm\n                 if not ret.is_Atom:\n-                    cancel(ret)\n+                    ret = cancel(ret)\n                 return ret\n \n             return sign*bareiss(self._new(mat.rows - 1, mat.cols - 1, entry), pivot_val)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/matrices/matrices.py",
+          "line": 211,
+          "statement": "                    cancel(ret)"
+        }
+      ],
+      "reasoning": "The Bareiss entry simplification called cancel(ret) but discarded its result, allowing unstable intermediate expressions (including NaN-producing forms) to propagate and later trigger invalid NaN ordering comparisons during factorization.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

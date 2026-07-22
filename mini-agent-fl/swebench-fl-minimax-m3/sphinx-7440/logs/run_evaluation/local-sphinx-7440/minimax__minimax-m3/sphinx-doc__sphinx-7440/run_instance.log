@@ -1,0 +1,121 @@
+2026-07-02 18:15:08,958 - INFO - Creating container for sphinx-doc__sphinx-7440...
+2026-07-02 18:15:09,073 - INFO - Container for sphinx-doc__sphinx-7440 created: 5a7d68053b279ec3d6b9d5ddc453665970ebf8a675a6503541bbecba61e7751e
+2026-07-02 18:15:09,544 - INFO - Container for sphinx-doc__sphinx-7440 started: 5a7d68053b279ec3d6b9d5ddc453665970ebf8a675a6503541bbecba61e7751e
+2026-07-02 18:15:09,544 - INFO - Intermediate patch for sphinx-doc__sphinx-7440 written to logs/run_evaluation/local-sphinx-7440/minimax__minimax-m3/sphinx-doc__sphinx-7440/patch.diff, now applying to container...
+2026-07-02 18:15:09,941 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/domains/std.py...
+Applied patch sphinx/domains/std.py cleanly.
+
+2026-07-02 18:15:10,185 - INFO - Git diff before:
+diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py
+index d820cfe5c..db5aa0380 100644
+--- a/sphinx/domains/std.py
++++ b/sphinx/domains/std.py
+@@ -305,7 +305,7 @@ def make_glossary_term(env: "BuildEnvironment", textnodes: Iterable[Node], index
+         term['ids'].append(node_id)
+ 
+     std = cast(StandardDomain, env.get_domain('std'))
+-    std.note_object('term', termtext.lower(), node_id, location=term)
++    std.note_object('term', termtext, node_id, location=term)
+ 
+     # add an index entry too
+     indexnode = addnodes.index()
+@@ -928,8 +928,19 @@ class StandardDomain(Domain):
+                           node: pending_xref, contnode: Element) -> Element:
+         objtypes = self.objtypes_for_role(typ) or []
+         for objtype in objtypes:
+-            if (objtype, target) in self.objects:
++            if objtype == 'term':
++                # case-insensitive lookup for terms
++                ltarget = target.lower()
++                docname, labelid = '', ''
++                for (key_objtype, key_name), (dn, lid) in self.objects.items():
++                    if key_objtype == 'term' and key_name.lower() == ltarget:
++                        docname, labelid = dn, lid
++                        break
++            elif (objtype, target) in self.objects:
+                 docname, labelid = self.objects[objtype, target]
++            else:
++                docname, labelid = '', ''
++            if docname:
+                 break
+         else:
+             docname, labelid = '', ''
+@@ -953,8 +964,14 @@ class StandardDomain(Domain):
+         for objtype in self.object_types:
+             key = (objtype, target)
+             if objtype == 'term':
+-                key = (objtype, ltarget)
+-            if key in self.objects:
++                # case-insensitive lookup for terms
++                for (key_objtype, key_name), (docname, labelid) in self.objects.items():
++                    if key_objtype == 'term' and key_name.lower() == ltarget:
++                        results.append(('std:' + self.role_for_objtype(objtype),
++                                        make_refnode(builder, fromdocname, docname,
++                                                     labelid, contnode)))
++                        break
++            elif key in self.objects:
+                 docname, labelid = self.objects[key]
+                 results.append(('std:' + self.role_for_objtype(objtype),
+                                 make_refnode(builder, fromdocname, docname,
+2026-07-02 18:15:10,185 - INFO - Eval script for sphinx-doc__sphinx-7440 written to logs/run_evaluation/local-sphinx-7440/minimax__minimax-m3/sphinx-doc__sphinx-7440/eval.sh; copying to container...
+2026-07-02 18:15:14,916 - INFO - Test runtime: 4.47 seconds
+2026-07-02 18:15:14,916 - INFO - Test output for sphinx-doc__sphinx-7440 written to logs/run_evaluation/local-sphinx-7440/minimax__minimax-m3/sphinx-doc__sphinx-7440/test_output.txt
+2026-07-02 18:15:14,986 - INFO - Git diff after:
+diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py
+index d820cfe5c..db5aa0380 100644
+--- a/sphinx/domains/std.py
++++ b/sphinx/domains/std.py
+@@ -305,7 +305,7 @@ def make_glossary_term(env: "BuildEnvironment", textnodes: Iterable[Node], index
+         term['ids'].append(node_id)
+ 
+     std = cast(StandardDomain, env.get_domain('std'))
+-    std.note_object('term', termtext.lower(), node_id, location=term)
++    std.note_object('term', termtext, node_id, location=term)
+ 
+     # add an index entry too
+     indexnode = addnodes.index()
+@@ -928,8 +928,19 @@ class StandardDomain(Domain):
+                           node: pending_xref, contnode: Element) -> Element:
+         objtypes = self.objtypes_for_role(typ) or []
+         for objtype in objtypes:
+-            if (objtype, target) in self.objects:
++            if objtype == 'term':
++                # case-insensitive lookup for terms
++                ltarget = target.lower()
++                docname, labelid = '', ''
++                for (key_objtype, key_name), (dn, lid) in self.objects.items():
++                    if key_objtype == 'term' and key_name.lower() == ltarget:
++                        docname, labelid = dn, lid
++                        break
++            elif (objtype, target) in self.objects:
+                 docname, labelid = self.objects[objtype, target]
++            else:
++                docname, labelid = '', ''
++            if docname:
+                 break
+         else:
+             docname, labelid = '', ''
+@@ -953,8 +964,14 @@ class StandardDomain(Domain):
+         for objtype in self.object_types:
+             key = (objtype, target)
+             if objtype == 'term':
+-                key = (objtype, ltarget)
+-            if key in self.objects:
++                # case-insensitive lookup for terms
++                for (key_objtype, key_name), (docname, labelid) in self.objects.items():
++                    if key_objtype == 'term' and key_name.lower() == ltarget:
++                        results.append(('std:' + self.role_for_objtype(objtype),
++                                        make_refnode(builder, fromdocname, docname,
++                                                     labelid, contnode)))
++                        break
++            elif key in self.objects:
+                 docname, labelid = self.objects[key]
+                 results.append(('std:' + self.role_for_objtype(objtype),
+                                 make_refnode(builder, fromdocname, docname,
+2026-07-02 18:15:14,986 - INFO - Grading answer for sphinx-doc__sphinx-7440...
+2026-07-02 18:15:14,996 - INFO - report: {'sphinx-doc__sphinx-7440': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_domain_std.py::test_glossary'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_domain_std.py::test_process_doc_handle_figure_caption', 'tests/test_domain_std.py::test_process_doc_handle_table_title', 'tests/test_domain_std.py::test_get_full_qualified_name', 'tests/test_domain_std.py::test_glossary_warning', 'tests/test_domain_std.py::test_glossary_comment', 'tests/test_domain_std.py::test_glossary_comment2', 'tests/test_domain_std.py::test_glossary_sorted', 'tests/test_domain_std.py::test_glossary_alphanumeric', 'tests/test_domain_std.py::test_glossary_conflicted_labels', 'tests/test_domain_std.py::test_cmdoption', 'tests/test_domain_std.py::test_multiple_cmdoptions', 'tests/test_domain_std.py::test_disabled_docref'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-7440: resolved: True
+2026-07-02 18:15:14,997 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-7440.local-sphinx-7440...
+2026-07-02 18:15:30,417 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-7440.local-sphinx-7440...
+2026-07-02 18:15:30,459 - INFO - Container sweb.eval.sphinx-doc__sphinx-7440.local-sphinx-7440 removed.

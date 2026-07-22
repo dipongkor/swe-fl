@@ -1,0 +1,19 @@
+{
+  "django__django-17084": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-17084",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 13a6809dd8..7846c75880 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -403,6 +403,7 @@ class Query(BaseExpression):\n         # Store annotation mask prior to temporarily adding aggregations for\n         # resolving purpose to facilitate their subsequent removal.\n         refs_subquery = False\n+        refs_over_clause = False\n         replacements = {}\n         annotation_select_mask = self.annotation_select_mask\n         for alias, aggregate_expr in aggregate_exprs.items():\n@@ -419,6 +420,10 @@ class Query(BaseExpression):\n                 getattr(self.annotations[ref], \"subquery\", False)\n                 for ref in aggregate.get_refs()\n             )\n+            refs_over_clause |= any(\n+                getattr(self.annotations[ref], \"contains_over_clause\", False)\n+                for ref in aggregate.get_refs()\n+            )\n             aggregate = aggregate.replace_expressions(replacements)\n             self.annotations[alias] = aggregate\n             replacements[Ref(alias, aggregate)] = aggregate\n@@ -451,6 +456,7 @@ class Query(BaseExpression):\n             or self.is_sliced\n             or has_existing_aggregation\n             or refs_subquery\n+            or refs_over_clause\n             or qualify\n             or self.distinct\n             or self.combinator\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 424,
+          "statement": "                getattr(self.annotations[ref], \"contains_over_clause\", False)"
+        }
+      ],
+      "reasoning": "The get_aggregation method in Query did not check whether any of the new aggregate's references point to an annotation that contains a window function. When such a reference exists, the resulting SQL has the aggregate function wrapping a window function, which is invalid in PostgreSQL. The fix adds a refs_over_clause check (mirroring the existing refs_subquery check) and uses it in the decision to wrap the query in a subquery.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-18698": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-18698",
+    "model_patch": "diff --git a/sympy/polys/sqfreetools.py b/sympy/polys/sqfreetools.py\nindex 1783a7744a..f9e267d7a0 100644\n--- a/sympy/polys/sqfreetools.py\n+++ b/sympy/polys/sqfreetools.py\n@@ -328,7 +328,10 @@ def dup_sqf_list(f, K, all=False):\n         g, p, q = dup_inner_gcd(p, h, K)\n \n         if all or dup_degree(g) > 0:\n-            result.append((g, i))\n+            if result and result[-1][1] == i:\n+                result[-1] = (dup_mul(result[-1][0], g, K), i)\n+            else:\n+                result.append((g, i))\n \n         i += 1\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/polys/sqfreetools.py",
+          "line": 331,
+          "statement": "            result.append((g, i))"
+        }
+      ],
+      "reasoning": "The algorithm appended every gcd component with the same multiplicity as separate entries instead of combining them, causing inconsistent sqf_list output with repeated multiplicities.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

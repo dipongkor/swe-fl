@@ -1,0 +1,19 @@
+{
+  "django__django-14170": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-14170",
+    "model_patch": "diff --git a/django/db/models/lookups.py b/django/db/models/lookups.py\nindex 916478d075..2189820c6d 100644\n--- a/django/db/models/lookups.py\n+++ b/django/db/models/lookups.py\n@@ -539,6 +539,13 @@ class IRegex(Regex):\n \n class YearLookup(Lookup):\n     def year_lookup_bounds(self, connection, year):\n+        # \"iso_year\" uses ISO week-numbering years, which can span across\n+        # adjacent Gregorian years and therefore cannot be reduced to simple\n+        # calendar year bounds.\n+        iso_year = isinstance(self.lhs, Transform) and self.lhs.lookup_name == \"iso_year\"\n+        if iso_year:\n+            return None\n+\n         output_field = self.lhs.lhs.output_field\n         if isinstance(output_field, DateTimeField):\n             bounds = connection.ops.year_lookup_bounds_for_datetime_field(year)\n@@ -555,9 +562,11 @@ class YearLookup(Lookup):\n             lhs_sql, params = self.process_lhs(compiler, connection, self.lhs.lhs)\n             rhs_sql, _ = self.process_rhs(compiler, connection)\n             rhs_sql = self.get_direct_rhs_sql(connection, rhs_sql)\n-            start, finish = self.year_lookup_bounds(connection, self.rhs)\n-            params.extend(self.get_bound_params(start, finish))\n-            return '%s %s' % (lhs_sql, rhs_sql), params\n+            bounds = self.year_lookup_bounds(connection, self.rhs)\n+            if bounds is not None:\n+                start, finish = bounds\n+                params.extend(self.get_bound_params(start, finish))\n+                return '%s %s' % (lhs_sql, rhs_sql), params\n         return super().as_sql(compiler, connection)\n \n     def get_direct_rhs_sql(self, connection, rhs):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/lookups.py",
+          "line": 565,
+          "statement": "            bounds = self.year_lookup_bounds(connection, self.rhs)"
+        }
+      ],
+      "reasoning": "YearLookup always attempted to derive and apply Gregorian year bounds for direct-value lookups, which is invalid for iso_year because ISO week-numbering years do not map to a simple Jan-1 to Dec-31 range.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

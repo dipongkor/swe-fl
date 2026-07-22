@@ -1,0 +1,7 @@
+2026-07-19 23:05:21,977 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-07-19 23:05:23,097 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-07-19 23:05:23,099 - minisweagent - INFO - Running on 1 instances...
+2026-07-19 23:05:23,101 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-07-19 23:05:25,715 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-4181c833 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.pydata_1776_xarray-3305:latest sleep 2h
+2026-07-19 23:07:41,096 - minisweagent.environment - INFO - Started container minisweagent-4181c833 with ID 550b66283eb620fab591f2a86690dc68bbb2c38642341500f6d8432875d1d320
+2026-07-19 23:13:11,071 - minisweagent - INFO - Saved trajectory to 'swebench-fl-gemini-3.1-flash-lite/xarray-3305/pydata__xarray-3305/pydata__xarray-3305.traj.json'

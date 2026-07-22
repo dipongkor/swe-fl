@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-6938": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pydata__xarray-6938",
+    "model_patch": "diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py\nindex c775d05c..ffb691bb 100644\n--- a/xarray/core/dataset.py\n+++ b/xarray/core/dataset.py\n@@ -3772,8 +3772,7 @@ class Dataset(\n         for k, v in self.variables.items():\n             dims = tuple(dims_dict.get(dim, dim) for dim in v.dims)\n             if k in result_dims:\n-                var = v.to_index_variable()\n-                var.dims = dims\n+                var = v.to_index_variable().set_dims(dims)\n                 if k in self._indexes:\n                     indexes[k] = self._indexes[k]\n                     variables[k] = var\n@@ -3783,8 +3782,7 @@ class Dataset(\n                     variables.update(index_vars)\n                     coord_names.update(index_vars)\n             else:\n-                var = v.to_base_variable()\n-                var.dims = dims\n+                var = v.to_base_variable().set_dims(dims)\n                 variables[k] = var\n \n         return self._replace_with_new_dims(variables, coord_names, indexes=indexes)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/dataset.py",
+          "line": 3776,
+          "statement": "                var.dims = dims"
+        }
+      ],
+      "reasoning": "swap_dims modified Variable dimensions in place on objects derived from existing dataset variables, which can share underlying variable instances and mutate the original dataset state.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-13142": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "model_patch": "diff --git a/sklearn/mixture/base.py b/sklearn/mixture/base.py\nindex bd34333c0..2187524c9 100644\n--- a/sklearn/mixture/base.py\n+++ b/sklearn/mixture/base.py\n@@ -257,6 +257,10 @@ class BaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta):\n                 best_params = self._get_parameters()\n                 best_n_iter = n_iter\n \n+        self._set_parameters(best_params)\n+        self.n_iter_ = best_n_iter\n+        self.lower_bound_ = max_lower_bound\n+\n         # Always do a final e-step to guarantee that the labels returned by\n         # fit_predict(X) are always consistent with fit(X).predict(X)\n         # for any value of max_iter and tol (and any random_state).\n@@ -269,10 +273,6 @@ class BaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta):\n                           'or check for degenerate data.'\n                           % (init + 1), ConvergenceWarning)\n \n-        self._set_parameters(best_params)\n-        self.n_iter_ = best_n_iter\n-        self.lower_bound_ = max_lower_bound\n-\n         return log_resp.argmax(axis=1)\n \n     def _e_step(self, X):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/mixture/base.py",
+          "line": 263,
+          "statement": "        _, log_resp = self._e_step(X)"
+        }
+      ],
+      "reasoning": "In fit_predict, the final E-step is computed using the parameters from the LAST initialization (not the best one) because the call to self._e_step(X) happens BEFORE self._set_parameters(best_params). The log_resp returned by the E-step is then used to compute the labels returned by fit_predict, but those labels are inconsistent with the best parameters that the model is set to. When predict(X) is later called, it uses the best parameters and produces different labels. The fix is to call self._set_parameters(best_params) BEFORE the final E-step.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

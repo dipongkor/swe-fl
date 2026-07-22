@@ -1,0 +1,28 @@
+diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py
+index b3daa06f1..af64934d4 100644
+--- a/sphinx/ext/napoleon/docstring.py
++++ b/sphinx/ext/napoleon/docstring.py
+@@ -408,13 +408,20 @@ class GoogleDocstring:
+         has_desc = any(_desc)
+         separator = ' -- ' if has_desc else ''
+         if _name:
++            _name = _name.strip()
++            if _name.startswith(r'\*') or _name.startswith('\\'):
++                # avoid splitting on '*' or '\\' inside a name
++                _name = re.sub(r'^\\?\*?(.+)$', r'\\*\1', _name)
++                _name = '**%s**' % _name
++            else:
++                _name = ', '.join('**%s**' % n.strip() for n in _name.split(','))
+             if _type:
+                 if '`' in _type:
+-                    field = '**%s** (%s)%s' % (_name, _type, separator)
++                    field = '%s (%s)%s' % (_name, _type, separator)
+                 else:
+-                    field = '**%s** (*%s*)%s' % (_name, _type, separator)
++                    field = '%s (*%s*)%s' % (_name, _type, separator)
+             else:
+-                field = '**%s**%s' % (_name, separator)
++                field = '%s%s' % (_name, separator)
+         elif _type:
+             if '`' in _type:
+                 field = '%s%s' % (_type, separator)

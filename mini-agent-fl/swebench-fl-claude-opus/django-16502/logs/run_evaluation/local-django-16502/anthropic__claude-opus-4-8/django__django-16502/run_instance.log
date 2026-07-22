@@ -1,0 +1,67 @@
+2026-06-30 01:48:56,675 - INFO - Creating container for django__django-16502...
+2026-06-30 01:48:56,753 - INFO - Container for django__django-16502 created: f91397fa67b6a7297c88adb05db74225345a0610a8174b5b369e38209e13b1c8
+2026-06-30 01:48:57,403 - INFO - Container for django__django-16502 started: f91397fa67b6a7297c88adb05db74225345a0610a8174b5b369e38209e13b1c8
+2026-06-30 01:48:57,406 - INFO - Intermediate patch for django__django-16502 written to logs/run_evaluation/local-django-16502/anthropic__claude-opus-4-8/django__django-16502/patch.diff, now applying to container...
+2026-06-30 01:48:57,879 - INFO - >>>>> Applied Patch:
+Checking patch django/core/servers/basehttp.py...
+Applied patch django/core/servers/basehttp.py cleanly.
+
+2026-06-30 01:48:58,784 - INFO - Git diff before:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..bf32ec13bb 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,19 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++    def finish_response(self):
++        # For compliance with RFC 2616, section 4.3, don't return a response
++        # body for HEAD requests (the common WSGI servers already do this so
++        # Django doesn't strip it; but runserver must handle it itself).
++        if self.environ["REQUEST_METHOD"] != "HEAD":
++            super().finish_response()
++        else:
++            try:
++                # Close the iterable, if any, and send the headers only.
++                self.finish_content()
++            finally:
++                self.close()
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()
+2026-06-30 01:48:58,787 - INFO - Eval script for django__django-16502 written to logs/run_evaluation/local-django-16502/anthropic__claude-opus-4-8/django__django-16502/eval.sh; copying to container...
+2026-06-30 01:49:06,347 - INFO - Test runtime: 7.24 seconds
+2026-06-30 01:49:06,351 - INFO - Test output for django__django-16502 written to logs/run_evaluation/local-django-16502/anthropic__claude-opus-4-8/django__django-16502/test_output.txt
+2026-06-30 01:49:06,628 - INFO - Git diff after:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..bf32ec13bb 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,19 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++    def finish_response(self):
++        # For compliance with RFC 2616, section 4.3, don't return a response
++        # body for HEAD requests (the common WSGI servers already do this so
++        # Django doesn't strip it; but runserver must handle it itself).
++        if self.environ["REQUEST_METHOD"] != "HEAD":
++            super().finish_response()
++        else:
++            try:
++                # Close the iterable, if any, and send the headers only.
++                self.finish_content()
++            finally:
++                self.close()
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()
+2026-06-30 01:49:06,629 - INFO - Grading answer for django__django-16502...
+2026-06-30 01:49:06,632 - INFO - report: {'django__django-16502': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_no_body_returned_for_head_requests (servers.test_basehttp.WSGIRequestHandlerTestCase.test_no_body_returned_for_head_requests)']}, 'PASS_TO_PASS': {'success': ['test_https (servers.test_basehttp.WSGIRequestHandlerTestCase.test_https)', 'test_log_message (servers.test_basehttp.WSGIRequestHandlerTestCase.test_log_message)', 'WSGIRequestHandler ignores headers containing underscores.', 'WSGIServer handles broken pipe errors.'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-16502: resolved: False
+2026-06-30 01:49:06,635 - INFO - Attempting to stop container sweb.eval.django__django-16502.local-django-16502...
+2026-06-30 01:49:22,084 - INFO - Attempting to remove container sweb.eval.django__django-16502.local-django-16502...
+2026-06-30 01:49:22,165 - INFO - Container sweb.eval.django__django-16502.local-django-16502 removed.

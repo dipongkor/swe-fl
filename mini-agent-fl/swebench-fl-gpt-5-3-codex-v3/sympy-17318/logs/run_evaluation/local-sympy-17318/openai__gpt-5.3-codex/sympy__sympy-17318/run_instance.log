@@ -1,0 +1,45 @@
+2026-06-30 14:54:57,361 - INFO - Creating container for sympy__sympy-17318...
+2026-06-30 14:54:57,454 - INFO - Container for sympy__sympy-17318 created: e4362ca114b9cd7b44ad212b7cfd5fdcf92647cdaf680b923ee11639d0c8a81c
+2026-06-30 14:54:57,857 - INFO - Container for sympy__sympy-17318 started: e4362ca114b9cd7b44ad212b7cfd5fdcf92647cdaf680b923ee11639d0c8a81c
+2026-06-30 14:54:57,863 - INFO - Intermediate patch for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/openai__gpt-5.3-codex/sympy__sympy-17318/patch.diff, now applying to container...
+2026-06-30 14:54:58,411 - INFO - >>>>> Applied Patch:
+Checking patch sympy/simplify/radsimp.py...
+Applied patch sympy/simplify/radsimp.py cleanly.
+
+2026-06-30 14:54:58,974 - INFO - Git diff before:
+diff --git a/sympy/simplify/radsimp.py b/sympy/simplify/radsimp.py
+index 216ae26204..37da7129de 100644
+--- a/sympy/simplify/radsimp.py
++++ b/sympy/simplify/radsimp.py
+@@ -1113,6 +1113,8 @@ def _split_gcd(*a):
+     >>> _split_gcd(55, 35, 22, 14, 77, 10)
+     (5, [55, 35, 10], [22, 14, 77])
+     """
++    if not a:
++        return S.One, [], []
+     g = a[0]
+     b1 = [g]
+     b2 = []
+2026-06-30 14:54:58,978 - INFO - Eval script for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/openai__gpt-5.3-codex/sympy__sympy-17318/eval.sh; copying to container...
+2026-06-30 14:55:21,620 - INFO - Test runtime: 22.38 seconds
+2026-06-30 14:55:21,624 - INFO - Test output for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/openai__gpt-5.3-codex/sympy__sympy-17318/test_output.txt
+2026-06-30 14:55:21,869 - INFO - Git diff after:
+diff --git a/sympy/simplify/radsimp.py b/sympy/simplify/radsimp.py
+index 216ae26204..37da7129de 100644
+--- a/sympy/simplify/radsimp.py
++++ b/sympy/simplify/radsimp.py
+@@ -1113,6 +1113,8 @@ def _split_gcd(*a):
+     >>> _split_gcd(55, 35, 22, 14, 77, 10)
+     (5, [55, 35, 10], [22, 14, 77])
+     """
++    if not a:
++        return S.One, [], []
+     g = a[0]
+     b1 = [g]
+     b2 = []
+2026-06-30 14:55:21,869 - INFO - Grading answer for sympy__sympy-17318...
+2026-06-30 14:55:21,874 - INFO - report: {'sympy__sympy-17318': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_issue_12420']}, 'PASS_TO_PASS': {'success': ['test_sqrtdenest', 'test_sqrtdenest2', 'test_sqrtdenest_rec', 'test_issue_6241', 'test_sqrtdenest3', 'test_sqrtdenest4', 'test_sqrt_symbolic_denest', 'test_issue_5857', 'test_subsets', 'test_issue_5653'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-17318: resolved: False
+2026-06-30 14:55:21,876 - INFO - Attempting to stop container sweb.eval.sympy__sympy-17318.local-sympy-17318...
+2026-06-30 14:55:37,336 - INFO - Attempting to remove container sweb.eval.sympy__sympy-17318.local-sympy-17318...
+2026-06-30 14:55:37,437 - INFO - Container sweb.eval.sympy__sympy-17318.local-sympy-17318 removed.

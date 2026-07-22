@@ -1,0 +1,19 @@
+{
+  "django__django-15503": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-15503",
+    "model_patch": "diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py\nindex fdca700c9d..fd58e41dc1 100644\n--- a/django/db/models/fields/json.py\n+++ b/django/db/models/fields/json.py\n@@ -138,6 +138,14 @@ def compile_json_path(key_transforms, include_root=True):\n             path.append(\"[%s]\" % num)\n     return \"\".join(path)\n \n+def compile_json_path_final_key(key_transforms, include_root=True):\n+    path = [\"$\"] if include_root else []\n+    *prev_key_transforms, final_key = key_transforms\n+    path.append(compile_json_path(prev_key_transforms, include_root=False))\n+    path.append(\".\")\n+    path.append(json.dumps(final_key))\n+    return \"\".join(path)\n+\n \n class DataContains(PostgresOperatorLookup):\n     lookup_name = \"contains\"\n@@ -197,7 +205,9 @@ class HasKeyLookup(PostgresOperatorLookup):\n                 \"%s%s\"\n                 % (\n                     lhs_json_path,\n-                    compile_json_path(rhs_key_transforms, include_root=False),\n+                    compile_json_path_final_key(\n+                        rhs_key_transforms, include_root=False\n+                    ),\n                 )\n             )\n         # Add condition for each key.\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/json.py",
+          "line": 138,
+          "statement": "            path.append(\"[%s]\" % num)"
+        }
+      ],
+      "reasoning": "The generic JSON path compiler coerces numeric-looking keys into array-index syntax, so has_key/has_keys/has_any_keys treat string keys like '1111' as indexes on SQLite/MySQL/Oracle.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

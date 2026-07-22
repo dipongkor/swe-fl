@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9658": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "model_patch": "diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py\nindex 87707d48f..76cba0d94 100644\n--- a/sphinx/util/typing.py\n+++ b/sphinx/util/typing.py\n@@ -192,10 +192,11 @@ def _restify_py37(cls: Optional[Type]) -> str:\n     elif isinstance(cls, typing._SpecialForm):\n         return ':py:obj:`~%s.%s`' % (cls.__module__, cls._name)\n     elif hasattr(cls, '__qualname__'):\n+        qualname = cls.__qualname__ or getattr(cls, '__name__', '')\n         if cls.__module__ == 'typing':\n-            return ':py:class:`~%s.%s`' % (cls.__module__, cls.__qualname__)\n+            return ':py:class:`~%s.%s`' % (cls.__module__, qualname)\n         else:\n-            return ':py:class:`%s.%s`' % (cls.__module__, cls.__qualname__)\n+            return ':py:class:`%s.%s`' % (cls.__module__, qualname)\n     elif isinstance(cls, ForwardRef):\n         return ':py:class:`%s`' % cls.__forward_arg__\n     else:\n@@ -274,10 +275,11 @@ def _restify_py36(cls: Optional[Type]) -> str:\n         else:\n             return ':py:obj:`Union`'\n     elif hasattr(cls, '__qualname__'):\n+        qualname = cls.__qualname__ or getattr(cls, '__name__', '')\n         if cls.__module__ == 'typing':\n-            return ':py:class:`~%s.%s`' % (cls.__module__, cls.__qualname__)\n+            return ':py:class:`~%s.%s`' % (cls.__module__, qualname)\n         else:\n-            return ':py:class:`%s.%s`' % (cls.__module__, cls.__qualname__)\n+            return ':py:class:`%s.%s`' % (cls.__module__, qualname)\n     elif hasattr(cls, '_name'):\n         # SpecialForm\n         if cls.__module__ == 'typing':\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/util/typing.py",
+          "line": 199,
+          "statement": "            return ':py:class:`%s.%s`' % (cls.__module__, cls.__qualname__)"
+        }
+      ],
+      "reasoning": "The formatter used __qualname__ unconditionally for class references; mocked base classes can have an empty __qualname__, which rendered as a trailing module dot in the Bases section.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

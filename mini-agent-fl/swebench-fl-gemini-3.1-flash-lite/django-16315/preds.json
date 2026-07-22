@@ -1,0 +1,19 @@
+{
+  "django__django-16315": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-16315",
+    "model_patch": "diff --git a/django/db/backends/postgresql/operations.py b/django/db/backends/postgresql/operations.py\nindex 62273fc43c..039013b8f4 100644\n--- a/django/db/backends/postgresql/operations.py\n+++ b/django/db/backends/postgresql/operations.py\n@@ -353,12 +353,16 @@ class DatabaseOperations(BaseDatabaseOperations):\n         if on_conflict == OnConflict.IGNORE:\n             return \"ON CONFLICT DO NOTHING\"\n         if on_conflict == OnConflict.UPDATE:\n+            model = fields[0].model\n+            def get_column(field_name):\n+                return model._meta.get_field(field_name).column\n+\n             return \"ON CONFLICT(%s) DO UPDATE SET %s\" % (\n-                \", \".join(map(self.quote_name, unique_fields)),\n+                \", \".join(map(self.quote_name, map(get_column, unique_fields))),\n                 \", \".join(\n                     [\n-                        f\"{field} = EXCLUDED.{field}\"\n-                        for field in map(self.quote_name, update_fields)\n+                        f\"{self.quote_name(get_column(field))} = EXCLUDED.{self.quote_name(get_column(field))}\"\n+                        for field in update_fields\n                     ]\n                 ),\n             )\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/postgresql/operations.py",
+          "line": 356,
+          "statement": "return \"ON CONFLICT(%s) DO UPDATE SET %s\" % ("
+        }
+      ],
+      "reasoning": "The original implementation used field names instead of database column names in the ON CONFLICT clause, which causes syntax errors when db_column is used.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

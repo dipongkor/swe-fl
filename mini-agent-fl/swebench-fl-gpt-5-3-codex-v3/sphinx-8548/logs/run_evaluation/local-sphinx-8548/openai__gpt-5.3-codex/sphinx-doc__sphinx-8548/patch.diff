@@ -1,0 +1,33 @@
+diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py
+index ddfd2b365..4fe60f579 100644
+--- a/sphinx/ext/autodoc/__init__.py
++++ b/sphinx/ext/autodoc/__init__.py
+@@ -689,6 +689,19 @@ class Documenter:
+         else:
+             attr_docs = {}
+ 
++        attr_doc_namespaces = {namespace}
++        if inspect.isclass(self.object):
++            for cls in self.object.__mro__[1:]:
++                if cls is object:
++                    continue
++
++                qualname = safe_getattr(cls, '__qualname__', safe_getattr(cls, '__name__', None))
++                modname = safe_getattr(cls, '__module__', None)
++                if qualname and modname:
++                    attr_doc_namespaces.add(modname + '.' + qualname)
++                elif qualname:
++                    attr_doc_namespaces.add(qualname)
++
+         # process members and determine which to skip
+         for obj in members:
+             membername, member = obj
+@@ -746,7 +759,7 @@ class Documenter:
+                         keep = has_doc or self.options.undoc_members
+                 else:
+                     keep = False
+-            elif (namespace, membername) in attr_docs:
++            elif any((ns, membername) in attr_docs for ns in attr_doc_namespaces):
+                 if want_all and isprivate:
+                     if self.options.private_members is None:
+                         keep = False

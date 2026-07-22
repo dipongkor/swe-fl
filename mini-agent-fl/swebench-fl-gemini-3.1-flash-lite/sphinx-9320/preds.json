@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9320": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "model_patch": "--- sphinx/cmd/quickstart.py.bak\t2026-07-01 07:02:51.139687200 +0000\n+++ sphinx/cmd/quickstart.py\t2026-07-01 07:02:51.159687200 +0000\n@@ -146,6 +146,8 @@\n         else:\n             prompt = colorize(COLOR_QUESTION, prompt, input_mode=False)\n         x = term_input(prompt).strip()\n+        if not x:\n+            return False\n         if default and not x:\n             x = default\n         try:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/cmd/quickstart.py",
+          "line": 148,
+          "statement": "x = term_input(prompt).strip()"
+        }
+      ],
+      "reasoning": "The do_prompt function did not handle empty input correctly when a validator was provided, causing it to always call the validator even if the user wanted to exit by pressing Enter.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

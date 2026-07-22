@@ -1,0 +1,19 @@
+{
+  "django__django-13344": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13344",
+    "model_patch": "diff --git a/django/core/handlers/exception.py b/django/core/handlers/exception.py\nindex 98fb46083a..106c30f73b 100644\n--- a/django/core/handlers/exception.py\n+++ b/django/core/handlers/exception.py\n@@ -14,6 +14,7 @@ from django.core.exceptions import (\n from django.http import Http404\n from django.http.multipartparser import MultiPartParserError\n from django.urls import get_resolver, get_urlconf\n+from django.utils.deprecation import MiddlewareMixin\n from django.utils.log import log_response\n from django.views import debug\n \n@@ -31,7 +32,10 @@ def convert_exception_to_response(get_response):\n     no middleware leaks an exception and that the next middleware in the stack\n     can rely on getting a response instead of an exception.\n     \"\"\"\n-    if asyncio.iscoroutinefunction(get_response):\n+    if asyncio.iscoroutinefunction(get_response) or (\n+        isinstance(get_response, MiddlewareMixin) and\n+        asyncio.iscoroutinefunction(get_response.get_response)\n+    ):\n         @wraps(get_response)\n         async def inner(request):\n             try:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/handlers/exception.py",
+          "line": 35,
+          "statement": "    if asyncio.iscoroutinefunction(get_response):"
+        }
+      ],
+      "reasoning": "The convert_exception_to_response function uses asyncio.iscoroutinefunction() to detect whether a middleware is async, but this fails for MiddlewareMixin subclasses (like SecurityMiddleware) whose __init__ overrides MiddlewareMixin.__init__ without calling _async_check(), so _is_coroutine is never set. As a result, the function returns a sync wrapper around the middleware, but MiddlewareMixin.__call__ actually returns a coroutine when get_response is async, causing the next middleware to receive an unawaited coroutine instead of an HttpResponse.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,63 @@
+diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py
+index d820cfe5c..9bb6c0ca6 100644
+--- a/sphinx/domains/std.py
++++ b/sphinx/domains/std.py
+@@ -305,7 +305,7 @@ def make_glossary_term(env: "BuildEnvironment", textnodes: Iterable[Node], index
+         term['ids'].append(node_id)
+ 
+     std = cast(StandardDomain, env.get_domain('std'))
+-    std.note_object('term', termtext.lower(), node_id, location=term)
++    std.note_object('term', termtext, node_id, location=term)
+ 
+     # add an index entry too
+     indexnode = addnodes.index()
+@@ -565,7 +565,7 @@ class StandardDomain(Domain):
+         # links to tokens in grammar productions
+         'token':   TokenXRefRole(),
+         # links to terms in glossary
+-        'term':    XRefRole(lowercase=True, innernodeclass=nodes.inline,
++        'term':    XRefRole(innernodeclass=nodes.inline,
+                             warn_dangling=True),
+         # links to headings or arbitrary labels
+         'ref':     XRefRole(lowercase=True, innernodeclass=nodes.inline,
+@@ -928,8 +928,12 @@ class StandardDomain(Domain):
+                           node: pending_xref, contnode: Element) -> Element:
+         objtypes = self.objtypes_for_role(typ) or []
+         for objtype in objtypes:
+-            if (objtype, target) in self.objects:
+-                docname, labelid = self.objects[objtype, target]
++            if objtype == 'term':
++                key = self._get_term_key(target)
++            else:
++                key = (objtype, target)
++            if key in self.objects:
++                docname, labelid = self.objects[key]
+                 break
+         else:
+             docname, labelid = '', ''
+@@ -938,6 +942,16 @@ class StandardDomain(Domain):
+         return make_refnode(builder, fromdocname, docname,
+                             labelid, contnode)
+ 
++    def _get_term_key(self, target: str) -> Tuple[str, str]:
++        # Terms are stored with their original case but should be looked up
++        # in a case-insensitive manner.
++        if ('term', target) in self.objects:
++            return ('term', target)
++        for objtype, name in self.objects:
++            if objtype == 'term' and name.lower() == target.lower():
++                return ('term', name)
++        return ('term', target)
++
+     def resolve_any_xref(self, env: "BuildEnvironment", fromdocname: str,
+                          builder: "Builder", target: str, node: pending_xref,
+                          contnode: Element) -> List[Tuple[str, Element]]:
+@@ -953,7 +967,7 @@ class StandardDomain(Domain):
+         for objtype in self.object_types:
+             key = (objtype, target)
+             if objtype == 'term':
+-                key = (objtype, ltarget)
++                key = self._get_term_key(target)
+             if key in self.objects:
+                 docname, labelid = self.objects[key]
+                 results.append(('std:' + self.role_for_objtype(objtype),

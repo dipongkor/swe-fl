@@ -1,0 +1,24 @@
+diff --git a/pylint/config/argument.py b/pylint/config/argument.py
+index 30a5fd175..f7334a1ec 100644
+--- a/pylint/config/argument.py
++++ b/pylint/config/argument.py
+@@ -113,10 +113,15 @@ def _regex_transformer(value: str) -> Pattern[str]:
+ 
+ def _regexp_csv_transfomer(value: str) -> Sequence[Pattern[str]]:
+     """Transforms a comma separated list of regular expressions."""
+-    patterns: list[Pattern[str]] = []
+-    for pattern in _csv_transformer(value):
+-        patterns.append(_regex_transformer(pattern))
+-    return patterns
++    try:
++        patterns: list[Pattern[str]] = []
++        for pattern in _csv_transformer(value):
++            patterns.append(_regex_transformer(pattern))
++        return patterns
++    except argparse.ArgumentTypeError:
++        # The split failed (likely because the regex contains commas).
++        # Try compiling the whole value as a single regex.
++        return [_regex_transformer(value)]
+ 
+ 
+ def _regexp_paths_csv_transfomer(value: str) -> Sequence[Pattern[str]]:

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-13091": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-13091",
+    "model_patch": "diff --git a/sympy/core/basic.py b/sympy/core/basic.py\nindex db4e97184..666573fad 100644\n--- a/sympy/core/basic.py\n+++ b/sympy/core/basic.py\n@@ -313,7 +313,7 @@ def __eq__(self, other):\n             try:\n                 other = _sympify(other)\n             except SympifyError:\n-                return False    # sympy != other\n+                return NotImplemented\n \n             if type(self) != type(other):\n                 return False\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/basic.py",
+          "line": 316,
+          "statement": "                return NotImplemented"
+        }
+      ],
+      "reasoning": "When sympification of an unknown type fails during equality, returning NotImplemented lets Python try the reflected comparison on the other operand; returning False prematurely forced asymmetric outcomes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

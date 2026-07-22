@@ -1,0 +1,27 @@
+diff --git a/sphinx/extension.py b/sphinx/extension.py
+index 7ec6c8518..18456b3b4 100644
+--- a/sphinx/extension.py
++++ b/sphinx/extension.py
+@@ -9,6 +9,7 @@
+ """
+ 
+ from typing import TYPE_CHECKING, Any, Dict
++from packaging.version import parse, InvalidVersion
+ 
+ from sphinx.config import Config
+ from sphinx.errors import VersionRequirementError
+@@ -51,7 +52,13 @@ def verify_needs_extensions(app: "Sphinx", config: Config) -> None:
+                               'but it is not loaded.'), extname)
+             continue
+ 
+-        if extension.version == 'unknown version' or reqversion > extension.version:
++        def is_not_new_enough(req: str, ver: str) -> bool:
++            try:
++                return parse(req) > parse(ver)
++            except InvalidVersion:
++                return req > ver
++
++        if extension.version == "unknown version" or is_not_new_enough(reqversion, extension.version):
+             raise VersionRequirementError(__('This project needs the extension %s at least in '
+                                              'version %s and therefore cannot be built with '
+                                              'the loaded version (%s).') %

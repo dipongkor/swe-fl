@@ -1,0 +1,87 @@
+2026-07-21 21:55:13,824 - INFO - Creating container for django__django-16502...
+2026-07-21 21:55:13,937 - INFO - Container for django__django-16502 created: ba1bd673ddb6b7e3c14da3947a4d756de8339d58ee8cf4c3ba5494c19aba4237
+2026-07-21 21:55:14,369 - INFO - Container for django__django-16502 started: ba1bd673ddb6b7e3c14da3947a4d756de8339d58ee8cf4c3ba5494c19aba4237
+2026-07-21 21:55:14,369 - INFO - Intermediate patch for django__django-16502 written to logs/run_evaluation/local-django-16502/minimax__minimax-m3/django__django-16502/patch.diff, now applying to container...
+2026-07-21 21:55:14,749 - INFO - >>>>> Applied Patch:
+Checking patch django/core/servers/basehttp.py...
+Applied patch django/core/servers/basehttp.py cleanly.
+
+2026-07-21 21:55:15,390 - INFO - Git diff before:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..a1a0381cd5 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -147,6 +147,29 @@ class ServerHandler(simple_server.ServerHandler):
+         self.get_stdin().read()
+         super().close()
+ 
++    def write(self, data):
++        """write() callable as specified by PEP 3333"""
++
++        assert type(data) is bytes, "write() argument must be a bytes instance"
++
++        if not self.status:
++            raise AssertionError("write() before start_response()")
++
++        elif not self.headers_sent:
++            # Before the first output, send the stored headers
++            self.bytes_sent = len(data)    # make sure we know content-length
++            self.send_headers()
++        else:
++            self.bytes_sent += len(data)
++
++        # Don't write the body for HEAD requests. The Content-Length header
++        # is set correctly by the wsgiref handlers (if it can be determined
++        # from the result, e.g. for a list with a single element), so the
++        # client knows the size of the body that would have been sent.
++        if self.environ["REQUEST_METHOD"] != "HEAD":
++            self._write(data)
++        self._flush()
++
+ 
+ class WSGIRequestHandler(simple_server.WSGIRequestHandler):
+     protocol_version = "HTTP/1.1"
+2026-07-21 21:55:15,390 - INFO - Eval script for django__django-16502 written to logs/run_evaluation/local-django-16502/minimax__minimax-m3/django__django-16502/eval.sh; copying to container...
+2026-07-21 21:55:22,167 - INFO - Test runtime: 6.54 seconds
+2026-07-21 21:55:22,168 - INFO - Test output for django__django-16502 written to logs/run_evaluation/local-django-16502/minimax__minimax-m3/django__django-16502/test_output.txt
+2026-07-21 21:55:22,259 - INFO - Git diff after:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..a1a0381cd5 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -147,6 +147,29 @@ class ServerHandler(simple_server.ServerHandler):
+         self.get_stdin().read()
+         super().close()
+ 
++    def write(self, data):
++        """write() callable as specified by PEP 3333"""
++
++        assert type(data) is bytes, "write() argument must be a bytes instance"
++
++        if not self.status:
++            raise AssertionError("write() before start_response()")
++
++        elif not self.headers_sent:
++            # Before the first output, send the stored headers
++            self.bytes_sent = len(data)    # make sure we know content-length
++            self.send_headers()
++        else:
++            self.bytes_sent += len(data)
++
++        # Don't write the body for HEAD requests. The Content-Length header
++        # is set correctly by the wsgiref handlers (if it can be determined
++        # from the result, e.g. for a list with a single element), so the
++        # client knows the size of the body that would have been sent.
++        if self.environ["REQUEST_METHOD"] != "HEAD":
++            self._write(data)
++        self._flush()
++
+ 
+ class WSGIRequestHandler(simple_server.WSGIRequestHandler):
+     protocol_version = "HTTP/1.1"
+2026-07-21 21:55:22,259 - INFO - Grading answer for django__django-16502...
+2026-07-21 21:55:22,260 - INFO - report: {'django__django-16502': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_no_body_returned_for_head_requests (servers.test_basehttp.WSGIRequestHandlerTestCase.test_no_body_returned_for_head_requests)']}, 'PASS_TO_PASS': {'success': ['test_https (servers.test_basehttp.WSGIRequestHandlerTestCase.test_https)', 'test_log_message (servers.test_basehttp.WSGIRequestHandlerTestCase.test_log_message)', 'WSGIRequestHandler ignores headers containing underscores.', 'WSGIServer handles broken pipe errors.'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-16502: resolved: False
+2026-07-21 21:55:22,261 - INFO - Attempting to stop container sweb.eval.django__django-16502.local-django-16502...
+2026-07-21 21:55:37,724 - INFO - Attempting to remove container sweb.eval.django__django-16502.local-django-16502...
+2026-07-21 21:55:37,744 - INFO - Container sweb.eval.django__django-16502.local-django-16502 removed.

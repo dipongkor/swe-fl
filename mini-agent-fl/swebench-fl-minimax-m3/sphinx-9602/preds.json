@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9602": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-9602",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 9875a9f4b..aaf1e8784 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -122,6 +122,12 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod\n         elif isinstance(node, ast.Constant):  # type: ignore\n             if node.value is Ellipsis:\n                 return [addnodes.desc_sig_punctuation('', \"...\")]\n+            elif isinstance(node.value, bool):\n+                return [addnodes.desc_sig_keyword('', repr(node.value))]\n+            elif isinstance(node.value, (int, float)):\n+                return [addnodes.desc_sig_literal_number('', repr(node.value))]\n+            elif isinstance(node.value, str):\n+                return [addnodes.desc_sig_literal_string('', repr(node.value))]\n             else:\n                 return [nodes.Text(node.value)]\n         elif isinstance(node, ast.Expr):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 132,
+          "statement": "                return [nodes.Text(node.value)]"
+        }
+      ],
+      "reasoning": "In _parse_annotation, the unparse function returns nodes.Text for AST constant values that are not Ellipsis. The post-processing loop in _parse_annotation then converts every non-empty Text node to a py:class pending_xref via type_to_xref. This means Literal[True], Literal[1], Literal['foo'], etc. are all treated as class references, causing nitpick warnings to flag them. The fix introduces explicit handling for bool, int/float, and str constant values using non-Text node types (desc_sig_keyword, desc_sig_literal_number, desc_sig_literal_string) so the post-processing skips them.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-15345": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-15345",
+    "model_patch": "diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py\nindex ea7e3a2d9..5f248c3aa 100644\n--- a/sympy/printing/mathematica.py\n+++ b/sympy/printing/mathematica.py\n@@ -101,6 +101,12 @@ def _print_Function(self, expr):\n                     return \"%s[%s]\" % (mfunc, self.stringify(expr.args, \", \"))\n         return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")\n \n+    def _print_Max(self, expr):\n+        return \"Max[%s]\" % self.stringify(expr.args, \", \")\n+\n+    def _print_Min(self, expr):\n+        return \"Min[%s]\" % self.stringify(expr.args, \", \")\n+\n     def _print_Integral(self, expr):\n         if len(expr.variables) == 1 and not expr.limits[0][1:]:\n             args = [expr.args[0], expr.variables[0]]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/mathematica.py",
+          "line": 102,
+          "statement": "        return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")"
+        }
+      ],
+      "reasoning": "MCodePrinter had no dedicated printer for Max/Min, so these expressions did not reach the bracket-producing Function printer and instead fell back to a generic Expr/str printer that emits parentheses like 'Max(2, x)', which is invalid Mathematica syntax. Adding _print_Max and _print_Min methods near this function printer fixes the output to 'Max[...]'.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

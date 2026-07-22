@@ -1,0 +1,51 @@
+2026-07-02 22:07:56,749 - INFO - Creating container for scikit-learn__scikit-learn-25931...
+2026-07-02 22:07:56,851 - INFO - Container for scikit-learn__scikit-learn-25931 created: 6c2825eefc9868f57d8e4b5ad4179f67cdf9e355fa07a90b1078a01a704694c2
+2026-07-02 22:07:57,275 - INFO - Container for scikit-learn__scikit-learn-25931 started: 6c2825eefc9868f57d8e4b5ad4179f67cdf9e355fa07a90b1078a01a704694c2
+2026-07-02 22:07:57,276 - INFO - Intermediate patch for scikit-learn__scikit-learn-25931 written to logs/run_evaluation/local-scikit-learn-25931/minimax__minimax-m3/scikit-learn__scikit-learn-25931/patch.diff, now applying to container...
+2026-07-02 22:07:57,652 - INFO - >>>>> Applied Patch:
+Checking patch sklearn/ensemble/_iforest.py...
+Applied patch sklearn/ensemble/_iforest.py cleanly.
+
+2026-07-02 22:07:57,932 - INFO - Git diff before:
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..d333d74aa 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -345,7 +345,11 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             return self
+ 
+         # else, define offset_ wrt contamination parameter
+-        self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
++        if issparse(X):
++            X = X.tocsr()
++        self.offset_ = np.percentile(
++            -self._compute_chunked_score_samples(X), 100.0 * self.contamination
++        )
+ 
+         return self
+2026-07-02 22:07:57,932 - INFO - Eval script for scikit-learn__scikit-learn-25931 written to logs/run_evaluation/local-scikit-learn-25931/minimax__minimax-m3/scikit-learn__scikit-learn-25931/eval.sh; copying to container...
+2026-07-02 22:08:10,490 - INFO - Test runtime: 12.26 seconds
+2026-07-02 22:08:10,490 - INFO - Test output for scikit-learn__scikit-learn-25931 written to logs/run_evaluation/local-scikit-learn-25931/minimax__minimax-m3/scikit-learn__scikit-learn-25931/test_output.txt
+2026-07-02 22:08:10,582 - INFO - Git diff after:
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..d333d74aa 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -345,7 +345,11 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             return self
+ 
+         # else, define offset_ wrt contamination parameter
+-        self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
++        if issparse(X):
++            X = X.tocsr()
++        self.offset_ = np.percentile(
++            -self._compute_chunked_score_samples(X), 100.0 * self.contamination
++        )
+ 
+         return self
+2026-07-02 22:08:10,582 - INFO - Grading answer for scikit-learn__scikit-learn-25931...
+2026-07-02 22:08:10,583 - INFO - report: {'scikit-learn__scikit-learn-25931': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['sklearn/ensemble/tests/test_iforest.py::test_iforest_preserve_feature_names'], 'failure': []}, 'PASS_TO_PASS': {'success': ['sklearn/ensemble/tests/test_iforest.py::test_iforest[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_sparse[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_error', 'sklearn/ensemble/tests/test_iforest.py::test_recalculate_max_depth', 'sklearn/ensemble/tests/test_iforest.py::test_max_samples_attribute', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_parallel_regression[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_performance[42]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_works[42-0.25]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_works[42-auto]', 'sklearn/ensemble/tests/test_iforest.py::test_max_samples_consistency', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_subsampled_features', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_average_path_length', 'sklearn/ensemble/tests/test_iforest.py::test_score_samples', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_warm_start', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works1[42-0.25-3]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works1[42-auto-2]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works2[42-0.25-3]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_chunks_works2[42-auto-2]', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_with_uniform_data', 'sklearn/ensemble/tests/test_iforest.py::test_iforest_with_n_jobs_does_not_segfault', 'sklearn/ensemble/tests/test_iforest.py::test_base_estimator_property_deprecated'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for scikit-learn__scikit-learn-25931: resolved: True
+2026-07-02 22:08:10,583 - INFO - Attempting to stop container sweb.eval.scikit-learn__scikit-learn-25931.local-scikit-learn-25931...
+2026-07-02 22:08:25,991 - INFO - Attempting to remove container sweb.eval.scikit-learn__scikit-learn-25931.local-scikit-learn-25931...
+2026-07-02 22:08:26,035 - INFO - Container sweb.eval.scikit-learn__scikit-learn-25931.local-scikit-learn-25931 removed.

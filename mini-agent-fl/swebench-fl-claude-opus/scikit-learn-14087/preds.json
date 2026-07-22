@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14087": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "scikit-learn__scikit-learn-14087",
+    "model_patch": "diff --git a/sklearn/linear_model/logistic.py b/sklearn/linear_model/logistic.py\nindex 1999f1dae..b7c5d85d9 100644\n--- a/sklearn/linear_model/logistic.py\n+++ b/sklearn/linear_model/logistic.py\n@@ -2170,7 +2170,7 @@ class LogisticRegressionCV(LogisticRegression, BaseEstimator,\n                 # Take the best scores across every fold and the average of\n                 # all coefficients corresponding to the best scores.\n                 best_indices = np.argmax(scores, axis=1)\n-                if self.multi_class == 'ovr':\n+                if multi_class == 'ovr':\n                     w = np.mean([coefs_paths[i, best_indices[i], :]\n                                  for i in range(len(folds))], axis=0)\n                 else:\n@@ -2181,7 +2181,11 @@ class LogisticRegressionCV(LogisticRegression, BaseEstimator,\n                 self.C_.append(np.mean(self.Cs_[best_indices_C]))\n \n                 best_indices_l1 = best_indices // len(self.Cs_)\n-                self.l1_ratio_.append(np.mean(l1_ratios_[best_indices_l1]))\n+                if self.penalty == 'elasticnet':\n+                    self.l1_ratio_.append(np.mean(\n+                        np.array(l1_ratios_)[best_indices_l1]))\n+                else:\n+                    self.l1_ratio_.append(None)\n \n             if multi_class == 'multinomial':\n                 self.C_ = np.tile(self.C_, n_classes)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/linear_model/logistic.py",
+          "line": 2173,
+          "statement": "                if self.multi_class == 'ovr':"
+        }
+      ],
+      "reasoning": "In the refit=False branch of LogisticRegressionCV.fit, the code checks self.multi_class (which may be 'auto') instead of the resolved multi_class variable to decide how to index coefs_paths. For binary problems 'auto' resolves to 'ovr' giving a 3D coefs_paths, but the check fails and the 4D multinomial indexing path is taken, causing the IndexError; a related line then also breaks because l1_ratios_ is a Python list indexed by an array (and can contain None).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

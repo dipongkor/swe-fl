@@ -1,0 +1,45 @@
+2026-06-30 16:25:44,849 - INFO - Creating container for sphinx-doc__sphinx-10673...
+2026-06-30 16:25:44,926 - INFO - Container for sphinx-doc__sphinx-10673 created: 45277f40c94c3ddbc2c8c1d8a11752eac3777aec78b5051cb4c040c7c12fc886
+2026-06-30 16:25:45,335 - INFO - Container for sphinx-doc__sphinx-10673 started: 45277f40c94c3ddbc2c8c1d8a11752eac3777aec78b5051cb4c040c7c12fc886
+2026-06-30 16:25:45,338 - INFO - Intermediate patch for sphinx-doc__sphinx-10673 written to logs/run_evaluation/local-sphinx-10673/openai__gpt-5.3-codex/sphinx-doc__sphinx-10673/patch.diff, now applying to container...
+2026-06-30 16:25:45,851 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/directives/other.py...
+Applied patch sphinx/directives/other.py cleanly.
+
+2026-06-30 16:25:46,336 - INFO - Git diff before:
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 35e16e623..5ae11c250 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -118,7 +118,7 @@ class TocTree(SphinxDirective):
+                 docname = docname_join(self.env.docname, docname)
+                 if url_re.match(ref) or ref == 'self':
+                     toctree['entries'].append((title, ref))
+-                elif docname not in self.env.found_docs:
++                elif docname not in self.env.found_docs and ref not in ('genindex', 'modindex', 'search'):
+                     if excluded(self.env.doc2path(docname, False)):
+                         message = __('toctree contains reference to excluded document %r')
+                         subtype = 'excluded'
+2026-06-30 16:25:46,340 - INFO - Eval script for sphinx-doc__sphinx-10673 written to logs/run_evaluation/local-sphinx-10673/openai__gpt-5.3-codex/sphinx-doc__sphinx-10673/eval.sh; copying to container...
+2026-06-30 16:25:51,376 - INFO - Test runtime: 4.76 seconds
+2026-06-30 16:25:51,380 - INFO - Test output for sphinx-doc__sphinx-10673 written to logs/run_evaluation/local-sphinx-10673/openai__gpt-5.3-codex/sphinx-doc__sphinx-10673/test_output.txt
+2026-06-30 16:25:51,583 - INFO - Git diff after:
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 35e16e623..5ae11c250 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -118,7 +118,7 @@ class TocTree(SphinxDirective):
+                 docname = docname_join(self.env.docname, docname)
+                 if url_re.match(ref) or ref == 'self':
+                     toctree['entries'].append((title, ref))
+-                elif docname not in self.env.found_docs:
++                elif docname not in self.env.found_docs and ref not in ('genindex', 'modindex', 'search'):
+                     if excluded(self.env.doc2path(docname, False)):
+                         message = __('toctree contains reference to excluded document %r')
+                         subtype = 'excluded'
+2026-06-30 16:25:51,583 - INFO - Grading answer for sphinx-doc__sphinx-10673...
+2026-06-30 16:25:51,592 - INFO - report: {'sphinx-doc__sphinx-10673': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_environment_toctree.py::test_toctree_index'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_environment_toctree.py::test_process_doc', 'tests/test_environment_toctree.py::test_glob', 'tests/test_environment_toctree.py::test_get_toc_for', 'tests/test_environment_toctree.py::test_get_toc_for_only', 'tests/test_environment_toctree.py::test_get_toc_for_tocdepth', 'tests/test_environment_toctree.py::test_get_toctree_for', 'tests/test_environment_toctree.py::test_get_toctree_for_collapse', 'tests/test_environment_toctree.py::test_get_toctree_for_maxdepth', 'tests/test_environment_toctree.py::test_get_toctree_for_includehidden'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-10673: resolved: True
+2026-06-30 16:25:51,594 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-10673.local-sphinx-10673...
+2026-06-30 16:26:07,051 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-10673.local-sphinx-10673...
+2026-06-30 16:26:07,127 - INFO - Container sweb.eval.sphinx-doc__sphinx-10673.local-sphinx-10673 removed.

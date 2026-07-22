@@ -1,0 +1,22 @@
+diff --git a/django/db/models/deletion.py b/django/db/models/deletion.py
+index ae82d26340..9c7cf42cdd 100644
+--- a/django/db/models/deletion.py
++++ b/django/db/models/deletion.py
+@@ -310,9 +310,16 @@ class Collector:
+                     )
+ 
+             # fast deletes
++            from collections import defaultdict
++            grouped_fast_deletes = defaultdict(list)
+             for qs in self.fast_deletes:
++                grouped_fast_deletes[qs.model].append(qs)
++            for model, qss in grouped_fast_deletes.items():
++                qs = qss[0]
++                for next_qs in qss[1:]:
++                    qs = qs | next_qs
+                 count = qs._raw_delete(using=self.using)
+-                deleted_counter[qs.model._meta.label] += count
++                deleted_counter[model._meta.label] += count
+ 
+             # update fields
+             for model, instances_for_fieldvalues in self.field_updates.items():

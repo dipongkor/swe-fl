@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-25931": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "model_patch": "diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py\nindex 4d6c1c3f0..d333d74aa 100644\n--- a/sklearn/ensemble/_iforest.py\n+++ b/sklearn/ensemble/_iforest.py\n@@ -345,7 +345,11 @@ class IsolationForest(OutlierMixin, BaseBagging):\n             return self\n \n         # else, define offset_ wrt contamination parameter\n-        self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)\n+        if issparse(X):\n+            X = X.tocsr()\n+        self.offset_ = np.percentile(\n+            -self._compute_chunked_score_samples(X), 100.0 * self.contamination\n+        )\n \n         return self\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/ensemble/_iforest.py",
+          "line": 348,
+          "statement": "        self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)"
+        }
+      ],
+      "reasoning": "When `contamination != 'auto'`, the `fit()` method calls `self.score_samples(X)` to compute the offset_. Since X has already been validated and converted to an ndarray via `_validate_data`, the subsequent call to `self.score_samples(X)` triggers `_validate_data(X, reset=False)` which calls `_check_feature_names(X, reset=False)`. With X as an ndarray (no feature names) and `self.feature_names_in_` set from the original DataFrame fit, this raises the spurious warning 'X does not have valid feature names, but IsolationForest was fitted with feature names'. The fix replaces the call to `self.score_samples(X)` with a direct call to `self._compute_chunked_score_samples(X)` (with sparse-to-csr conversion when needed), bypassing the unnecessary re-validation.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14629": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-14629",
+    "model_patch": "diff --git a/sklearn/model_selection/_validation.py b/sklearn/model_selection/_validation.py\nindex 95669a212..880e622f7 100644\n--- a/sklearn/model_selection/_validation.py\n+++ b/sklearn/model_selection/_validation.py\n@@ -854,11 +854,25 @@ def _fit_and_predict(estimator, X, y, train, test, verbose, fit_params,\n     func = getattr(estimator, method)\n     predictions = func(X_test)\n     if method in ['decision_function', 'predict_proba', 'predict_log_proba']:\n+        # `MultiOutputClassifier` does not have a `classes_` attribute,\n+        # but its underlying estimators do. We need to handle this case.\n         if isinstance(predictions, list):\n-            predictions = [_enforce_prediction_order(\n-                estimator.classes_[i_label], predictions[i_label],\n-                n_classes=len(set(y[:, i_label])), method=method)\n-                for i_label in range(len(predictions))]\n+            # For MultiOutputClassifier, the predictions are a list of arrays,\n+            # one per output. The order of classes in each array corresponds\n+            # to the order of the classes in the corresponding estimator's\n+            # `classes_` attribute.\n+            from ..multioutput import MultiOutputClassifier\n+            if isinstance(estimator, MultiOutputClassifier):\n+                predictions = [_enforce_prediction_order(\n+                    estimator.estimators_[i_label].classes_,\n+                    predictions[i_label],\n+                    n_classes=len(set(y[:, i_label])), method=method)\n+                    for i_label in range(len(predictions))]\n+            else:\n+                predictions = [_enforce_prediction_order(\n+                    estimator.classes_[i_label], predictions[i_label],\n+                    n_classes=len(set(y[:, i_label])), method=method)\n+                    for i_label in range(len(predictions))]\n         else:\n             # A 2D y array should be a binary label indicator matrix\n             n_classes = len(set(y)) if y.ndim == 1 else y.shape[1]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_validation.py",
+          "line": 859,
+          "statement": "                estimator.classes_[i_label], predictions[i_label],"
+        }
+      ],
+      "reasoning": "The `_fit_and_predict` function in `sklearn/model_selection/_validation.py` accesses `estimator.classes_[i_label]` for multi-output predictions, but `MultiOutputClassifier` does not have a `classes_` attribute. Instead, the class labels are stored in the underlying estimators' `classes_` attribute, accessible as `estimator.estimators_[i_label].classes_`. This causes an `AttributeError` when using `cross_val_predict` with `MultiOutputClassifier` and `method='predict_proba'` (or `decision_function`/`predict_log_proba`).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

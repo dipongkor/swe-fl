@@ -1,0 +1,20 @@
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..356a19884c 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -852,6 +852,15 @@ def is_finite_set(self):
+         all_finite = fuzzy_and(s.is_finite_set for s in self.sets)
+         return fuzzy_or([self.is_empty, all_finite])
+ 
++    def _eval_is_subset(self, other):
++        # A finite ProductSet is a subset of another finite set if all of
++        # its elements are contained in the other set. We convert to a
++        # FiniteSet and delegate to its ``_eval_is_subset`` so that we
++        # can return a fuzzy bool.
++        if self.is_finite_set and self.is_iterable:
++            return FiniteSet(*self).is_subset(other)
++        return None
++
+     @property
+     def _measure(self):
+         measure = 1

@@ -1,0 +1,19 @@
+{
+  "psf__requests-2931": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "psf__requests-2931",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 9c624d3..f3a4f6d 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -81,7 +81,7 @@ class RequestEncodingMixin(object):\n         \"\"\"\n \n         if isinstance(data, (str, bytes)):\n-            return to_native_string(data)\n+            return data\n         elif hasattr(data, 'read'):\n             return data\n         elif hasattr(data, '__iter__'):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 84,
+          "statement": "            return to_native_string(data)"
+        }
+      ],
+      "reasoning": "The _encode_params method in RequestEncodingMixin calls to_native_string() on bytes data. to_native_string() decodes bytes using ASCII by default, which fails with UnicodeDecodeError when the bytes contain non-ASCII characters (e.g. UTF-8 encoded text). The fix returns the data as-is since bytes is already the native binary representation.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

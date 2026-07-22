@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-21596": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-21596",
+    "model_patch": "diff --git a/sympy/sets/handlers/intersection.py b/sympy/sets/handlers/intersection.py\nindex c54dc8f72a..75dfcc115e 100644\n--- a/sympy/sets/handlers/intersection.py\n+++ b/sympy/sets/handlers/intersection.py\n@@ -306,9 +306,9 @@ def intersection_sets(self, other): # noqa:F811\n             # univarite imaginary part in same variable\n             x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])\n             if x and all(i == n for i in x):\n-                base_set -= FiniteSet(xis)\n+                base_set &= FiniteSet(*xis)\n             else:\n-                base_set -= ConditionSet(n, Eq(im, 0), S.Integers)\n+                base_set = base_set - ConditionSet(n, Eq(im, 0), S.Integers)\n         # exclude values that make denominators 0\n         for i in denoms(f):\n             if i.has(n):\n@@ -318,7 +318,7 @@ def intersection_sets(self, other): # noqa:F811\n                     if x and all(i == n for i in x):\n                         base_set -= FiniteSet(xis)\n                 else:\n-                    base_set -= ConditionSet(n, Eq(i, 0), S.Integers)\n+                    base_set = base_set - ConditionSet(n, Eq(i, 0), S.Integers)\n         return imageset(lam, base_set)\n \n     elif isinstance(other, Interval):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/sets/handlers/intersection.py",
+          "line": 309,
+          "statement": "                base_set -= FiniteSet(xis)"
+        }
+      ],
+      "reasoning": "When intersecting an ImageSet with Reals, the code computes the imaginary part `im` of the lambda expression. If `im` is zero at specific values of `n` (but not identically zero), the code incorrectly removes those values from the base set using `base_set -= FiniteSet(xis)`. The correct behavior is to keep only those values where the imaginary part is zero (i.e., where the function value is real), using `base_set &= FiniteSet(*xis)`. Additionally, `FiniteSet(xis)` creates a set containing a single tuple element rather than unpacking the tuple, so `FiniteSet(*xis)` is needed to properly construct the set of zero values.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

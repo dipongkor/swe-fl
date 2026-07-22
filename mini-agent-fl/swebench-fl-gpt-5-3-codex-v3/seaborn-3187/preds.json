@@ -1,0 +1,19 @@
+{
+  "mwaskom__seaborn-3187": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "mwaskom__seaborn-3187",
+    "model_patch": "diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py\nindex 55874bf2..b985be86 100644\n--- a/seaborn/_core/scales.py\n+++ b/seaborn/_core/scales.py\n@@ -378,7 +378,11 @@ class ContinuousBase(Scale):\n             axis.set_view_interval(vmin, vmax)\n             locs = axis.major.locator()\n             locs = locs[(vmin <= locs) & (locs <= vmax)]\n-            labels = axis.major.formatter.format_ticks(locs)\n+            formatter = axis.major.formatter\n+            labels = formatter.format_ticks(locs)\n+            offset = formatter.get_offset()\n+            if offset:\n+                labels = [f\"{label}{offset}\" for label in labels]\n             new._legend = list(locs), list(labels)\n \n         return new\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "seaborn/_core/scales.py",
+          "line": 382,
+          "statement": "            labels = axis.major.formatter.format_ticks(locs)"
+        }
+      ],
+      "reasoning": "Legend labels were generated from tick strings alone, ignoring formatter offset/scaling text (e.g. scientific multiplier), so large values appeared with incorrect magnitude in legends.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

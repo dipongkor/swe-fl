@@ -1,0 +1,23 @@
+diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py
+index d4922fc517..ceea5201e3 100644
+--- a/lib/matplotlib/text.py
++++ b/lib/matplotlib/text.py
+@@ -2,6 +2,7 @@
+ Classes for including text in a figure.
+ """
+ 
++import copy
+ import functools
+ import logging
+ import math
+@@ -1456,7 +1457,9 @@ class _AnnotationBase:
+                  xycoords='data',
+                  annotation_clip=None):
+ 
+-        self.xy = xy
++        # Store a copy of *xy* so that if the caller mutates the array
++        # passed as *xy* later on, the stored position is not affected.
++        self.xy = copy.copy(xy)
+         self.xycoords = xycoords
+         self.set_annotation_clip(annotation_clip)
+ 

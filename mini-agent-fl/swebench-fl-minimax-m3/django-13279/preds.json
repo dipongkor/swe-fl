@@ -1,0 +1,19 @@
+{
+  "django__django-13279": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13279",
+    "model_patch": "diff --git a/django/contrib/sessions/backends/base.py b/django/contrib/sessions/backends/base.py\nindex b5453160a5..44a71b2761 100644\n--- a/django/contrib/sessions/backends/base.py\n+++ b/django/contrib/sessions/backends/base.py\n@@ -108,11 +108,20 @@ class SessionBase:\n \n     def encode(self, session_dict):\n         \"Return the given session dictionary serialized and encoded as a string.\"\n+        # RemovedInDjango40Warning.\n+        if settings.DEFAULT_HASHING_ALGORITHM == 'sha1':\n+            return self._legacy_encode(session_dict)\n         return signing.dumps(\n             session_dict, salt=self.key_salt, serializer=self.serializer,\n             compress=True,\n         )\n \n+    def _legacy_encode(self, session_dict):\n+        # RemovedInDjango40Warning: pre-Django 3.1 format will be invalid.\n+        serialized = self.serializer().dumps(session_dict)\n+        hash = self._hash(serialized)\n+        return base64.b64encode(hash.encode() + b\":\" + serialized).decode('ascii')\n+\n     def decode(self, session_data):\n         try:\n             return signing.loads(session_data, salt=self.key_salt, serializer=self.serializer)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/sessions/backends/base.py",
+          "line": 109,
+          "statement": "    def encode(self, session_dict):\n        \"Return the given session dictionary serialized and encoded as a string.\"\n        return signing.dumps(\n            session_dict, salt=self.key_salt, serializer=self.serializer,\n            compress=True,\n        )"
+        }
+      ],
+      "reasoning": "After commit d4fff711d4 (#31274), the SessionBase.encode() method always uses signing.dumps() to produce a new format, even when DEFAULT_HASHING_ALGORITHM is set to 'sha1' for transition compatibility. This breaks the ability to run multiple instances of the same project during the transition to Django 3.1, because older instances (Django <3.1) cannot decode the new format. The fix is to use the legacy encode format (base64-encoded hash:serialized) when DEFAULT_HASHING_ALGORITHM == 'sha1', matching the format produced by older Django versions.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-18199": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-18199",
+    "model_patch": "diff --git a/sympy/ntheory/residue_ntheory.py b/sympy/ntheory/residue_ntheory.py\nindex 9a3052d4c3..454e6ced49 100644\n--- a/sympy/ntheory/residue_ntheory.py\n+++ b/sympy/ntheory/residue_ntheory.py\n@@ -771,6 +771,8 @@ def nthroot_mod(a, n, p, all_roots=False):\n     if n == 2:\n         return sqrt_mod(a, p, all_roots)\n     # see Hackman \"Elementary Number Theory\" (2009), page 76\n+    if a % p == 0:\n+        return [0] if all_roots else 0\n     if not is_nthpow_residue(a, n, p):\n         return None\n     if not isprime(p):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/ntheory/residue_ntheory.py",
+          "line": 774,
+          "statement": "    if not is_nthpow_residue(a, n, p):"
+        }
+      ],
+      "reasoning": "The nthroot_mod function failed to handle the case where a % p == 0 (i.e., a is a multiple of p). When a is a multiple of p, x=0 is the only root (for prime p), but the function would proceed to call _nthroot_mod1, which calls discrete_log with s1=0 and raises a ValueError. The fix adds an early check for a % p == 0 to return 0 (or [0] for all_roots) directly.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

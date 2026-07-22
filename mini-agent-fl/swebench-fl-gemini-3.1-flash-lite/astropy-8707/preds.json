@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-8707": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "astropy__astropy-8707",
+    "model_patch": "diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py\nindex 8c1ac5d73..98c8a858c 100644\n--- a/astropy/io/fits/card.py\n+++ b/astropy/io/fits/card.py\n@@ -1269,6 +1269,11 @@ def _format_float(value):\n def _pad(input):\n     \"\"\"Pad blank space to the input string to be multiple of 80.\"\"\"\n \n+    if isinstance(input, bytes):\n+        pad_char = b\" \"\n+    else:\n+        pad_char = \" \"\n+\n     _len = len(input)\n     if _len == Card.length:\n         return input\n@@ -1277,9 +1282,9 @@ def _pad(input):\n         if strlen == 0:\n             return input\n         else:\n-            return input + ' ' * (Card.length - strlen)\n+            return input + pad_char * (Card.length - strlen)\n \n     # minimum length is 80\n     else:\n         strlen = _len % Card.length\n-        return input + ' ' * (Card.length - strlen)\n+        return input + pad_char * (Card.length - strlen)\ndiff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py\nindex ad07e6d52..852098775 100644\n--- a/astropy/io/fits/header.py\n+++ b/astropy/io/fits/header.py\n@@ -347,6 +347,8 @@ class Header:\n         header\n             A new `Header` instance.\n         \"\"\"\n+        if isinstance(data, bytes):\n+            data = data.decode(\"ascii\")\n \n         cards = []\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/io/fits/header.py",
+          "line": 350,
+          "statement": "if isinstance(data, bytes):"
+        },
+        {
+          "file": "astropy/io/fits/card.py",
+          "line": 1272,
+          "statement": "if isinstance(input, bytes):"
+        }
+      ],
+      "reasoning": "Header.fromstring and Card._pad did not handle bytes input, which is common in Python 3 when reading binary files. Added checks to convert bytes to string or handle bytes padding.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

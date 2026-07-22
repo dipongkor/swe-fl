@@ -1,0 +1,19 @@
+{
+  "django__django-14434": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-14434",
+    "model_patch": "diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py\nindex ad2f5a7da1..4c018624fb 100644\n--- a/django/db/backends/base/schema.py\n+++ b/django/db/backends/base/schema.py\n@@ -1251,7 +1251,7 @@ class BaseDatabaseSchemaEditor:\n         else:\n             sql = self.sql_create_unique\n         if columns:\n-            columns = self._index_columns(table, columns, col_suffixes=(), opclasses=opclasses)\n+            columns = self._index_columns(model._meta.db_table, columns, col_suffixes=(), opclasses=opclasses)\n         else:\n             columns = Expressions(model._meta.db_table, expressions, compiler, self.quote_value)\n         return Statement(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/base/schema.py",
+          "line": 1254,
+          "statement": "columns = self._index_columns(table, columns, col_suffixes=(), opclasses=opclasses)"
+        }
+      ],
+      "reasoning": "In _create_unique_sql, the local variable `table` is a Table instance (created at line 1244 as `Table(model._meta.db_table, self.quote_name)`), but _index_columns passes it to Columns.__init__ which (via TableColumns.__init__) stores it as self.table. The references_column method then compares self.table (a Table instance) with the string table name, which always returns False. The fix is to pass model._meta.db_table (a string) instead of the Table instance, matching the pattern in _create_index_sql.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

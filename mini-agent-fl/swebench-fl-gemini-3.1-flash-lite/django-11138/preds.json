@@ -1,0 +1,29 @@
+{
+  "django__django-11138": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-11138",
+    "model_patch": "diff --git a/django/db/backends/mysql/operations.py b/django/db/backends/mysql/operations.py\nindex 50f85e0621..9e1d89a143 100644\n--- a/django/db/backends/mysql/operations.py\n+++ b/django/db/backends/mysql/operations.py\n@@ -70,7 +70,9 @@ class DatabaseOperations(BaseDatabaseOperations):\n \n     def _convert_field_to_tz(self, field_name, tzname):\n         if settings.USE_TZ:\n-            field_name = \"CONVERT_TZ(%s, 'UTC', '%s')\" % (field_name, tzname)\n+            db_tz = self.connection.timezone\n+            if db_tz != tzname:\n+                field_name = \"CONVERT_TZ(%s, '%s', '%s')\" % (field_name, db_tz, tzname)\n         return field_name\n \n     def datetime_cast_date_sql(self, field_name, tzname):\ndiff --git a/django/db/backends/oracle/operations.py b/django/db/backends/oracle/operations.py\nindex c1afb2ed5e..1a64867dc4 100644\n--- a/django/db/backends/oracle/operations.py\n+++ b/django/db/backends/oracle/operations.py\n@@ -99,6 +99,9 @@ END;\n             return field_name\n         if not self._tzname_re.match(tzname):\n             raise ValueError(\"Invalid time zone name: %s\" % tzname)\n+        db_tz = self.connection.timezone\n+        if db_tz == tzname:\n+            return field_name\n         # Convert from UTC to local time, returning TIMESTAMP WITH TIME ZONE\n         # and cast it back to TIMESTAMP to strip the TIME ZONE details.\n         return \"CAST((FROM_TZ(%s, '0:00') AT TIME ZONE '%s') AS TIMESTAMP)\" % (field_name, tzname)\ndiff --git a/django/db/backends/sqlite3/operations.py b/django/db/backends/sqlite3/operations.py\nindex c4b02e5c60..2608ed1e2c 100644\n--- a/django/db/backends/sqlite3/operations.py\n+++ b/django/db/backends/sqlite3/operations.py\n@@ -85,7 +85,10 @@ class DatabaseOperations(BaseDatabaseOperations):\n         return \"django_time_trunc('%s', %s)\" % (lookup_type.lower(), field_name)\n \n     def _convert_tzname_to_sql(self, tzname):\n-        return \"'%s'\" % tzname if settings.USE_TZ else 'NULL'\n+        if not settings.USE_TZ:\n+            return 'NULL'\n+        db_tz = self.connection.timezone\n+        return \"'%s'\" % tzname if db_tz != tzname else 'NULL'\n \n     def datetime_cast_date_sql(self, field_name, tzname):\n         return \"django_datetime_cast_date(%s, %s)\" % (\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/mysql/operations.py",
+          "line": 73,
+          "statement": "field_name = \"CONVERT_TZ(%s, 'UTC', '%s')\" % (field_name, tzname)"
+        },
+        {
+          "file": "django/db/backends/oracle/operations.py",
+          "line": 102,
+          "statement": "return \"CAST((FROM_TZ(%s, '0:00') AT TIME ZONE '%s') AS TIMESTAMP)\" % (field_name, tzname)"
+        },
+        {
+          "file": "django/db/backends/sqlite3/operations.py",
+          "line": 88,
+          "statement": "return \"'%s'\" % tzname if settings.USE_TZ else 'NULL'"
+        }
+      ],
+      "reasoning": "The database backends were forcing a conversion from UTC or ignoring the database's configured timezone when performing date lookups, leading to incorrect results when the database timezone differed from the application timezone or when they were the same.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

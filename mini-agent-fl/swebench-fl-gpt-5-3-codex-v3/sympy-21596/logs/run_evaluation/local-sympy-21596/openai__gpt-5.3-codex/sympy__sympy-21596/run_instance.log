@@ -1,0 +1,45 @@
+2026-06-30 14:57:49,071 - INFO - Creating container for sympy__sympy-21596...
+2026-06-30 14:57:49,151 - INFO - Container for sympy__sympy-21596 created: 5c10995796d7f3d620e3e71ca9fef76c97f6e6a942d00181a1c40ec5ee753cf0
+2026-06-30 14:57:49,526 - INFO - Container for sympy__sympy-21596 started: 5c10995796d7f3d620e3e71ca9fef76c97f6e6a942d00181a1c40ec5ee753cf0
+2026-06-30 14:57:49,530 - INFO - Intermediate patch for sympy__sympy-21596 written to logs/run_evaluation/local-sympy-21596/openai__gpt-5.3-codex/sympy__sympy-21596/patch.diff, now applying to container...
+2026-06-30 14:57:50,014 - INFO - >>>>> Applied Patch:
+Checking patch sympy/sets/handlers/functions.py...
+Applied patch sympy/sets/handlers/functions.py cleanly.
+
+2026-06-30 14:57:50,712 - INFO - Git diff before:
+diff --git a/sympy/sets/handlers/functions.py b/sympy/sets/handlers/functions.py
+index d492bb9655..56baab2c08 100644
+--- a/sympy/sets/handlers/functions.py
++++ b/sympy/sets/handlers/functions.py
+@@ -254,4 +254,7 @@ def _set_function(f, self): # noqa:F811
+     expr = f.expr
+     if not isinstance(expr, Expr):
+         return
+-    return _set_function(f, Interval(-oo, oo))
++    # Mapping over Reals can only be simplified safely when we can prove
++    # the image is real-valued. Otherwise keep it unevaluated.
++    if expr.is_real is True:
++        return _set_function(f, Interval(-oo, oo))
+2026-06-30 14:57:50,719 - INFO - Eval script for sympy__sympy-21596 written to logs/run_evaluation/local-sympy-21596/openai__gpt-5.3-codex/sympy__sympy-21596/eval.sh; copying to container...
+2026-06-30 14:58:12,205 - INFO - Test runtime: 21.15 seconds
+2026-06-30 14:58:12,211 - INFO - Test output for sympy__sympy-21596 written to logs/run_evaluation/local-sympy-21596/openai__gpt-5.3-codex/sympy__sympy-21596/test_output.txt
+2026-06-30 14:58:12,416 - INFO - Git diff after:
+diff --git a/sympy/sets/handlers/functions.py b/sympy/sets/handlers/functions.py
+index d492bb9655..56baab2c08 100644
+--- a/sympy/sets/handlers/functions.py
++++ b/sympy/sets/handlers/functions.py
+@@ -254,4 +254,7 @@ def _set_function(f, self): # noqa:F811
+     expr = f.expr
+     if not isinstance(expr, Expr):
+         return
+-    return _set_function(f, Interval(-oo, oo))
++    # Mapping over Reals can only be simplified safely when we can prove
++    # the image is real-valued. Otherwise keep it unevaluated.
++    if expr.is_real is True:
++        return _set_function(f, Interval(-oo, oo))
+2026-06-30 14:58:12,418 - INFO - Grading answer for sympy__sympy-21596...
+2026-06-30 14:58:12,422 - INFO - report: {'sympy__sympy-21596': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_imageset_intersect_real']}, 'PASS_TO_PASS': {'success': ['test_naturals', 'test_naturals0', 'test_integers', 'test_ImageSet', 'test_image_is_ImageSet', 'test_halfcircle', 'test_ImageSet_iterator_not_injective', 'test_inf_Range_len', 'test_Range_set', 'test_Range_symbolic', 'test_range_range_intersection', 'test_range_interval_intersection', 'test_range_is_finite_set', 'test_Integers_eval_imageset', 'test_Range_eval_imageset', 'test_fun', 'test_Reals', 'test_Complex', 'test_intersections', 'test_infinitely_indexed_set_1', 'test_infinitely_indexed_set_2', 'test_imageset_intersect_interval', 'test_imageset_intersect_diophantine', 'test_infinitely_indexed_set_3', 'test_ImageSet_simplification', 'test_ImageSet_contains', 'test_ComplexRegion_contains', 'test_ComplexRegion_intersect', 'test_ComplexRegion_union', 'test_ComplexRegion_from_real', 'test_ComplexRegion_measure', 'test_normalize_theta_set', 'test_ComplexRegion_FiniteSet', 'test_union_RealSubSet', 'test_issue_9980', 'test_issue_11732', 'test_issue_11730', 'test_issue_11938', 'test_issue_11914', 'test_issue_9543', 'test_issue_16871', 'test_issue_18050', 'test_Rationals', 'test_NZQRC_unions', 'test_imageset_intersection', 'test_issue_17858'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-21596: resolved: False
+2026-06-30 14:58:12,425 - INFO - Attempting to stop container sweb.eval.sympy__sympy-21596.local-sympy-21596...
+2026-06-30 14:58:27,870 - INFO - Attempting to remove container sweb.eval.sympy__sympy-21596.local-sympy-21596...
+2026-06-30 14:58:27,955 - INFO - Container sweb.eval.sympy__sympy-21596.local-sympy-21596 removed.

@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-5840": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pytest-dev__pytest-5840",
+    "model_patch": "diff --git a/src/_pytest/pathlib.py b/src/_pytest/pathlib.py\nindex 0403b6947..101ed9e7a 100644\n--- a/src/_pytest/pathlib.py\n+++ b/src/_pytest/pathlib.py\n@@ -11,7 +11,6 @@ from functools import partial\n from os.path import expanduser\n from os.path import expandvars\n from os.path import isabs\n-from os.path import normcase\n from os.path import sep\n from posixpath import sep as posix_sep\n \n@@ -342,5 +341,12 @@ def unique_path(path):\n     systems such as Windows.\n \n     This is needed only for ``py.path.local``; ``pathlib.Path`` handles this\n-    natively with ``resolve()``.\"\"\"\n-    return type(path)(normcase(str(path.realpath())))\n+    natively with ``resolve()``.\n+\n+    ``resolve()`` is used here (instead of ``py.path.local.realpath()`` +\n+    ``normcase``) because it resolves the path to the *correct* case on\n+    case-insensitive but case-preserving file systems such as Windows, while\n+    also deduplicating paths that only differ in case. Lowercasing the path\n+    (as ``normcase`` does) would break importing modules from folders whose\n+    real name is not all lowercase (see #5792).\"\"\"\n+    return type(path)(Path(str(path)).resolve())\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/pathlib.py",
+          "line": 346,
+          "statement": "    return type(path)(normcase(str(path.realpath())))"
+        }
+      ],
+      "reasoning": "unique_path() applied os.path.normcase to the resolved path, which lowercases paths on Windows. Since this normalized path is later used to import conftest.py (via pypkgpath/pyimport), the package name derived from the folder (e.g. 'Python') was lowercased to 'python', causing 'ModuleNotFoundError: No module named python'. Using Path().resolve() preserves the real folder casing while still deduplicating paths on case-insensitive filesystems.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

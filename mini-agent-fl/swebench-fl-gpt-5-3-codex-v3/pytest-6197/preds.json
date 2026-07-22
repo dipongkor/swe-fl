@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-6197": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pytest-dev__pytest-6197",
+    "model_patch": "diff --git a/src/_pytest/python.py b/src/_pytest/python.py\nindex 306e5f217..4bd8f1fdf 100644\n--- a/src/_pytest/python.py\n+++ b/src/_pytest/python.py\n@@ -178,7 +178,7 @@ def pytest_collect_file(path, parent):\n     if ext == \".py\":\n         if not parent.session.isinitpath(path):\n             if not path_matches_patterns(\n-                path, parent.config.getini(\"python_files\") + [\"__init__.py\"]\n+                path, parent.config.getini(\"python_files\")\n             ):\n                 return\n         ihook = parent.session.gethookproxy(path)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/python.py",
+          "line": 181,
+          "statement": "                path, parent.config.getini(\"python_files\") + [\"__init__.py\"]"
+        }
+      ],
+      "reasoning": "The collection filter incorrectly forced all __init__.py files to match test file patterns, causing pytest to import package initializers during discovery even when they are not test files.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

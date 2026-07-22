@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-8399": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-8399",
+    "model_patch": "diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py\nindex 719eb4e88..3f88d7a9e 100644\n--- a/src/_pytest/unittest.py\n+++ b/src/_pytest/unittest.py\n@@ -144,7 +144,7 @@ def _make_xunit_fixture(\n         scope=scope,\n         autouse=True,\n         # Use a unique name to speed up lookup.\n-        name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\",\n+        name=f\"_unittest_{setup_name}_fixture_{obj.__qualname__}\",\n     )\n     def fixture(self, request: FixtureRequest) -> Generator[None, None, None]:\n         if _is_skipped(self):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/unittest.py",
+          "line": 147,
+          "statement": "        name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\","
+        }
+      ],
+      "reasoning": "The fixture name generated for unittest setUpClass/setup_method/etc. starts with 'unittest_', which is not a leading underscore. The _showfixtures_main function in src/_pytest/python.py only hides fixtures whose names start with an underscore unless the verbose flag is set. Adding a leading underscore prefix to the fixture name causes it to be hidden from the default `--fixtures` output, matching the pre-6.2.0 behavior.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

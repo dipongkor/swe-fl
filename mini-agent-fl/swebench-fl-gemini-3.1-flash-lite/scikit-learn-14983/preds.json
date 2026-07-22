@@ -1,0 +1,24 @@
+{
+  "scikit-learn__scikit-learn-14983": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "scikit-learn__scikit-learn-14983",
+    "model_patch": "diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py\nindex c49a3ce6a..af8282725 100644\n--- a/sklearn/model_selection/_split.py\n+++ b/sklearn/model_selection/_split.py\n@@ -1212,6 +1212,9 @@ class RepeatedKFold(_RepeatedSplits):\n     --------\n     RepeatedStratifiedKFold: Repeats Stratified K-Fold n times.\n     \"\"\"\n+    def __repr__(self):\n+        return \"RepeatedKFold(n_splits={}, n_repeats={}, random_state={})\".format(self.n_splits, self.n_repeats, self.random_state)\n+\n     def __init__(self, n_splits=5, n_repeats=10, random_state=None):\n         super().__init__(\n             KFold, n_repeats, random_state, n_splits=n_splits)\n@@ -1262,9 +1265,11 @@ class RepeatedStratifiedKFold(_RepeatedSplits):\n     to an integer.\n \n     See also\n-    --------\n     RepeatedKFold: Repeats K-Fold n times.\n     \"\"\"\n+    def __repr__(self):\n+        return \"RepeatedStratifiedKFold(n_splits={}, n_repeats={}, random_state={})\".format(self.n_splits, self.n_repeats, self.random_state)\n+\n     def __init__(self, n_splits=5, n_repeats=10, random_state=None):\n         super().__init__(\n             StratifiedKFold, n_repeats, random_state, n_splits=n_splits)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 1212,
+          "statement": "class RepeatedKFold(_RepeatedSplits):"
+        },
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 1262,
+          "statement": "class RepeatedStratifiedKFold(_RepeatedSplits):"
+        }
+      ],
+      "reasoning": "RepeatedKFold and RepeatedStratifiedKFold classes were missing a __repr__ method, causing them to use the default object representation.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

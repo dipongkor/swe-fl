@@ -1,0 +1,29 @@
+{
+  "pylint-dev__pylint-6386": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pylint-dev__pylint-6386",
+    "model_patch": "diff --git a/pylint/config/utils.py b/pylint/config/utils.py\nindex 8c790416..69e0a2f3 100644\n--- a/pylint/config/utils.py\n+++ b/pylint/config/utils.py\n@@ -206,6 +206,7 @@ PREPROCESSABLE_OPTIONS: dict[\n     \"--rcfile\": (True, _set_rcfile),\n     \"--output\": (True, _set_output),\n     \"--load-plugins\": (True, _add_plugins),\n+    \"-v\": (False, _set_verbose_mode),\n     \"--verbose\": (False, _set_verbose_mode),\n     \"--enable-all-extensions\": (False, _enable_all_extensions),\n }\n@@ -218,15 +219,19 @@ def _preprocess_options(run: Run, args: Sequence[str]) -> list[str]:\n     i = 0\n     while i < len(args):\n         argument = args[i]\n-        if not argument.startswith(\"--\"):\n+        if not argument.startswith(\"-\"):\n             processed_args.append(argument)\n             i += 1\n             continue\n \n-        try:\n-            option, value = argument.split(\"=\", 1)\n-        except ValueError:\n-            option, value = argument, None\n+        if argument.startswith(\"--\"):\n+            try:\n+                option, value = argument.split(\"=\", 1)\n+            except ValueError:\n+                option, value = argument, None\n+        else:\n+            option = argument\n+            value = None\n \n         if option not in PREPROCESSABLE_OPTIONS:\n             processed_args.append(argument)\ndiff --git a/pylint/lint/base_options.py b/pylint/lint/base_options.py\nindex c793cc85..cbc4bab6 100644\n--- a/pylint/lint/base_options.py\n+++ b/pylint/lint/base_options.py\n@@ -539,7 +539,7 @@ def _make_run_options(self: Run) -> Options:\n             \"verbose\",\n             {\n                 \"action\": _DoNothingAction,\n-                \"kwargs\": {},\n+                \"kwargs\": {\"nargs\": 0},\n                 \"short\": \"v\",\n                 \"help\": \"In verbose mode, extra non-checker-related info \"\n                 \"will be displayed.\",\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "pylint/lint/base_options.py",
+          "line": 542,
+          "statement": "                \"kwargs\": {\"nargs\": 0},"
+        },
+        {
+          "file": "pylint/config/utils.py",
+          "line": 209,
+          "statement": "    \"-v\": (False, _set_verbose_mode),"
+        },
+        {
+          "file": "pylint/config/utils.py",
+          "line": 222,
+          "statement": "        if not argument.startswith(\"-\"):"
+        }
+      ],
+      "reasoning": "The verbose option's short form `-v` was not working because (1) the option's kwargs did not include 'nargs': 0, so argparse expected an argument for the option; (2) the short form '-v' was not registered in PREPROCESSABLE_OPTIONS, so it was not preprocessed; (3) _preprocess_options only checked for the '--' prefix, so short options like '-v' were never recognized for preprocessing. These three changes together ensure that the verbose option's short form works correctly without expecting an argument and properly enables verbose mode.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

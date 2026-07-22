@@ -1,0 +1,24 @@
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..bf32ec13bb 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,19 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++    def finish_response(self):
++        # For compliance with RFC 2616, section 4.3, don't return a response
++        # body for HEAD requests (the common WSGI servers already do this so
++        # Django doesn't strip it; but runserver must handle it itself).
++        if self.environ["REQUEST_METHOD"] != "HEAD":
++            super().finish_response()
++        else:
++            try:
++                # Close the iterable, if any, and send the headers only.
++                self.finish_content()
++            finally:
++                self.close()
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()

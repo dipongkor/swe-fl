@@ -1,0 +1,19 @@
+{
+  "django__django-15554": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-15554",
+    "model_patch": "--- a/django/db/models/sql/datastructures.py\n+++ b/django/db/models/sql/datastructures.py\n@@ -163,7 +163,7 @@\n \n     def equals(self, other):\n-        return self.identity[:-1] == other.identity[:-1]\n+        return self.identity == other.identity\n \n     def demote(self):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/datastructures.py",
+          "line": 166,
+          "statement": "return self.identity[:-1] == other.identity[:-1]"
+        }
+      ],
+      "reasoning": "The Join.equals method was incorrectly ignoring the filtered_relation attribute, causing multiple FilteredRelation objects for the same relation to be treated as identical and thus merged into a single join.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

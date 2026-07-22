@@ -1,0 +1,13 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+index fafc1beee8..0ca22780a6 100644
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -503,3 +503,8 @@ class KeyTransformFactory:
+ 
+     def __call__(self, *args, **kwargs):
+         return KeyTransform(self.key_name, *args, **kwargs)
++
++class KeyTransformIn(KeyTransformNumericLookupMixin, lookups.In):
++    pass
++
++KeyTransform.register_lookup(KeyTransformIn)

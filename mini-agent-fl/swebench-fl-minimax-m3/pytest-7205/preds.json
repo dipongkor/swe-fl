@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7205": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-7205",
+    "model_patch": "diff --git a/src/_pytest/setuponly.py b/src/_pytest/setuponly.py\nindex c9cc589ff..8e1845f4d 100644\n--- a/src/_pytest/setuponly.py\n+++ b/src/_pytest/setuponly.py\n@@ -1,4 +1,5 @@\n import pytest\n+from _pytest._io.saferepr import saferepr\n \n \n def pytest_addoption(parser):\n@@ -66,7 +67,10 @@ def _show_fixture_action(fixturedef, msg):\n             tw.write(\" (fixtures used: {})\".format(\", \".join(deps)))\n \n     if hasattr(fixturedef, \"cached_param\"):\n-        tw.write(\"[{}]\".format(fixturedef.cached_param))\n+        if isinstance(fixturedef.cached_param, bytes):\n+            tw.write(\"[{}]\".format(saferepr(fixturedef.cached_param)))\n+        else:\n+            tw.write(\"[{}]\".format(fixturedef.cached_param))\n \n     tw.flush()\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/setuponly.py",
+          "line": 69,
+          "statement": "        tw.write(\"[{}]\".format(fixturedef.cached_param))"
+        }
+      ],
+      "reasoning": "The line uses str.format() on fixturedef.cached_param, which implicitly calls str() on the value. When cached_param is a bytes instance, str() triggers a BytesWarning (especially with -bb flag). The fix uses saferepr for bytes values to safely produce a string representation without triggering the warning.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-13579": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "astropy__astropy-13579",
+    "model_patch": "diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py\nindex d7605b078..d51b86264 100644\n--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py\n+++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py\n@@ -246,12 +246,15 @@ class SlicedLowLevelWCS(BaseWCSWrapper):\n         world_arrays = tuple(map(np.asanyarray, world_arrays))\n         world_arrays_new = []\n         iworld_curr = -1\n+        idropped_curr = -1\n+        dropped_world = self.dropped_world_dimensions\n         for iworld in range(self._wcs.world_n_dim):\n             if iworld in self._world_keep:\n                 iworld_curr += 1\n                 world_arrays_new.append(world_arrays[iworld_curr])\n             else:\n-                world_arrays_new.append(1.)\n+                idropped_curr += 1\n+                world_arrays_new.append(dropped_world['value'][idropped_curr])\n \n         world_arrays_new = np.broadcast_arrays(*world_arrays_new)\n         pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/wcs/wcsapi/wrappers/sliced_wcs.py",
+          "line": 254,
+          "statement": "                world_arrays_new.append(1.)"
+        }
+      ],
+      "reasoning": "In SlicedLowLevelWCS.world_to_pixel_values, when a world dimension has been dropped (sliced out with an integer), the placeholder value 1.0 was being used for that dimension. This is incorrect because the actual world coordinate at the slice position (from dropped_world_dimensions) should be used. This is especially problematic when the WCS has a non-trivial PC matrix that couples the dropped dimension (e.g., spectral) with the kept dimensions (e.g., spatial), leading to wildly incorrect pixel values for the kept dimensions.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

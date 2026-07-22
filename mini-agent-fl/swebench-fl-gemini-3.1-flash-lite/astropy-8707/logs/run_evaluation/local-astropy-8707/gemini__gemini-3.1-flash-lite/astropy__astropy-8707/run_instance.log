@@ -1,0 +1,101 @@
+2026-07-01 20:35:04,921 - INFO - Creating container for astropy__astropy-8707...
+2026-07-01 20:35:05,002 - INFO - Container for astropy__astropy-8707 created: 8100e4efcc8a20af160d7b07672cb3e2a5a5532fd2805e217fd311102a8028d5
+2026-07-01 20:35:05,451 - INFO - Container for astropy__astropy-8707 started: 8100e4efcc8a20af160d7b07672cb3e2a5a5532fd2805e217fd311102a8028d5
+2026-07-01 20:35:05,454 - INFO - Intermediate patch for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/gemini__gemini-3.1-flash-lite/astropy__astropy-8707/patch.diff, now applying to container...
+2026-07-01 20:35:05,945 - INFO - >>>>> Applied Patch:
+Checking patch astropy/io/fits/card.py...
+Checking patch astropy/io/fits/header.py...
+Applied patch astropy/io/fits/card.py cleanly.
+Applied patch astropy/io/fits/header.py cleanly.
+
+2026-07-01 20:35:06,652 - INFO - Git diff before:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..98c8a858c 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -1269,6 +1269,11 @@ def _format_float(value):
+ def _pad(input):
+     """Pad blank space to the input string to be multiple of 80."""
+ 
++    if isinstance(input, bytes):
++        pad_char = b" "
++    else:
++        pad_char = " "
++
+     _len = len(input)
+     if _len == Card.length:
+         return input
+@@ -1277,9 +1282,9 @@ def _pad(input):
+         if strlen == 0:
+             return input
+         else:
+-            return input + ' ' * (Card.length - strlen)
++            return input + pad_char * (Card.length - strlen)
+ 
+     # minimum length is 80
+     else:
+         strlen = _len % Card.length
+-        return input + ' ' * (Card.length - strlen)
++        return input + pad_char * (Card.length - strlen)
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..852098775 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -347,6 +347,8 @@ class Header:
+         header
+             A new `Header` instance.
+         """
++        if isinstance(data, bytes):
++            data = data.decode("ascii")
+ 
+         cards = []
+2026-07-01 20:35:06,656 - INFO - Eval script for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/gemini__gemini-3.1-flash-lite/astropy__astropy-8707/eval.sh; copying to container...
+2026-07-01 20:35:52,170 - INFO - Test runtime: 45.22 seconds
+2026-07-01 20:35:52,179 - INFO - Test output for astropy__astropy-8707 written to logs/run_evaluation/local-astropy-8707/gemini__gemini-3.1-flash-lite/astropy__astropy-8707/test_output.txt
+2026-07-01 20:35:52,378 - INFO - Git diff after:
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..98c8a858c 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -1269,6 +1269,11 @@ def _format_float(value):
+ def _pad(input):
+     """Pad blank space to the input string to be multiple of 80."""
+ 
++    if isinstance(input, bytes):
++        pad_char = b" "
++    else:
++        pad_char = " "
++
+     _len = len(input)
+     if _len == Card.length:
+         return input
+@@ -1277,9 +1282,9 @@ def _pad(input):
+         if strlen == 0:
+             return input
+         else:
+-            return input + ' ' * (Card.length - strlen)
++            return input + pad_char * (Card.length - strlen)
+ 
+     # minimum length is 80
+     else:
+         strlen = _len % Card.length
+-        return input + ' ' * (Card.length - strlen)
++        return input + pad_char * (Card.length - strlen)
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..852098775 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -347,6 +347,8 @@ class Header:
+         header
+             A new `Header` instance.
+         """
++        if isinstance(data, bytes):
++            data = data.decode("ascii")
+ 
+         cards = []
+2026-07-01 20:35:52,378 - INFO - Grading answer for astropy__astropy-8707...
+2026-07-01 20:35:52,529 - INFO - report: {'astropy__astropy-8707': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_from_bytes']}, 'PASS_TO_PASS': {'success': ['astropy/io/fits/tests/test_header.py::test_shallow_copy', 'astropy/io/fits/tests/test_header.py::test_init_with_header', 'astropy/io/fits/tests/test_header.py::test_init_with_dict', 'astropy/io/fits/tests/test_header.py::test_init_with_ordereddict'], 'failure': ['astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_rename_keyword', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_constructor_default_args', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_string_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_boolean_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_integer_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_floating_point_value_card', 'astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_complex_value_card']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for astropy__astropy-8707: resolved: False
+2026-07-01 20:35:52,532 - INFO - Attempting to stop container sweb.eval.astropy__astropy-8707.local-astropy-8707...
+2026-07-01 20:36:07,957 - INFO - Attempting to remove container sweb.eval.astropy__astropy-8707.local-astropy-8707...
+2026-07-01 20:36:08,027 - INFO - Container sweb.eval.astropy__astropy-8707.local-astropy-8707 removed.

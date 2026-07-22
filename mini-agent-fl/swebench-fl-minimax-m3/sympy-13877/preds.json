@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-13877": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-13877",
+    "model_patch": "diff --git a/sympy/matrices/matrices.py b/sympy/matrices/matrices.py\nindex 97cde62e2..215e68f7f 100644\n--- a/sympy/matrices/matrices.py\n+++ b/sympy/matrices/matrices.py\n@@ -208,7 +208,7 @@ def bareiss(mat, cumm=1):\n             def entry(i, j):\n                 ret = (pivot_val*tmp_mat[i, j + 1] - mat[pivot_pos, j + 1]*tmp_mat[i, 0]) / cumm\n                 if not ret.is_Atom:\n-                    cancel(ret)\n+                    ret = cancel(ret)\n                 return ret\n \n             return sign*bareiss(self._new(mat.rows - 1, mat.cols - 1, entry), pivot_val)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/matrices/matrices.py",
+          "line": 211,
+          "statement": "                    cancel(ret)"
+        }
+      ],
+      "reasoning": "The bug is that `cancel(ret)` is called as a statement with its return value discarded, instead of being assigned back to `ret`. This means the entry returned by the `entry` function is the un-simplified expression. When the next iteration of bareiss uses this entry as a pivot, the `if val:` check in `_find_pivot` cannot recognize that a complex symbolic expression evaluates to zero, so the algorithm proceeds with a non-zero pivot. This eventually leads to division by zero (which produces nan) when the symbolic zero expression is used as the cumulative divisor (cumm) in subsequent iterations. The fix is to assign the cancelled result back to `ret`: `ret = cancel(ret)`.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

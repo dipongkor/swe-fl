@@ -1,0 +1,83 @@
+2026-06-30 21:11:52,325 - INFO - Creating container for django__django-14315...
+2026-06-30 21:11:52,402 - INFO - Container for django__django-14315 created: 22d85853264f794ca569d1e96c252dca420581a5c8c96cd2bfd0cfd04516413d
+2026-06-30 21:11:52,786 - INFO - Container for django__django-14315 started: 22d85853264f794ca569d1e96c252dca420581a5c8c96cd2bfd0cfd04516413d
+2026-06-30 21:11:52,790 - INFO - Intermediate patch for django__django-14315 written to logs/run_evaluation/local-django-14315/openai__gpt-5.3-codex/django__django-14315/patch.diff, now applying to container...
+2026-06-30 21:11:53,320 - INFO - >>>>> Applied Patch:
+Checking patch django/db/backends/postgresql/client.py...
+Applied patch django/db/backends/postgresql/client.py cleanly.
+
+2026-06-30 21:11:54,184 - INFO - Git diff before:
+diff --git a/django/db/backends/postgresql/client.py b/django/db/backends/postgresql/client.py
+index 3effab65a8..360622951f 100644
+--- a/django/db/backends/postgresql/client.py
++++ b/django/db/backends/postgresql/client.py
+@@ -36,20 +36,27 @@ class DatabaseClient(BaseDatabaseClient):
+             args += [dbname]
+         args.extend(parameters)
+ 
+-        env = {}
++        env = None
+         if passwd:
++            env = {} if env is None else env
+             env['PGPASSWORD'] = str(passwd)
+         if service:
++            env = {} if env is None else env
+             env['PGSERVICE'] = str(service)
+         if sslmode:
++            env = {} if env is None else env
+             env['PGSSLMODE'] = str(sslmode)
+         if sslrootcert:
++            env = {} if env is None else env
+             env['PGSSLROOTCERT'] = str(sslrootcert)
+         if sslcert:
++            env = {} if env is None else env
+             env['PGSSLCERT'] = str(sslcert)
+         if sslkey:
++            env = {} if env is None else env
+             env['PGSSLKEY'] = str(sslkey)
+         if passfile:
++            env = {} if env is None else env
+             env['PGPASSFILE'] = str(passfile)
+         return args, env
+2026-06-30 21:11:54,189 - INFO - Eval script for django__django-14315 written to logs/run_evaluation/local-django-14315/openai__gpt-5.3-codex/django__django-14315/eval.sh; copying to container...
+2026-06-30 21:12:01,440 - INFO - Test runtime: 6.94 seconds
+2026-06-30 21:12:01,443 - INFO - Test output for django__django-14315 written to logs/run_evaluation/local-django-14315/openai__gpt-5.3-codex/django__django-14315/test_output.txt
+2026-06-30 21:12:02,558 - INFO - Git diff after:
+diff --git a/django/db/backends/postgresql/client.py b/django/db/backends/postgresql/client.py
+index 3effab65a8..360622951f 100644
+--- a/django/db/backends/postgresql/client.py
++++ b/django/db/backends/postgresql/client.py
+@@ -36,20 +36,27 @@ class DatabaseClient(BaseDatabaseClient):
+             args += [dbname]
+         args.extend(parameters)
+ 
+-        env = {}
++        env = None
+         if passwd:
++            env = {} if env is None else env
+             env['PGPASSWORD'] = str(passwd)
+         if service:
++            env = {} if env is None else env
+             env['PGSERVICE'] = str(service)
+         if sslmode:
++            env = {} if env is None else env
+             env['PGSSLMODE'] = str(sslmode)
+         if sslrootcert:
++            env = {} if env is None else env
+             env['PGSSLROOTCERT'] = str(sslrootcert)
+         if sslcert:
++            env = {} if env is None else env
+             env['PGSSLCERT'] = str(sslcert)
+         if sslkey:
++            env = {} if env is None else env
+             env['PGSSLKEY'] = str(sslkey)
+         if passfile:
++            env = {} if env is None else env
+             env['PGPASSFILE'] = str(passfile)
+         return args, env
+2026-06-30 21:12:02,559 - INFO - Grading answer for django__django-14315...
+2026-06-30 21:12:02,563 - INFO - report: {'django__django-14315': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_accent (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_basic (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_column (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_crash_password_does_not_leak (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_nopass (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_parameters (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_passfile (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_service (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)', 'test_ssl_certificate (dbshell.test_postgresql.PostgreSqlDbshellCommandTestCase)'], 'failure': ['test_runshell_use_environ (backends.base.test_client.SimpleDatabaseClientTests)', 'test_settings_to_cmd_args_env (backends.base.test_client.SimpleDatabaseClientTests)']}, 'PASS_TO_PASS': {'success': [], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14315: resolved: False
+2026-06-30 21:12:02,573 - INFO - Attempting to stop container sweb.eval.django__django-14315.local-django-14315...
+2026-06-30 21:12:18,004 - INFO - Attempting to remove container sweb.eval.django__django-14315.local-django-14315...
+2026-06-30 21:12:18,082 - INFO - Container sweb.eval.django__django-14315.local-django-14315 removed.

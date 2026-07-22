@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-21930": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-21930",
+    "model_patch": "",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/physics/secondquant.py",
+          "line": 481,
+          "statement": "        return \"b^\\\\dagger_{%s}\" % self.state.name"
+        }
+      ],
+      "reasoning": "The creation operator LaTeX string includes an ungrouped superscript (\\dagger) and then later receives another superscript when exponentiated, producing invalid double-superscript output. Grouping the base avoids malformed LaTeX.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

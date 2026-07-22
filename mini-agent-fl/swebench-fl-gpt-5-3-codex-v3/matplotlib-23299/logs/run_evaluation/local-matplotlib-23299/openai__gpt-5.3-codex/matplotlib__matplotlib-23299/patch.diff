@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+index c268a56724..1bceb2b490 100644
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -1175,7 +1175,12 @@ def get_backend():
+     --------
+     matplotlib.use
+     """
+-    return rcParams['backend']
++    backend = rcParams._get_backend_or_none()
++    if backend is None:
++        # Fall back to the originally configured backend without triggering
++        # auto-backend resolution (which can switch backends and close figs).
++        backend = rcParamsOrig['backend']
++    return backend
+ 
+ 
+ def interactive(b):

@@ -1,0 +1,99 @@
+2026-06-29 20:33:50,601 - INFO - Creating container for sphinx-doc__sphinx-9602...
+2026-06-29 20:33:50,690 - INFO - Container for sphinx-doc__sphinx-9602 created: 3af6d13e71f94420cb8e8de4e201e8a083d257db808cd1cd588573cca36f247d
+2026-06-29 20:33:51,113 - INFO - Container for sphinx-doc__sphinx-9602 started: 3af6d13e71f94420cb8e8de4e201e8a083d257db808cd1cd588573cca36f247d
+2026-06-29 20:33:51,117 - INFO - Intermediate patch for sphinx-doc__sphinx-9602 written to logs/run_evaluation/local-sphinx-9602/anthropic__claude-opus-4-8/sphinx-doc__sphinx-9602/patch.diff, now applying to container...
+2026-06-29 20:33:51,623 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/domains/python.py...
+Applied patch sphinx/domains/python.py cleanly.
+
+2026-06-29 20:33:52,022 - INFO - Git diff before:
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..d5ed30c35 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -122,8 +122,11 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         elif isinstance(node, ast.Constant):  # type: ignore
+             if node.value is Ellipsis:
+                 return [addnodes.desc_sig_punctuation('', "...")]
++            elif node.value is None:
++                return [nodes.Text('None')]
+             else:
+-                return [nodes.Text(node.value)]
++                # e.g. Literal values such as True, False, 1, 'foo'
++                return [nodes.literal('', nodes.Text(repr(node.value)))]
+         elif isinstance(node, ast.Expr):
+             return unparse(node.value)
+         elif isinstance(node, ast.Index):
+@@ -167,7 +170,10 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+                 if isinstance(node, ast.Ellipsis):
+                     return [addnodes.desc_sig_punctuation('', "...")]
+                 elif isinstance(node, ast.NameConstant):
+-                    return [nodes.Text(node.value)]
++                    if node.value is None:
++                        return [nodes.Text(str(node.value))]
++                    else:
++                        return [nodes.literal('', nodes.Text(repr(node.value)))]
+ 
+             raise SyntaxError  # unsupported syntax
+ 
+@@ -179,7 +185,9 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         tree = ast_parse(annotation)
+         result = unparse(tree)
+         for i, node in enumerate(result):
+-            if isinstance(node, nodes.Text) and node.strip():
++            if isinstance(node, nodes.literal):
++                result[i] = node[0]
++            elif isinstance(node, nodes.Text) and node.strip():
+                 result[i] = type_to_xref(str(node), env)
+         return result
+     except SyntaxError:
+2026-06-29 20:33:52,026 - INFO - Eval script for sphinx-doc__sphinx-9602 written to logs/run_evaluation/local-sphinx-9602/anthropic__claude-opus-4-8/sphinx-doc__sphinx-9602/eval.sh; copying to container...
+2026-06-29 20:34:00,230 - INFO - Test runtime: 7.89 seconds
+2026-06-29 20:34:00,234 - INFO - Test output for sphinx-doc__sphinx-9602 written to logs/run_evaluation/local-sphinx-9602/anthropic__claude-opus-4-8/sphinx-doc__sphinx-9602/test_output.txt
+2026-06-29 20:34:00,439 - INFO - Git diff after:
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..d5ed30c35 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -122,8 +122,11 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         elif isinstance(node, ast.Constant):  # type: ignore
+             if node.value is Ellipsis:
+                 return [addnodes.desc_sig_punctuation('', "...")]
++            elif node.value is None:
++                return [nodes.Text('None')]
+             else:
+-                return [nodes.Text(node.value)]
++                # e.g. Literal values such as True, False, 1, 'foo'
++                return [nodes.literal('', nodes.Text(repr(node.value)))]
+         elif isinstance(node, ast.Expr):
+             return unparse(node.value)
+         elif isinstance(node, ast.Index):
+@@ -167,7 +170,10 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+                 if isinstance(node, ast.Ellipsis):
+                     return [addnodes.desc_sig_punctuation('', "...")]
+                 elif isinstance(node, ast.NameConstant):
+-                    return [nodes.Text(node.value)]
++                    if node.value is None:
++                        return [nodes.Text(str(node.value))]
++                    else:
++                        return [nodes.literal('', nodes.Text(repr(node.value)))]
+ 
+             raise SyntaxError  # unsupported syntax
+ 
+@@ -179,7 +185,9 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         tree = ast_parse(annotation)
+         result = unparse(tree)
+         for i, node in enumerate(result):
+-            if isinstance(node, nodes.Text) and node.strip():
++            if isinstance(node, nodes.literal):
++                result[i] = node[0]
++            elif isinstance(node, nodes.Text) and node.strip():
+                 result[i] = type_to_xref(str(node), env)
+         return result
+     except SyntaxError:
+2026-06-29 20:34:00,439 - INFO - Grading answer for sphinx-doc__sphinx-9602...
+2026-06-29 20:34:00,453 - INFO - report: {'sphinx-doc__sphinx-9602': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_domain_py.py::test_parse_annotation_Literal'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_domain_py.py::test_function_signatures', 'tests/test_domain_py.py::test_domain_py_xrefs', 'tests/test_domain_py.py::test_domain_py_xrefs_abbreviations', 'tests/test_domain_py.py::test_domain_py_objects', 'tests/test_domain_py.py::test_resolve_xref_for_properties', 'tests/test_domain_py.py::test_domain_py_find_obj', 'tests/test_domain_py.py::test_domain_py_canonical', 'tests/test_domain_py.py::test_get_full_qualified_name', 'tests/test_domain_py.py::test_parse_annotation', 'tests/test_domain_py.py::test_pyfunction_signature', 'tests/test_domain_py.py::test_pyfunction_signature_full', 'tests/test_domain_py.py::test_pyfunction_signature_full_py38', 'tests/test_domain_py.py::test_pyfunction_with_number_literals', 'tests/test_domain_py.py::test_pyfunction_with_union_type_operator', 'tests/test_domain_py.py::test_optional_pyfunction_signature', 'tests/test_domain_py.py::test_pyexception_signature', 'tests/test_domain_py.py::test_pydata_signature', 'tests/test_domain_py.py::test_pydata_signature_old', 'tests/test_domain_py.py::test_pydata_with_union_type_operator', 'tests/test_domain_py.py::test_pyobject_prefix', 'tests/test_domain_py.py::test_pydata', 'tests/test_domain_py.py::test_pyfunction', 'tests/test_domain_py.py::test_pyclass_options', 'tests/test_domain_py.py::test_pymethod_options', 'tests/test_domain_py.py::test_pyclassmethod', 'tests/test_domain_py.py::test_pystaticmethod', 'tests/test_domain_py.py::test_pyattribute', 'tests/test_domain_py.py::test_pyproperty', 'tests/test_domain_py.py::test_pydecorator_signature', 'tests/test_domain_py.py::test_pydecoratormethod_signature', 'tests/test_domain_py.py::test_canonical', 'tests/test_domain_py.py::test_canonical_definition_overrides', 'tests/test_domain_py.py::test_canonical_definition_skip', 'tests/test_domain_py.py::test_canonical_duplicated', 'tests/test_domain_py.py::test_info_field_list', 'tests/test_domain_py.py::test_info_field_list_piped_type', 'tests/test_domain_py.py::test_info_field_list_var', 'tests/test_domain_py.py::test_module_index', 'tests/test_domain_py.py::test_module_index_submodule', 'tests/test_domain_py.py::test_module_index_not_collapsed', 'tests/test_domain_py.py::test_modindex_common_prefix', 'tests/test_domain_py.py::test_noindexentry', 'tests/test_domain_py.py::test_python_python_use_unqualified_type_names', 'tests/test_domain_py.py::test_python_python_use_unqualified_type_names_disabled', 'tests/test_domain_py.py::test_warn_missing_reference'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-9602: resolved: True
+2026-06-29 20:34:00,455 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-9602.local-sphinx-9602...
+2026-06-29 20:34:15,899 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-9602.local-sphinx-9602...
+2026-06-29 20:34:15,970 - INFO - Container sweb.eval.sphinx-doc__sphinx-9602.local-sphinx-9602 removed.

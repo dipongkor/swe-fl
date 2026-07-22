@@ -1,0 +1,35 @@
+diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py
+index f2ca8c8df9..7d91235587 100644
+--- a/django/db/backends/base/schema.py
++++ b/django/db/backends/base/schema.py
+@@ -561,11 +561,28 @@ class BaseDatabaseSchemaEditor:
+             constraint.name for constraint in model._meta.constraints
+         }
+         meta_index_names = {constraint.name for constraint in model._meta.indexes}
+-        columns = [model._meta.get_field(field).column for field in fields]
++        fields_objs = [model._meta.get_field(field) for field in fields]
++        columns = [field.column for field in fields_objs]
++        exclude = meta_constraint_names | meta_index_names
++        if constraint_kwargs == {"unique": True} and len(columns) == 1:
++            unique_constraint_names = self._constraint_names(
++                model,
++                columns,
++                unique=True,
++                primary_key=False,
++            )
++            if len(unique_constraint_names) > 1:
++                # Exclude single-column unique constraints (e.g. created by
++                # field.unique=True) so only the unique_together constraint
++                # remains.
++                for field in fields_objs:
++                    if field.unique:
++                        exclude |= set(unique_constraint_names)
++                        break
+         constraint_names = self._constraint_names(
+             model,
+             columns,
+-            exclude=meta_constraint_names | meta_index_names,
++            exclude=exclude,
+             **constraint_kwargs,
+         )
+         if len(constraint_names) != 1:

@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8548": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-8548",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py\nindex ddfd2b365..4fe60f579 100644\n--- a/sphinx/ext/autodoc/__init__.py\n+++ b/sphinx/ext/autodoc/__init__.py\n@@ -689,6 +689,19 @@ class Documenter:\n         else:\n             attr_docs = {}\n \n+        attr_doc_namespaces = {namespace}\n+        if inspect.isclass(self.object):\n+            for cls in self.object.__mro__[1:]:\n+                if cls is object:\n+                    continue\n+\n+                qualname = safe_getattr(cls, '__qualname__', safe_getattr(cls, '__name__', None))\n+                modname = safe_getattr(cls, '__module__', None)\n+                if qualname and modname:\n+                    attr_doc_namespaces.add(modname + '.' + qualname)\n+                elif qualname:\n+                    attr_doc_namespaces.add(qualname)\n+\n         # process members and determine which to skip\n         for obj in members:\n             membername, member = obj\n@@ -746,7 +759,7 @@ class Documenter:\n                         keep = has_doc or self.options.undoc_members\n                 else:\n                     keep = False\n-            elif (namespace, membername) in attr_docs:\n+            elif any((ns, membername) in attr_docs for ns in attr_doc_namespaces):\n                 if want_all and isprivate:\n                     if self.options.private_members is None:\n                         keep = False\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/__init__.py",
+          "line": 762,
+          "statement": "            elif any((ns, membername) in attr_docs for ns in attr_doc_namespaces):"
+        }
+      ],
+      "reasoning": "The old logic only checked (current namespace, membername) in attr_docs, so inherited attributes documented on base classes were missed. The fix expands lookup to include base-class namespaces.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "django__django-13158": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-13158",
+    "model_patch": "diff --git a/django/db/models/query.py b/django/db/models/query.py\nindex 07d6ffd4ca..52d31a370a 100644\n--- a/django/db/models/query.py\n+++ b/django/db/models/query.py\n@@ -919,6 +919,8 @@ class QuerySet:\n     def none(self):\n         \"\"\"Return an empty QuerySet.\"\"\"\n         clone = self._chain()\n+        if clone.query.combined_queries:\n+            clone.query.combined_queries = ()\n         clone.query.set_empty()\n         return clone\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/query.py",
+          "line": 925,
+          "statement": "clone.query.set_empty()"
+        }
+      ],
+      "reasoning": "The none() method on a QuerySet with combined queries (like union) did not clear the combined_queries, causing the resulting QuerySet to still return results from the combined queries.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

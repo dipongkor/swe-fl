@@ -1,0 +1,28 @@
+diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py
+index e10a5bb6d9..6a1a9be19a 100644
+--- a/django/db/models/fields/files.py
++++ b/django/db/models/fields/files.py
+@@ -228,8 +228,9 @@ class FileField(Field):
+         self._primary_key_set_explicitly = 'primary_key' in kwargs
+ 
+         self.storage = storage or default_storage
+-        if callable(self.storage):
+-            self.storage = self.storage()
++        self._storage_callable = self.storage if callable(self.storage) else None
++        if self._storage_callable is not None:
++            self.storage = self._storage_callable()
+             if not isinstance(self.storage, Storage):
+                 raise TypeError(
+                     "%s.storage must be a subclass/instance of %s.%s"
+@@ -278,8 +279,9 @@ class FileField(Field):
+         if kwargs.get("max_length") == 100:
+             del kwargs["max_length"]
+         kwargs['upload_to'] = self.upload_to
+-        if self.storage is not default_storage:
+-            kwargs['storage'] = self.storage
++        storage = self._storage_callable or self.storage
++        if storage is not default_storage:
++            kwargs['storage'] = storage
+         return name, path, args, kwargs
+ 
+     def get_internal_type(self):

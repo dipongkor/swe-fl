@@ -1,0 +1,137 @@
+2026-06-29 18:44:42,828 - INFO - Creating container for sympy__sympy-20438...
+2026-06-29 18:44:42,902 - INFO - Container for sympy__sympy-20438 created: 1f843ce64964711568629d5f9f32b03c85ba90ff315fae4a33b50552d18fbfca
+2026-06-29 18:44:43,360 - INFO - Container for sympy__sympy-20438 started: 1f843ce64964711568629d5f9f32b03c85ba90ff315fae4a33b50552d18fbfca
+2026-06-29 18:44:43,368 - INFO - Intermediate patch for sympy__sympy-20438 written to logs/run_evaluation/local-sympy-20438/anthropic__claude-opus-4-8/sympy__sympy-20438/patch.diff, now applying to container...
+2026-06-29 18:44:43,844 - INFO - >>>>> Applied Patch:
+Checking patch sympy/core/relational.py...
+Checking patch sympy/sets/handlers/issubset.py...
+Checking patch sympy/sets/sets.py...
+Applied patch sympy/core/relational.py cleanly.
+Applied patch sympy/sets/handlers/issubset.py cleanly.
+Applied patch sympy/sets/sets.py cleanly.
+
+2026-06-29 18:44:44,466 - INFO - Git diff before:
+diff --git a/sympy/core/relational.py b/sympy/core/relational.py
+index e2e0b7fbcc..a097d00f8a 100644
+--- a/sympy/core/relational.py
++++ b/sympy/core/relational.py
+@@ -557,7 +557,13 @@ def binary_symbols(self):
+ 
+     def _eval_simplify(self, **kwargs):
+         from .add import Add
++        from sympy.core.expr import Expr
+         from sympy.solvers.solveset import linear_coeffs
++        # If either side is not an Expr (e.g. a Set) then the generic
++        # Relational simplification (which subtracts lhs - rhs) is not
++        # applicable, so just simplify the two sides.
++        if not all(isinstance(arg, Expr) for arg in self.args):
++            return self.func(*[arg.simplify(**kwargs) for arg in self.args])
+         # standard simplify
+         e = super()._eval_simplify(**kwargs)
+         if not isinstance(e, Equality):
+diff --git a/sympy/sets/handlers/issubset.py b/sympy/sets/handlers/issubset.py
+index fdca06025a..ac3effe092 100644
+--- a/sympy/sets/handlers/issubset.py
++++ b/sympy/sets/handlers/issubset.py
+@@ -1,7 +1,7 @@
+ from sympy import S, Symbol
+ from sympy.core.logic import fuzzy_and, fuzzy_bool, fuzzy_not, fuzzy_or
+ from sympy.core.relational import Eq
+-from sympy.sets.sets import FiniteSet, Interval, Set, Union
++from sympy.sets.sets import FiniteSet, Interval, Set, Union, ProductSet
+ from sympy.sets.fancysets import Complexes, Reals, Range, Rationals
+ from sympy.multipledispatch import dispatch
+ 
+@@ -133,3 +133,8 @@ def is_subset_sets(a, b): # noqa:F811
+ @dispatch(Rationals, Range)  # type: ignore # noqa:F811
+ def is_subset_sets(a, b): # noqa:F811
+     return False
++
++
++@dispatch(ProductSet, FiniteSet)  # type: ignore # noqa:F811
++def is_subset_sets(a_ps, b_fs): # noqa:F811
++    return fuzzy_and(b_fs.contains(x) for x in a_ps)
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..de4298c82e 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -801,6 +801,12 @@ def _contains(self, element):
+ 
+         return fuzzy_and(s._contains(e) for s, e in zip(self.sets, element))
+ 
++    def _eval_rewrite_as_FiniteSet(self, *args, **kwargs):
++        if self.is_iterable:
++            return FiniteSet(*self)
++        else:
++            return self
++
+     def as_relational(self, *symbols):
+         symbols = [_sympify(s) for s in symbols]
+         if len(symbols) != len(self.sets) or not all(
+2026-06-29 18:44:44,482 - INFO - Eval script for sympy__sympy-20438 written to logs/run_evaluation/local-sympy-20438/anthropic__claude-opus-4-8/sympy__sympy-20438/eval.sh; copying to container...
+2026-06-29 18:45:36,714 - INFO - Test runtime: 51.95 seconds
+2026-06-29 18:45:36,725 - INFO - Test output for sympy__sympy-20438 written to logs/run_evaluation/local-sympy-20438/anthropic__claude-opus-4-8/sympy__sympy-20438/test_output.txt
+2026-06-29 18:45:36,916 - INFO - Git diff after:
+diff --git a/sympy/core/relational.py b/sympy/core/relational.py
+index e2e0b7fbcc..a097d00f8a 100644
+--- a/sympy/core/relational.py
++++ b/sympy/core/relational.py
+@@ -557,7 +557,13 @@ def binary_symbols(self):
+ 
+     def _eval_simplify(self, **kwargs):
+         from .add import Add
++        from sympy.core.expr import Expr
+         from sympy.solvers.solveset import linear_coeffs
++        # If either side is not an Expr (e.g. a Set) then the generic
++        # Relational simplification (which subtracts lhs - rhs) is not
++        # applicable, so just simplify the two sides.
++        if not all(isinstance(arg, Expr) for arg in self.args):
++            return self.func(*[arg.simplify(**kwargs) for arg in self.args])
+         # standard simplify
+         e = super()._eval_simplify(**kwargs)
+         if not isinstance(e, Equality):
+diff --git a/sympy/sets/handlers/issubset.py b/sympy/sets/handlers/issubset.py
+index fdca06025a..ac3effe092 100644
+--- a/sympy/sets/handlers/issubset.py
++++ b/sympy/sets/handlers/issubset.py
+@@ -1,7 +1,7 @@
+ from sympy import S, Symbol
+ from sympy.core.logic import fuzzy_and, fuzzy_bool, fuzzy_not, fuzzy_or
+ from sympy.core.relational import Eq
+-from sympy.sets.sets import FiniteSet, Interval, Set, Union
++from sympy.sets.sets import FiniteSet, Interval, Set, Union, ProductSet
+ from sympy.sets.fancysets import Complexes, Reals, Range, Rationals
+ from sympy.multipledispatch import dispatch
+ 
+@@ -133,3 +133,8 @@ def is_subset_sets(a, b): # noqa:F811
+ @dispatch(Rationals, Range)  # type: ignore # noqa:F811
+ def is_subset_sets(a, b): # noqa:F811
+     return False
++
++
++@dispatch(ProductSet, FiniteSet)  # type: ignore # noqa:F811
++def is_subset_sets(a_ps, b_fs): # noqa:F811
++    return fuzzy_and(b_fs.contains(x) for x in a_ps)
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..de4298c82e 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -801,6 +801,12 @@ def _contains(self, element):
+ 
+         return fuzzy_and(s._contains(e) for s, e in zip(self.sets, element))
+ 
++    def _eval_rewrite_as_FiniteSet(self, *args, **kwargs):
++        if self.is_iterable:
++            return FiniteSet(*self)
++        else:
++            return self
++
+     def as_relational(self, *symbols):
+         symbols = [_sympify(s) for s in symbols]
+         if len(symbols) != len(self.sets) or not all(
+2026-06-29 18:45:36,917 - INFO - Grading answer for sympy__sympy-20438...
+2026-06-29 18:45:36,922 - INFO - report: {'sympy__sympy-20438': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_Eq', 'test_issue_19378']}, 'PASS_TO_PASS': {'success': ['test_imageset', 'test_is_empty', 'test_is_finiteset', 'test_deprecated_is_EmptySet', 'test_interval_arguments', 'test_interval_symbolic_end_points', 'test_interval_is_empty', 'test_union', 'test_union_iter', 'test_union_is_empty', 'test_difference', 'test_Complement', 'test_set_operations_nonsets', 'test_complement', 'test_intersect1', 'test_intersection', 'test_issue_9623', 'test_is_disjoint', 'test_ProductSet__len__', 'test_ProductSet', 'test_ProductSet_of_single_arg_is_not_arg', 'test_ProductSet_is_empty', 'test_interval_subs', 'test_interval_to_mpi', 'test_set_evalf', 'test_measure', 'test_is_subset', 'test_is_proper_subset', 'test_is_superset', 'test_is_proper_superset', 'test_contains', 'test_interval_symbolic', 'test_union_contains', 'test_is_number', 'test_Interval_is_left_unbounded', 'test_Interval_is_right_unbounded', 'test_Interval_as_relational', 'test_Finite_as_relational', 'test_Union_as_relational', 'test_Intersection_as_relational', 'test_Complement_as_relational', 'test_SymmetricDifference_as_relational', 'test_EmptySet', 'test_finite_basic', 'test_product_basic', 'test_real', 'test_supinf', 'test_universalset', 'test_Union_of_ProductSets_shares', 'test_Interval_free_symbols', 'test_image_interval', 'test_image_piecewise', 'test_image_FiniteSet', 'test_image_Union', 'test_image_EmptySet', 'test_issue_5724_7680', 'test_boundary', 'test_boundary_Union', 'test_boundary_ProductSet', 'test_boundary_ProductSet_line', 'test_is_open', 'test_is_closed', 'test_closure', 'test_interior', 'test_issue_7841', 'test_SymmetricDifference', 'test_issue_9536', 'test_issue_9637', 'test_issue_9808', 'test_issue_9956', 'test_issue_Symbol_inter', 'test_issue_11827', 'test_issue_10113', 'test_issue_10248', 'test_issue_9447', 'test_issue_10337', 'test_issue_10326', 'test_issue_2799', 'test_issue_9706', 'test_issue_8257', 'test_issue_10931', 'test_issue_11174', 'test_issue_18505', 'test_finite_set_intersection', 'test_union_intersection_constructor', 'test_Union_contains', 'test_DisjointUnion', 'test_DisjointUnion_is_empty', 'test_DisjointUnion_is_iterable', 'test_DisjointUnion_contains', 'test_DisjointUnion_iter', 'test_DisjointUnion_len', 'test_issue_20089'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-20438: resolved: False
+2026-06-29 18:45:36,925 - INFO - Attempting to stop container sweb.eval.sympy__sympy-20438.local-sympy-20438...
+2026-06-29 18:45:52,409 - INFO - Attempting to remove container sweb.eval.sympy__sympy-20438.local-sympy-20438...
+2026-06-29 18:45:52,492 - INFO - Container sweb.eval.sympy__sympy-20438.local-sympy-20438 removed.

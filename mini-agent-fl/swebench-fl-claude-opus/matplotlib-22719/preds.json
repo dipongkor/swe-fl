@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-22719": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "matplotlib__matplotlib-22719",
+    "model_patch": "diff --git a/lib/matplotlib/category.py b/lib/matplotlib/category.py\nindex c823b68fd9..cbf636dd6d 100644\n--- a/lib/matplotlib/category.py\n+++ b/lib/matplotlib/category.py\n@@ -58,7 +58,7 @@ class StrCategoryConverter(units.ConversionInterface):\n             is_numlike = all(units.ConversionInterface.is_numlike(v)\n                              and not isinstance(v, (str, bytes))\n                              for v in values)\n-        if is_numlike:\n+        if is_numlike and len(values):\n             _api.warn_deprecated(\n                 \"3.5\", message=\"Support for passing numbers through unit \"\n                 \"converters is deprecated since %(since)s and support will be \"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/category.py",
+          "line": 61,
+          "statement": "        if is_numlike:"
+        }
+      ],
+      "reasoning": "For empty input, the `all(...)` generator is vacuously True, so `is_numlike` is True and the code incorrectly issues the numeric-passthrough deprecation warning and then fails converting the empty array; guarding with `len(values)` avoids treating empty data as numeric.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

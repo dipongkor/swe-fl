@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-7671": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "astropy__astropy-7671",
+    "model_patch": "diff --git a/astropy/utils/introspection.py b/astropy/utils/introspection.py\nindex 3e784f9fc..eb95a086a 100644\n--- a/astropy/utils/introspection.py\n+++ b/astropy/utils/introspection.py\n@@ -6,7 +6,7 @@\n import inspect\n import types\n import importlib\n-from distutils.version import LooseVersion\n+from pkg_resources import parse_version\n \n \n __all__ = ['resolve_name', 'minversion', 'find_current_module',\n@@ -140,9 +140,9 @@ def minversion(module, version, inclusive=True, version_path='__version__'):\n         have_version = resolve_name(module.__name__, version_path)\n \n     if inclusive:\n-        return LooseVersion(have_version) >= LooseVersion(version)\n+        return parse_version(have_version) >= parse_version(version)\n     else:\n-        return LooseVersion(have_version) > LooseVersion(version)\n+        return parse_version(have_version) > parse_version(version)\n \n \n def find_current_module(depth=1, finddiff=False):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/utils/introspection.py",
+          "line": 146,
+          "statement": "        return LooseVersion(have_version) >= LooseVersion(version)"
+        }
+      ],
+      "reasoning": "minversion relied on distutils LooseVersion comparisons, which can raise TypeError when version components mix numeric and string tokens (e.g. 1.14.3 vs 1.14dev).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

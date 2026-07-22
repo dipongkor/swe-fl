@@ -1,0 +1,24 @@
+{
+  "pylint-dev__pylint-6386": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pylint-dev__pylint-6386",
+    "model_patch": "diff --git a/pylint/config/utils.py b/pylint/config/utils.py\nindex 8c790416..d86293f9 100644\n--- a/pylint/config/utils.py\n+++ b/pylint/config/utils.py\n@@ -207,6 +207,7 @@ PREPROCESSABLE_OPTIONS: dict[\n     \"--output\": (True, _set_output),\n     \"--load-plugins\": (True, _add_plugins),\n     \"--verbose\": (False, _set_verbose_mode),\n+    \"-v\": (False, _set_verbose_mode),\n     \"--enable-all-extensions\": (False, _enable_all_extensions),\n }\n \n@@ -218,7 +219,8 @@ def _preprocess_options(run: Run, args: Sequence[str]) -> list[str]:\n     i = 0\n     while i < len(args):\n         argument = args[i]\n-        if not argument.startswith(\"--\"):\n+\n+        if not argument.startswith(\"-\"):\n             processed_args.append(argument)\n             i += 1\n             continue\ndiff --git a/pylint/lint/base_options.py b/pylint/lint/base_options.py\nindex c793cc85..cbc4bab6 100644\n--- a/pylint/lint/base_options.py\n+++ b/pylint/lint/base_options.py\n@@ -539,7 +539,7 @@ def _make_run_options(self: Run) -> Options:\n             \"verbose\",\n             {\n                 \"action\": _DoNothingAction,\n-                \"kwargs\": {},\n+                \"kwargs\": {\"nargs\": 0},\n                 \"short\": \"v\",\n                 \"help\": \"In verbose mode, extra non-checker-related info \"\n                 \"will be displayed.\",\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "pylint/lint/base_options.py",
+          "line": 542,
+          "statement": "                \"kwargs\": {},"
+        },
+        {
+          "file": "pylint/config/utils.py",
+          "line": 221,
+          "statement": "        if not argument.startswith(\"--\"):"
+        }
+      ],
+      "reasoning": "The verbose option uses _DoNothingAction with empty kwargs, so argparse defaults to nargs=None and requires one argument for '-v' (and shows a VERBOSE metavar); adding nargs=0 fixes this. The long '--verbose' avoided the error only because _preprocess_options strips it, but that loop only handled options starting with '--', so the short '-v' was never preprocessed.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

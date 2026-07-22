@@ -1,0 +1,65 @@
+2026-06-30 17:04:08,438 - INFO - Creating container for scikit-learn__scikit-learn-25973...
+2026-06-30 17:04:08,518 - INFO - Container for scikit-learn__scikit-learn-25973 created: 971ce63c7d764cbae3a3f47cb0b40ceb065f2f0de480a8ce4e84fe7a5680701a
+2026-06-30 17:04:08,918 - INFO - Container for scikit-learn__scikit-learn-25973 started: 971ce63c7d764cbae3a3f47cb0b40ceb065f2f0de480a8ce4e84fe7a5680701a
+2026-06-30 17:04:08,921 - INFO - Intermediate patch for scikit-learn__scikit-learn-25973 written to logs/run_evaluation/local-scikit-learn-25973/openai__gpt-5.3-codex/scikit-learn__scikit-learn-25973/patch.diff, now applying to container...
+2026-06-30 17:04:09,468 - INFO - >>>>> Applied Patch:
+Checking patch sklearn/feature_selection/_sequential.py...
+Applied patch sklearn/feature_selection/_sequential.py cleanly.
+
+2026-06-30 17:04:09,934 - INFO - Git diff before:
+diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py
+index e983c55de..cc822f14c 100644
+--- a/sklearn/feature_selection/_sequential.py
++++ b/sklearn/feature_selection/_sequential.py
+@@ -260,6 +260,9 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+             raise ValueError("tol must be positive when doing forward selection")
+ 
+         cloned_estimator = clone(self.estimator)
++        cv = self.cv
++        if hasattr(cv, "__iter__") and not hasattr(cv, "split"):
++            cv = list(cv)
+ 
+         # the current mask corresponds to the set of features:
+         # - that we have already *selected* if we do forward selection
+@@ -309,7 +312,7 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+                 estimator,
+                 X_new,
+                 y,
+-                cv=self.cv,
++                cv=cv,
+                 scoring=self.scoring,
+                 n_jobs=self.n_jobs,
+             ).mean()
+2026-06-30 17:04:09,937 - INFO - Eval script for scikit-learn__scikit-learn-25973 written to logs/run_evaluation/local-scikit-learn-25973/openai__gpt-5.3-codex/scikit-learn__scikit-learn-25973/eval.sh; copying to container...
+2026-06-30 17:04:18,092 - INFO - Test runtime: 7.89 seconds
+2026-06-30 17:04:18,098 - INFO - Test output for scikit-learn__scikit-learn-25973 written to logs/run_evaluation/local-scikit-learn-25973/openai__gpt-5.3-codex/scikit-learn__scikit-learn-25973/test_output.txt
+2026-06-30 17:04:18,292 - INFO - Git diff after:
+diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py
+index e983c55de..cc822f14c 100644
+--- a/sklearn/feature_selection/_sequential.py
++++ b/sklearn/feature_selection/_sequential.py
+@@ -260,6 +260,9 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+             raise ValueError("tol must be positive when doing forward selection")
+ 
+         cloned_estimator = clone(self.estimator)
++        cv = self.cv
++        if hasattr(cv, "__iter__") and not hasattr(cv, "split"):
++            cv = list(cv)
+ 
+         # the current mask corresponds to the set of features:
+         # - that we have already *selected* if we do forward selection
+@@ -309,7 +312,7 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+                 estimator,
+                 X_new,
+                 y,
+-                cv=self.cv,
++                cv=cv,
+                 scoring=self.scoring,
+                 n_jobs=self.n_jobs,
+             ).mean()
+2026-06-30 17:04:18,293 - INFO - Grading answer for scikit-learn__scikit-learn-25973...
+2026-06-30 17:04:18,349 - INFO - report: {'scikit-learn__scikit-learn-25973': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['sklearn/feature_selection/tests/test_sequential.py::test_cv_generator_support']}, 'PASS_TO_PASS': {'success': ['sklearn/feature_selection/tests/test_sequential.py::test_bad_n_features_to_select', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_float[1.0-10-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_forward_neg_tol_error'], 'failure': ['sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[1-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[1-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[5-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[5-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[9-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[9-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[auto-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select[auto-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_auto[forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_auto[backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_stopping_criterion[forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_stopping_criterion[backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_float[0.1-1-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_float[0.1-1-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_float[1.0-10-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_float[0.5-5-forward]', 'sklearn/feature_selection/tests/test_sequential.py::test_n_features_to_select_float[0.5-5-backward]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-0]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-1]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-2]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-3]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-4]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-5]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-6]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-7]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-8]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-forward-9]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-0]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-1]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-2]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-3]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-4]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-5]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-6]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-7]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-8]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[2-expected_selected_features0-backward-9]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-0]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-1]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-2]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-3]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-4]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-5]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-6]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-7]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-8]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-forward-9]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-0]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-1]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-2]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-3]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-4]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-5]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-6]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-7]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-8]', 'sklearn/feature_selection/tests/test_sequential.py::test_sanity[1-expected_selected_features1-backward-9]', 'sklearn/feature_selection/tests/test_sequential.py::test_sparse_support', 'sklearn/feature_selection/tests/test_sequential.py::test_nan_support', 'sklearn/feature_selection/tests/test_sequential.py::test_pipeline_support', 'sklearn/feature_selection/tests/test_sequential.py::test_raise_deprecation_warning', 'sklearn/feature_selection/tests/test_sequential.py::test_unsupervised_model_fit[2]', 'sklearn/feature_selection/tests/test_sequential.py::test_unsupervised_model_fit[3]', 'sklearn/feature_selection/tests/test_sequential.py::test_no_y_validation_model_fit[no_validation]', 'sklearn/feature_selection/tests/test_sequential.py::test_no_y_validation_model_fit[1j]', 'sklearn/feature_selection/tests/test_sequential.py::test_no_y_validation_model_fit[99.9]', 'sklearn/feature_selection/tests/test_sequential.py::test_no_y_validation_model_fit[nan]', 'sklearn/feature_selection/tests/test_sequential.py::test_no_y_validation_model_fit[3]', 'sklearn/feature_selection/tests/test_sequential.py::test_backward_neg_tol']}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for scikit-learn__scikit-learn-25973: resolved: False
+2026-06-30 17:04:18,352 - INFO - Attempting to stop container sweb.eval.scikit-learn__scikit-learn-25973.local-scikit-learn-25973...
+2026-06-30 17:04:33,734 - INFO - Attempting to remove container sweb.eval.scikit-learn__scikit-learn-25973.local-scikit-learn-25973...
+2026-06-30 17:04:33,807 - INFO - Container sweb.eval.scikit-learn__scikit-learn-25973.local-scikit-learn-25973 removed.

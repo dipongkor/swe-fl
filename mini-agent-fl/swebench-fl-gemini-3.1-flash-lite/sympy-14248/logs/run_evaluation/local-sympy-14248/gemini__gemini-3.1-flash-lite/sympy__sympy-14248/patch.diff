@@ -1,0 +1,60 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+index 8253b2f68..7e9a5383e 100644
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -1483,11 +1483,12 @@ def _print_MatAdd(self, expr):
+ 
+     def _print_MatMul(self, expr):
+         from sympy import Add, MatAdd, HadamardProduct
+-
+         def parens(x):
+             if isinstance(x, (Add, MatAdd, HadamardProduct)):
+                 return r"\left(%s\right)" % self._print(x)
+             return self._print(x)
++        if len(expr.args) > 1 and expr.args[0] == -1:
++            return "-" + " ".join(map(parens, expr.args[1:]))
+         return ' '.join(map(parens, expr.args))
+ 
+     def _print_Mod(self, expr, exp=None):
+diff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py
+index db24f4c61..8e9dc3327 100644
+--- a/sympy/printing/pretty/pretty.py
++++ b/sympy/printing/pretty/pretty.py
+@@ -823,6 +823,12 @@ def _print_MatAdd(self, expr):
+ 
+     def _print_MatMul(self, expr):
+         args = list(expr.args)
++        if len(args) > 1 and args[0] == -1:
++            res = self._print(expr.func(*args[1:]))
++            p = prettyForm("-")
++            p.baseline = res.baseline
++            p.picture = [p.picture[0] + res.picture[0]]
++            return p
+         from sympy import Add, MatAdd, HadamardProduct
+         for i, a in enumerate(args):
+             if (isinstance(a, (Add, MatAdd, HadamardProduct))
+@@ -832,7 +838,6 @@ def _print_MatMul(self, expr):
+                 args[i] = self._print(a)
+ 
+         return prettyForm.__mul__(*args)
+-
+     def _print_DotProduct(self, expr):
+         args = list(expr.args)
+ 
+diff --git a/sympy/printing/str.py b/sympy/printing/str.py
+index 0baefe0f7..5641cadbb 100644
+--- a/sympy/printing/str.py
++++ b/sympy/printing/str.py
+@@ -304,7 +304,11 @@ def _print_Mul(self, expr):
+             return sign + '*'.join(a_str) + "/(%s)" % '*'.join(b_str)
+ 
+     def _print_MatMul(self, expr):
+-        return '*'.join([self.parenthesize(arg, precedence(expr))
++        from sympy.matrices.expressions.matexpr import MatrixSymbol
++        if len(expr.args) > 1 and expr.args[0] == -1:
++            return "-" + "*".join([self.parenthesize(arg, precedence(expr))
++                for arg in expr.args[1:]])
++        return "*".join([self.parenthesize(arg, precedence(expr))
+             for arg in expr.args])
+ 
+     def _print_HadamardProduct(self, expr):

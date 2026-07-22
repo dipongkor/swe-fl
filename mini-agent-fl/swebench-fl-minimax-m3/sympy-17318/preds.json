@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-17318": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-17318",
+    "model_patch": "diff --git a/sympy/simplify/radsimp.py b/sympy/simplify/radsimp.py\nindex 216ae26204..5b134d3bfc 100644\n--- a/sympy/simplify/radsimp.py\n+++ b/sympy/simplify/radsimp.py\n@@ -1077,7 +1077,7 @@ def split_surds(expr):\n     coeff_muls = [x.as_coeff_Mul() for x in args]\n     surds = [x[1]**2 for x in coeff_muls if x[1].is_Pow]\n     surds.sort(key=default_sort_key)\n-    g, b1, b2 = _split_gcd(*surds)\n+    g, b1, b2 = _split_gcd(*surds) if surds else (S.One, [], [])\n     g2 = g\n     if not b2 and len(b1) >= 2:\n         b1n = [x/g for x in b1]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/simplify/radsimp.py",
+          "line": 1080,
+          "statement": "    g, b1, b2 = _split_gcd(*surds)"
+        }
+      ],
+      "reasoning": "The function split_surds can be called with an Add expression that has no terms that are Pow objects (no actual surds), such as '4 + 3*I'. In this case, the 'surds' list is empty, and _split_gcd is called with an empty tuple, which raises IndexError when trying to access a[0]. The fix is to check if surds is non-empty before calling _split_gcd, otherwise default to a trivial split with g=1, b1=[], b2=[].",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

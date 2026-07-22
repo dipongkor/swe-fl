@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-21379": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-21379",
+    "model_patch": "diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py\nindex bfec61de64..9178ccc21c 100644\n--- a/sympy/polys/polytools.py\n+++ b/sympy/polys/polytools.py\n@@ -4396,7 +4396,7 @@ def _parallel_poly_from_expr(exprs, opt):\n \n     for k in opt.gens:\n         if isinstance(k, Piecewise):\n-            raise PolynomialError(\"Piecewise generators do not make sense\")\n+            continue\n \n     coeffs_list, lengths = [], []\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/polys/polytools.py",
+          "line": 4398,
+          "statement": "if isinstance(k, Piecewise):"
+        }
+      ],
+      "reasoning": "The code was explicitly raising a PolynomialError when a Piecewise object was found in the generators, which is too restrictive for expressions that might contain Piecewise objects in a way that doesn't violate polynomial structure, such as when they are treated as atoms.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

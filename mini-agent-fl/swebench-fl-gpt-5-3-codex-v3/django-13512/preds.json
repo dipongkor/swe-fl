@@ -1,0 +1,19 @@
+{
+  "django__django-13512": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-13512",
+    "model_patch": "diff --git a/django/forms/fields.py b/django/forms/fields.py\nindex 9de2c60b35..17c7956b53 100644\n--- a/django/forms/fields.py\n+++ b/django/forms/fields.py\n@@ -1258,7 +1258,7 @@ class JSONField(CharField):\n     def prepare_value(self, value):\n         if isinstance(value, InvalidJSONInput):\n             return value\n-        return json.dumps(value, cls=self.encoder)\n+        return json.dumps(value, ensure_ascii=False, cls=self.encoder)\n \n     def has_changed(self, initial, data):\n         if super().has_changed(initial, data):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/forms/fields.py",
+          "line": 1261,
+          "statement": "        return json.dumps(value, cls=self.encoder)"
+        }
+      ],
+      "reasoning": "JSONField form rendering used json.dumps() with its default ensure_ascii=True, which escaped non-ASCII characters into Unicode escape sequences in admin widgets.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

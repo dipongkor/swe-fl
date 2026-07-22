@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-25747": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "scikit-learn__scikit-learn-25747",
+    "model_patch": "diff --git a/sklearn/utils/_set_output.py b/sklearn/utils/_set_output.py\nindex 335773c6a..b98f4aeed 100644\n--- a/sklearn/utils/_set_output.py\n+++ b/sklearn/utils/_set_output.py\n@@ -55,7 +55,7 @@ def _wrap_in_pandas_container(\n     if isinstance(data_to_wrap, pd.DataFrame):\n         if columns is not None:\n             data_to_wrap.columns = columns\n-        if index is not None:\n+        if index is not None and data_to_wrap.shape[0] == len(index):\n             data_to_wrap.index = index\n         return data_to_wrap\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/utils/_set_output.py",
+          "line": 58,
+          "statement": "        if index is not None:"
+        }
+      ],
+      "reasoning": "When a transformer returns a DataFrame whose row count differs from the original input (e.g. after an aggregation), _wrap_in_pandas_container unconditionally assigns the original input's index to the output DataFrame, causing a length-mismatch ValueError. The index should only be overwritten when the lengths match.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

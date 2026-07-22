@@ -1,0 +1,19 @@
+{
+  "django__django-14011": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-14011",
+    "model_patch": "diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py\nindex 14dab517c9..17f394ffe1 100644\n--- a/django/core/servers/basehttp.py\n+++ b/django/core/servers/basehttp.py\n@@ -81,6 +81,13 @@ class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):\n     \"\"\"A threaded version of the WSGIServer\"\"\"\n     daemon_threads = True\n \n+    def process_request_thread(self, request, client_address):\n+        \"\"\"Close database connections at the end of each request thread.\"\"\"\n+        from django.db import connections\n+\n+        super().process_request_thread(request, client_address)\n+        connections.close_all()\n+\n \n class ServerHandler(simple_server.ServerHandler):\n     http_version = '1.1'\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/servers/basehttp.py",
+          "line": 82,
+          "statement": "    daemon_threads = True"
+        }
+      ],
+      "reasoning": "ThreadedWSGIServer enabled per-request threading but didn't close database connections when each request thread finished, leaving connections open until process teardown and causing test DB drop races.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,58 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 59a5d6abbb..6a5e71ab07 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1851,10 +1851,22 @@ class SQLUpdateCompiler(SQLCompiler):
+             # don't want them to change), or the db backend doesn't support
+             # selecting from the updating table (e.g. MySQL).
+             idents = []
++            related_ids_by_model = {
++                model: [] for model in self.query.related_updates
++            }
++            related_id_getters = {
++                model: query.model._meta.get_ancestor_link(model).attname
++                for model in self.query.related_updates
++            }
+             for rows in query.get_compiler(self.using).execute_sql(MULTI):
+-                idents.extend(r[0] for r in rows)
++                for row in rows:
++                    obj_id = row[0]
++                    idents.append(obj_id)
++                    for model, attname in related_id_getters.items():
++                        related_ids_by_model[model].append(getattr(obj_id, attname))
+             self.query.add_filter("pk__in", idents)
+             self.query.related_ids = idents
++            self.query.related_ids_by_model = related_ids_by_model
+         else:
+             # The fast path. Filters and updates in one query.
+             self.query.add_filter("pk__in", query)
+diff --git a/django/db/models/sql/subqueries.py b/django/db/models/sql/subqueries.py
+index 04063f73bc..02e280edf6 100644
+--- a/django/db/models/sql/subqueries.py
++++ b/django/db/models/sql/subqueries.py
+@@ -61,11 +61,13 @@ class UpdateQuery(Query):
+         """
+         self.values = []
+         self.related_ids = None
++        self.related_ids_by_model = {}
+         self.related_updates = {}
+ 
+     def clone(self):
+         obj = super().clone()
+         obj.related_updates = self.related_updates.copy()
++        obj.related_ids_by_model = self.related_ids_by_model.copy()
+         return obj
+ 
+     def update_batch(self, pk_list, values, using):
+@@ -133,8 +135,9 @@ class UpdateQuery(Query):
+         for model, values in self.related_updates.items():
+             query = UpdateQuery(model)
+             query.values = values
+-            if self.related_ids is not None:
+-                query.add_filter("pk__in", self.related_ids)
++            related_ids = self.related_ids_by_model.get(model, self.related_ids)
++            if related_ids is not None:
++                query.add_filter("pk__in", related_ids)
+             result.append(query)
+         return result
+ 

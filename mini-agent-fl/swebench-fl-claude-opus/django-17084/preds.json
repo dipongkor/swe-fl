@@ -1,0 +1,19 @@
+{
+  "django__django-17084": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-17084",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 13a6809dd8..f137110b09 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -436,6 +436,14 @@ class Query(BaseExpression):\n             )\n             or having\n         )\n+        # Existing window function annotations referenced by the aggregates\n+        # must be computed in a subquery as aggregate function calls cannot\n+        # contain window function calls.\n+        has_existing_window_annotation = any(\n+            getattr(self.annotations.get(ref), \"contains_over_clause\", False)\n+            for aggregate in aggregates.values()\n+            for ref in aggregate.get_refs()\n+        )\n         # Decide if we need to use a subquery.\n         #\n         # Existing aggregations would cause incorrect results as\n@@ -450,6 +458,7 @@ class Query(BaseExpression):\n             isinstance(self.group_by, tuple)\n             or self.is_sliced\n             or has_existing_aggregation\n+            or has_existing_window_annotation\n             or refs_subquery\n             or qualify\n             or self.distinct\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 452,
+          "statement": "            or has_existing_aggregation"
+        }
+      ],
+      "reasoning": "In Query.get_aggregation(), the condition that decides whether aggregations must be computed in a subquery did not account for aggregates that reference existing window-function annotations. Because a window function was not detected here, the aggregate (e.g. Sum) was rendered in the same SELECT as the Window() call, producing invalid SQL (aggregate function calls cannot contain window function calls).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

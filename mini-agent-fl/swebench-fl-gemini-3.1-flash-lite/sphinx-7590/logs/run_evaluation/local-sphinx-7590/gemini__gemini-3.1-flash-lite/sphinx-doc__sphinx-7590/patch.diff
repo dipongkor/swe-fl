@@ -1,0 +1,44 @@
+diff --git a/sphinx/domains/cpp.py b/sphinx/domains/cpp.py
+index fe52d881d..27a0a7fa0 100644
+--- a/sphinx/domains/cpp.py
++++ b/sphinx/domains/cpp.py
+@@ -822,6 +822,22 @@ class ASTBooleanLiteral(ASTLiteral):
+         signode.append(nodes.Text(str(self)))
+ 
+ 
++class ASTUserDefinedLiteral(ASTLiteral):
++    def __init__(self, literal: ASTLiteral, suffix: str) -> None:
++        self.literal = literal
++        self.suffix = suffix
++
++    def _stringify(self, transform: StringifyTransform) -> str:
++        return str(self.literal) + self.suffix
++
++    def get_id(self, version: int) -> str:
++        return "L" + self.suffix + "E" + str(self.literal)
++
++    def describe_signature(self, signode: TextElement, mode: str,
++                           env: "BuildEnvironment", symbol: "Symbol") -> None:
++        txt = str(self)
++        signode.append(nodes.Text(txt, txt))
++
+ class ASTNumberLiteral(ASTLiteral):
+     def __init__(self, data: str) -> None:
+         self.data = data
+@@ -4662,9 +4678,14 @@ class DefinitionParser(BaseParser):
+                       integer_literal_re, octal_literal_re]:
+             pos = self.pos
+             if self.match(regex):
+-                while self.current_char in 'uUlLfF':
++                while self.current_char in "uUlLfF":
+                     self.pos += 1
+-                return ASTNumberLiteral(self.definition[pos:self.pos])
++                lit = ASTNumberLiteral(self.definition[pos:self.pos])
++                # UDL suffix must start with an underscore
++                udl_suffix_re = re.compile(r"_[a-zA-Z0-9_]*")
++                if self.match(udl_suffix_re):
++                    return ASTUserDefinedLiteral(lit, self.matched_text)
++                return lit
+ 
+         string = self._parse_string()
+         if string is not None:

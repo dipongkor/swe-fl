@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7910": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "model_patch": "diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py\nindex 10b1ff3a3..3907c1bef 100644\n--- a/sphinx/ext/napoleon/__init__.py\n+++ b/sphinx/ext/napoleon/__init__.py\n@@ -13,6 +13,7 @@ from typing import Any, Dict, List\n from sphinx import __display_version__ as __version__\n from sphinx.application import Sphinx\n from sphinx.ext.napoleon.docstring import GoogleDocstring, NumpyDocstring\n+from sphinx.util.inspect import unwrap_all\n \n \n class Config:\n@@ -429,16 +430,20 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,\n             qualname = getattr(obj, '__qualname__', '')\n             cls_path, _, _ = qualname.rpartition('.')\n             if cls_path:\n+                # Store the original function, to allow following decorators\n+                # to extract the correct docstring (e.g. functools.wraps)\n+                orig = unwrap_all(obj)\n+\n                 try:\n                     if '.' in cls_path:\n-                        import importlib\n                         import functools\n+                        import importlib\n \n-                        mod = importlib.import_module(obj.__module__)\n+                        mod = importlib.import_module(orig.__module__)\n                         mod_path = cls_path.split('.')\n                         cls = functools.reduce(getattr, mod_path, mod)\n                     else:\n-                        cls = obj.__globals__[cls_path]\n+                        cls = orig.__globals__[cls_path]\n                 except Exception:\n                     cls_is_owner = False\n                 else:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/napoleon/__init__.py",
+          "line": 441,
+          "statement": "                        cls = obj.__globals__[cls_path]"
+        }
+      ],
+      "reasoning": "When a method (e.g. __init__) is decorated with functools.wraps, the wrapper function's __globals__ references the module where the decorator is defined, not the module where the decorated function's class is defined. This causes the KeyError exception to be raised, cls_is_owner is set to False, and the decorated __init__ is not documented even when napoleon_include_init_with_doc is True. The fix is to use unwrap_all() to get the original (undecorated) function, which has the correct __globals__ and __module__ attributes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

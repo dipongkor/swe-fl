@@ -1,0 +1,24 @@
+{
+  "astropy__astropy-8707": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "astropy__astropy-8707",
+    "model_patch": "diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py\nindex 8c1ac5d73..8ab86b4de 100644\n--- a/astropy/io/fits/card.py\n+++ b/astropy/io/fits/card.py\n@@ -5,7 +5,7 @@ import warnings\n \n import numpy as np\n \n-from .util import _str_to_num, _is_int, translate, _words_group\n+from .util import _str_to_num, _is_int, translate, _words_group, decode_ascii\n from .verify import _Verify, _ErrList, VerifyError, VerifyWarning\n \n from . import conf\n@@ -547,12 +547,15 @@ class Card(_Verify):\n     @classmethod\n     def fromstring(cls, image):\n         \"\"\"\n-        Construct a `Card` object from a (raw) string. It will pad the string\n-        if it is not the length of a card image (80 columns).  If the card\n-        image is longer than 80 columns, assume it contains ``CONTINUE``\n+        Construct a `Card` object from a (raw) string or bytes. It will pad the\n+        string if it is not the length of a card image (80 columns).  If the\n+        card image is longer than 80 columns, assume it contains ``CONTINUE``\n         card(s).\n         \"\"\"\n \n+        if isinstance(image, bytes):\n+            image = decode_ascii(image)\n+\n         card = cls()\n         card._image = _pad(image)\n         card._verified = False\ndiff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py\nindex ad07e6d52..ff124f21b 100644\n--- a/astropy/io/fits/header.py\n+++ b/astropy/io/fits/header.py\n@@ -334,10 +334,10 @@ class Header:\n \n         Parameters\n         ----------\n-        data : str\n-           String containing the entire header.\n+        data : str or bytes\n+           String or bytes containing the entire header.\n \n-        sep : str, optional\n+        sep : str or bytes, optional\n             The string separating cards from each other, such as a newline.  By\n             default there is no card separator (as is the case in a raw FITS\n             file).\n@@ -348,6 +348,9 @@ class Header:\n             A new `Header` instance.\n         \"\"\"\n \n+        data = decode_ascii(data)\n+        sep = decode_ascii(sep)\n+\n         cards = []\n \n         # If the card separator contains characters that may validly appear in\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/io/fits/header.py",
+          "line": 330,
+          "statement": "    def fromstring(cls, data, sep=''):"
+        },
+        {
+          "file": "astropy/io/fits/card.py",
+          "line": 548,
+          "statement": "    def fromstring(cls, image):"
+        }
+      ],
+      "reasoning": "Header.fromstring and Card.fromstring are documented to accept 'byte strings' but actually only work with str type. The method bodies process the data as if it is always a str, and they don't decode bytes to str. This causes errors on Python 3 when bytes are passed in, since Python 3 doesn't allow implicit conversion between str and bytes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

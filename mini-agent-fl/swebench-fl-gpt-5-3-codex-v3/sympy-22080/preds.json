@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-22080": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-22080",
+    "model_patch": "diff --git a/sympy/printing/lambdarepr.py b/sympy/printing/lambdarepr.py\nindex 02f89a6746..4e5d650be8 100644\n--- a/sympy/printing/lambdarepr.py\n+++ b/sympy/printing/lambdarepr.py\n@@ -63,6 +63,10 @@ def _print_ITE(self, expr):\n     def _print_NumberSymbol(self, expr):\n         return str(expr)\n \n+\n+    def _print_Mod(self, expr):\n+        return \"mod(%s, %s)\" % (self._print(expr.args[0]), self._print(expr.args[1]))\n+\n     def _print_Pow(self, expr, **kwargs):\n         # XXX Temporary workaround. Should python math printer be\n         # isolated from PythonCodePrinter?\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/pycode.py",
+          "line": 237,
+          "statement": "        return ('{} % {}'.format(*map(lambda x: self.parenthesize(x, PREC), expr.args)))"
+        }
+      ],
+      "reasoning": "LambdaPrinter inherits PythonCodePrinter's Mod rendering, which emits '%' form; in lambdify output this can change semantics for expressions like -Mod(x, y) due to Python operator precedence and simplification path. Using function-form mod(...) in LambdaPrinter avoids this issue.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

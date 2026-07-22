@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7490": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pytest-dev__pytest-7490",
+    "model_patch": "diff --git a/src/_pytest/skipping.py b/src/_pytest/skipping.py\nindex 335e10996..3f8e20e92 100644\n--- a/src/_pytest/skipping.py\n+++ b/src/_pytest/skipping.py\n@@ -262,6 +262,13 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):\n     outcome = yield\n     rep = outcome.get_result()\n     xfailed = item._store.get(xfailed_key, None)\n+    if not item.config.option.runxfail:\n+        # The xfail marker may have been added dynamically during the test\n+        # via request.node.add_marker(), in which case it will not have\n+        # been evaluated in pytest_runtest_setup/call. Re-evaluate it here\n+        # for the call phase so such tests are still treated as xfail.\n+        if xfailed is None and call.when == \"call\":\n+            item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)\n     # unittest special case, see setting of unexpectedsuccess_key\n     if unexpectedsuccess_key in item._store and rep.when == \"call\":\n         reason = item._store[unexpectedsuccess_key]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/skipping.py",
+          "line": 264,
+          "statement": "    xfailed = item._store.get(xfailed_key, None)"
+        }
+      ],
+      "reasoning": "In pytest_runtest_makereport, xfail marks are only read from the store (populated during setup/call before the test body runs). A marker added dynamically during the test via request.node.add_marker() is never re-evaluated, so xfailed stays None and the failure is reported as a real failure instead of an xfail. The fix re-evaluates xfail marks in the call phase when none were previously found.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

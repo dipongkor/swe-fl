@@ -1,0 +1,89 @@
+2026-06-30 16:58:05,863 - INFO - Creating container for sphinx-doc__sphinx-11510...
+2026-06-30 16:58:05,936 - INFO - Container for sphinx-doc__sphinx-11510 created: e07a567e7fc1d0e514098b6800f236a3907150aca8b6cd175614c29329a80fde
+2026-06-30 16:58:06,373 - INFO - Container for sphinx-doc__sphinx-11510 started: e07a567e7fc1d0e514098b6800f236a3907150aca8b6cd175614c29329a80fde
+2026-06-30 16:58:06,376 - INFO - Intermediate patch for sphinx-doc__sphinx-11510 written to logs/run_evaluation/local-sphinx-11510/openai__gpt-5.3-codex/sphinx-doc__sphinx-11510/patch.diff, now applying to container...
+2026-06-30 16:58:06,872 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/directives/other.py...
+Applied patch sphinx/directives/other.py cleanly.
+
+2026-06-30 16:58:07,295 - INFO - Git diff before:
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 19f7c0a8d..5e07acf7e 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -376,7 +376,29 @@ class Include(BaseInclude, SphinxDirective):
+         rel_filename, filename = self.env.relfn2path(self.arguments[0])
+         self.arguments[0] = filename
+         self.env.note_included(filename)
+-        return super().run()
++
++        # Apply the same source preprocessing as normal documents.
++        #
++        # Included reStructuredText files are read by docutils directly during
++        # parsing of the parent document and therefore bypass
++        # ``SphinxStandaloneReader.read_source()`` where Sphinx emits the
++        # ``source-read`` event. Emit it here for included sources as well, so
++        # extensions that mutate source text work consistently.
++        old_get_text = self.state_machine.input_lines.source
++
++        def get_text(source, *args, **kwargs):
++            text = old_get_text(source, *args, **kwargs)
++            if source == filename:
++                arg = [text]
++                self.env.events.emit('source-read', self.env.docname, arg)
++                return arg[0]
++            return text
++
++        self.state_machine.input_lines.source = get_text
++        try:
++            return super().run()
++        finally:
++            self.state_machine.input_lines.source = old_get_text
+ 
+ 
+ def setup(app: Sphinx) -> dict[str, Any]:
+2026-06-30 16:58:07,299 - INFO - Eval script for sphinx-doc__sphinx-11510 written to logs/run_evaluation/local-sphinx-11510/openai__gpt-5.3-codex/sphinx-doc__sphinx-11510/eval.sh; copying to container...
+2026-06-30 16:58:12,490 - INFO - Test runtime: 4.91 seconds
+2026-06-30 16:58:12,493 - INFO - Test output for sphinx-doc__sphinx-11510 written to logs/run_evaluation/local-sphinx-11510/openai__gpt-5.3-codex/sphinx-doc__sphinx-11510/test_output.txt
+2026-06-30 16:58:12,715 - INFO - Git diff after:
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 19f7c0a8d..5e07acf7e 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -376,7 +376,29 @@ class Include(BaseInclude, SphinxDirective):
+         rel_filename, filename = self.env.relfn2path(self.arguments[0])
+         self.arguments[0] = filename
+         self.env.note_included(filename)
+-        return super().run()
++
++        # Apply the same source preprocessing as normal documents.
++        #
++        # Included reStructuredText files are read by docutils directly during
++        # parsing of the parent document and therefore bypass
++        # ``SphinxStandaloneReader.read_source()`` where Sphinx emits the
++        # ``source-read`` event. Emit it here for included sources as well, so
++        # extensions that mutate source text work consistently.
++        old_get_text = self.state_machine.input_lines.source
++
++        def get_text(source, *args, **kwargs):
++            text = old_get_text(source, *args, **kwargs)
++            if source == filename:
++                arg = [text]
++                self.env.events.emit('source-read', self.env.docname, arg)
++                return arg[0]
++            return text
++
++        self.state_machine.input_lines.source = get_text
++        try:
++            return super().run()
++        finally:
++            self.state_machine.input_lines.source = old_get_text
+ 
+ 
+ def setup(app: Sphinx) -> dict[str, Any]:
+2026-06-30 16:58:12,716 - INFO - Grading answer for sphinx-doc__sphinx-11510...
+2026-06-30 16:58:12,721 - INFO - report: {'sphinx-doc__sphinx-11510': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['tests/test_directive_other.py::test_include_source_read_event', 'tests/test_directive_other.py::test_include_source_read_event_nested_includes']}, 'PASS_TO_PASS': {'success': ['tests/test_directive_other.py::test_toctree', 'tests/test_directive_other.py::test_relative_toctree', 'tests/test_directive_other.py::test_toctree_urls_and_titles', 'tests/test_directive_other.py::test_toctree_glob', 'tests/test_directive_other.py::test_toctree_glob_and_url', 'tests/test_directive_other.py::test_reversed_toctree', 'tests/test_directive_other.py::test_toctree_twice'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-11510: resolved: False
+2026-06-30 16:58:12,723 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-11510.local-sphinx-11510...
+2026-06-30 16:58:28,149 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-11510.local-sphinx-11510...
+2026-06-30 16:58:28,219 - INFO - Container sweb.eval.sphinx-doc__sphinx-11510.local-sphinx-11510 removed.

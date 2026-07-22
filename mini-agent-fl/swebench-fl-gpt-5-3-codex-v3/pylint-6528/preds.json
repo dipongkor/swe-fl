@@ -1,0 +1,19 @@
+{
+  "pylint-dev__pylint-6528": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pylint-dev__pylint-6528",
+    "model_patch": "diff --git a/pylint/lint/pylinter.py b/pylint/lint/pylinter.py\nindex 53345a6b..e719e568 100644\n--- a/pylint/lint/pylinter.py\n+++ b/pylint/lint/pylinter.py\n@@ -31,7 +31,7 @@ from pylint.constants import (\n )\n from pylint.lint.base_options import _make_linter_options\n from pylint.lint.caching import load_results, save_results\n-from pylint.lint.expand_modules import expand_modules\n+from pylint.lint.expand_modules import _is_in_ignore_list_re, expand_modules\n from pylint.lint.message_state_handler import _MessageStateHandler\n from pylint.lint.parallel import check_parallel\n from pylint.lint.report_functions import (\n@@ -564,8 +564,7 @@ class PyLinter(\n             if not msg.may_be_emitted():\n                 self._msgs_state[msg.msgid] = False\n \n-    @staticmethod\n-    def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:\n+    def _discover_files(self, files_or_modules: Sequence[str]) -> Iterator[str]:\n         \"\"\"Discover python modules and packages in sub-directory.\n \n         Returns iterator of paths to discovered modules and packages.\n@@ -575,7 +574,24 @@ class PyLinter(\n                 os.path.join(something, \"__init__.py\")\n             ):\n                 skip_subtrees: list[str] = []\n-                for root, _, files in os.walk(something):\n+                for root, dirs, files in os.walk(something):\n+                    dirs[:] = [\n+                        d\n+                        for d in dirs\n+                        if d not in self.config.ignore\n+                        and not _is_in_ignore_list_re(d, self.config.ignore_patterns)\n+                        and not _is_in_ignore_list_re(\n+                            os.path.normpath(os.path.join(root, d)), self._ignore_paths\n+                        )\n+                    ]\n+                    if (\n+                        os.path.basename(root) in self.config.ignore\n+                        or _is_in_ignore_list_re(\n+                            os.path.basename(root), self.config.ignore_patterns\n+                        )\n+                        or _is_in_ignore_list_re(os.path.normpath(root), self._ignore_paths)\n+                    ):\n+                        continue\n                     if any(root.startswith(s) for s in skip_subtrees):\n                         # Skip subtree of already discovered package.\n                         continue\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "pylint/lint/pylinter.py",
+          "line": 602,
+          "statement": "yield from ("
+        }
+      ],
+      "reasoning": "Recursive file discovery yielded Python files directly from os.walk without applying ignore, ignore-patterns, or ignore-paths filters, so ignored directories were still linted.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

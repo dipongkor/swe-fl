@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-8872": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "astropy__astropy-8872",
+    "model_patch": "diff --git a/astropy/units/quantity.py b/astropy/units/quantity.py\nindex ded609cbe..e6378f41d 100644\n--- a/astropy/units/quantity.py\n+++ b/astropy/units/quantity.py\n@@ -296,7 +296,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):\n                 if not copy:\n                     return value\n \n-                if not (np.can_cast(np.float32, value.dtype) or\n+                if not (np.can_cast(np.float16, value.dtype) or\n                         value.dtype.fields):\n                     dtype = float\n \n@@ -377,7 +377,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):\n                             \"Numpy numeric type.\")\n \n         # by default, cast any integer, boolean, etc., to float\n-        if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n+        if dtype is None and (not (np.can_cast(np.float16, value.dtype)\n                                    or value.dtype.fields)\n                               or value.dtype.kind == 'O'):\n             value = value.astype(float)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/units/quantity.py",
+          "line": 380,
+          "statement": "        if dtype is None and (not (np.can_cast(np.float16, value.dtype)"
+        }
+      ],
+      "reasoning": "The dtype inference used float32 as the minimum floating type, causing float16 inputs to be treated as non-float-capable and upcast to Python float (float64). Using float16 preserves float16 values while still promoting integer/bool types.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

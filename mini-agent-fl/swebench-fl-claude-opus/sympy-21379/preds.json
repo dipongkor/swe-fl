@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-21379": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-21379",
+    "model_patch": "diff --git a/sympy/core/mod.py b/sympy/core/mod.py\nindex b4f3de2523..6a29e09d2a 100644\n--- a/sympy/core/mod.py\n+++ b/sympy/core/mod.py\n@@ -166,10 +166,14 @@ def doit(p, q):\n         # XXX other possibilities?\n \n         # extract gcd; any further simplification should be done by the user\n-        G = gcd(p, q)\n-        if G != 1:\n-            p, q = [\n-                gcd_terms(i/G, clear=False, fraction=False) for i in (p, q)]\n+        from sympy.polys.polyerrors import PolynomialError\n+        try:\n+            G = gcd(p, q)\n+            if G != 1:\n+                p, q = [\n+                    gcd_terms(i/G, clear=False, fraction=False) for i in (p, q)]\n+        except PolynomialError:  # issue 21373\n+            G = S.One\n         pwas, qwas = p, q\n \n         # simplify terms\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/mod.py",
+          "line": 169,
+          "statement": "        G = gcd(p, q)"
+        }
+      ],
+      "reasoning": "During assumption evaluation (e.g. hyperbolic _eval_is_real computing (im % pi).is_zero), Mod.eval calls gcd(p, q) with an expression containing a Piecewise. gcd invokes the polynomial machinery which raises PolynomialError('Piecewise generators do not make sense'), leaking out of subs(). Guarding this gcd call to fall back to G=1 on PolynomialError fixes the crash while preserving normal Mod behavior.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

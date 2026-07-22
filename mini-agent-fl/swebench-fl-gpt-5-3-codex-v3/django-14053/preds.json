@@ -1,0 +1,19 @@
+{
+  "django__django-14053": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-14053",
+    "model_patch": "diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py\nindex 494890cc23..1c47529b48 100644\n--- a/django/contrib/staticfiles/storage.py\n+++ b/django/contrib/staticfiles/storage.py\n@@ -227,21 +227,32 @@ class HashedFilesMixin:\n             if matches_patterns(path, self._patterns)\n         ]\n         # Do a single pass first. Post-process all files once, then repeat for\n-        # adjustable files.\n+        # adjustable files. Collect per-file results and only yield each file\n+        # once using its final hashed name.\n+        processed_files = {}\n         for name, hashed_name, processed, _ in self._post_process(paths, adjustable_paths, hashed_files):\n-            yield name, hashed_name, processed\n+            if hashed_name is None:\n+                yield name, hashed_name, processed\n+            else:\n+                processed_files[name] = (name, hashed_name, processed)\n \n         paths = {path: paths[path] for path in adjustable_paths}\n \n         for i in range(self.max_post_process_passes):\n             substitutions = False\n             for name, hashed_name, processed, subst in self._post_process(paths, adjustable_paths, hashed_files):\n-                yield name, hashed_name, processed\n+                if hashed_name is None:\n+                    yield name, hashed_name, processed\n+                else:\n+                    processed_files[name] = (name, hashed_name, processed)\n                 substitutions = substitutions or subst\n \n             if not substitutions:\n                 break\n \n+        for result in processed_files.values():\n+            yield result\n+\n         if substitutions:\n             yield 'All', None, RuntimeError('Max post-process passes exceeded.')\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/staticfiles/storage.py",
+          "line": 231,
+          "statement": "        for name, hashed_name, processed, _ in self._post_process(paths, adjustable_paths, hashed_files):"
+        }
+      ],
+      "reasoning": "post_process() yielded results directly from each processing pass, causing the same original file to be yielded multiple times as passes repeated. This duplicated post-processed reporting and downstream work.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

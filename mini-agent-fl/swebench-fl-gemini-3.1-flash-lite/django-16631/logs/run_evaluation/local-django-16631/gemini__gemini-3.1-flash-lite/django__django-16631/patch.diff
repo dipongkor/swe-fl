@@ -1,0 +1,48 @@
+diff --git a/django/contrib/auth/__init__.py b/django/contrib/auth/__init__.py
+index 155330c596..d57731081b 100644
+--- a/django/contrib/auth/__init__.py
++++ b/django/contrib/auth/__init__.py
+@@ -199,8 +199,12 @@ def get_user(request):
+             # Verify the session
+             if hasattr(user, "get_session_auth_hash"):
+                 session_hash = request.session.get(HASH_SESSION_KEY)
+-                session_hash_verified = session_hash and constant_time_compare(
+-                    session_hash, user.get_session_auth_hash()
++                session_hashes = [user.get_session_auth_hash()] + [
++                    user.get_session_auth_hash(secret=fallback)
++                    for fallback in settings.SECRET_KEY_FALLBACKS
++                ]
++                session_hash_verified = session_hash and any(
++                    constant_time_compare(session_hash, h) for h in session_hashes
+                 )
+                 if not session_hash_verified:
+                     request.session.flush()
+diff --git a/django/contrib/auth/base_user.py b/django/contrib/auth/base_user.py
+index 5ee30bf59c..eb802d9244 100644
+--- a/django/contrib/auth/base_user.py
++++ b/django/contrib/auth/base_user.py
+@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import (
+     make_password,
+ )
+ from django.db import models
++from django.conf import settings
+ from django.utils.crypto import get_random_string, salted_hmac
+ from django.utils.deprecation import RemovedInDjango51Warning
+ from django.utils.translation import gettext_lazy as _
+@@ -131,7 +132,7 @@ class AbstractBaseUser(models.Model):
+         """
+         return is_password_usable(self.password)
+ 
+-    def get_session_auth_hash(self):
++    def get_session_auth_hash(self, secret=None):
+         """
+         Return an HMAC of the password field.
+         """
+@@ -139,6 +140,7 @@ class AbstractBaseUser(models.Model):
+         return salted_hmac(
+             key_salt,
+             self.password,
++            secret=secret or settings.SECRET_KEY,
+             algorithm="sha256",
+         ).hexdigest()
+ 

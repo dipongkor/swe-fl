@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25122": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-25122",
+    "model_patch": "diff --git a/lib/matplotlib/mlab.py b/lib/matplotlib/mlab.py\nindex 3552904c3d..b90c7ada60 100644\n--- a/lib/matplotlib/mlab.py\n+++ b/lib/matplotlib/mlab.py\n@@ -427,7 +427,7 @@ def _spectral_helper(x, y=None, NFFT=None, Fs=None, detrend_func=None,\n             result /= (np.abs(window)**2).sum()\n         else:\n             # In this case, preserve power in the segment, not amplitude\n-            result /= np.abs(window).sum()**2\n+            result /= window.sum()**2\n \n     t = np.arange(NFFT/2, len(x) - NFFT/2 + 1, NFFT - noverlap)/Fs\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/mlab.py",
+          "line": 430,
+          "statement": "            result /= np.abs(window).sum()**2"
+        }
+      ],
+      "reasoning": "Using abs(window) in amplitude correction changes normalization for windows with negative values (e.g., flattop), producing incorrect PSD scaling; the correction should use the signed window sum squared.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

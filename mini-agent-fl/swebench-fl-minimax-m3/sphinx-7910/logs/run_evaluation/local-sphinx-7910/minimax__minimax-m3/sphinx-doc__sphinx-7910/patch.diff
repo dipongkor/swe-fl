@@ -1,0 +1,36 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+index 10b1ff3a3..3907c1bef 100644
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -13,6 +13,7 @@ from typing import Any, Dict, List
+ from sphinx import __display_version__ as __version__
+ from sphinx.application import Sphinx
+ from sphinx.ext.napoleon.docstring import GoogleDocstring, NumpyDocstring
++from sphinx.util.inspect import unwrap_all
+ 
+ 
+ class Config:
+@@ -429,16 +430,20 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+             qualname = getattr(obj, '__qualname__', '')
+             cls_path, _, _ = qualname.rpartition('.')
+             if cls_path:
++                # Store the original function, to allow following decorators
++                # to extract the correct docstring (e.g. functools.wraps)
++                orig = unwrap_all(obj)
++
+                 try:
+                     if '.' in cls_path:
+-                        import importlib
+                         import functools
++                        import importlib
+ 
+-                        mod = importlib.import_module(obj.__module__)
++                        mod = importlib.import_module(orig.__module__)
+                         mod_path = cls_path.split('.')
+                         cls = functools.reduce(getattr, mod_path, mod)
+                     else:
+-                        cls = obj.__globals__[cls_path]
++                        cls = orig.__globals__[cls_path]
+                 except Exception:
+                     cls_is_owner = False
+                 else:

@@ -1,0 +1,19 @@
+{
+  "django__django-13297": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "django__django-13297",
+    "model_patch": "diff --git a/django/db/backends/sqlite3/base.py b/django/db/backends/sqlite3/base.py\nindex 8a105d4f35..af057a070b 100644\n--- a/django/db/backends/sqlite3/base.py\n+++ b/django/db/backends/sqlite3/base.py\n@@ -19,6 +19,7 @@ from django.core.exceptions import ImproperlyConfigured\n from django.db import IntegrityError\n from django.db.backends import utils as backend_utils\n from django.db.backends.base.base import BaseDatabaseWrapper\n+from django.utils.functional import SimpleLazyObject\n from django.utils import timezone\n from django.utils.asyncio import async_unsafe\n from django.utils.dateparse import parse_datetime, parse_time\n@@ -75,6 +76,7 @@ Database.register_converter(\"datetime\", decoder(parse_datetime))\n Database.register_converter(\"timestamp\", decoder(parse_datetime))\n \n Database.register_adapter(decimal.Decimal, str)\n+Database.register_adapter(SimpleLazyObject, str)\n \n \n class DatabaseWrapper(BaseDatabaseWrapper):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/sqlite3/base.py",
+          "line": 78,
+          "statement": "Database.register_adapter(SimpleLazyObject, str)"
+        }
+      ],
+      "reasoning": "The SQLite backend was not registering an adapter for SimpleLazyObject, causing it to fail when passed as a parameter to SQL queries.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

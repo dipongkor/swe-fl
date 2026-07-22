@@ -1,0 +1,24 @@
+{
+  "sympy__sympy-19783": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-19783",
+    "model_patch": "diff --git a/sympy/physics/quantum/dagger.py b/sympy/physics/quantum/dagger.py\nindex 17da3cfd2c..f8efec5ae8 100644\n--- a/sympy/physics/quantum/dagger.py\n+++ b/sympy/physics/quantum/dagger.py\n@@ -2,7 +2,7 @@\n \n from __future__ import print_function, division\n \n-from sympy.core import Expr\n+from sympy.core import Expr, Mul\n from sympy.functions.elementary.complexes import adjoint\n \n __all__ = [\n@@ -85,5 +85,11 @@ def __new__(cls, arg):\n             return obj\n         return Expr.__new__(cls, arg)\n \n+    def __mul__(self, other):\n+        from sympy.physics.quantum.operator import IdentityOperator\n+        if isinstance(other, IdentityOperator):\n+            return self\n+        return Mul(self, other)\n+\n adjoint.__name__ = \"Dagger\"\n adjoint._sympyrepr = lambda a, b: \"Dagger(%s)\" % b._print(a.args[0])\ndiff --git a/sympy/physics/quantum/operator.py b/sympy/physics/quantum/operator.py\nindex 306bfee64f..11ab2fb7ad 100644\n--- a/sympy/physics/quantum/operator.py\n+++ b/sympy/physics/quantum/operator.py\n@@ -310,7 +310,7 @@ def __mul__(self, other):\n         if isinstance(other, Operator):\n             return other\n \n-        return Mul(self, other)\n+        return Mul(self, other) if not isinstance(other, Dagger) else other * self\n \n     def _represent_default_basis(self, **options):\n         if not self.N or self.N == oo:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/physics/quantum/dagger.py",
+          "line": 86,
+          "statement": "        return Expr.__new__(cls, arg)"
+        },
+        {
+          "file": "sympy/physics/quantum/operator.py",
+          "line": 313,
+          "statement": "        return Mul(self, other)"
+        }
+      ],
+      "reasoning": "The Dagger class lacks a __mul__ method, so Dagger(A) * IdentityOperator() falls back to Expr.__mul__ and returns Mul(Dagger(A), IdentityOperator()) without simplification. Similarly, IdentityOperator.__mul__ only checks for Operator instances (not Dagger instances), so IdentityOperator() * Dagger(A) is also not simplified. Adding a __mul__ method to Dagger and updating IdentityOperator.__mul__ to handle Dagger fixes both directions of the simplification.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

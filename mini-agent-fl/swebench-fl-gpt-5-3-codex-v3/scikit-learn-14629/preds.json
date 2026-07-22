@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14629": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "scikit-learn__scikit-learn-14629",
+    "model_patch": "diff --git a/sklearn/model_selection/_validation.py b/sklearn/model_selection/_validation.py\nindex 95669a212..7bdebd3b7 100644\n--- a/sklearn/model_selection/_validation.py\n+++ b/sklearn/model_selection/_validation.py\n@@ -855,8 +855,15 @@ def _fit_and_predict(estimator, X, y, train, test, verbose, fit_params,\n     predictions = func(X_test)\n     if method in ['decision_function', 'predict_proba', 'predict_log_proba']:\n         if isinstance(predictions, list):\n+            if hasattr(estimator, 'classes_'):\n+                classes = estimator.classes_\n+            elif hasattr(estimator, 'estimators_'):\n+                classes = [e.classes_ for e in estimator.estimators_]\n+            else:\n+                raise AttributeError(\"Estimator does not expose class labels via \"\n+                                     \"'classes_' or 'estimators_'.\")\n             predictions = [_enforce_prediction_order(\n-                estimator.classes_[i_label], predictions[i_label],\n+                classes[i_label], predictions[i_label],\n                 n_classes=len(set(y[:, i_label])), method=method)\n                 for i_label in range(len(predictions))]\n         else:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_validation.py",
+          "line": 859,
+          "statement": "                estimator.classes_[i_label], predictions[i_label],"
+        }
+      ],
+      "reasoning": "cross_val_predict assumed all estimators returning list outputs expose classes_ on the meta-estimator, but MultiOutputClassifier stores class labels on each sub-estimator, causing AttributeError.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

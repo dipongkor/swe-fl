@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-6992": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pydata__xarray-6992",
+    "model_patch": "diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py\nindex 620f32f8..e9fde467 100644\n--- a/xarray/core/dataset.py\n+++ b/xarray/core/dataset.py\n@@ -365,7 +365,9 @@ class DataVariables(Mapping[Any, \"DataArray\"]):\n         )\n \n     def __len__(self) -> int:\n-        return len(self._dataset._variables) - len(self._dataset._coord_names)\n+        length = len(self._dataset._variables) - len(self._dataset._coord_names)\n+        assert length >= 0, \"something is wrong with Dataset._coord_names\"\n+        return length\n \n     def __contains__(self, key: Hashable) -> bool:\n         return key in self._dataset._variables and key not in self._dataset._coord_names\n@@ -4177,7 +4179,7 @@ class Dataset(\n         }\n         variables.update(new_variables)\n \n-        coord_names = set(new_variables) | self._coord_names\n+        coord_names = set(new_variables) | (self._coord_names - set(drop_variables))\n \n         return self._replace(variables, coord_names=coord_names, indexes=indexes)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/dataset.py",
+          "line": 4180,
+          "statement": "        coord_names = set(new_variables) | self._coord_names"
+        }
+      ],
+      "reasoning": "In Dataset.reset_index with drop=True, the dropped index/level names (e.g. the MultiIndex name 'z') are removed from _variables via drop_variables but never removed from _coord_names, leaving more _coord_names than _variables. This breaks DataVariables.__len__ (which computes len(_variables) - len(_coord_names)) yielding a negative value and the reported ValueError.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

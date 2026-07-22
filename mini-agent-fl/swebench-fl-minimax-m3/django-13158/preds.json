@@ -1,0 +1,29 @@
+{
+  "django__django-13158": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13158",
+    "model_patch": "diff --git a/django/db/models/query.py b/django/db/models/query.py\nindex 07d6ffd4ca..585be53adb 100644\n--- a/django/db/models/query.py\n+++ b/django/db/models/query.py\n@@ -919,6 +919,8 @@ class QuerySet:\n     def none(self):\n         \"\"\"Return an empty QuerySet.\"\"\"\n         clone = self._chain()\n+        clone.query.combinator = None\n+        clone.query.combined_queries = ()\n         clone.query.set_empty()\n         return clone\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/query.py",
+          "line": 919,
+          "statement": "    def none(self):"
+        },
+        {
+          "file": "django/db/models/query.py",
+          "line": 921,
+          "statement": "        clone = self._chain()"
+        },
+        {
+          "file": "django/db/models/query.py",
+          "line": 922,
+          "statement": "        clone.query.set_empty()"
+        }
+      ],
+      "reasoning": "The none() method on QuerySet calls set_empty() on the query, but for combined queries (union, intersection, difference), the where clause added by set_empty() is on the outer query and doesn't affect the combined subqueries. The combinator and combined_queries attributes need to be reset on the clone so the query becomes a simple empty query, not a combined query with a where clause.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

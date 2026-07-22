@@ -1,0 +1,19 @@
+{
+  "django__django-17084": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-17084",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 13a6809dd8..85e51f36bf 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -403,6 +403,7 @@ class Query(BaseExpression):\n         # Store annotation mask prior to temporarily adding aggregations for\n         # resolving purpose to facilitate their subsequent removal.\n         refs_subquery = False\n+        refs_window = False\n         replacements = {}\n         annotation_select_mask = self.annotation_select_mask\n         for alias, aggregate_expr in aggregate_exprs.items():\n@@ -419,6 +420,7 @@ class Query(BaseExpression):\n                 getattr(self.annotations[ref], \"subquery\", False)\n                 for ref in aggregate.get_refs()\n             )\n+            refs_window |= aggregate.contains_over_clause\n             aggregate = aggregate.replace_expressions(replacements)\n             self.annotations[alias] = aggregate\n             replacements[Ref(alias, aggregate)] = aggregate\n@@ -451,6 +453,7 @@ class Query(BaseExpression):\n             or self.is_sliced\n             or has_existing_aggregation\n             or refs_subquery\n+            or refs_window\n             or qualify\n             or self.distinct\n             or self.combinator\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 454,
+          "statement": "            or refs_subquery"
+        }
+      ],
+      "reasoning": "The aggregation path only forced subquery wrapping for subquery references and omitted window-function references, allowing aggregates over window expressions to be inlined into a single SELECT and producing invalid SQL on PostgreSQL.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

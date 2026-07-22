@@ -1,0 +1,35 @@
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 19f7c0a8d..5e07acf7e 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -376,7 +376,29 @@ class Include(BaseInclude, SphinxDirective):
+         rel_filename, filename = self.env.relfn2path(self.arguments[0])
+         self.arguments[0] = filename
+         self.env.note_included(filename)
+-        return super().run()
++
++        # Apply the same source preprocessing as normal documents.
++        #
++        # Included reStructuredText files are read by docutils directly during
++        # parsing of the parent document and therefore bypass
++        # ``SphinxStandaloneReader.read_source()`` where Sphinx emits the
++        # ``source-read`` event. Emit it here for included sources as well, so
++        # extensions that mutate source text work consistently.
++        old_get_text = self.state_machine.input_lines.source
++
++        def get_text(source, *args, **kwargs):
++            text = old_get_text(source, *args, **kwargs)
++            if source == filename:
++                arg = [text]
++                self.env.events.emit('source-read', self.env.docname, arg)
++                return arg[0]
++            return text
++
++        self.state_machine.input_lines.source = get_text
++        try:
++            return super().run()
++        finally:
++            self.state_machine.input_lines.source = old_get_text
+ 
+ 
+ def setup(app: Sphinx) -> dict[str, Any]:

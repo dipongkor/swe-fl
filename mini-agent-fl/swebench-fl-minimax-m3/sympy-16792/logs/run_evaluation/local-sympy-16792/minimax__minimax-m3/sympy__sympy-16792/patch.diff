@@ -1,0 +1,76 @@
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..f7a6d6ec8 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -736,10 +736,14 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+             name_arg_dict = {x.name: x for x in arg_list}
+             new_args = []
+             for symbol in argument_sequence:
+-                try:
++                if symbol in name_arg_dict:
+                     new_args.append(name_arg_dict[symbol])
+-                except KeyError:
+-                    new_args.append(InputArgument(symbol))
++                else:
++                    if isinstance(symbol, MatrixSymbol):
++                        dims = tuple([(S.Zero, dim - 1) for dim in symbol.shape])
++                        new_args.append(InputArgument(symbol, dimensions=dims))
++                    else:
++                        new_args.append(InputArgument(symbol))
+             arg_list = new_args
+ 
+         return Routine(name, arg_list, return_val, local_vars, global_vars)
+@@ -1399,10 +1403,14 @@ def routine(self, name, expr, argument_sequence, global_vars):
+             name_arg_dict = {x.name: x for x in arg_list}
+             new_args = []
+             for symbol in argument_sequence:
+-                try:
++                if symbol in name_arg_dict:
+                     new_args.append(name_arg_dict[symbol])
+-                except KeyError:
+-                    new_args.append(InputArgument(symbol))
++                else:
++                    if isinstance(symbol, MatrixSymbol):
++                        dims = tuple([(S.Zero, dim - 1) for dim in symbol.shape])
++                        new_args.append(InputArgument(symbol, dimensions=dims))
++                    else:
++                        new_args.append(InputArgument(symbol))
+             arg_list = new_args
+ 
+         return Routine(name, arg_list, return_vals, local_vars, global_vars)
+@@ -1607,10 +1615,14 @@ def routine(self, name, expr, argument_sequence, global_vars):
+             name_arg_dict = {x.name: x for x in arg_list}
+             new_args = []
+             for symbol in argument_sequence:
+-                try:
++                if symbol in name_arg_dict:
+                     new_args.append(name_arg_dict[symbol])
+-                except KeyError:
+-                    new_args.append(InputArgument(symbol))
++                else:
++                    if isinstance(symbol, MatrixSymbol):
++                        dims = tuple([(S.Zero, dim - 1) for dim in symbol.shape])
++                        new_args.append(InputArgument(symbol, dimensions=dims))
++                    else:
++                        new_args.append(InputArgument(symbol))
+             arg_list = new_args
+ 
+         return Routine(name, arg_list, return_vals, local_vars, global_vars)
+@@ -1838,10 +1850,14 @@ def routine(self, name, expr, argument_sequence, global_vars):
+             name_arg_dict = {x.name: x for x in arg_list}
+             new_args = []
+             for symbol in argument_sequence:
+-                try:
++                if symbol in name_arg_dict:
+                     new_args.append(name_arg_dict[symbol])
+-                except KeyError:
+-                    new_args.append(InputArgument(symbol))
++                else:
++                    if isinstance(symbol, MatrixSymbol):
++                        dims = tuple([(S.Zero, dim - 1) for dim in symbol.shape])
++                        new_args.append(InputArgument(symbol, dimensions=dims))
++                    else:
++                        new_args.append(InputArgument(symbol))
+             arg_list = new_args
+ 
+         return Routine(name, arg_list, return_vals, local_vars, global_vars)

@@ -1,0 +1,25 @@
+diff --git a/django/db/backends/base/operations.py b/django/db/backends/base/operations.py
+index 2e283a3193..2648560510 100644
+--- a/django/db/backends/base/operations.py
++++ b/django/db/backends/base/operations.py
+@@ -8,6 +8,7 @@ from django.conf import settings
+ from django.db import NotSupportedError, transaction
+ from django.db.backends import utils
+ from django.utils import timezone
++from django.utils.dateparse import parse_duration
+ from django.utils.encoding import force_str
+ 
+ 
+@@ -580,7 +581,11 @@ class BaseDatabaseOperations:
+ 
+     def convert_durationfield_value(self, value, expression, connection):
+         if value is not None:
+-            return datetime.timedelta(0, 0, value)
++            if isinstance(value, str):
++                value = parse_duration(value)
++            else:
++                value = datetime.timedelta(0, 0, value)
++        return value
+ 
+     def check_expression_support(self, expression):
+         """

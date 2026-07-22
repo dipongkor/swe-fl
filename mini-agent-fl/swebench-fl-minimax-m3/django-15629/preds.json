@@ -1,0 +1,19 @@
+{
+  "django__django-15629": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-15629",
+    "model_patch": "diff --git a/django/db/backends/base/schema.py b/django/db/backends/base/schema.py\nindex 696bfd7742..a918eb0284 100644\n--- a/django/db/backends/base/schema.py\n+++ b/django/db/backends/base/schema.py\n@@ -829,7 +829,10 @@ class BaseDatabaseSchemaEditor:\n                 (old_field.primary_key and new_field.primary_key)\n                 or (old_field.unique and new_field.unique)\n             )\n-            and old_type != new_type\n+            and (\n+                old_type != new_type\n+                or old_db_params.get(\"collation\") != new_db_params.get(\"collation\")\n+            )\n         )\n         if drop_foreign_keys:\n             # '_meta.related_field' also contains M2M reverse fields, these\n@@ -1038,9 +1041,15 @@ class BaseDatabaseSchemaEditor:\n         for old_rel, new_rel in rels_to_update:\n             rel_db_params = new_rel.field.db_parameters(connection=self.connection)\n             rel_type = rel_db_params[\"type\"]\n-            fragment, other_actions = self._alter_column_type_sql(\n-                new_rel.related_model, old_rel.field, new_rel.field, rel_type\n-            )\n+            rel_collation = rel_db_params.get(\"collation\")\n+            if rel_collation:\n+                fragment = self._alter_column_collation_sql(\n+                    new_rel.related_model, new_rel.field, rel_type, rel_collation\n+                )\n+            else:\n+                fragment, other_actions = self._alter_column_type_sql(\n+                    new_rel.related_model, old_rel.field, new_rel.field, rel_type\n+                )\n             self.execute(\n                 self.sql_alter_column\n                 % {\n@@ -1049,8 +1058,9 @@ class BaseDatabaseSchemaEditor:\n                 },\n                 fragment[1],\n             )\n-            for sql, params in other_actions:\n-                self.execute(sql, params)\n+            if not rel_collation:\n+                for sql, params in other_actions:\n+                    self.execute(sql, params)\n         # Does it have a foreign key?\n         if (\n             self.connection.features.supports_foreign_keys\ndiff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py\nindex fad5560486..bb4e065e37 100644\n--- a/django/db/models/fields/related.py\n+++ b/django/db/models/fields/related.py\n@@ -1180,7 +1180,12 @@ class ForeignKey(ForeignObject):\n         return self.target_field.rel_db_type(connection=connection)\n \n     def db_parameters(self, connection):\n-        return {\"type\": self.db_type(connection), \"check\": self.db_check(connection)}\n+        target_db_parameters = self.target_field.db_parameters(connection)\n+        return {\n+            \"type\": self.db_type(connection),\n+            \"check\": self.db_check(connection),\n+            \"collation\": target_db_parameters.get(\"collation\"),\n+        }\n \n     def convert_empty_strings(self, value, expression, connection):\n         if (not value) and isinstance(value, str):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/related.py",
+          "line": 1183,
+          "statement": "        return {\"type\": self.db_type(connection), \"check\": self.db_check(connection)}"
+        }
+      ],
+      "reasoning": "The ForeignKey.db_parameters() method did not include the 'collation' key, so when a CharField with db_collation was used as a primary key and referenced by a ForeignKey, the FK column was generated without the COLLATE clause. This caused MySQL FK constraint errors because the collation of the PK must match the collation of the FK. The fix adds the collation from the target field to the db_parameters of the ForeignKey.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

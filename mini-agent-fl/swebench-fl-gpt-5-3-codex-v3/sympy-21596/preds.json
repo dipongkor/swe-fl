@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-21596": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-21596",
+    "model_patch": "diff --git a/sympy/sets/handlers/functions.py b/sympy/sets/handlers/functions.py\nindex d492bb9655..56baab2c08 100644\n--- a/sympy/sets/handlers/functions.py\n+++ b/sympy/sets/handlers/functions.py\n@@ -254,4 +254,7 @@ def _set_function(f, self): # noqa:F811\n     expr = f.expr\n     if not isinstance(expr, Expr):\n         return\n-    return _set_function(f, Interval(-oo, oo))\n+    # Mapping over Reals can only be simplified safely when we can prove\n+    # the image is real-valued. Otherwise keep it unevaluated.\n+    if expr.is_real is True:\n+        return _set_function(f, Interval(-oo, oo))\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/sets/handlers/functions.py",
+          "line": 258,
+          "statement": "    return _set_function(f, Interval(-oo, oo))"
+        }
+      ],
+      "reasoning": "The Reals handler unconditionally rewrote function images over Reals to interval images without proving the mapped expression is real-valued, causing incorrect subset/intersection results for complex-valued imagesets.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

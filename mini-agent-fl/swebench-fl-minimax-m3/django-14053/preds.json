@@ -1,0 +1,24 @@
+{
+  "django__django-14053": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-14053",
+    "model_patch": "diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py\nindex 494890cc23..8e02ede5f9 100644\n--- a/django/contrib/staticfiles/storage.py\n+++ b/django/contrib/staticfiles/storage.py\n@@ -229,19 +229,29 @@ class HashedFilesMixin:\n         # Do a single pass first. Post-process all files once, then repeat for\n         # adjustable files.\n         for name, hashed_name, processed, _ in self._post_process(paths, adjustable_paths, hashed_files):\n-            yield name, hashed_name, processed\n+            # Pass through errors (e.g. missing referenced file) immediately.\n+            if isinstance(processed, Exception):\n+                yield name, hashed_name, processed\n+            elif name not in adjustable_paths:\n+                yield name, hashed_name, processed\n \n         paths = {path: paths[path] for path in adjustable_paths}\n \n         for i in range(self.max_post_process_passes):\n             substitutions = False\n             for name, hashed_name, processed, subst in self._post_process(paths, adjustable_paths, hashed_files):\n-                yield name, hashed_name, processed\n                 substitutions = substitutions or subst\n \n             if not substitutions:\n                 break\n \n+        # Yield the post-processed adjustable files using their final hash\n+        # from the hashed_files dictionary.\n+        for name in paths:\n+            cleaned_name = self.clean_name(name)\n+            hash_key = self.hash_key(cleaned_name)\n+            yield name, hashed_files[hash_key], True\n+\n         if substitutions:\n             yield 'All', None, RuntimeError('Max post-process passes exceeded.')\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/staticfiles/storage.py",
+          "line": 232,
+          "statement": "            yield name, hashed_name, processed"
+        },
+        {
+          "file": "django/contrib/staticfiles/storage.py",
+          "line": 239,
+          "statement": "                yield name, hashed_name, processed"
+        }
+      ],
+      "reasoning": "The post_process() method in HashedFilesMixin yielded the same file multiple times: once in the first pass (line 232) and again in each of the subsequent max_post_process_passes iterations (line 239). Since adjustable files are processed in every pass to update their content references, this caused the same original file to be yielded up to max_post_process_passes+1 times with potentially different (intermediate vs final) hashes. The fix ensures each file is yielded exactly once with the final hash.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

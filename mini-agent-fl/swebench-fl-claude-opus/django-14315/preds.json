@@ -1,0 +1,19 @@
+{
+  "django__django-14315": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-14315",
+    "model_patch": "diff --git a/django/db/backends/postgresql/client.py b/django/db/backends/postgresql/client.py\nindex 3effab65a8..0effcc44e6 100644\n--- a/django/db/backends/postgresql/client.py\n+++ b/django/db/backends/postgresql/client.py\n@@ -51,7 +51,7 @@ class DatabaseClient(BaseDatabaseClient):\n             env['PGSSLKEY'] = str(sslkey)\n         if passfile:\n             env['PGPASSFILE'] = str(passfile)\n-        return args, env\n+        return args, (env or None)\n \n     def runshell(self, parameters):\n         sigint_handler = signal.getsignal(signal.SIGINT)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/postgresql/client.py",
+          "line": 54,
+          "statement": "        return args, env"
+        }
+      ],
+      "reasoning": "settings_to_cmd_args_env returned an empty dict instead of None when no PG* env vars were set; the base client's `if env:` check treats empty dict as falsy but subprocess still received an empty env in earlier flow, and returning None lets os.environ be used. Returning `env or None` ensures os.environ is respected.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

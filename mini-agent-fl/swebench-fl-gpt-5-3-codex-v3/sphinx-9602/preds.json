@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9602": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-9602",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 9875a9f4b..fbfad75db 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -123,7 +123,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod\n             if node.value is Ellipsis:\n                 return [addnodes.desc_sig_punctuation('', \"...\")]\n             else:\n-                return [nodes.Text(node.value)]\n+                return [nodes.Text(repr(node.value))]\n         elif isinstance(node, ast.Expr):\n             return unparse(node.value)\n         elif isinstance(node, ast.Index):\n@@ -167,7 +167,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod\n                 if isinstance(node, ast.Ellipsis):\n                     return [addnodes.desc_sig_punctuation('', \"...\")]\n                 elif isinstance(node, ast.NameConstant):\n-                    return [nodes.Text(node.value)]\n+                    return [nodes.Text(repr(node.value))]\n \n             raise SyntaxError  # unsupported syntax\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 126,
+          "statement": "                return [nodes.Text(node.value)]"
+        }
+      ],
+      "reasoning": "Literal values in annotations were emitted as plain text tokens like True/False, then indiscriminately converted into py:class cross references, causing nitpicky warnings for non-class literals. Rendering constants with repr() keeps them as quoted/explicit literals and avoids false class targets.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

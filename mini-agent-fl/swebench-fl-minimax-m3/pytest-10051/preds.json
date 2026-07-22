@@ -1,0 +1,24 @@
+{
+  "pytest-dev__pytest-10051": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-10051",
+    "model_patch": "diff --git a/changelog/9612.bugfix.rst b/changelog/9612.bugfix.rst\nnew file mode 100644\nindex 000000000..09afe3472\n--- /dev/null\n+++ b/changelog/9612.bugfix.rst\n@@ -0,0 +1 @@\n+Fixed :meth:`caplog.get_records() <pytest.LogCaptureFixture.get_records>` to be consistent with :attr:`caplog.records <pytest.LogCaptureFixture.records>` after :meth:`caplog.clear() <pytest.LogCaptureFixture.clear>` is called.\ndiff --git a/src/_pytest/logging.py b/src/_pytest/logging.py\nindex a4f4214b1..1c5b64b7b 100644\n--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -345,6 +345,10 @@ class LogCaptureHandler(logging_StreamHandler):\n         self.records = []\n         self.stream = StringIO()\n \n+    def clear(self) -> None:\n+        self.records.clear()\n+        self.stream = StringIO()\n+\n     def handleError(self, record: logging.LogRecord) -> None:\n         if logging.raiseExceptions:\n             # Fail the test if the log message is bad (emit failed).\n@@ -440,7 +444,7 @@ class LogCaptureFixture:\n \n     def clear(self) -> None:\n         \"\"\"Reset the list of log records and the captured log text.\"\"\"\n-        self.handler.reset()\n+        self.handler.clear()\n \n     def set_level(self, level: Union[int, str], logger: Optional[str] = None) -> None:\n         \"\"\"Set the level of a logger for the duration of a test.\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/logging.py",
+          "line": 345,
+          "statement": "        self.records = []"
+        },
+        {
+          "file": "src/_pytest/logging.py",
+          "line": 443,
+          "statement": "        self.handler.reset()"
+        }
+      ],
+      "reasoning": "The `LogCaptureHandler.reset()` method replaces `self.records` with a brand new empty list (`self.records = []`), breaking the reference stored in `item.stash[caplog_records_key][when]` (which was set to the same list at the start of each phase in `_runtest_for`). `LogCaptureFixture.clear()` invokes `self.handler.reset()`, so calling `caplog.clear()` causes this replacement, decoupling `caplog.records` from `caplog.get_records(when)`. The fix is to add a new `clear()` method that clears the list in place (`self.records.clear()`) and route `LogCaptureFixture.clear()` to it, preserving the reference.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

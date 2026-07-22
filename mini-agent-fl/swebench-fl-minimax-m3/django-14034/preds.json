@@ -1,0 +1,19 @@
+{
+  "django__django-14034": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-14034",
+    "model_patch": "diff --git a/django/forms/fields.py b/django/forms/fields.py\nindex 65d6a9ec82..9e90b9b738 100644\n--- a/django/forms/fields.py\n+++ b/django/forms/fields.py\n@@ -1025,7 +1025,7 @@ class MultiValueField(Field):\n             if not value or not [v for v in value if v not in self.empty_values]:\n                 if self.required:\n                     raise ValidationError(self.error_messages['required'], code='required')\n-                else:\n+                elif not value or not any(f.required for f in self.fields):\n                     return self.compress([])\n         else:\n             raise ValidationError(self.error_messages['invalid'], code='invalid')\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/forms/fields.py",
+          "line": 1028,
+          "statement": "                elif not value or not any(f.required for f in self.fields):"
+        }
+      ],
+      "reasoning": "The MultiValueField.clean() method had an early-return path (originally `else: return self.compress([])`) when all values were empty and the field itself was not required. This caused the field to skip validation of individual sub-fields, ignoring whether any sub-field was required. The fix changes this to a conditional that only early-returns when the value is empty (None/'') or no sub-field is required; otherwise, it falls through to the per-field loop so that 'incomplete' errors are collected for required sub-fields with empty values.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

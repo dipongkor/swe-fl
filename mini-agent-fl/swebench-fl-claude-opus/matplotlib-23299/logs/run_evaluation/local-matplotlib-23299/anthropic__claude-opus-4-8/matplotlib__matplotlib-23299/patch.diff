@@ -1,0 +1,35 @@
+diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py
+index e3c66ea67c..598f1e3f38 100644
+--- a/lib/matplotlib/pyplot.py
++++ b/lib/matplotlib/pyplot.py
+@@ -222,7 +222,6 @@ def switch_backend(newbackend):
+     global _backend_mod
+     # make sure the init is pulled up so we can assign to it later
+     import matplotlib.backends
+-    close("all")
+ 
+     if newbackend is rcsetup._auto_backend_sentinel:
+         current_framework = cbook._get_running_interactive_framework()
+@@ -260,6 +259,11 @@ def switch_backend(newbackend):
+             rcParamsOrig["backend"] = "agg"
+             return
+ 
++    # the last part is a hack to only compare against the backend that is
++    # actually loaded, if any, rather than the (possibly temporary,
++    # e.g. within an rc_context) value stored in rcParams['backend'].
++    old_backend = dict.__getitem__(rcParamsDefault, 'backend')
++
+     backend_mod = importlib.import_module(
+         cbook._backend_module_name(newbackend))
+     canvas_class = backend_mod.FigureCanvas
+@@ -307,6 +311,10 @@ def switch_backend(newbackend):
+     _log.debug("Loaded backend %s version %s.",
+                newbackend, backend_mod.backend_version)
+ 
++    if old_backend != newbackend:
++        # we need to close all figures registered with the old backend
++        close("all")
++
+     rcParams['backend'] = rcParamsDefault['backend'] = newbackend
+     _backend_mod = backend_mod
+     for func_name in ["new_figure_manager", "draw_if_interactive", "show"]:

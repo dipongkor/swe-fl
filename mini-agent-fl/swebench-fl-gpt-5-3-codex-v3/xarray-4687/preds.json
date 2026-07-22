@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-4687": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "pydata__xarray-4687",
+    "model_patch": "diff --git a/xarray/core/computation.py b/xarray/core/computation.py\nindex 9fe93c88..b3662208 100644\n--- a/xarray/core/computation.py\n+++ b/xarray/core/computation.py\n@@ -1817,6 +1817,7 @@ def where(cond, x, y):\n         join=\"exact\",\n         dataset_join=\"exact\",\n         dask=\"allowed\",\n+        keep_attrs=_get_keep_attrs(default=False),\n     )\n \n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/computation.py",
+          "line": 1820,
+          "statement": "        keep_attrs=_get_keep_attrs(default=False),"
+        }
+      ],
+      "reasoning": "xr.where called apply_ufunc without forwarding keep_attrs behavior, causing attrs to be dropped. The added line makes it respect xarray's global keep_attrs option.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

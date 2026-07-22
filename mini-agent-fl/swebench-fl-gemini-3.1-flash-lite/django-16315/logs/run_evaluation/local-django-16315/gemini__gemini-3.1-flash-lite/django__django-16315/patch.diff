@@ -1,0 +1,24 @@
+diff --git a/django/db/backends/postgresql/operations.py b/django/db/backends/postgresql/operations.py
+index 62273fc43c..039013b8f4 100644
+--- a/django/db/backends/postgresql/operations.py
++++ b/django/db/backends/postgresql/operations.py
+@@ -353,12 +353,16 @@ class DatabaseOperations(BaseDatabaseOperations):
+         if on_conflict == OnConflict.IGNORE:
+             return "ON CONFLICT DO NOTHING"
+         if on_conflict == OnConflict.UPDATE:
++            model = fields[0].model
++            def get_column(field_name):
++                return model._meta.get_field(field_name).column
++
+             return "ON CONFLICT(%s) DO UPDATE SET %s" % (
+-                ", ".join(map(self.quote_name, unique_fields)),
++                ", ".join(map(self.quote_name, map(get_column, unique_fields))),
+                 ", ".join(
+                     [
+-                        f"{field} = EXCLUDED.{field}"
+-                        for field in map(self.quote_name, update_fields)
++                        f"{self.quote_name(get_column(field))} = EXCLUDED.{self.quote_name(get_column(field))}"
++                        for field in update_fields
+                     ]
+                 ),
+             )

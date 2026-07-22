@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7590": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-7590",
+    "model_patch": "diff --git a/sphinx/domains/cpp.py b/sphinx/domains/cpp.py\nindex fe52d881d..27a0a7fa0 100644\n--- a/sphinx/domains/cpp.py\n+++ b/sphinx/domains/cpp.py\n@@ -822,6 +822,22 @@ class ASTBooleanLiteral(ASTLiteral):\n         signode.append(nodes.Text(str(self)))\n \n \n+class ASTUserDefinedLiteral(ASTLiteral):\n+    def __init__(self, literal: ASTLiteral, suffix: str) -> None:\n+        self.literal = literal\n+        self.suffix = suffix\n+\n+    def _stringify(self, transform: StringifyTransform) -> str:\n+        return str(self.literal) + self.suffix\n+\n+    def get_id(self, version: int) -> str:\n+        return \"L\" + self.suffix + \"E\" + str(self.literal)\n+\n+    def describe_signature(self, signode: TextElement, mode: str,\n+                           env: \"BuildEnvironment\", symbol: \"Symbol\") -> None:\n+        txt = str(self)\n+        signode.append(nodes.Text(txt, txt))\n+\n class ASTNumberLiteral(ASTLiteral):\n     def __init__(self, data: str) -> None:\n         self.data = data\n@@ -4662,9 +4678,14 @@ class DefinitionParser(BaseParser):\n                       integer_literal_re, octal_literal_re]:\n             pos = self.pos\n             if self.match(regex):\n-                while self.current_char in 'uUlLfF':\n+                while self.current_char in \"uUlLfF\":\n                     self.pos += 1\n-                return ASTNumberLiteral(self.definition[pos:self.pos])\n+                lit = ASTNumberLiteral(self.definition[pos:self.pos])\n+                # UDL suffix must start with an underscore\n+                udl_suffix_re = re.compile(r\"_[a-zA-Z0-9_]*\")\n+                if self.match(udl_suffix_re):\n+                    return ASTUserDefinedLiteral(lit, self.matched_text)\n+                return lit\n \n         string = self._parse_string()\n         if string is not None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/cpp.py",
+          "line": 4685,
+          "statement": "if self.match(udl_suffix_re):"
+        }
+      ],
+      "reasoning": "The parser did not support user-defined literals, so it failed to parse the suffix of the literal, causing a parsing error.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

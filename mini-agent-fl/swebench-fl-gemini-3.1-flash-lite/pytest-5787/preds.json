@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-5787": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pytest-dev__pytest-5787",
+    "model_patch": "diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py\nindex 4682d5b6e..94aff2562 100644\n--- a/src/_pytest/reports.py\n+++ b/src/_pytest/reports.py\n@@ -162,28 +162,38 @@ class BaseReport:\n         \"\"\"\n \n         def disassembled_report(rep):\n-            reprtraceback = rep.longrepr.reprtraceback.__dict__.copy()\n+            def serialize_traceback(reprtraceback):\n+                reprtraceback = reprtraceback.__dict__.copy()\n+                new_entries = []\n+                for entry in reprtraceback[\"reprentries\"]:\n+                    entry_data = {\n+                        \"type\": type(entry).__name__,\n+                        \"data\": entry.__dict__.copy(),\n+                    }\n+                    for key, value in entry_data[\"data\"].items():\n+                        if hasattr(value, \"__dict__\"):\n+                            entry_data[\"data\"][key] = value.__dict__.copy()\n+                    new_entries.append(entry_data)\n+                reprtraceback[\"reprentries\"] = new_entries\n+                return reprtraceback\n+\n+            reprtraceback = serialize_traceback(rep.longrepr.reprtraceback)\n             reprcrash = rep.longrepr.reprcrash.__dict__.copy()\n \n-            new_entries = []\n-            for entry in reprtraceback[\"reprentries\"]:\n-                entry_data = {\n-                    \"type\": type(entry).__name__,\n-                    \"data\": entry.__dict__.copy(),\n-                }\n-                for key, value in entry_data[\"data\"].items():\n-                    if hasattr(value, \"__dict__\"):\n-                        entry_data[\"data\"][key] = value.__dict__.copy()\n-                new_entries.append(entry_data)\n-\n-            reprtraceback[\"reprentries\"] = new_entries\n-\n-            return {\n+            res = {\n                 \"reprcrash\": reprcrash,\n                 \"reprtraceback\": reprtraceback,\n                 \"sections\": rep.longrepr.sections,\n             }\n-\n+            if hasattr(rep.longrepr, \"chain\"):\n+                res[\"chain\"] = []\n+                for tb, crash, descr in rep.longrepr.chain:\n+                    res[\"chain\"].append({\n+                        \"reprtraceback\": serialize_traceback(tb),\n+                        \"reprcrash\": crash.__dict__.copy() if crash else None,\n+                        \"descr\": descr\n+                    })\n+            return res\n         d = self.__dict__.copy()\n         if hasattr(self.longrepr, \"toterminal\"):\n             if hasattr(self.longrepr, \"reprtraceback\") and hasattr(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/reports.py",
+          "line": 164,
+          "statement": "def disassembled_report(rep):"
+        }
+      ],
+      "reasoning": "The disassembled_report function in src/_pytest/reports.py only serializes the outermost exception in a chain, ignoring the rest of the chained exceptions.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

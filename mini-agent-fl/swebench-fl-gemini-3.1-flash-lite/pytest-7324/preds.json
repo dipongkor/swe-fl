@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7324": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pytest-dev__pytest-7324",
+    "model_patch": "diff --git a/src/_pytest/mark/expression.py b/src/_pytest/mark/expression.py\nindex 04c73411a..8f51f4a26 100644\n--- a/src/_pytest/mark/expression.py\n+++ b/src/_pytest/mark/expression.py\n@@ -161,6 +161,12 @@ def not_expr(s: Scanner) -> ast.expr:\n         return ret\n     ident = s.accept(TokenType.IDENT)\n     if ident:\n+        if ident.value == \"True\":\n+            return ast.Constant(True)\n+        elif ident.value == \"False\":\n+            return ast.Constant(False)\n+        elif ident.value == \"None\":\n+            return ast.Constant(None)\n         return ast.Name(ident.value, ast.Load())\n     s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/mark/expression.py",
+          "line": 164,
+          "statement": "return ast.Name(ident.value, ast.Load())"
+        }
+      ],
+      "reasoning": "The code was creating an ast.Name node for 'True', 'False', and 'None' identifiers, which causes a compilation error in Python 3.8+ because these are reserved keywords/constants that cannot be used as variable names in this context.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

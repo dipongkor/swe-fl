@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-12419": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-12419",
+    "model_patch": "diff --git a/sympy/matrices/expressions/matexpr.py b/sympy/matrices/expressions/matexpr.py\nindex b4d759836..e41aa774d 100644\n--- a/sympy/matrices/expressions/matexpr.py\n+++ b/sympy/matrices/expressions/matexpr.py\n@@ -7,6 +7,7 @@\n from sympy.core.compatibility import range\n from sympy.core.sympify import SympifyError, sympify\n from sympy.functions import conjugate, adjoint\n+from sympy.functions.special.tensor_functions import KroneckerDelta\n from sympy.matrices import ShapeError\n from sympy.simplify import simplify\n \n@@ -476,10 +477,13 @@ def conjugate(self):\n         return self\n \n     def _entry(self, i, j):\n-        if i == j:\n+        from sympy.core.relational import Eq\n+        eq = Eq(i, j)\n+        if eq is S.true:\n             return S.One\n-        else:\n+        elif eq is S.false:\n             return S.Zero\n+        return KroneckerDelta(i, j)\n \n     def _eval_determinant(self):\n         return S.One\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/matrices/expressions/matexpr.py",
+          "line": 479,
+          "statement": "        if i == j:"
+        }
+      ],
+      "reasoning": "Identity._entry uses Python structural equality (i == j), which is False for distinct symbolic indices, so it unconditionally returns S.Zero for symbolic off-diagonal-looking accesses. This makes I[i, j] evaluate to 0 even when i and j could be equal, causing the double summation over the identity matrix to yield 0 instead of n. Returning KroneckerDelta(i, j) for indeterminate indices fixes it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

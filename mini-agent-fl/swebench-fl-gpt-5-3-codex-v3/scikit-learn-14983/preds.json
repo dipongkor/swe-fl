@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-14983": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "scikit-learn__scikit-learn-14983",
+    "model_patch": "diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py\nindex c49a3ce6a..928afb5bf 100644\n--- a/sklearn/model_selection/_split.py\n+++ b/sklearn/model_selection/_split.py\n@@ -1063,7 +1063,7 @@ class LeavePGroupsOut(BaseCrossValidator):\n         return super().split(X, y, groups)\n \n \n-class _RepeatedSplits(metaclass=ABCMeta):\n+class _RepeatedSplits(BaseCrossValidator, metaclass=ABCMeta):\n     \"\"\"Repeated splits for an arbitrary randomized CV splitter.\n \n     Repeats splits for cross-validators n times with different randomization\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/model_selection/_split.py",
+          "line": 1066,
+          "statement": "class _RepeatedSplits(metaclass=ABCMeta):"
+        }
+      ],
+      "reasoning": "_RepeatedSplits did not inherit from BaseCrossValidator, so it lacked the shared __repr__ implementation used by cross-validator classes; its subclasses therefore fell back to object.__repr__.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

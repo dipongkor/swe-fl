@@ -1,0 +1,63 @@
+2026-07-01 15:44:28,125 - INFO - Creating container for django__django-16502...
+2026-07-01 15:44:28,213 - INFO - Container for django__django-16502 created: 10a285ebde4af64aca4f1d45f888a27c66dd534e2bb9071c1f3423bd3751c71d
+2026-07-01 15:44:28,648 - INFO - Container for django__django-16502 started: 10a285ebde4af64aca4f1d45f888a27c66dd534e2bb9071c1f3423bd3751c71d
+2026-07-01 15:44:28,651 - INFO - Intermediate patch for django__django-16502 written to logs/run_evaluation/local-django-16502/gemini__gemini-3.1-flash-lite/django__django-16502/patch.diff, now applying to container...
+2026-07-01 15:44:29,125 - INFO - >>>>> Applied Patch:
+Checking patch django/core/servers/basehttp.py...
+Applied patch django/core/servers/basehttp.py cleanly.
+
+2026-07-01 15:44:30,044 - INFO - Git diff before:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..c33bd45cda 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,17 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++
++    def send_headers(self):
++        self.is_sending_headers = True
++        super().send_headers()
++        self.is_sending_headers = False
++
++    def _write(self, data):
++        if self.environ['REQUEST_METHOD'] == 'HEAD' and not getattr(self, 'is_sending_headers', False):
++            return
++        super()._write(data)
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()
+2026-07-01 15:44:30,050 - INFO - Eval script for django__django-16502 written to logs/run_evaluation/local-django-16502/gemini__gemini-3.1-flash-lite/django__django-16502/eval.sh; copying to container...
+2026-07-01 15:44:37,639 - INFO - Test runtime: 7.19 seconds
+2026-07-01 15:44:37,646 - INFO - Test output for django__django-16502 written to logs/run_evaluation/local-django-16502/gemini__gemini-3.1-flash-lite/django__django-16502/test_output.txt
+2026-07-01 15:44:37,879 - INFO - Git diff after:
+diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py
+index fef5532e58..c33bd45cda 100644
+--- a/django/core/servers/basehttp.py
++++ b/django/core/servers/basehttp.py
+@@ -143,6 +143,17 @@ class ServerHandler(simple_server.ServerHandler):
+         if self.headers.get("Connection") == "close":
+             self.request_handler.close_connection = True
+ 
++
++    def send_headers(self):
++        self.is_sending_headers = True
++        super().send_headers()
++        self.is_sending_headers = False
++
++    def _write(self, data):
++        if self.environ['REQUEST_METHOD'] == 'HEAD' and not getattr(self, 'is_sending_headers', False):
++            return
++        super()._write(data)
++
+     def close(self):
+         self.get_stdin().read()
+         super().close()
+2026-07-01 15:44:37,880 - INFO - Grading answer for django__django-16502...
+2026-07-01 15:44:37,883 - INFO - report: {'django__django-16502': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_no_body_returned_for_head_requests (servers.test_basehttp.WSGIRequestHandlerTestCase.test_no_body_returned_for_head_requests)']}, 'PASS_TO_PASS': {'success': ['test_https (servers.test_basehttp.WSGIRequestHandlerTestCase.test_https)', 'test_log_message (servers.test_basehttp.WSGIRequestHandlerTestCase.test_log_message)', 'WSGIRequestHandler ignores headers containing underscores.', 'WSGIServer handles broken pipe errors.'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-16502: resolved: False
+2026-07-01 15:44:37,886 - INFO - Attempting to stop container sweb.eval.django__django-16502.local-django-16502...
+2026-07-01 15:44:53,340 - INFO - Attempting to remove container sweb.eval.django__django-16502.local-django-16502...
+2026-07-01 15:44:53,408 - INFO - Container sweb.eval.django__django-16502.local-django-16502 removed.

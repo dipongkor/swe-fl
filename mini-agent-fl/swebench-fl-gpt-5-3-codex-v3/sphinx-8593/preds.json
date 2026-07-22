@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8593": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-8593",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py\nindex 76265f5be..1f49e0ed6 100644\n--- a/sphinx/ext/autodoc/__init__.py\n+++ b/sphinx/ext/autodoc/__init__.py\n@@ -729,11 +729,15 @@ class Documenter:\n             has_doc = bool(doc)\n \n             metadata = extract_metadata(doc)\n+            if (namespace, membername) in attr_docs:\n+                attr_doc = '\\n'.join(attr_docs.get((namespace, membername), []))\n+                metadata.update(extract_metadata(attr_doc))\n+\n             if 'private' in metadata:\n-                # consider a member private if docstring has \"private\" metadata\n+                # consider a member private if docs have \"private\" metadata\n                 isprivate = True\n             elif 'public' in metadata:\n-                # consider a member public if docstring has \"public\" metadata\n+                # consider a member public if docs have \"public\" metadata\n                 isprivate = False\n             else:\n                 isprivate = membername.startswith('_')\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/__init__.py",
+          "line": 732,
+          "statement": "            if (namespace, membername) in attr_docs:"
+        }
+      ],
+      "reasoning": "Member privacy/publicity was determined only from object docstrings, so metadata attached via attribute comments for module variables was ignored and underscored variables stayed private.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

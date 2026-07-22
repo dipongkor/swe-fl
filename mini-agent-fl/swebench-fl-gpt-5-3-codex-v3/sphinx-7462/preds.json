@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7462": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 3ca730e30..b6a228a60 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -118,7 +118,8 @@ def _parse_annotation(annotation: str) -> List[Node]:\n             for elem in node.elts:\n                 result.extend(unparse(elem))\n                 result.append(addnodes.desc_sig_punctuation('', ', '))\n-            result.pop()\n+            if result:\n+                result.pop()\n             return result\n         else:\n             raise SyntaxError  # unsupported syntax\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 121,
+          "statement": "            result.pop()"
+        }
+      ],
+      "reasoning": "The tuple unparser unconditionally popped a trailing delimiter even when the tuple had no elements, causing IndexError for annotations like Tuple[()].",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

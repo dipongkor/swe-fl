@@ -1,0 +1,19 @@
+{
+  "pydata__xarray-6938": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pydata__xarray-6938",
+    "model_patch": "diff --git a/xarray/core/variable.py b/xarray/core/variable.py\nindex 5827b90a..d03654e9 100644\n--- a/xarray/core/variable.py\n+++ b/xarray/core/variable.py\n@@ -2881,7 +2881,7 @@ class IndexVariable(Variable):\n \n     def to_index_variable(self):\n         \"\"\"Return this variable as an xarray.IndexVariable\"\"\"\n-        return self\n+        return self.copy(deep=False)\n \n     to_coord = utils.alias(to_index_variable, \"to_coord\")\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/variable.py",
+          "line": 2884,
+          "statement": "        return self"
+        }
+      ],
+      "reasoning": "IndexVariable.to_index_variable() returned self instead of a copy. In Dataset.swap_dims(), the returned variable's .dims attribute is mutated in place (var.dims = dims), which modified the original object's variable when it was already an IndexVariable. Returning a shallow copy prevents this in-place mutation of the source object.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

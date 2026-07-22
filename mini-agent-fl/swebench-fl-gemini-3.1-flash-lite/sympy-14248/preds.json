@@ -1,0 +1,29 @@
+{
+  "sympy__sympy-14248": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-14248",
+    "model_patch": "diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py\nindex 8253b2f68..7e9a5383e 100644\n--- a/sympy/printing/latex.py\n+++ b/sympy/printing/latex.py\n@@ -1483,11 +1483,12 @@ def _print_MatAdd(self, expr):\n \n     def _print_MatMul(self, expr):\n         from sympy import Add, MatAdd, HadamardProduct\n-\n         def parens(x):\n             if isinstance(x, (Add, MatAdd, HadamardProduct)):\n                 return r\"\\left(%s\\right)\" % self._print(x)\n             return self._print(x)\n+        if len(expr.args) > 1 and expr.args[0] == -1:\n+            return \"-\" + \" \".join(map(parens, expr.args[1:]))\n         return ' '.join(map(parens, expr.args))\n \n     def _print_Mod(self, expr, exp=None):\ndiff --git a/sympy/printing/pretty/pretty.py b/sympy/printing/pretty/pretty.py\nindex db24f4c61..8e9dc3327 100644\n--- a/sympy/printing/pretty/pretty.py\n+++ b/sympy/printing/pretty/pretty.py\n@@ -823,6 +823,12 @@ def _print_MatAdd(self, expr):\n \n     def _print_MatMul(self, expr):\n         args = list(expr.args)\n+        if len(args) > 1 and args[0] == -1:\n+            res = self._print(expr.func(*args[1:]))\n+            p = prettyForm(\"-\")\n+            p.baseline = res.baseline\n+            p.picture = [p.picture[0] + res.picture[0]]\n+            return p\n         from sympy import Add, MatAdd, HadamardProduct\n         for i, a in enumerate(args):\n             if (isinstance(a, (Add, MatAdd, HadamardProduct))\n@@ -832,7 +838,6 @@ def _print_MatMul(self, expr):\n                 args[i] = self._print(a)\n \n         return prettyForm.__mul__(*args)\n-\n     def _print_DotProduct(self, expr):\n         args = list(expr.args)\n \ndiff --git a/sympy/printing/str.py b/sympy/printing/str.py\nindex 0baefe0f7..5641cadbb 100644\n--- a/sympy/printing/str.py\n+++ b/sympy/printing/str.py\n@@ -304,7 +304,11 @@ def _print_Mul(self, expr):\n             return sign + '*'.join(a_str) + \"/(%s)\" % '*'.join(b_str)\n \n     def _print_MatMul(self, expr):\n-        return '*'.join([self.parenthesize(arg, precedence(expr))\n+        from sympy.matrices.expressions.matexpr import MatrixSymbol\n+        if len(expr.args) > 1 and expr.args[0] == -1:\n+            return \"-\" + \"*\".join([self.parenthesize(arg, precedence(expr))\n+                for arg in expr.args[1:]])\n+        return \"*\".join([self.parenthesize(arg, precedence(expr))\n             for arg in expr.args])\n \n     def _print_HadamardProduct(self, expr):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/str.py",
+          "line": 306,
+          "statement": "    def _print_MatMul(self, expr):"
+        },
+        {
+          "file": "sympy/printing/pretty/pretty.py",
+          "line": 824,
+          "statement": "    def _print_MatMul(self, expr):"
+        },
+        {
+          "file": "sympy/printing/latex.py",
+          "line": 1484,
+          "statement": "    def _print_MatMul(self, expr):"
+        }
+      ],
+      "reasoning": "The _print_MatMul methods in the printers did not handle the case where the first argument is -1, which is how MatrixSymbol differences are represented.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

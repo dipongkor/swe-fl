@@ -1,0 +1,9 @@
+{
+  "pydata__xarray-6938": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pydata__xarray-6938",
+    "model_patch": "",
+    "localization": null,
+    "localization_parse_error": null
+  }
+}

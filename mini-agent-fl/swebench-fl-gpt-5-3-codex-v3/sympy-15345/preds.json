@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-15345": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-15345",
+    "model_patch": "diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py\nindex ea7e3a2d9..806ac3e99 100644\n--- a/sympy/printing/mathematica.py\n+++ b/sympy/printing/mathematica.py\n@@ -116,6 +116,12 @@ def _print_Derivative(self, expr):\n         dvars = [i[0] if i[1] == 1 else i for i in expr.variable_count]\n         return \"Hold[D[\" + ', '.join(self.doprint(a) for a in [dexpr] + dvars) + \"]]\"\n \n+    def _print_Max(self, expr):\n+        return \"Max[%s]\" % self.stringify(expr.args, \", \")\n+\n+    def _print_Min(self, expr):\n+        return \"Min[%s]\" % self.stringify(expr.args, \", \")\n+\n \n def mathematica_code(expr, **settings):\n     r\"\"\"Converts an expr to a string of the Wolfram Mathematica code\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/mathematica.py",
+          "line": 102,
+          "statement": "        return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")"
+        }
+      ],
+      "reasoning": "Max/Min were handled by the generic function fallback, but their arguments are canonically sorted in SymPy and the fallback happened to emit non-Mathematica call syntax for this case; explicit printers ensure valid Mathematica Max[...] and Min[...] output.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "sympy__sympy-13091": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-13091",
+    "model_patch": "diff --git a/sympy/core/basic.py b/sympy/core/basic.py\nindex db4e97184..25390f44f 100644\n--- a/sympy/core/basic.py\n+++ b/sympy/core/basic.py\n@@ -313,10 +313,10 @@ def __eq__(self, other):\n             try:\n                 other = _sympify(other)\n             except SympifyError:\n-                return False    # sympy != other\n+                return NotImplemented    # sympy != other\n \n             if type(self) != type(other):\n-                return False\n+                return NotImplemented\n \n         return self._hashable_content() == other._hashable_content()\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/basic.py",
+          "line": 316,
+          "statement": "return False    # sympy != other"
+        },
+        {
+          "file": "sympy/core/basic.py",
+          "line": 319,
+          "statement": "return False"
+        }
+      ],
+      "reasoning": "The __eq__ method in Basic returns False when it cannot compare with another type, which prevents the reflected method on the other object from being called. Returning NotImplemented allows Python to delegate the comparison to the other object.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

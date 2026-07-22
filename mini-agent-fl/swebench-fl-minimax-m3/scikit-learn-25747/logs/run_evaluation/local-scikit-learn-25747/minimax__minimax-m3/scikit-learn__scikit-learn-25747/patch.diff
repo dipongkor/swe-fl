@@ -1,0 +1,16 @@
+diff --git a/sklearn/utils/_set_output.py b/sklearn/utils/_set_output.py
+index 335773c6a..425918f94 100644
+--- a/sklearn/utils/_set_output.py
++++ b/sklearn/utils/_set_output.py
+@@ -53,9 +53,9 @@ def _wrap_in_pandas_container(
+     pd = check_pandas_support("Setting output container to 'pandas'")
+ 
+     if isinstance(data_to_wrap, pd.DataFrame):
+-        if columns is not None:
++        if columns is not None and len(columns) == len(data_to_wrap.columns):
+             data_to_wrap.columns = columns
+-        if index is not None:
++        if index is not None and len(index) == len(data_to_wrap.index):
+             data_to_wrap.index = index
+         return data_to_wrap
+ 

@@ -1,0 +1,19 @@
+{
+  "django__django-12155": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-12155",
+    "model_patch": "diff --git a/django/contrib/admindocs/utils.py b/django/contrib/admindocs/utils.py\nindex 4c0e7e2a56..aa663ead5b 100644\n--- a/django/contrib/admindocs/utils.py\n+++ b/django/contrib/admindocs/utils.py\n@@ -34,7 +34,7 @@ def trim_docstring(docstring):\n         return ''\n     # Convert tabs to spaces and split into lines\n     lines = docstring.expandtabs().splitlines()\n-    indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())\n+    indent = min((len(line) - len(line.lstrip()) for line in lines[1:] if line.lstrip()), default=0)\n     trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]\n     return \"\\n\".join(trimmed).strip()\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/contrib/admindocs/utils.py",
+          "line": 37,
+          "statement": "    indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())"
+        }
+      ],
+      "reasoning": "The indentation calculation includes the first line of the docstring. When the first line has content (a docstring summary) and is at the same indentation level as the function body (typically column 0), the minimum indent computed is 0, so subsequent indented body lines are not stripped of their leading whitespace. This causes reST directives (e.g., '.. default-role::') in the body to be incorrectly indented and treated as blockquotes, raising an error like 'no content permitted' in 'default-role' directive. The fix is to skip the first line (the summary) when computing the indent, matching PEP 257's expectation that the first line is the summary and the body has its own indentation level.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

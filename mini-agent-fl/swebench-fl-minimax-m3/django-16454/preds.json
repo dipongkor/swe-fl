@@ -1,0 +1,19 @@
+{
+  "django__django-16454": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-16454",
+    "model_patch": "diff --git a/django/core/management/base.py b/django/core/management/base.py\nindex abc6f79a15..4a4123d07a 100644\n--- a/django/core/management/base.py\n+++ b/django/core/management/base.py\n@@ -71,6 +71,23 @@ class CommandParser(ArgumentParser):\n         else:\n             raise CommandError(\"Error: %s\" % message)\n \n+    def add_subparsers(self, **kwargs):\n+        subparsers_action = super().add_subparsers(**kwargs)\n+        # Subparsers need to inherit the missing_args_message and\n+        # called_from_command_line attributes from the parent parser\n+        # so they have the same error formatting behavior.\n+        original_add_parser = subparsers_action.add_parser\n+\n+        def add_parser(name, **kwargs):\n+            kwargs.setdefault(\"missing_args_message\", self.missing_args_message)\n+            kwargs.setdefault(\n+                \"called_from_command_line\", self.called_from_command_line\n+            )\n+            return original_add_parser(name, **kwargs)\n+\n+        subparsers_action.add_parser = add_parser\n+        return subparsers_action\n+\n \n def handle_default_options(options):\n     \"\"\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/management/base.py",
+          "line": 74,
+          "statement": "    def add_subparsers(self, **kwargs):"
+        }
+      ],
+      "reasoning": "The CommandParser class overrides error() to provide better error formatting based on called_from_command_line and missing_args_message attributes, but it does not override add_subparsers() to propagate these attributes to subparsers. As a result, subparsers created via add_subparsers().add_parser() lack the same error formatting behavior, causing stack traces when missing required arguments are encountered in subparsers.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

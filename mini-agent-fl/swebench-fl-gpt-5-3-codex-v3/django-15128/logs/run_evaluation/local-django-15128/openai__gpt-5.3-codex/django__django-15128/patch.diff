@@ -1,0 +1,28 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index aaf35ee37c..cd9b75cb00 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -10,7 +10,7 @@ import copy
+ import difflib
+ import functools
+ import sys
+-from collections import Counter, namedtuple
++from collections import Counter, OrderedDict, namedtuple
+ from collections.abc import Iterator, Mapping
+ from itertools import chain, count, product
+ from string import ascii_uppercase
+@@ -846,7 +846,13 @@ class Query(BaseExpression):
+         relabelling any references to them in select columns and the where
+         clause.
+         """
+-        assert set(change_map).isdisjoint(change_map.values())
++        # Alias replacement must be applied in an order that avoids relabeling
++        # a newly assigned alias again (e.g. T4->T5, T5->T6).
++        if not set(change_map).isdisjoint(change_map.values()):
++            # Apply replacements from highest-numbered aliases first.
++            change_map = OrderedDict(
++                sorted(change_map.items(), key=lambda t: self.alias_refcount[t[0]], reverse=True)
++            )
+ 
+         # 1. Update references in "select" (normal columns plus aliases),
+         # "group by" and "where".

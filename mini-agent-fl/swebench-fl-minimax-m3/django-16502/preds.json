@@ -1,0 +1,19 @@
+{
+  "django__django-16502": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-16502",
+    "model_patch": "diff --git a/django/core/servers/basehttp.py b/django/core/servers/basehttp.py\nindex fef5532e58..a1a0381cd5 100644\n--- a/django/core/servers/basehttp.py\n+++ b/django/core/servers/basehttp.py\n@@ -147,6 +147,29 @@ class ServerHandler(simple_server.ServerHandler):\n         self.get_stdin().read()\n         super().close()\n \n+    def write(self, data):\n+        \"\"\"write() callable as specified by PEP 3333\"\"\"\n+\n+        assert type(data) is bytes, \"write() argument must be a bytes instance\"\n+\n+        if not self.status:\n+            raise AssertionError(\"write() before start_response()\")\n+\n+        elif not self.headers_sent:\n+            # Before the first output, send the stored headers\n+            self.bytes_sent = len(data)    # make sure we know content-length\n+            self.send_headers()\n+        else:\n+            self.bytes_sent += len(data)\n+\n+        # Don't write the body for HEAD requests. The Content-Length header\n+        # is set correctly by the wsgiref handlers (if it can be determined\n+        # from the result, e.g. for a list with a single element), so the\n+        # client knows the size of the body that would have been sent.\n+        if self.environ[\"REQUEST_METHOD\"] != \"HEAD\":\n+            self._write(data)\n+        self._flush()\n+\n \n class WSGIRequestHandler(simple_server.WSGIRequestHandler):\n     protocol_version = \"HTTP/1.1\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/servers/basehttp.py",
+          "line": 169,
+          "statement": "        if self.environ[\"REQUEST_METHOD\"] != \"HEAD\":"
+        }
+      ],
+      "reasoning": "The ServerHandler class inherits the write() method from wsgiref.handlers.BaseHandler, which unconditionally writes the response body to the client. This violates RFC 2616, section 4.3, which requires that HEAD responses must not include a body. The fix overrides write() to skip the actual body transmission for HEAD requests (while still updating bytes_sent and flushing the stream so the headers and Content-Length are sent correctly).",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

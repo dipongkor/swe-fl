@@ -1,0 +1,19 @@
+{
+  "psf__requests-2931": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "psf__requests-2931",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex 9c624d3..f3a4f6d 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -81,7 +81,7 @@ class RequestEncodingMixin(object):\n         \"\"\"\n \n         if isinstance(data, (str, bytes)):\n-            return to_native_string(data)\n+            return data\n         elif hasattr(data, 'read'):\n             return data\n         elif hasattr(data, '__iter__'):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 84,
+          "statement": "            return to_native_string(data)"
+        }
+      ],
+      "reasoning": "In RequestEncodingMixin._encode_params, calling to_native_string on bytes data decodes using ASCII by default, which raises a UnicodeDecodeError for non-ASCII (e.g. UTF-8 encoded) binary payloads; the data should be returned unchanged.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

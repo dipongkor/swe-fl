@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7236": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "pytest-dev__pytest-7236",
+    "model_patch": "diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py\nindex 773f545af..04d65619a 100644\n--- a/src/_pytest/unittest.py\n+++ b/src/_pytest/unittest.py\n@@ -180,6 +180,10 @@ class TestCaseFunction(Function):\n         except skip.Exception:\n             self._store[skipped_by_mark_key] = True\n             self._addexcinfo(sys.exc_info())\n+        # Explicitly set the tearDown to None again in case the test was\n+        # skipped, because the tearDown method would not have been called\n+        # by unittest in that case (see #7215).\n+        self._explicit_tearDown = None\n \n     def addExpectedFailure(self, testcase, rawexcinfo, reason=\"\"):\n         try:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/unittest.py",
+          "line": 228,
+          "statement": "                self._explicit_tearDown = self._testcase.tearDown"
+        }
+      ],
+      "reasoning": "When --pdb is enabled, runtest() defers tearDown by storing the original tearDown in _explicit_tearDown and later calling it unconditionally in teardown(). For skipped tests unittest never calls tearDown, so calling the stored _explicit_tearDown causes tearDown to run on skipped tests; clearing it in addSkip fixes this.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

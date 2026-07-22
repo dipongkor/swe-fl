@@ -1,0 +1,24 @@
+{
+  "django__django-13343": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-13343",
+    "model_patch": "diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py\nindex e10a5bb6d9..a191727a2b 100644\n--- a/django/db/models/fields/files.py\n+++ b/django/db/models/fields/files.py\n@@ -227,6 +227,7 @@ class FileField(Field):\n     def __init__(self, verbose_name=None, name=None, upload_to='', storage=None, **kwargs):\n         self._primary_key_set_explicitly = 'primary_key' in kwargs\n \n+        self._storage_callable = storage\n         self.storage = storage or default_storage\n         if callable(self.storage):\n             self.storage = self.storage()\n@@ -279,7 +280,7 @@ class FileField(Field):\n             del kwargs[\"max_length\"]\n         kwargs['upload_to'] = self.upload_to\n         if self.storage is not default_storage:\n-            kwargs['storage'] = self.storage\n+            kwargs['storage'] = self._storage_callable\n         return name, path, args, kwargs\n \n     def get_internal_type(self):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/files.py",
+          "line": 232,
+          "statement": "            self.storage = self.storage()"
+        },
+        {
+          "file": "django/db/models/fields/files.py",
+          "line": 282,
+          "statement": "            kwargs['storage'] = self.storage"
+        }
+      ],
+      "reasoning": "In FileField.__init__, when storage is a callable, the original callable is overwritten with the evaluated value (line 232). Then in deconstruct(), the evaluated value is used instead of the original callable (line 282). This breaks the assumption that storage may vary at runtime when using a callable, since the actual evaluated Storage is inlined into the deconstructed FileField. The fix is to save the original callable in __init__ and use it in deconstruct.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

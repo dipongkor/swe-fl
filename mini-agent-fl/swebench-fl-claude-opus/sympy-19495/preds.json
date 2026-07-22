@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-19495": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-19495",
+    "model_patch": "diff --git a/sympy/sets/conditionset.py b/sympy/sets/conditionset.py\nindex 118eda6f77..ebf5723a0c 100644\n--- a/sympy/sets/conditionset.py\n+++ b/sympy/sets/conditionset.py\n@@ -240,11 +240,18 @@ def _eval_subs(self, old, new):\n             # the base set should be filtered and if new is not in\n             # the base set then this substitution is ignored\n             return self.func(sym, cond, base)\n-        cond = self.condition.subs(old, new)\n-        base = self.base_set.subs(old, new)\n-        if cond is S.true:\n-            return ConditionSet(new, Contains(new, base), base)\n-        return self.func(self.sym, cond, base)\n+        # `old` is a free symbol of the condition and/or base set,\n+        # so substitute it in both, taking care not to capture the\n+        # bound symbol; if `new` contains the bound symbol, rename the\n+        # bound symbol to a fresh dummy first.\n+        if sym in new.free_symbols:\n+            newsym = Dummy('rho')\n+            cond = cond.xreplace({sym: newsym})\n+            base = base.xreplace({sym: newsym})\n+            sym = newsym\n+        cond = cond.subs(old, new)\n+        base = base.subs(old, new)\n+        return self.func(sym, cond, base)\n \n     def dummy_eq(self, other, symbol=None):\n         if not isinstance(other, self.func):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/sets/conditionset.py",
+          "line": 246,
+          "statement": "            return ConditionSet(new, Contains(new, base), base)"
+        }
+      ],
+      "reasoning": "When substituting a free symbol (not the bound symbol) in a ConditionSet, if the condition simplified to True the code incorrectly rebuilt the set as ConditionSet(new, Contains(new, base), base), using the substitution value 'new' in place of the bound symbol. This confused the bound variable with the substituted value (e.g. treating x as if it were 1/3), producing a nonsensical ConditionSet instead of just the (substituted) base set.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

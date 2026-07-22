@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-24562": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-24562",
+    "model_patch": "diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py\nindex 52f7ea45ad..117788a537 100644\n--- a/sympy/core/numbers.py\n+++ b/sympy/core/numbers.py\n@@ -1627,6 +1627,8 @@ def __new__(cls, p, q=None, gcd=None):\n \n         if not isinstance(p, SYMPY_INTS):\n             p = Rational(p)\n+            if not isinstance(q, SYMPY_INTS):\n+                q = Rational(q)\n             q *= p.q\n             p = p.p\n         else:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/numbers.py",
+          "line": 1630,
+          "statement": "            q *= p.q"
+        }
+      ],
+      "reasoning": "In Rational.__new__, when p is a string like '0.5' it is converted to a Rational, but q (e.g. '100') may still be a string. The statement 'q *= p.q' then performs string repetition ('100' * 2 -> '100100') instead of integer multiplication, yielding the wrong denominator. Converting q to a Rational before this arithmetic fixes it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

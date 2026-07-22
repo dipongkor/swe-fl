@@ -1,0 +1,24 @@
+{
+  "sphinx-doc__sphinx-7462": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 3ca730e30..b3a202fd9 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -96,6 +96,8 @@ def _parse_annotation(annotation: str) -> List[Node]:\n         elif isinstance(node, ast.Index):\n             return unparse(node.value)\n         elif isinstance(node, ast.List):\n+            if not node.elts:\n+                return [addnodes.desc_sig_punctuation('', '[]')]\n             result = [addnodes.desc_sig_punctuation('', '[')]  # type: List[Node]\n             for elem in node.elts:\n                 result.extend(unparse(elem))\n@@ -114,6 +116,8 @@ def _parse_annotation(annotation: str) -> List[Node]:\n             result.append(addnodes.desc_sig_punctuation('', ']'))\n             return result\n         elif isinstance(node, ast.Tuple):\n+            if not node.elts:\n+                return [nodes.Text('()')]\n             result = []\n             for elem in node.elts:\n                 result.extend(unparse(elem))\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 103,
+          "statement": "result.pop()"
+        },
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 121,
+          "statement": "result.pop()"
+        }
+      ],
+      "reasoning": "The code calls result.pop() on an empty list when encountering an empty list or tuple in type annotations, causing an IndexError.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

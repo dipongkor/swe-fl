@@ -1,0 +1,24 @@
+{
+  "scikit-learn__scikit-learn-14087": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "scikit-learn__scikit-learn-14087",
+    "model_patch": "diff --git a/sklearn/linear_model/logistic.py b/sklearn/linear_model/logistic.py\nindex 1999f1dae..f3a81d602 100644\n--- a/sklearn/linear_model/logistic.py\n+++ b/sklearn/linear_model/logistic.py\n@@ -1977,6 +1977,9 @@ class LogisticRegressionCV(LogisticRegression, BaseEstimator,\n \n             l1_ratios_ = [None]\n \n+        # make sure l1_ratios_ is an ndarray (for indexing)\n+        l1_ratios_ = np.asarray(l1_ratios_)\n+\n         if self.penalty == 'none':\n             raise ValueError(\n                 \"penalty='none' is not useful and not supported by \"\n@@ -2170,7 +2173,7 @@ class LogisticRegressionCV(LogisticRegression, BaseEstimator,\n                 # Take the best scores across every fold and the average of\n                 # all coefficients corresponding to the best scores.\n                 best_indices = np.argmax(scores, axis=1)\n-                if self.multi_class == 'ovr':\n+                if multi_class == 'ovr':\n                     w = np.mean([coefs_paths[i, best_indices[i], :]\n                                  for i in range(len(folds))], axis=0)\n                 else:\n@@ -2181,7 +2184,14 @@ class LogisticRegressionCV(LogisticRegression, BaseEstimator,\n                 self.C_.append(np.mean(self.Cs_[best_indices_C]))\n \n                 best_indices_l1 = best_indices // len(self.Cs_)\n-                self.l1_ratio_.append(np.mean(l1_ratios_[best_indices_l1]))\n+                # For non-elasticnet penalty, l1_ratios_ contains None\n+                # which cannot be averaged. In this case we just\n+                # append None.\n+                if l1_ratios_[0] is None:\n+                    self.l1_ratio_.append(None)\n+                else:\n+                    self.l1_ratio_.append(\n+                        np.mean(l1_ratios_[best_indices_l1]))\n \n             if multi_class == 'multinomial':\n                 self.C_ = np.tile(self.C_, n_classes)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/linear_model/logistic.py",
+          "line": 2173,
+          "statement": "                if self.multi_class == 'ovr':"
+        },
+        {
+          "file": "sklearn/linear_model/logistic.py",
+          "line": 2184,
+          "statement": "                self.l1_ratio_.append(np.mean(l1_ratios_[best_indices_l1]))"
+        }
+      ],
+      "reasoning": "The first issue is that the code uses `self.multi_class` (the unresolved user-provided value, e.g. 'auto') to choose the indexing branch, instead of the locally-resolved `multi_class` (the value returned by `_check_multi_class`, e.g. 'ovr' for binary problems). This causes the OVR branch to be skipped, falling through to the multinomial branch which uses 4 indices on a 3D array (for OVR), raising IndexError. The second issue is that `l1_ratios_` is a Python list `[None]` for non-elasticnet penalties, and indexing it with an array of integers (in `l1_ratios_[best_indices_l1]`) raises a TypeError; additionally, even if indexing worked, `np.mean` of None values would fail.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

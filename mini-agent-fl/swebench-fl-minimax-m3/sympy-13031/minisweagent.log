@@ -1,0 +1,7 @@
+2026-07-02 16:24:47,952 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-07-02 16:24:49,357 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-07-02 16:24:49,358 - minisweagent - INFO - Running on 1 instances...
+2026-07-02 16:24:49,359 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench-minimax-m3.yaml']
+2026-07-02 16:24:49,382 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-3fa196f5 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-13031:latest sleep 2h
+2026-07-02 16:25:12,357 - minisweagent.environment - INFO - Started container minisweagent-3fa196f5 with ID c69f092970d026bbdcfb4305cae6d32f8cae013f5fbdc30f6da652b0299ed436
+2026-07-02 16:32:34,864 - minisweagent - INFO - Saved trajectory to 'swebench-fl-minimax-m3/sympy-13031/sympy__sympy-13031/sympy__sympy-13031.traj.json'

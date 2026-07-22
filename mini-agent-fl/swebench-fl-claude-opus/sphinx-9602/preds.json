@@ -1,0 +1,24 @@
+{
+  "sphinx-doc__sphinx-9602": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sphinx-doc__sphinx-9602",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 9875a9f4b..d5ed30c35 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -122,8 +122,11 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod\n         elif isinstance(node, ast.Constant):  # type: ignore\n             if node.value is Ellipsis:\n                 return [addnodes.desc_sig_punctuation('', \"...\")]\n+            elif node.value is None:\n+                return [nodes.Text('None')]\n             else:\n-                return [nodes.Text(node.value)]\n+                # e.g. Literal values such as True, False, 1, 'foo'\n+                return [nodes.literal('', nodes.Text(repr(node.value)))]\n         elif isinstance(node, ast.Expr):\n             return unparse(node.value)\n         elif isinstance(node, ast.Index):\n@@ -167,7 +170,10 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod\n                 if isinstance(node, ast.Ellipsis):\n                     return [addnodes.desc_sig_punctuation('', \"...\")]\n                 elif isinstance(node, ast.NameConstant):\n-                    return [nodes.Text(node.value)]\n+                    if node.value is None:\n+                        return [nodes.Text(str(node.value))]\n+                    else:\n+                        return [nodes.literal('', nodes.Text(repr(node.value)))]\n \n             raise SyntaxError  # unsupported syntax\n \n@@ -179,7 +185,9 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod\n         tree = ast_parse(annotation)\n         result = unparse(tree)\n         for i, node in enumerate(result):\n-            if isinstance(node, nodes.Text) and node.strip():\n+            if isinstance(node, nodes.literal):\n+                result[i] = node[0]\n+            elif isinstance(node, nodes.Text) and node.strip():\n                 result[i] = type_to_xref(str(node), env)\n         return result\n     except SyntaxError:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 182,
+          "statement": "            if isinstance(node, nodes.Text) and node.strip():"
+        },
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 126,
+          "statement": "                return [nodes.Text(node.value)]"
+        }
+      ],
+      "reasoning": "In _parse_annotation, constant values (e.g. True/False/1/'foo' inside Literal[...]) were emitted as plain nodes.Text, and the post-processing loop then wrapped every non-empty Text node in a py:class cross-reference via type_to_xref, causing nitpick to flag these literal values as missing classes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

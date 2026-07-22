@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9711": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "model_patch": "diff --git a/sphinx/extension.py b/sphinx/extension.py\nindex 7ec6c8518..eb63ebbfd 100644\n--- a/sphinx/extension.py\n+++ b/sphinx/extension.py\n@@ -10,6 +10,8 @@\n \n from typing import TYPE_CHECKING, Any, Dict\n \n+from packaging.version import Version\n+\n from sphinx.config import Config\n from sphinx.errors import VersionRequirementError\n from sphinx.locale import __\n@@ -51,7 +53,7 @@ def verify_needs_extensions(app: \"Sphinx\", config: Config) -> None:\n                               'but it is not loaded.'), extname)\n             continue\n \n-        if extension.version == 'unknown version' or reqversion > extension.version:\n+        if extension.version == 'unknown version' or Version(reqversion) > Version(extension.version):\n             raise VersionRequirementError(__('This project needs the extension %s at least in '\n                                              'version %s and therefore cannot be built with '\n                                              'the loaded version (%s).') %\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/extension.py",
+          "line": 56,
+          "statement": "        if extension.version == 'unknown version' or reqversion > extension.version:"
+        }
+      ],
+      "reasoning": "The code compared version strings lexicographically, so values like 0.10.0 were treated as lower than 0.6.0. Proper semantic version parsing is required for accurate minimum-version checks.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

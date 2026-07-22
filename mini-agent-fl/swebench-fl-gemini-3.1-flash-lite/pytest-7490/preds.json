@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7490": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pytest-dev__pytest-7490",
+    "model_patch": "diff --git a/src/_pytest/skipping.py b/src/_pytest/skipping.py\nindex 335e10996..115be68ed 100644\n--- a/src/_pytest/skipping.py\n+++ b/src/_pytest/skipping.py\n@@ -246,9 +246,8 @@ def pytest_runtest_setup(item: Item) -> None:\n \n @hookimpl(hookwrapper=True)\n def pytest_runtest_call(item: Item) -> Generator[None, None, None]:\n-    xfailed = item._store.get(xfailed_key, None)\n-    if xfailed is None:\n-        item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)\n+    xfailed = evaluate_xfail_marks(item)\n+    item._store[xfailed_key] = xfailed\n \n     if not item.config.option.runxfail:\n         if xfailed and not xfailed.run:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/skipping.py",
+          "line": 249,
+          "statement": "xfailed = item._store.get(xfailed_key, None)"
+        }
+      ],
+      "reasoning": "The xfailed status was cached in the store during setup, but it was not updated when new markers were added dynamically during the test call.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

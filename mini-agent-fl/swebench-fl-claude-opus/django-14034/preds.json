@@ -1,0 +1,19 @@
+{
+  "django__django-14034": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-14034",
+    "model_patch": "diff --git a/django/forms/fields.py b/django/forms/fields.py\nindex 65d6a9ec82..1add2c23a4 100644\n--- a/django/forms/fields.py\n+++ b/django/forms/fields.py\n@@ -1025,7 +1025,10 @@ class MultiValueField(Field):\n             if not value or not [v for v in value if v not in self.empty_values]:\n                 if self.required:\n                     raise ValidationError(self.error_messages['required'], code='required')\n-                else:\n+                elif not value or self.require_all_fields:\n+                    # Return the compressed empty value when there's no data to\n+                    # clean, i.e. the whole value is empty, or when all fields\n+                    # are required together.\n                     return self.compress([])\n         else:\n             raise ValidationError(self.error_messages['invalid'], code='invalid')\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/forms/fields.py",
+          "line": 1028,
+          "statement": "                else:"
+        }
+      ],
+      "reasoning": "In MultiValueField.clean(), when all submitted sub-values are empty and the MultiValueField is not required, the code unconditionally returned self.compress([]) via this else branch, bypassing the per-subfield 'required' validation. When require_all_fields=False and actual (though empty) data was submitted as a list, it must instead fall through to the loop so required sub-fields raise 'incomplete' errors.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

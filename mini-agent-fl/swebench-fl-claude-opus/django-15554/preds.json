@@ -1,0 +1,19 @@
+{
+  "django__django-15554": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-15554",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex 54f3258eac..81ec5b5794 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -1029,6 +1029,15 @@ class Query(BaseExpression):\n             for a, j in self.alias_map.items()\n             if (reuse is None or a in reuse) and j.equals(join)\n         ]\n+        if reuse_aliases and join.filtered_relation is not None:\n+            # A FilteredRelation must not reuse a join created for a different\n+            # filtered relation (or for the base relation) as each filtered\n+            # relation requires its own join with a distinct ON clause.\n+            reuse_aliases = [\n+                a\n+                for a in reuse_aliases\n+                if self.alias_map[a].filtered_relation == join.filtered_relation\n+            ]\n         if reuse_aliases:\n             if join.table_alias in reuse_aliases:\n                 reuse_alias = join.table_alias\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 1030,
+          "statement": "            if (reuse is None or a in reuse) and j.equals(join)"
+        }
+      ],
+      "reasoning": "In Query.join(), the reuse candidates are selected using Join.equals(), which deliberately ignores filtered_relation. As a result, a new FilteredRelation join for the same base relation matches an already-created join for a different filtered relation and gets reused, so only a single SQL JOIN is emitted and subsequent FilteredRelations with different conditions are silently dropped.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

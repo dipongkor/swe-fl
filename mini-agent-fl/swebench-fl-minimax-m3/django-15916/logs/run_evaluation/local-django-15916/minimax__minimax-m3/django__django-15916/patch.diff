@@ -1,0 +1,48 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+index 192d9fad94..43a49a060c 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -253,6 +253,7 @@ class ModelFormOptions:
+         self.help_texts = getattr(options, "help_texts", None)
+         self.error_messages = getattr(options, "error_messages", None)
+         self.field_classes = getattr(options, "field_classes", None)
++        self.formfield_callback = getattr(options, "formfield_callback", None)
+ 
+ 
+ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+@@ -267,6 +268,24 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+ 
+         new_class = super().__new__(mcs, name, bases, attrs)
+ 
++        # Also check the new class's Meta for ``formfield_callback``, since
++        # it is not in ``attrs`` when set as a Meta attribute.
++        if not formfield_callback and hasattr(new_class, "Meta"):
++            meta_formfield_callback = getattr(
++                new_class.Meta, "formfield_callback", None
++            )
++            if meta_formfield_callback is not None:
++                formfield_callback = meta_formfield_callback
++
++        # Store ``formfield_callback`` on the new class's Meta so it can be
++        # accessed by subclasses (e.g., via ``modelform_factory``).
++        if (
++            formfield_callback
++            and hasattr(new_class, "Meta")
++            and not hasattr(new_class.Meta, "formfield_callback")
++        ):
++            new_class.Meta.formfield_callback = staticmethod(formfield_callback)
++
+         if bases == (BaseModelForm,):
+             return new_class
+ 
+@@ -636,7 +655,9 @@ def modelform_factory(
+     class_name = model.__name__ + "Form"
+ 
+     # Class attributes for the new form class.
+-    form_class_attrs = {"Meta": Meta, "formfield_callback": formfield_callback}
++    form_class_attrs = {"Meta": Meta}
++    if formfield_callback:
++        form_class_attrs["formfield_callback"] = staticmethod(formfield_callback)
+ 
+     if getattr(Meta, "fields", None) is None and getattr(Meta, "exclude", None) is None:
+         raise ImproperlyConfigured(

@@ -1,0 +1,129 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+index 4682d5b6e..167a069f5 100644
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -6,6 +6,7 @@ import py
+ from _pytest._code.code import ExceptionInfo
+ from _pytest._code.code import ReprEntry
+ from _pytest._code.code import ReprEntryNative
++from _pytest._code.code import ExceptionChainRepr
+ from _pytest._code.code import ReprExceptionInfo
+ from _pytest._code.code import ReprFileLocation
+ from _pytest._code.code import ReprFuncArgs
+@@ -162,28 +163,44 @@ class BaseReport:
+         """
+ 
+         def disassembled_report(rep):
+-            reprtraceback = rep.longrepr.reprtraceback.__dict__.copy()
+-            reprcrash = rep.longrepr.reprcrash.__dict__.copy()
+-
+-            new_entries = []
+-            for entry in reprtraceback["reprentries"]:
+-                entry_data = {
+-                    "type": type(entry).__name__,
+-                    "data": entry.__dict__.copy(),
+-                }
+-                for key, value in entry_data["data"].items():
+-                    if hasattr(value, "__dict__"):
+-                        entry_data["data"][key] = value.__dict__.copy()
+-                new_entries.append(entry_data)
+-
+-            reprtraceback["reprentries"] = new_entries
+-
+-            return {
++            def serialize_repr_traceback(reprtraceback):
++                data = reprtraceback.__dict__.copy()
++
++                new_entries = []
++                for entry in data["reprentries"]:
++                    entry_data = {
++                        "type": type(entry).__name__,
++                        "data": entry.__dict__.copy(),
++                    }
++                    for key, value in entry_data["data"].items():
++                        if hasattr(value, "__dict__"):
++                            entry_data["data"][key] = value.__dict__.copy()
++                    new_entries.append(entry_data)
++
++                data["reprentries"] = new_entries
++                return data
++
++            reprtraceback = serialize_repr_traceback(rep.longrepr.reprtraceback)
++            reprcrash = rep.longrepr.reprcrash and rep.longrepr.reprcrash.__dict__.copy()
++
++            result = {
+                 "reprcrash": reprcrash,
+                 "reprtraceback": reprtraceback,
+                 "sections": rep.longrepr.sections,
+             }
+ 
++            if isinstance(rep.longrepr, ExceptionChainRepr):
++                result["chain"] = [
++                    (
++                        serialize_repr_traceback(chained_reprtraceback),
++                        chained_reprcrash and chained_reprcrash.__dict__.copy(),
++                        descr,
++                    )
++                    for chained_reprtraceback, chained_reprcrash, descr in rep.longrepr.chain
++                ]
++
++            return result
++
+         d = self.__dict__.copy()
+         if hasattr(self.longrepr, "toterminal"):
+             if hasattr(self.longrepr, "reprtraceback") and hasattr(
+@@ -250,10 +267,50 @@ class BaseReport:
+                     unserialized_entries.append(reprentry)
+                 reprtraceback["reprentries"] = unserialized_entries
+ 
+-                exception_info = ReprExceptionInfo(
+-                    reprtraceback=ReprTraceback(**reprtraceback),
+-                    reprcrash=ReprFileLocation(**reprcrash),
+-                )
++                if "chain" in reportdict["longrepr"]:
++                    chain = []
++                    for chain_reprtraceback, chain_reprcrash, descr in reportdict["longrepr"]["chain"]:
++                        unserialized_chain_entries = []
++                        for entry_data in chain_reprtraceback["reprentries"]:
++                            data = entry_data["data"]
++                            entry_type = entry_data["type"]
++                            if entry_type == "ReprEntry":
++                                reprfuncargs = None
++                                reprfileloc = None
++                                reprlocals = None
++                                if data["reprfuncargs"]:
++                                    reprfuncargs = ReprFuncArgs(**data["reprfuncargs"])
++                                if data["reprfileloc"]:
++                                    reprfileloc = ReprFileLocation(**data["reprfileloc"])
++                                if data["reprlocals"]:
++                                    reprlocals = ReprLocals(data["reprlocals"]["lines"])
++
++                                reprentry = ReprEntry(
++                                    lines=data["lines"],
++                                    reprfuncargs=reprfuncargs,
++                                    reprlocals=reprlocals,
++                                    filelocrepr=reprfileloc,
++                                    style=data["style"],
++                                )
++                            elif entry_type == "ReprEntryNative":
++                                reprentry = ReprEntryNative(data["lines"])
++                            else:
++                                _report_unserialization_failure(entry_type, cls, reportdict)
++                            unserialized_chain_entries.append(reprentry)
++                        chain_reprtraceback["reprentries"] = unserialized_chain_entries
++                        chain.append(
++                            (
++                                ReprTraceback(**chain_reprtraceback),
++                                chain_reprcrash and ReprFileLocation(**chain_reprcrash),
++                                descr,
++                            )
++                        )
++                    exception_info = ExceptionChainRepr(chain)
++                else:
++                    exception_info = ReprExceptionInfo(
++                        reprtraceback=ReprTraceback(**reprtraceback),
++                        reprcrash=ReprFileLocation(**reprcrash),
++                    )
+ 
+                 for section in reportdict["longrepr"]["sections"]:
+                     exception_info.addsection(*section)

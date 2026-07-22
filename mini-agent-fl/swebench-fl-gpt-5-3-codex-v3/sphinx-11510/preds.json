@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-11510": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "model_patch": "diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py\nindex 19f7c0a8d..5e07acf7e 100644\n--- a/sphinx/directives/other.py\n+++ b/sphinx/directives/other.py\n@@ -376,7 +376,29 @@ class Include(BaseInclude, SphinxDirective):\n         rel_filename, filename = self.env.relfn2path(self.arguments[0])\n         self.arguments[0] = filename\n         self.env.note_included(filename)\n-        return super().run()\n+\n+        # Apply the same source preprocessing as normal documents.\n+        #\n+        # Included reStructuredText files are read by docutils directly during\n+        # parsing of the parent document and therefore bypass\n+        # ``SphinxStandaloneReader.read_source()`` where Sphinx emits the\n+        # ``source-read`` event. Emit it here for included sources as well, so\n+        # extensions that mutate source text work consistently.\n+        old_get_text = self.state_machine.input_lines.source\n+\n+        def get_text(source, *args, **kwargs):\n+            text = old_get_text(source, *args, **kwargs)\n+            if source == filename:\n+                arg = [text]\n+                self.env.events.emit('source-read', self.env.docname, arg)\n+                return arg[0]\n+            return text\n+\n+        self.state_machine.input_lines.source = get_text\n+        try:\n+            return super().run()\n+        finally:\n+            self.state_machine.input_lines.source = old_get_text\n \n \n def setup(app: Sphinx) -> dict[str, Any]:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/directives/other.py",
+          "line": 379,
+          "statement": "        return super().run()"
+        }
+      ],
+      "reasoning": "The include directive delegated directly to docutils without routing included file text through Sphinx's source-read preprocessing path, so source mutations from extensions were ignored for included content.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

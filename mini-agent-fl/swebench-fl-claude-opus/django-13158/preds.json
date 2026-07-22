@@ -1,0 +1,19 @@
+{
+  "django__django-13158": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-13158",
+    "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 686e75c979..c4c5b4bc86 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -431,6 +431,8 @@ class SQLCompiler:\n         return sql, params\n \n     def get_combinator_sql(self, combinator, all):\n+        if self.query.is_empty():\n+            raise EmptyResultSet\n         features = self.connection.features\n         compilers = [\n             query.get_compiler(self.using, self.connection)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/compiler.py",
+          "line": 433,
+          "statement": "    def get_combinator_sql(self, combinator, all):"
+        }
+      ],
+      "reasoning": "For combined queries (union/intersection/difference) the compiler builds SQL solely from the combined_queries and ignores the outer query's WHERE clause. When QuerySet.none() calls set_empty(), a NothingNode is added to the outer query's WHERE, which is never rendered for combinator queries, so get_combinator_sql produced SQL returning all combined results. The fix adds an is_empty() check at the start of get_combinator_sql that raises EmptyResultSet.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

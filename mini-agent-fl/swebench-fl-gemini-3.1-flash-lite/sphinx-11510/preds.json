@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-11510": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "model_patch": "diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py\nindex 19f7c0a8d..38487d741 100644\n--- a/sphinx/directives/other.py\n+++ b/sphinx/directives/other.py\n@@ -369,14 +369,19 @@ class Include(BaseInclude, SphinxDirective):\n     \"\"\"\n \n     def run(self) -> list[Node]:\n-        if self.arguments[0].startswith('<') and \\\n-           self.arguments[0].endswith('>'):\n+        if self.arguments[0].startswith('<') and            self.arguments[0].endswith('>'):\n             # docutils \"standard\" includes, do not do path processing\n             return super().run()\n         rel_filename, filename = self.env.relfn2path(self.arguments[0])\n         self.arguments[0] = filename\n         self.env.note_included(filename)\n         return super().run()\n+    \n+    def read_file(self, path: str) -> str:\n+        content = super().read_file(path)\n+        arg = [content]\n+        self.env.app.emit('source-read', path, arg)\n+        return arg[0]\n \n \n def setup(app: Sphinx) -> dict[str, Any]:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/directives/other.py",
+          "line": 376,
+          "statement": "def read_file(self, path: str) -> str:"
+        }
+      ],
+      "reasoning": "The Include directive was not emitting the 'source-read' event for included files, because it was using the default docutils read_file method which does not know about Sphinx events.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

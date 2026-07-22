@@ -1,0 +1,24 @@
+{
+  "pydata__xarray-6992": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pydata__xarray-6992",
+    "model_patch": "diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py\nindex 620f32f8..5fee578e 100644\n--- a/xarray/core/dataset.py\n+++ b/xarray/core/dataset.py\n@@ -365,7 +365,7 @@ class DataVariables(Mapping[Any, \"DataArray\"]):\n         )\n \n     def __len__(self) -> int:\n-        return len(self._dataset._variables) - len(self._dataset._coord_names)\n+        return max(0, len(self._dataset._variables) - len(self._dataset._coord_names))\n \n     def __contains__(self, key: Hashable) -> bool:\n         return key in self._dataset._variables and key not in self._dataset._coord_names\n@@ -4177,7 +4177,7 @@ class Dataset(\n         }\n         variables.update(new_variables)\n \n-        coord_names = set(new_variables) | self._coord_names\n+        coord_names = (set(new_variables) | self._coord_names) - set(drop_variables)\n \n         return self._replace(variables, coord_names=coord_names, indexes=indexes)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "xarray/core/dataset.py",
+          "line": 368,
+          "statement": "        return len(self._dataset._variables) - len(self._dataset._coord_names)"
+        },
+        {
+          "file": "xarray/core/dataset.py",
+          "line": 4180,
+          "statement": "        coord_names = set(new_variables) | self._coord_names"
+        }
+      ],
+      "reasoning": "The DataVariables.__len__ method assumed that _coord_names is a subset of _variables, but the reset_index method could produce a Dataset where _coord_names contains entries (e.g. the index name being dropped) that are not in _variables, resulting in a negative length and ValueError. The fix updates __len__ to use max(0, ...) for defensive programming and updates reset_index to subtract drop_variables from coord_names, maintaining the invariant that _coord_names is a subset of _variables.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

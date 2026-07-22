@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-9711": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "model_patch": "diff --git a/sphinx/extension.py b/sphinx/extension.py\nindex 7ec6c8518..18456b3b4 100644\n--- a/sphinx/extension.py\n+++ b/sphinx/extension.py\n@@ -9,6 +9,7 @@\n \"\"\"\n \n from typing import TYPE_CHECKING, Any, Dict\n+from packaging.version import parse, InvalidVersion\n \n from sphinx.config import Config\n from sphinx.errors import VersionRequirementError\n@@ -51,7 +52,13 @@ def verify_needs_extensions(app: \"Sphinx\", config: Config) -> None:\n                               'but it is not loaded.'), extname)\n             continue\n \n-        if extension.version == 'unknown version' or reqversion > extension.version:\n+        def is_not_new_enough(req: str, ver: str) -> bool:\n+            try:\n+                return parse(req) > parse(ver)\n+            except InvalidVersion:\n+                return req > ver\n+\n+        if extension.version == \"unknown version\" or is_not_new_enough(reqversion, extension.version):\n             raise VersionRequirementError(__('This project needs the extension %s at least in '\n                                              'version %s and therefore cannot be built with '\n                                              'the loaded version (%s).') %\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/extension.py",
+          "line": 43,
+          "statement": "if extension.version == 'unknown version' or reqversion > extension.version:"
+        }
+      ],
+      "reasoning": "The code used string comparison for version checking, which incorrectly handles versions like '0.10' as smaller than '0.6'.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

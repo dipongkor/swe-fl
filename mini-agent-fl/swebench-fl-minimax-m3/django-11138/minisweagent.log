@@ -1,0 +1,29 @@
+2026-07-21 22:10:33,644 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-07-21 22:10:34,853 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-07-21 22:10:34,854 - minisweagent - INFO - Running on 1 instances...
+2026-07-21 22:10:34,855 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench-minimax-m3.yaml']
+2026-07-21 22:10:34,877 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-a47f06ce -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11138:latest sleep 2h
+2026-07-21 22:10:57,337 - minisweagent.environment - INFO - Started container minisweagent-a47f06ce with ID e42849ed329816b1feb771296737e97d3c0a309b0b82e7555bd9bd27e6e931e1
+2026-07-21 22:16:31,058 - minisweagent - ERROR - Error processing instance django__django-11138: No valid cost information available from OpenRouter API for model minimax/minimax-m3: Usage {}, cost 0.0. Cost must be > 0.0. Set cost_tracking: 'ignore_errors' in your config file or export MSWEA_COST_TRACKING='ignore_errors' to ignore cost tracking errors (for example for free/local models), more information at https://klieret.short.gy/mini-local-models for more details. Still stuck? Please open a github issue at https://github.com/SWE-agent/mini-swe-agent/issues/new/choose!
+Traceback (most recent call last):
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 180, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/agents/default.py", line 87, in run
+    self.step()
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 80, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/agents/default.py", line 101, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/agents/default.py", line 114, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    cost_output = self._calculate_cost(response)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/semeru/Documents/Atish/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 115, in _calculate_cost
+    raise RuntimeError(
+RuntimeError: No valid cost information available from OpenRouter API for model minimax/minimax-m3: Usage {}, cost 0.0. Cost must be > 0.0. Set cost_tracking: 'ignore_errors' in your config file or export MSWEA_COST_TRACKING='ignore_errors' to ignore cost tracking errors (for example for free/local models), more information at https://klieret.short.gy/mini-local-models for more details. Still stuck? Please open a github issue at https://github.com/SWE-agent/mini-swe-agent/issues/new/choose!
+2026-07-21 22:16:31,080 - minisweagent - INFO - Saved trajectory to 'swebench-fl-minimax-m3/django-11138/django__django-11138/django__django-11138.traj.json'

@@ -1,0 +1,45 @@
+2026-07-01 16:46:10,503 - INFO - Creating container for django__django-14034...
+2026-07-01 16:46:10,586 - INFO - Container for django__django-14034 created: fc9c40acf026fc91e271d7e2f291b0a0b239c653419c33bd03b40ee3f69a8a4b
+2026-07-01 16:46:10,977 - INFO - Container for django__django-14034 started: fc9c40acf026fc91e271d7e2f291b0a0b239c653419c33bd03b40ee3f69a8a4b
+2026-07-01 16:46:10,980 - INFO - Intermediate patch for django__django-14034 written to logs/run_evaluation/local-django-14034/gemini__gemini-3.1-flash-lite/django__django-14034/patch.diff, now applying to container...
+2026-07-01 16:46:11,505 - INFO - >>>>> Applied Patch:
+Checking patch django/forms/fields.py...
+Applied patch django/forms/fields.py cleanly.
+
+2026-07-01 16:46:12,440 - INFO - Git diff before:
+diff --git a/django/forms/fields.py b/django/forms/fields.py
+index 65d6a9ec82..583b486de9 100644
+--- a/django/forms/fields.py
++++ b/django/forms/fields.py
+@@ -1025,8 +1025,6 @@ class MultiValueField(Field):
+             if not value or not [v for v in value if v not in self.empty_values]:
+                 if self.required:
+                     raise ValidationError(self.error_messages['required'], code='required')
+-                else:
+-                    return self.compress([])
+         else:
+             raise ValidationError(self.error_messages['invalid'], code='invalid')
+         for i, field in enumerate(self.fields):
+2026-07-01 16:46:12,443 - INFO - Eval script for django__django-14034 written to logs/run_evaluation/local-django-14034/gemini__gemini-3.1-flash-lite/django__django-14034/eval.sh; copying to container...
+2026-07-01 16:46:20,257 - INFO - Test runtime: 7.53 seconds
+2026-07-01 16:46:20,259 - INFO - Test output for django__django-14034 written to logs/run_evaluation/local-django-14034/gemini__gemini-3.1-flash-lite/django__django-14034/test_output.txt
+2026-07-01 16:46:20,483 - INFO - Git diff after:
+diff --git a/django/forms/fields.py b/django/forms/fields.py
+index 65d6a9ec82..583b486de9 100644
+--- a/django/forms/fields.py
++++ b/django/forms/fields.py
+@@ -1025,8 +1025,6 @@ class MultiValueField(Field):
+             if not value or not [v for v in value if v not in self.empty_values]:
+                 if self.required:
+                     raise ValidationError(self.error_messages['required'], code='required')
+-                else:
+-                    return self.compress([])
+         else:
+             raise ValidationError(self.error_messages['invalid'], code='invalid')
+         for i, field in enumerate(self.fields):
+2026-07-01 16:46:20,484 - INFO - Grading answer for django__django-14034...
+2026-07-01 16:46:20,488 - INFO - report: {'django__django-14034': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_render_required_attributes (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)']}, 'PASS_TO_PASS': {'success': ['test_bad_choice (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_clean (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_clean_disabled_multivalue (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_disabled_has_changed (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_form_as_table (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_form_as_table_data (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_form_cleaned_data (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', "Test when the first widget's data has changed.", "Test when the last widget's data has changed. This ensures that it is", 'test_has_changed_no_initial (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'test_has_changed_same (forms_tests.field_tests.test_multivaluefield.MultiValueFieldTest)', 'If insufficient data is provided, None is substituted.'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14034: resolved: False
+2026-07-01 16:46:20,490 - INFO - Attempting to stop container sweb.eval.django__django-14034.local-django-14034...
+2026-07-01 16:46:35,963 - INFO - Attempting to remove container sweb.eval.django__django-14034.local-django-14034...
+2026-07-01 16:46:36,041 - INFO - Container sweb.eval.django__django-14034.local-django-14034 removed.

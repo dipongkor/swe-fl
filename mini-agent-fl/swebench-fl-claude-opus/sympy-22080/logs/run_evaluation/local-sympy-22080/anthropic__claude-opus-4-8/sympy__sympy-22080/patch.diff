@@ -1,0 +1,43 @@
+diff --git a/sympy/printing/codeprinter.py b/sympy/printing/codeprinter.py
+index ba0e746f5d..101ace1485 100644
+--- a/sympy/printing/codeprinter.py
++++ b/sympy/printing/codeprinter.py
+@@ -9,7 +9,7 @@
+ from sympy.core.mul import _keep_coeff
+ from sympy.core.symbol import Symbol
+ from sympy.printing.str import StrPrinter
+-from sympy.printing.precedence import precedence
++from sympy.printing.precedence import precedence, PRECEDENCE
+ 
+ 
+ class requires:
+@@ -487,7 +487,16 @@ def _print_Mul(self, expr):
+ 
+         a = a or [S.One]
+ 
+-        a_str = [self.parenthesize(x, prec) for x in a]
++        # Factors of a product should be parenthesized at least at the
++        # precedence of multiplication.  ``prec`` can be lower than that when
++        # the Mul has a negative leading coefficient (e.g. ``-Mod(x, y)``),
++        # in which case using ``prec`` directly would fail to parenthesize
++        # factors such as ``Mod`` that are printed using an operator with
++        # multiplicative precedence (``%``), producing ``-x % y`` instead of
++        # the correct ``-(x % y)``.
++        mul_prec = max(prec, PRECEDENCE["Mul"])
++
++        a_str = [self.parenthesize(x, mul_prec) for x in a]
+         b_str = [self.parenthesize(x, prec) for x in b]
+ 
+         # To parenthesize Pow with exp = -1 and having more than one Symbol
+diff --git a/sympy/printing/precedence.py b/sympy/printing/precedence.py
+index 47ff463faf..9a2c9c21d9 100644
+--- a/sympy/printing/precedence.py
++++ b/sympy/printing/precedence.py
+@@ -48,6 +48,7 @@
+     "KroneckerProduct": PRECEDENCE["Mul"],
+     "Equality": PRECEDENCE["Mul"],
+     "Unequality": PRECEDENCE["Mul"],
++    "Mod": PRECEDENCE["Mul"],
+ }
+ 
+ # Sometimes it's not enough to assign a fixed precedence value to a

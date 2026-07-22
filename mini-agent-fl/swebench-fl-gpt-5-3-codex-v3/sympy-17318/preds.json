@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-17318": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sympy__sympy-17318",
+    "model_patch": "diff --git a/sympy/simplify/radsimp.py b/sympy/simplify/radsimp.py\nindex 216ae26204..37da7129de 100644\n--- a/sympy/simplify/radsimp.py\n+++ b/sympy/simplify/radsimp.py\n@@ -1113,6 +1113,8 @@ def _split_gcd(*a):\n     >>> _split_gcd(55, 35, 22, 14, 77, 10)\n     (5, [55, 35, 10], [22, 14, 77])\n     \"\"\"\n+    if not a:\n+        return S.One, [], []\n     g = a[0]\n     b1 = [g]\n     b2 = []\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/simplify/radsimp.py",
+          "line": 1116,
+          "statement": "    g = a[0]"
+        }
+      ],
+      "reasoning": "_split_gcd assumed at least one surd and indexed a[0] unconditionally; for expressions with no surds this raised IndexError during sqrtdenest matching instead of returning unchanged.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

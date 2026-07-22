@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8056": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "model_patch": "diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py\nindex b3daa06f1..3260ebec6 100644\n--- a/sphinx/ext/napoleon/docstring.py\n+++ b/sphinx/ext/napoleon/docstring.py\n@@ -1095,15 +1095,20 @@ class NumpyDocstring(GoogleDocstring):\n         else:\n             _name, _type = line, ''\n         _name, _type = _name.strip(), _type.strip()\n-        _name = self._escape_args_and_kwargs(_name)\n+\n+        if prefer_type and not _type:\n+            _type, _name = _name, _type\n+\n+        names = [_name]\n+        if _name and ',' in _name:\n+            names = [name.strip() for name in _name.split(',') if name.strip()]\n+\n+        _name = ', '.join(self._escape_args_and_kwargs(name) for name in names)\n         _type = _convert_numpy_type_spec(\n             _type,\n             location=self._get_location(),\n             translations=self._config.napoleon_type_aliases or {},\n         )\n-\n-        if prefer_type and not _type:\n-            _type, _name = _name, _type\n         indent = self._get_indent(line) + 1\n         _desc = self._dedent(self._consume_indented_block(indent))\n         _desc = self.__class__(_desc, self._config).lines()\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/napoleon/docstring.py",
+          "line": 1098,
+          "statement": "        _name = self._escape_args_and_kwargs(_name)"
+        }
+      ],
+      "reasoning": "NumPy-style parameter parsing escaped the whole combined name string before splitting, so entries like 'x1, x2 : type, optional' were treated as one parameter and rendered without per-parameter formatting and optional/type clarity.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,7 @@
+2026-06-29 21:50:17,702 - minisweagent - INFO - Loading dataset princeton-nlp/SWE-Bench_Verified, split test...
+2026-06-29 21:50:18,944 - minisweagent - INFO - Instance filter: 500 -> 1 instances
+2026-06-29 21:50:18,947 - minisweagent - INFO - Running on 1 instances...
+2026-06-29 21:50:18,949 - minisweagent - INFO - Building agent config from specs: ['mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml']
+2026-06-29 21:50:21,621 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-3834d037 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-7571:latest sleep 2h
+2026-06-29 21:50:58,997 - minisweagent.environment - INFO - Started container minisweagent-3834d037 with ID 934d774b76cc10861a8ada4bf0fd773f6dc71ec90ec9e5f31951ca855f65883f
+2026-06-29 21:51:53,044 - minisweagent - INFO - Saved trajectory to 'swebench-fl-claude-opus/pytest-7571/pytest-dev__pytest-7571/pytest-dev__pytest-7571.traj.json'

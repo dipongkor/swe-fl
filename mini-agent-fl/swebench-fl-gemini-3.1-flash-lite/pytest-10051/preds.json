@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-10051": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "pytest-dev__pytest-10051",
+    "model_patch": "diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py\nindex a4f4214b1..b60465cb4 100644\n--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -342,7 +342,7 @@ class LogCaptureHandler(logging_StreamHandler):\n         super().emit(record)\n \n     def reset(self) -> None:\n-        self.records = []\n+        self.records.clear()\n         self.stream = StringIO()\n \n     def handleError(self, record: logging.LogRecord) -> None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/logging.py",
+          "line": 345,
+          "statement": "self.records = []"
+        }
+      ],
+      "reasoning": "The LogCaptureHandler.reset method was replacing the 'records' list with a new empty list instead of clearing the existing one. Since the LogCaptureFixture's 'get_records' method holds a reference to the original list, it became disconnected from the handler's new list after 'clear()' was called.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

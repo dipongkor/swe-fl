@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-26466": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "matplotlib__matplotlib-26466",
+    "model_patch": "diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py\nindex d4922fc517..2951122a51 100644\n--- a/lib/matplotlib/text.py\n+++ b/lib/matplotlib/text.py\n@@ -1456,7 +1456,7 @@ class _AnnotationBase:\n                  xycoords='data',\n                  annotation_clip=None):\n \n-        self.xy = xy\n+        self.xy = tuple(xy)\n         self.xycoords = xycoords\n         self.set_annotation_clip(annotation_clip)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/text.py",
+          "line": 1459,
+          "statement": "        self.xy = xy"
+        }
+      ],
+      "reasoning": "Annotation stored a direct reference to the caller-provided xy sequence, so mutating that array later changed the annotation target position. Copying to an immutable tuple at initialization prevents aliasing.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

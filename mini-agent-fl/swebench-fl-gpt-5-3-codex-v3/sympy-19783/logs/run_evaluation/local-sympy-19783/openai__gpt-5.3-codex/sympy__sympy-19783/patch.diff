@@ -1,0 +1,22 @@
+diff --git a/sympy/physics/quantum/operator.py b/sympy/physics/quantum/operator.py
+index 306bfee64f..dfefc53f50 100644
+--- a/sympy/physics/quantum/operator.py
++++ b/sympy/physics/quantum/operator.py
+@@ -16,6 +16,7 @@
+ from sympy.physics.quantum.dagger import Dagger
+ from sympy.physics.quantum.qexpr import QExpr, dispatch_method
+ from sympy.matrices import eye
++from sympy.functions.elementary.complexes import adjoint
+ 
+ __all__ = [
+     'Operator',
+@@ -181,6 +182,9 @@ def __mul__(self, other):
+         if isinstance(other, IdentityOperator):
+             return self
+ 
++        if isinstance(self, adjoint) and isinstance(other, Operator):
++            return Mul(self, other).expand()
++
+         return Mul(self, other)
+ 
+ 

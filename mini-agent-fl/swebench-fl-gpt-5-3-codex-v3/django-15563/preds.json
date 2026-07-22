@@ -1,0 +1,19 @@
+{
+  "django__django-15563": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-15563",
+    "model_patch": "diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py\nindex 59a5d6abbb..6a5e71ab07 100644\n--- a/django/db/models/sql/compiler.py\n+++ b/django/db/models/sql/compiler.py\n@@ -1851,10 +1851,22 @@ class SQLUpdateCompiler(SQLCompiler):\n             # don't want them to change), or the db backend doesn't support\n             # selecting from the updating table (e.g. MySQL).\n             idents = []\n+            related_ids_by_model = {\n+                model: [] for model in self.query.related_updates\n+            }\n+            related_id_getters = {\n+                model: query.model._meta.get_ancestor_link(model).attname\n+                for model in self.query.related_updates\n+            }\n             for rows in query.get_compiler(self.using).execute_sql(MULTI):\n-                idents.extend(r[0] for r in rows)\n+                for row in rows:\n+                    obj_id = row[0]\n+                    idents.append(obj_id)\n+                    for model, attname in related_id_getters.items():\n+                        related_ids_by_model[model].append(getattr(obj_id, attname))\n             self.query.add_filter(\"pk__in\", idents)\n             self.query.related_ids = idents\n+            self.query.related_ids_by_model = related_ids_by_model\n         else:\n             # The fast path. Filters and updates in one query.\n             self.query.add_filter(\"pk__in\", query)\ndiff --git a/django/db/models/sql/subqueries.py b/django/db/models/sql/subqueries.py\nindex 04063f73bc..02e280edf6 100644\n--- a/django/db/models/sql/subqueries.py\n+++ b/django/db/models/sql/subqueries.py\n@@ -61,11 +61,13 @@ class UpdateQuery(Query):\n         \"\"\"\n         self.values = []\n         self.related_ids = None\n+        self.related_ids_by_model = {}\n         self.related_updates = {}\n \n     def clone(self):\n         obj = super().clone()\n         obj.related_updates = self.related_updates.copy()\n+        obj.related_ids_by_model = self.related_ids_by_model.copy()\n         return obj\n \n     def update_batch(self, pk_list, values, using):\n@@ -133,8 +135,9 @@ class UpdateQuery(Query):\n         for model, values in self.related_updates.items():\n             query = UpdateQuery(model)\n             query.values = values\n-            if self.related_ids is not None:\n-                query.add_filter(\"pk__in\", self.related_ids)\n+            related_ids = self.related_ids_by_model.get(model, self.related_ids)\n+            if related_ids is not None:\n+                query.add_filter(\"pk__in\", related_ids)\n             result.append(query)\n         return result\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/compiler.py",
+          "line": 1857,
+          "statement": "            self.query.related_ids = idents"
+        }
+      ],
+      "reasoning": "The update preselection stored only the child model primary keys and reused them for all ancestor table updates, which is wrong with multiple inheritance where each parent has different primary key values.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

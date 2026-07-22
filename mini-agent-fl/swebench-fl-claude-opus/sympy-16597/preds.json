@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-16597": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-16597",
+    "model_patch": "diff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py\nindex ce4dd30f2..945498627 100644\n--- a/sympy/core/assumptions.py\n+++ b/sympy/core/assumptions.py\n@@ -165,6 +165,7 @@\n     'integer        ->  rational',\n     'rational       ->  real',\n     'rational       ->  algebraic',\n+    'rational       ->  finite',\n     'algebraic      ->  complex',\n     'real           ->  complex',\n     'real           ->  hermitian',\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/core/assumptions.py",
+          "line": 166,
+          "statement": "    'rational       ->  real',"
+        }
+      ],
+      "reasoning": "The assumption fact rules lacked any implication connecting rational/integer numbers to being finite, so a symbol declared as even (which implies integer and rational) did not deduce is_finite=True. Adding 'rational -> finite' after this line makes integers, and therefore even/odd numbers, correctly imply finiteness.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

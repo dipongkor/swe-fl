@@ -1,0 +1,89 @@
+diff --git a/sklearn/linear_model/least_angle.py b/sklearn/linear_model/least_angle.py
+index 03b34a0dc..296883eae 100644
+--- a/sklearn/linear_model/least_angle.py
++++ b/sklearn/linear_model/least_angle.py
+@@ -527,8 +527,9 @@ class Lars(LinearModel, RegressorMixin):
+         optimization-based algorithms, this parameter does not control
+         the tolerance of the optimization.
+ 
+-    copy_X : boolean, optional, default True
+-        If ``True``, X will be copied; else, it may be overwritten.
++    copy_X : boolean, optional, default None
++        If ``None``, it is taken from ``self.copy_X``. If ``True``, X will
++            be copied; else, it may be overwritten.
+ 
+     fit_path : boolean
+         If True the full path is stored in the ``coef_path_`` attribute.
+@@ -758,7 +759,7 @@ class LassoLars(Lars):
+         optimization-based algorithms, this parameter does not control
+         the tolerance of the optimization.
+ 
+-    copy_X : boolean, optional, default True
++    copy_X : boolean, optional, default None
+         If True, X will be copied; else, it may be overwritten.
+ 
+     fit_path : boolean
+@@ -1032,8 +1033,9 @@ class LarsCV(Lars):
+         Cholesky diagonal factors. Increase this for very ill-conditioned
+         systems.
+ 
+-    copy_X : boolean, optional, default True
+-        If ``True``, X will be copied; else, it may be overwritten.
++    copy_X : boolean, optional, default None
++        If ``None``, it is taken from ``self.copy_X``. If ``True``, X will
++            be copied; else, it may be overwritten.
+ 
+     positive : boolean (default=False)
+         Restrict coefficients to be >= 0. Be aware that you might want to
+@@ -1255,7 +1257,7 @@ class LassoLarsCV(LarsCV):
+         Cholesky diagonal factors. Increase this for very ill-conditioned
+         systems.
+ 
+-    copy_X : boolean, optional, default True
++    copy_X : boolean, optional, default None
+         If True, X will be copied; else, it may be overwritten.
+ 
+     positive : boolean (default=False)
+@@ -1400,7 +1402,7 @@ class LassoLarsIC(LassoLars):
+         optimization-based algorithms, this parameter does not control
+         the tolerance of the optimization.
+ 
+-    copy_X : boolean, optional, default True
++    copy_X : boolean, optional, default None
+         If True, X will be copied; else, it may be overwritten.
+ 
+     positive : boolean (default=False)
+@@ -1479,7 +1481,7 @@ class LassoLarsIC(LassoLars):
+         self.eps = eps
+         self.fit_path = True
+ 
+-    def fit(self, X, y, copy_X=True):
++    def fit(self, X, y, copy_X=None):
+         """Fit the model using X, y as training data.
+ 
+         Parameters
+@@ -1490,8 +1492,9 @@ class LassoLarsIC(LassoLars):
+         y : array-like, shape (n_samples,)
+             target values. Will be cast to X's dtype if necessary
+ 
+-        copy_X : boolean, optional, default True
+-            If ``True``, X will be copied; else, it may be overwritten.
++        copy_X : boolean, optional, default None
++            If ``None``, it is taken from ``self.copy_X``. If ``True``, X will
++            be copied; else, it may be overwritten.
+ 
+         Returns
+         -------
+@@ -1500,8 +1503,11 @@ class LassoLarsIC(LassoLars):
+         """
+         X, y = check_X_y(X, y, y_numeric=True)
+ 
++        if copy_X is None:
++            copy_X = self.copy_X
++
+         X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(
+-            X, y, self.fit_intercept, self.normalize, self.copy_X)
++            X, y, self.fit_intercept, self.normalize, copy_X)
+         max_iter = self.max_iter
+ 
+         Gram = self.precompute

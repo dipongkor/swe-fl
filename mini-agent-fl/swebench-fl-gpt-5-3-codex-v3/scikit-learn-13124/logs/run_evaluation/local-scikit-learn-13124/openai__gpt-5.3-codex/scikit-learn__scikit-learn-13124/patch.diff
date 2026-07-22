@@ -1,0 +1,31 @@
+diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py
+index 24394f869..22d2ec6d1 100644
+--- a/sklearn/model_selection/_split.py
++++ b/sklearn/model_selection/_split.py
+@@ -657,17 +657,20 @@ class StratifiedKFold(_BaseKFold):
+             for count in y_counts]
+ 
+         test_folds = np.zeros(n_samples, dtype=np.int)
+-        for test_fold_indices, per_cls_splits in enumerate(zip(*per_cls_cvs)):
+-            for cls, (_, test_split) in zip(unique_y, per_cls_splits):
+-                cls_test_folds = test_folds[y == cls]
++        rng = check_random_state(self.random_state)
++        for cls, per_cls_splits in zip(unique_y, per_cls_cvs):
++            cls_y_indices = np.where(y == cls)[0]
++            if self.shuffle:
++                rng.shuffle(cls_y_indices)
++
++            for test_fold_indices, (_, test_split) in enumerate(per_cls_splits):
+                 # the test split can be too big because we used
+                 # KFold(...).split(X[:max(c, n_splits)]) when data is not 100%
+                 # stratifiable for all the classes
+                 # (we use a warning instead of raising an exception)
+                 # If this is the case, let's trim it:
+-                test_split = test_split[test_split < len(cls_test_folds)]
+-                cls_test_folds[test_split] = test_fold_indices
+-                test_folds[y == cls] = cls_test_folds
++                test_split = test_split[test_split < len(cls_y_indices)]
++                test_folds[cls_y_indices[test_split]] = test_fold_indices
+ 
+         return test_folds
+ 

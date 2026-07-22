@@ -1,0 +1,67 @@
+diff --git a/pylint/config/argument.py b/pylint/config/argument.py
+index 30a5fd175..5b70005f2 100644
+--- a/pylint/config/argument.py
++++ b/pylint/config/argument.py
+@@ -112,10 +112,59 @@ def _regex_transformer(value: str) -> Pattern[str]:
+ 
+ 
+ def _regexp_csv_transfomer(value: str) -> Sequence[Pattern[str]]:
+-    """Transforms a comma separated list of regular expressions."""
++    """Transforms a comma separated list of regular expressions.
++
++    Commas are treated as separators only when they appear at the top-level of
++    the pattern list. Commas within regex syntax (for example quantifiers like
++    ``{1,3}``, character classes, groups, or escaped commas) are preserved as
++    part of a pattern.
++    """
++
+     patterns: list[Pattern[str]] = []
+-    for pattern in _csv_transformer(value):
+-        patterns.append(_regex_transformer(pattern))
++    current: list[str] = []
++    escaped = False
++    brace_depth = 0
++    paren_depth = 0
++    bracket_depth = 0
++
++    for char in pylint_utils._unquote(value):
++        if escaped:
++            current.append(char)
++            escaped = False
++            continue
++
++        if char == "\\":
++            current.append(char)
++            escaped = True
++            continue
++
++        if char == "[":
++            bracket_depth += 1
++        elif char == "]" and bracket_depth > 0:
++            bracket_depth -= 1
++        elif bracket_depth == 0:
++            if char == "(":
++                paren_depth += 1
++            elif char == ")" and paren_depth > 0:
++                paren_depth -= 1
++            elif char == "{":
++                brace_depth += 1
++            elif char == "}" and brace_depth > 0:
++                brace_depth -= 1
++
++        if (
++            char == ","
++            and bracket_depth == 0
++            and paren_depth == 0
++            and brace_depth == 0
++        ):
++            patterns.append(_regex_transformer("".join(current).strip()))
++            current = []
++            continue
++
++        current.append(char)
++
++    patterns.append(_regex_transformer("".join(current).strip()))
+     return patterns
+ 
+ 

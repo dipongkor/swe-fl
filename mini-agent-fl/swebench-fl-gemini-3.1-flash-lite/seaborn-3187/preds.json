@@ -1,0 +1,19 @@
+{
+  "mwaskom__seaborn-3187": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "mwaskom__seaborn-3187",
+    "model_patch": "diff --git a/seaborn/_core/plot.py b/seaborn/_core/plot.py\nindex 8915616b..f856460e 100644\n--- a/seaborn/_core/plot.py\n+++ b/seaborn/_core/plot.py\n@@ -1569,6 +1569,8 @@ class Plotter:\n                         break\n                 else:\n                     title = self._resolve_label(p, var, data.names[var])\n+                    if hasattr(scales[var], \"_legend_title\"):\n+                        title = f\"{title} ({scales[var]._legend_title})\"\n                     entry = (title, data.ids[var]), [var], (values, labels)\n                     schema.append(entry)\n \ndiff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py\nindex 55874bf2..50b6c257 100644\n--- a/seaborn/_core/scales.py\n+++ b/seaborn/_core/scales.py\n@@ -379,6 +379,9 @@ class ContinuousBase(Scale):\n             locs = axis.major.locator()\n             locs = locs[(vmin <= locs) & (locs <= vmax)]\n             labels = axis.major.formatter.format_ticks(locs)\n+            offset = axis.major.formatter.get_offset()\n+            if offset:\n+                new._legend_title = offset\n             new._legend = list(locs), list(labels)\n \n         return new\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "seaborn/_core/scales.py",
+          "line": 382,
+          "statement": "new._legend = list(locs), list(labels)"
+        }
+      ],
+      "reasoning": "The legend generation in Scale._get_legend_info (or similar) does not account for the formatter's offset, which is crucial for large numbers.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

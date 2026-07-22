@@ -1,0 +1,26 @@
+diff --git a/requests/models.py b/requests/models.py
+index 9c624d3..917ec7d 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -81,7 +81,7 @@ class RequestEncodingMixin(object):
+         """
+ 
+         if isinstance(data, (str, bytes)):
+-            return to_native_string(data)
++            return to_native_string(data, "utf-8")
+         elif hasattr(data, 'read'):
+             return data
+         elif hasattr(data, '__iter__'):
+@@ -165,10 +165,10 @@ class RequestHooksMixin(object):
+         if event not in self.hooks:
+             raise ValueError('Unsupported event specified, with event name "%s"' % (event))
+ 
+-        if isinstance(hook, collections.Callable):
++        if isinstance(hook, collections.abc.Callable):
+             self.hooks[event].append(hook)
+         elif hasattr(hook, '__iter__'):
+-            self.hooks[event].extend(h for h in hook if isinstance(h, collections.Callable))
++            self.hooks[event].extend(h for h in hook if isinstance(h, collections.abc.Callable))
+ 
+     def deregister_hook(self, event, hook):
+         """Deregister a previously registered hook.

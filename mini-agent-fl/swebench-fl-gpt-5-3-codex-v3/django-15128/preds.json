@@ -1,0 +1,19 @@
+{
+  "django__django-15128": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-15128",
+    "model_patch": "diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py\nindex aaf35ee37c..cd9b75cb00 100644\n--- a/django/db/models/sql/query.py\n+++ b/django/db/models/sql/query.py\n@@ -10,7 +10,7 @@ import copy\n import difflib\n import functools\n import sys\n-from collections import Counter, namedtuple\n+from collections import Counter, OrderedDict, namedtuple\n from collections.abc import Iterator, Mapping\n from itertools import chain, count, product\n from string import ascii_uppercase\n@@ -846,7 +846,13 @@ class Query(BaseExpression):\n         relabelling any references to them in select columns and the where\n         clause.\n         \"\"\"\n-        assert set(change_map).isdisjoint(change_map.values())\n+        # Alias replacement must be applied in an order that avoids relabeling\n+        # a newly assigned alias again (e.g. T4->T5, T5->T6).\n+        if not set(change_map).isdisjoint(change_map.values()):\n+            # Apply replacements from highest-numbered aliases first.\n+            change_map = OrderedDict(\n+                sorted(change_map.items(), key=lambda t: self.alias_refcount[t[0]], reverse=True)\n+            )\n \n         # 1. Update references in \"select\" (normal columns plus aliases),\n         # \"group by\" and \"where\".\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/sql/query.py",
+          "line": 847,
+          "statement": "        assert set(change_map).isdisjoint(change_map.values())"
+        }
+      ],
+      "reasoning": "Query.combine can generate alias remaps where new aliases overlap old aliases (e.g. T4->T5, T5->T6). The assertion in change_aliases rejects these valid cases instead of applying relabeling in a safe order.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

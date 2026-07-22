@@ -1,0 +1,59 @@
+2026-07-02 14:27:05,175 - INFO - Creating container for sympy__sympy-20438...
+2026-07-02 14:27:05,289 - INFO - Container for sympy__sympy-20438 created: 6a2b2b02e6f3d8d8fb180d194870e7dc8048ceddbf62fef6a0c90fc662e63046
+2026-07-02 14:27:05,727 - INFO - Container for sympy__sympy-20438 started: 6a2b2b02e6f3d8d8fb180d194870e7dc8048ceddbf62fef6a0c90fc662e63046
+2026-07-02 14:27:05,727 - INFO - Intermediate patch for sympy__sympy-20438 written to logs/run_evaluation/local-sympy-20438/minimax__minimax-m3/sympy__sympy-20438/patch.diff, now applying to container...
+2026-07-02 14:27:06,146 - INFO - >>>>> Applied Patch:
+Checking patch sympy/sets/sets.py...
+Applied patch sympy/sets/sets.py cleanly.
+
+2026-07-02 14:27:06,533 - INFO - Git diff before:
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..356a19884c 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -852,6 +852,15 @@ def is_finite_set(self):
+         all_finite = fuzzy_and(s.is_finite_set for s in self.sets)
+         return fuzzy_or([self.is_empty, all_finite])
+ 
++    def _eval_is_subset(self, other):
++        # A finite ProductSet is a subset of another finite set if all of
++        # its elements are contained in the other set. We convert to a
++        # FiniteSet and delegate to its ``_eval_is_subset`` so that we
++        # can return a fuzzy bool.
++        if self.is_finite_set and self.is_iterable:
++            return FiniteSet(*self).is_subset(other)
++        return None
++
+     @property
+     def _measure(self):
+         measure = 1
+2026-07-02 14:27:06,534 - INFO - Eval script for sympy__sympy-20438 written to logs/run_evaluation/local-sympy-20438/minimax__minimax-m3/sympy__sympy-20438/eval.sh; copying to container...
+2026-07-02 14:28:06,936 - INFO - Test runtime: 60.11 seconds
+2026-07-02 14:28:06,936 - INFO - Test output for sympy__sympy-20438 written to logs/run_evaluation/local-sympy-20438/minimax__minimax-m3/sympy__sympy-20438/test_output.txt
+2026-07-02 14:28:07,052 - INFO - Git diff after:
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..356a19884c 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -852,6 +852,15 @@ def is_finite_set(self):
+         all_finite = fuzzy_and(s.is_finite_set for s in self.sets)
+         return fuzzy_or([self.is_empty, all_finite])
+ 
++    def _eval_is_subset(self, other):
++        # A finite ProductSet is a subset of another finite set if all of
++        # its elements are contained in the other set. We convert to a
++        # FiniteSet and delegate to its ``_eval_is_subset`` so that we
++        # can return a fuzzy bool.
++        if self.is_finite_set and self.is_iterable:
++            return FiniteSet(*self).is_subset(other)
++        return None
++
+     @property
+     def _measure(self):
+         measure = 1
+2026-07-02 14:28:07,052 - INFO - Grading answer for sympy__sympy-20438...
+2026-07-02 14:28:07,054 - INFO - report: {'sympy__sympy-20438': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_Eq', 'test_issue_19378']}, 'PASS_TO_PASS': {'success': ['test_imageset', 'test_is_empty', 'test_is_finiteset', 'test_deprecated_is_EmptySet', 'test_interval_arguments', 'test_interval_symbolic_end_points', 'test_interval_is_empty', 'test_union', 'test_union_iter', 'test_union_is_empty', 'test_difference', 'test_Complement', 'test_set_operations_nonsets', 'test_complement', 'test_intersect1', 'test_intersection', 'test_issue_9623', 'test_is_disjoint', 'test_ProductSet__len__', 'test_ProductSet', 'test_ProductSet_of_single_arg_is_not_arg', 'test_ProductSet_is_empty', 'test_interval_subs', 'test_interval_to_mpi', 'test_set_evalf', 'test_measure', 'test_is_subset', 'test_is_proper_subset', 'test_is_superset', 'test_is_proper_superset', 'test_contains', 'test_interval_symbolic', 'test_union_contains', 'test_is_number', 'test_Interval_is_left_unbounded', 'test_Interval_is_right_unbounded', 'test_Interval_as_relational', 'test_Finite_as_relational', 'test_Union_as_relational', 'test_Intersection_as_relational', 'test_Complement_as_relational', 'test_SymmetricDifference_as_relational', 'test_EmptySet', 'test_finite_basic', 'test_product_basic', 'test_real', 'test_supinf', 'test_universalset', 'test_Union_of_ProductSets_shares', 'test_Interval_free_symbols', 'test_image_interval', 'test_image_piecewise', 'test_image_FiniteSet', 'test_image_Union', 'test_image_EmptySet', 'test_issue_5724_7680', 'test_boundary', 'test_boundary_Union', 'test_boundary_ProductSet', 'test_boundary_ProductSet_line', 'test_is_open', 'test_is_closed', 'test_closure', 'test_interior', 'test_issue_7841', 'test_SymmetricDifference', 'test_issue_9536', 'test_issue_9637', 'test_issue_9808', 'test_issue_9956', 'test_issue_Symbol_inter', 'test_issue_11827', 'test_issue_10113', 'test_issue_10248', 'test_issue_9447', 'test_issue_10337', 'test_issue_10326', 'test_issue_2799', 'test_issue_9706', 'test_issue_8257', 'test_issue_10931', 'test_issue_11174', 'test_issue_18505', 'test_finite_set_intersection', 'test_union_intersection_constructor', 'test_Union_contains', 'test_DisjointUnion', 'test_DisjointUnion_is_empty', 'test_DisjointUnion_is_iterable', 'test_DisjointUnion_contains', 'test_DisjointUnion_iter', 'test_DisjointUnion_len', 'test_issue_20089'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-20438: resolved: False
+2026-07-02 14:28:07,054 - INFO - Attempting to stop container sweb.eval.sympy__sympy-20438.local-sympy-20438...
+2026-07-02 14:28:22,449 - INFO - Attempting to remove container sweb.eval.sympy__sympy-20438.local-sympy-20438...
+2026-07-02 14:28:22,467 - INFO - Container sweb.eval.sympy__sympy-20438.local-sympy-20438 removed.

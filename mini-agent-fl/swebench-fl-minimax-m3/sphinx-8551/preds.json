@@ -1,0 +1,24 @@
+{
+  "sphinx-doc__sphinx-8551": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "model_patch": "diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py\nindex 79d7e4f46..563d7b59b 100644\n--- a/sphinx/domains/python.py\n+++ b/sphinx/domains/python.py\n@@ -1224,6 +1224,12 @@ class PythonDomain(Domain):\n             if mod.docname == docname:\n                 del self.modules[modname]\n \n+    def process_field_xref(self, pnode: pending_xref) -> None:\n+        \"\"\"Process a pending xref created in a doc field.\n+        For example, attach information about the current scope.\n+        \"\"\"\n+        pnode.attributes.update(self.env.ref_context)\n+\n     def merge_domaindata(self, docnames: List[str], otherdata: Dict) -> None:\n         # XXX check duplicates?\n         for fullname, obj in otherdata['objects'].items():\ndiff --git a/sphinx/util/docfields.py b/sphinx/util/docfields.py\nindex 404bb127f..a4d5527e7 100644\n--- a/sphinx/util/docfields.py\n+++ b/sphinx/util/docfields.py\n@@ -290,11 +290,13 @@ class DocFieldTransformer:\n                         len(content) == 1 and isinstance(content[0], nodes.Text)):\n                     typed_field = cast(TypedField, typedesc)\n                     target = content[0].astext()\n+                    env = self.directive.state.document.settings.env\n                     xrefs = typed_field.make_xrefs(\n                         typed_field.typerolename,\n                         self.directive.domain,\n                         target,\n                         contnode=content[0],\n+                        env=env,\n                     )\n                     if _is_single_paragraph(field_body):\n                         paragraph = cast(nodes.paragraph, field_body[0])\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/python.py",
+          "line": 1227,
+          "statement": "    def process_field_xref(self, pnode: pending_xref) -> None:"
+        },
+        {
+          "file": "sphinx/util/docfields.py",
+          "line": 294,
+          "statement": "                    xrefs = typed_field.make_xrefs("
+        }
+      ],
+      "reasoning": "The Python domain did not implement process_field_xref, so field-level cross-references created via :param:, :type:, :rtype: did not receive the current module/class context (py:module, py:class) from env.ref_context. This caused resolve_xref to fall through to fuzzy searching across all submodules, producing 'more than one target found' warnings for unqualified type names. Additionally, the call to typed_field.make_xrefs in DocFieldTransformer.transform did not pass env, so the domain hook (process_field_xref) was never invoked even if the domain provided it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

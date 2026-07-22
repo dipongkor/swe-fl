@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8593": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-8593",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/__init__.py b/sphinx/ext/autodoc/__init__.py\nindex 76265f5be..ba48a43a7 100644\n--- a/sphinx/ext/autodoc/__init__.py\n+++ b/sphinx/ext/autodoc/__init__.py\n@@ -726,7 +726,12 @@ class Documenter:\n                 # hack for ClassDocumenter to inject docstring via ObjectMember\n                 doc = obj.docstring\n \n+            # check the existence of attribute docstring\n+            # (only attributes listed in attr_docs are considered)\n             has_doc = bool(doc)\n+            if (namespace, membername) in attr_docs:\n+                doc = '\\n'.join(attr_docs[namespace, membername])\n+                has_doc = bool(doc)\n \n             metadata = extract_metadata(doc)\n             if 'private' in metadata:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/__init__.py",
+          "line": 731,
+          "statement": "            metadata = extract_metadata(doc)"
+        }
+      ],
+      "reasoning": "The extract_metadata(doc) call only inspects the __doc__ attribute of the member, but for module-level variables documented via `#:` comments, the metadata (like `:meta public:`) is stored in attr_docs rather than the __doc__ attribute. As a result, the 'public'/'private' metadata was never detected for such variables, so `isprivate` defaulted to `membername.startswith('_')`, causing underscore-prefixed variables with `:meta public:` comments to be filtered out.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

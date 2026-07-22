@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-18698": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-18698",
+    "model_patch": "diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py\nindex c9e77a901f..b50b28e806 100644\n--- a/sympy/polys/polytools.py\n+++ b/sympy/polys/polytools.py\n@@ -5950,6 +5950,39 @@ def _symbolic_factor_list(expr, opt, method):\n \n                 factors.append((_factors_product(other), exp))\n \n+    if method == 'sqf':\n+        # Group factors by exponent and recombine Poly factors\n+        # with the same exponent (so that we get a \"more factored\"\n+        # square-free decomposition)\n+        if factors:\n+            exp_to_factors = {}\n+            for f, k in factors:\n+                if k not in exp_to_factors:\n+                    exp_to_factors[k] = []\n+                exp_to_factors[k].append(f)\n+\n+            new_factors = []\n+            for k, fs in exp_to_factors.items():\n+                if len(fs) == 1:\n+                    new_factors.append((fs[0], k))\n+                else:\n+                    if all(isinstance(f, Poly) and f.gens == fs[0].gens for f in fs):\n+                        # Multiply the polynomials and re-decompose\n+                        prod = fs[0]\n+                        for p in fs[1:]:\n+                            prod = prod * p\n+                        _coeff, _factors = prod.sqf_list()\n+                        if _coeff is not S.One:\n+                            if k.is_Integer:\n+                                coeff *= _coeff**k\n+                            else:\n+                                # Distribute non-integer exponents\n+                                new_factors.append((_coeff, k))\n+                        new_factors.extend([(f, k*exp) for f, exp in _factors])\n+                    else:\n+                        new_factors.extend([(p, k) for p in fs])\n+            factors = new_factors\n+\n     return coeff, factors\n \n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/polys/polytools.py",
+          "line": 5952,
+          "statement": "    return coeff, factors"
+        }
+      ],
+      "reasoning": "The _symbolic_factor_list function in sympy/polys/polytools.py processes each factor of a Mul expression separately and returns the factors without recombining those that share the same exponent. This causes inconsistent output for square-free decompositions: e.g., for (x-2)**3 * (x-3)**3, it returns [(x-2, 3), (x-3, 3)] instead of the correct [(x**2 - 5*x + 6, 3)].",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

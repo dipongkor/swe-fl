@@ -1,0 +1,45 @@
+2026-06-29 20:29:26,588 - INFO - Creating container for sphinx-doc__sphinx-8120...
+2026-06-29 20:29:26,895 - INFO - Container for sphinx-doc__sphinx-8120 created: 08d849fef8064945084a65f7faae6481d9d79647b6f4f604648e0f2fd9251c62
+2026-06-29 20:29:27,353 - INFO - Container for sphinx-doc__sphinx-8120 started: 08d849fef8064945084a65f7faae6481d9d79647b6f4f604648e0f2fd9251c62
+2026-06-29 20:29:27,356 - INFO - Intermediate patch for sphinx-doc__sphinx-8120 written to logs/run_evaluation/local-sphinx-8120/anthropic__claude-opus-4-8/sphinx-doc__sphinx-8120/patch.diff, now applying to container...
+2026-06-29 20:29:27,813 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/application.py...
+Applied patch sphinx/application.py cleanly.
+
+2026-06-29 20:29:28,194 - INFO - Git diff before:
+diff --git a/sphinx/application.py b/sphinx/application.py
+index 385b74d8a..95d1848ae 100644
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -293,7 +293,7 @@ class Sphinx:
+                 if catalog.domain == 'sphinx' and catalog.is_outdated():
+                     catalog.write_mo(self.config.language)
+ 
+-            locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)
++            locale_dirs = list(repo.locale_dirs) + [None, path.join(package_dir, 'locale')]
+             self.translator, has_translation = locale.init(locale_dirs, self.config.language)
+             if has_translation or self.config.language == 'en':
+                 # "en" never needs to be translated
+2026-06-29 20:29:28,197 - INFO - Eval script for sphinx-doc__sphinx-8120 written to logs/run_evaluation/local-sphinx-8120/anthropic__claude-opus-4-8/sphinx-doc__sphinx-8120/eval.sh; copying to container...
+2026-06-29 20:29:39,091 - INFO - Test runtime: 10.64 seconds
+2026-06-29 20:29:39,100 - INFO - Test output for sphinx-doc__sphinx-8120 written to logs/run_evaluation/local-sphinx-8120/anthropic__claude-opus-4-8/sphinx-doc__sphinx-8120/test_output.txt
+2026-06-29 20:29:39,306 - INFO - Git diff after:
+diff --git a/sphinx/application.py b/sphinx/application.py
+index 385b74d8a..95d1848ae 100644
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -293,7 +293,7 @@ class Sphinx:
+                 if catalog.domain == 'sphinx' and catalog.is_outdated():
+                     catalog.write_mo(self.config.language)
+ 
+-            locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)
++            locale_dirs = list(repo.locale_dirs) + [None, path.join(package_dir, 'locale')]
+             self.translator, has_translation = locale.init(locale_dirs, self.config.language)
+             if has_translation or self.config.language == 'en':
+                 # "en" never needs to be translated
+2026-06-29 20:29:39,306 - INFO - Grading answer for sphinx-doc__sphinx-8120...
+2026-06-29 20:29:39,390 - INFO - report: {'sphinx-doc__sphinx-8120': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_intl.py::test_customize_system_message'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_intl.py::test_text_toctree', 'tests/test_intl.py::test_text_emit_warnings', 'tests/test_intl.py::test_text_warning_node', 'tests/test_intl.py::test_text_title_underline', 'tests/test_intl.py::test_text_subdirs', 'tests/test_intl.py::test_text_inconsistency_warnings', 'tests/test_intl.py::test_text_literalblock_warnings', 'tests/test_intl.py::test_text_definition_terms', 'tests/test_intl.py::test_text_glossary_term', 'tests/test_intl.py::test_text_glossary_term_inconsistencies', 'tests/test_intl.py::test_gettext_section', 'tests/test_intl.py::test_text_section', 'tests/test_intl.py::test_text_seealso', 'tests/test_intl.py::test_text_figure_captions', 'tests/test_intl.py::test_text_rubric', 'tests/test_intl.py::test_text_docfields', 'tests/test_intl.py::test_text_admonitions', 'tests/test_intl.py::test_gettext_toctree', 'tests/test_intl.py::test_gettext_table', 'tests/test_intl.py::test_text_table', 'tests/test_intl.py::test_gettext_topic', 'tests/test_intl.py::test_text_topic', 'tests/test_intl.py::test_gettext_definition_terms', 'tests/test_intl.py::test_gettext_glossary_terms', 'tests/test_intl.py::test_gettext_glossary_term_inconsistencies', 'tests/test_intl.py::test_gettext_literalblock', 'tests/test_intl.py::test_gettext_buildr_ignores_only_directive', 'tests/test_intl.py::test_gettext_dont_rebuild_mo', 'tests/test_intl.py::test_html_footnotes', 'tests/test_intl.py::test_html_undefined_refs', 'tests/test_intl.py::test_html_index_entries', 'tests/test_intl.py::test_html_versionchanges', 'tests/test_intl.py::test_html_docfields', 'tests/test_intl.py::test_html_template', 'tests/test_intl.py::test_html_rebuild_mo', 'tests/test_intl.py::test_xml_footnotes', 'tests/test_intl.py::test_xml_footnote_backlinks', 'tests/test_intl.py::test_xml_refs_in_python_domain', 'tests/test_intl.py::test_xml_keep_external_links', 'tests/test_intl.py::test_xml_role_xref', 'tests/test_intl.py::test_xml_warnings', 'tests/test_intl.py::test_text_references', 'tests/test_intl.py::test_image_glob_intl', 'tests/test_intl.py::test_image_glob_intl_using_figure_language_filename'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-8120: resolved: True
+2026-06-29 20:29:39,393 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-8120.local-sphinx-8120...
+2026-06-29 20:29:54,931 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-8120.local-sphinx-8120...
+2026-06-29 20:29:55,006 - INFO - Container sweb.eval.sphinx-doc__sphinx-8120.local-sphinx-8120 removed.

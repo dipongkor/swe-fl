@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-15345": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sympy__sympy-15345",
+    "model_patch": "diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py\nindex ea7e3a2d9..e014cf571 100644\n--- a/sympy/printing/mathematica.py\n+++ b/sympy/printing/mathematica.py\n@@ -101,6 +101,11 @@ def _print_Function(self, expr):\n                     return \"%s[%s]\" % (mfunc, self.stringify(expr.args, \", \"))\n         return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")\n \n+    _print_Expr = _print_Function\n+\n+    def _print_LatticeOp(self, expr):\n+        return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")\n+\n     def _print_Integral(self, expr):\n         if len(expr.variables) == 1 and not expr.limits[0][1:]:\n             args = [expr.args[0], expr.variables[0]]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/printing/mathematica.py",
+          "line": 96,
+          "statement": "    def _print_Function(self, expr):"
+        }
+      ],
+      "reasoning": "MCodePrinter overrides _print_Function to use Mathematica [] notation, but the Printer dispatcher first finds _print_Expr (inherited from CodePrinter, where _print_Expr = _print_Function binds to CodePrinter._print_Function which uses () notation) for LatticeOp subclasses like Max and Min whose MRO includes Expr before LatticeOp. The fix rebinds _print_Expr to MCodePrinter._print_Function and adds a _print_LatticeOp method for LatticeOps.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

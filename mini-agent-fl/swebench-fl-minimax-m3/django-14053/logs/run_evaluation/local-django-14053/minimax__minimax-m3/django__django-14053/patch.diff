@@ -1,0 +1,36 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+index 494890cc23..8e02ede5f9 100644
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -229,19 +229,29 @@ class HashedFilesMixin:
+         # Do a single pass first. Post-process all files once, then repeat for
+         # adjustable files.
+         for name, hashed_name, processed, _ in self._post_process(paths, adjustable_paths, hashed_files):
+-            yield name, hashed_name, processed
++            # Pass through errors (e.g. missing referenced file) immediately.
++            if isinstance(processed, Exception):
++                yield name, hashed_name, processed
++            elif name not in adjustable_paths:
++                yield name, hashed_name, processed
+ 
+         paths = {path: paths[path] for path in adjustable_paths}
+ 
+         for i in range(self.max_post_process_passes):
+             substitutions = False
+             for name, hashed_name, processed, subst in self._post_process(paths, adjustable_paths, hashed_files):
+-                yield name, hashed_name, processed
+                 substitutions = substitutions or subst
+ 
+             if not substitutions:
+                 break
+ 
++        # Yield the post-processed adjustable files using their final hash
++        # from the hashed_files dictionary.
++        for name in paths:
++            cleaned_name = self.clean_name(name)
++            hash_key = self.hash_key(cleaned_name)
++            yield name, hashed_files[hash_key], True
++
+         if substitutions:
+             yield 'All', None, RuntimeError('Max post-process passes exceeded.')
+ 

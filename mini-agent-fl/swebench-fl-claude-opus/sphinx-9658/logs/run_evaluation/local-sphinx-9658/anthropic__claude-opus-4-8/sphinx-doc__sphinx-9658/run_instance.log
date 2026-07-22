@@ -1,0 +1,171 @@
+2026-06-29 20:11:30,574 - INFO - Creating container for sphinx-doc__sphinx-9658...
+2026-06-29 20:11:30,648 - INFO - Container for sphinx-doc__sphinx-9658 created: 8a58b2358145fbae5f0a6c860bbc7fa798363550b80a86150fbba2d1ee55d0e9
+2026-06-29 20:11:31,096 - INFO - Container for sphinx-doc__sphinx-9658 started: 8a58b2358145fbae5f0a6c860bbc7fa798363550b80a86150fbba2d1ee55d0e9
+2026-06-29 20:11:31,100 - INFO - Intermediate patch for sphinx-doc__sphinx-9658 written to logs/run_evaluation/local-sphinx-9658/anthropic__claude-opus-4-8/sphinx-doc__sphinx-9658/patch.diff, now applying to container...
+2026-06-29 20:11:31,594 - INFO - >>>>> Applied Patch:
+Checking patch sphinx/ext/autodoc/mock.py...
+Checking patch sphinx/util/typing.py...
+Applied patch sphinx/ext/autodoc/mock.py cleanly.
+Applied patch sphinx/util/typing.py cleanly.
+
+2026-06-29 20:11:31,997 - INFO - Git diff before:
+diff --git a/sphinx/ext/autodoc/mock.py b/sphinx/ext/autodoc/mock.py
+index b562f47fd..ad1c75668 100644
+--- a/sphinx/ext/autodoc/mock.py
++++ b/sphinx/ext/autodoc/mock.py
+@@ -73,6 +73,7 @@ def _make_subclass(name: str, module: str, superclass: Any = _MockObject,
+                    attributes: Any = None, decorator_args: Tuple = ()) -> Any:
+     attrs = {'__module__': module,
+              '__display_name__': module + '.' + name,
++             '__name__': name,
+              '__sphinx_decorator_args__': decorator_args}
+     attrs.update(attributes or {})
+ 
+@@ -152,6 +153,11 @@ def mock(modnames: List[str]) -> Generator[None, None, None]:
+         finder.invalidate_caches()
+ 
+ 
++def ismockmodule(subject: Any) -> bool:
++    """Check if the object is a mocked module."""
++    return isinstance(subject, _MockModule)
++
++
+ def ismock(subject: Any) -> bool:
+     """Check if the object is mocked."""
+     # check the object has '__sphinx_mock__' attribute
+@@ -168,7 +174,7 @@ def ismock(subject: Any) -> bool:
+     try:
+         # check the object is mocked object
+         __mro__ = safe_getattr(type(subject), '__mro__', [])
+-        if len(__mro__) > 2 and __mro__[1] is _MockObject:
++        if len(__mro__) > 2 and __mro__[-2] is _MockObject:
+             return True
+     except AttributeError:
+         pass
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+index 87707d48f..651c185e2 100644
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -106,6 +106,7 @@ def is_system_TypeVar(typ: Any) -> bool:
+ 
+ def restify(cls: Optional[Type]) -> str:
+     """Convert python class to a reST reference."""
++    from sphinx.ext.autodoc.mock import ismock, ismockmodule  # lazy loading
+     from sphinx.util import inspect  # lazy loading
+ 
+     try:
+@@ -115,6 +116,10 @@ def restify(cls: Optional[Type]) -> str:
+             return '...'
+         elif isinstance(cls, str):
+             return cls
++        elif ismockmodule(cls):
++            return ':py:class:`%s`' % cls.__name__
++        elif ismock(cls):
++            return ':py:class:`%s.%s`' % (cls.__module__, cls.__name__)
+         elif cls in INVALID_BUILTIN_CLASSES:
+             return ':py:class:`%s`' % INVALID_BUILTIN_CLASSES[cls]
+         elif inspect.isNewType(cls):
+@@ -300,6 +305,7 @@ def _restify_py36(cls: Optional[Type]) -> str:
+ 
+ def stringify(annotation: Any) -> str:
+     """Stringify type annotation object."""
++    from sphinx.ext.autodoc.mock import ismock, ismockmodule  # lazy loading
+     from sphinx.util import inspect  # lazy loading
+ 
+     if isinstance(annotation, str):
+@@ -308,6 +314,10 @@ def stringify(annotation: Any) -> str:
+             return annotation[1:-1]
+         else:
+             return annotation
++    elif ismockmodule(annotation):
++        return annotation.__name__
++    elif ismock(annotation):
++        return '%s.%s' % (annotation.__module__, annotation.__name__)
+     elif isinstance(annotation, TypeVar):
+         if annotation.__module__ == 'typing':
+             return annotation.__name__
+2026-06-29 20:11:32,000 - INFO - Eval script for sphinx-doc__sphinx-9658 written to logs/run_evaluation/local-sphinx-9658/anthropic__claude-opus-4-8/sphinx-doc__sphinx-9658/eval.sh; copying to container...
+2026-06-29 20:11:36,352 - INFO - Test runtime: 4.10 seconds
+2026-06-29 20:11:36,354 - INFO - Test output for sphinx-doc__sphinx-9658 written to logs/run_evaluation/local-sphinx-9658/anthropic__claude-opus-4-8/sphinx-doc__sphinx-9658/test_output.txt
+2026-06-29 20:11:36,576 - INFO - Git diff after:
+diff --git a/sphinx/ext/autodoc/mock.py b/sphinx/ext/autodoc/mock.py
+index b562f47fd..ad1c75668 100644
+--- a/sphinx/ext/autodoc/mock.py
++++ b/sphinx/ext/autodoc/mock.py
+@@ -73,6 +73,7 @@ def _make_subclass(name: str, module: str, superclass: Any = _MockObject,
+                    attributes: Any = None, decorator_args: Tuple = ()) -> Any:
+     attrs = {'__module__': module,
+              '__display_name__': module + '.' + name,
++             '__name__': name,
+              '__sphinx_decorator_args__': decorator_args}
+     attrs.update(attributes or {})
+ 
+@@ -152,6 +153,11 @@ def mock(modnames: List[str]) -> Generator[None, None, None]:
+         finder.invalidate_caches()
+ 
+ 
++def ismockmodule(subject: Any) -> bool:
++    """Check if the object is a mocked module."""
++    return isinstance(subject, _MockModule)
++
++
+ def ismock(subject: Any) -> bool:
+     """Check if the object is mocked."""
+     # check the object has '__sphinx_mock__' attribute
+@@ -168,7 +174,7 @@ def ismock(subject: Any) -> bool:
+     try:
+         # check the object is mocked object
+         __mro__ = safe_getattr(type(subject), '__mro__', [])
+-        if len(__mro__) > 2 and __mro__[1] is _MockObject:
++        if len(__mro__) > 2 and __mro__[-2] is _MockObject:
+             return True
+     except AttributeError:
+         pass
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+index 87707d48f..651c185e2 100644
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -106,6 +106,7 @@ def is_system_TypeVar(typ: Any) -> bool:
+ 
+ def restify(cls: Optional[Type]) -> str:
+     """Convert python class to a reST reference."""
++    from sphinx.ext.autodoc.mock import ismock, ismockmodule  # lazy loading
+     from sphinx.util import inspect  # lazy loading
+ 
+     try:
+@@ -115,6 +116,10 @@ def restify(cls: Optional[Type]) -> str:
+             return '...'
+         elif isinstance(cls, str):
+             return cls
++        elif ismockmodule(cls):
++            return ':py:class:`%s`' % cls.__name__
++        elif ismock(cls):
++            return ':py:class:`%s.%s`' % (cls.__module__, cls.__name__)
+         elif cls in INVALID_BUILTIN_CLASSES:
+             return ':py:class:`%s`' % INVALID_BUILTIN_CLASSES[cls]
+         elif inspect.isNewType(cls):
+@@ -300,6 +305,7 @@ def _restify_py36(cls: Optional[Type]) -> str:
+ 
+ def stringify(annotation: Any) -> str:
+     """Stringify type annotation object."""
++    from sphinx.ext.autodoc.mock import ismock, ismockmodule  # lazy loading
+     from sphinx.util import inspect  # lazy loading
+ 
+     if isinstance(annotation, str):
+@@ -308,6 +314,10 @@ def stringify(annotation: Any) -> str:
+             return annotation[1:-1]
+         else:
+             return annotation
++    elif ismockmodule(annotation):
++        return annotation.__name__
++    elif ismock(annotation):
++        return '%s.%s' % (annotation.__module__, annotation.__name__)
+     elif isinstance(annotation, TypeVar):
+         if annotation.__module__ == 'typing':
+             return annotation.__name__
+2026-06-29 20:11:36,576 - INFO - Grading answer for sphinx-doc__sphinx-9658...
+2026-06-29 20:11:36,580 - INFO - report: {'sphinx-doc__sphinx-9658': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_util_typing.py::test_restify_mock'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_util_typing.py::test_restify', 'tests/test_util_typing.py::test_restify_type_hints_containers', 'tests/test_util_typing.py::test_restify_type_hints_Callable', 'tests/test_util_typing.py::test_restify_type_hints_Union', 'tests/test_util_typing.py::test_restify_type_hints_typevars', 'tests/test_util_typing.py::test_restify_type_hints_custom_class', 'tests/test_util_typing.py::test_restify_type_hints_alias', 'tests/test_util_typing.py::test_restify_type_ForwardRef', 'tests/test_util_typing.py::test_restify_type_Literal', 'tests/test_util_typing.py::test_restify_pep_585', 'tests/test_util_typing.py::test_restify_broken_type_hints', 'tests/test_util_typing.py::test_stringify', 'tests/test_util_typing.py::test_stringify_type_hints_containers', 'tests/test_util_typing.py::test_stringify_type_hints_pep_585', 'tests/test_util_typing.py::test_stringify_Annotated', 'tests/test_util_typing.py::test_stringify_type_hints_string', 'tests/test_util_typing.py::test_stringify_type_hints_Callable', 'tests/test_util_typing.py::test_stringify_type_hints_Union', 'tests/test_util_typing.py::test_stringify_type_hints_typevars', 'tests/test_util_typing.py::test_stringify_type_hints_custom_class', 'tests/test_util_typing.py::test_stringify_type_hints_alias', 'tests/test_util_typing.py::test_stringify_type_Literal', 'tests/test_util_typing.py::test_stringify_broken_type_hints', 'tests/test_util_typing.py::test_stringify_mock'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-9658: resolved: True
+2026-06-29 20:11:36,582 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-9658.local-sphinx-9658...
+2026-06-29 20:11:52,038 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-9658.local-sphinx-9658...
+2026-06-29 20:11:52,107 - INFO - Container sweb.eval.sphinx-doc__sphinx-9658.local-sphinx-9658 removed.

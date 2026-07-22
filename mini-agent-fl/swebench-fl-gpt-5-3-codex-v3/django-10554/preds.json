@@ -1,0 +1,19 @@
+{
+  "django__django-10554": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-10554",
+    "model_patch": "diff --git a/django/db/models/query.py b/django/db/models/query.py\nindex 1544beb613..286c6c7fea 100644\n--- a/django/db/models/query.py\n+++ b/django/db/models/query.py\n@@ -931,7 +931,7 @@ class QuerySet:\n         # Clear limits and ordering so they can be reapplied\n         clone.query.clear_ordering(True)\n         clone.query.clear_limits()\n-        clone.query.combined_queries = (self.query,) + tuple(qs.query for qs in other_qs)\n+        clone.query.combined_queries = (self.query.clone(),) + tuple(qs.query.clone() for qs in other_qs)\n         clone.query.combinator = combinator\n         clone.query.combinator_all = all\n         return clone\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/query.py",
+          "line": 934,
+          "statement": "        clone.query.combined_queries = (self.query,) + tuple(qs.query for qs in other_qs)"
+        }
+      ],
+      "reasoning": "The combined queryset kept direct references to source Query objects, so later operations could mutate shared query state (e.g., select/ordering) and break reevaluation. Cloning each Query when combining prevents these side effects.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

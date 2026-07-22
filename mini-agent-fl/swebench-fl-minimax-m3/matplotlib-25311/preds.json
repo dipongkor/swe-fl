@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25311": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "matplotlib__matplotlib-25311",
+    "model_patch": "diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py\nindex 1dee8a23d9..f3763153ee 100644\n--- a/lib/matplotlib/offsetbox.py\n+++ b/lib/matplotlib/offsetbox.py\n@@ -1505,7 +1505,6 @@ class DraggableBase:\n         if not ref_artist.pickable():\n             ref_artist.set_picker(True)\n         self.got_artist = False\n-        self.canvas = self.ref_artist.figure.canvas\n         self._use_blit = use_blit and self.canvas.supports_blit\n         self.cids = [\n             self.canvas.callbacks._connect_picklable(\n@@ -1571,6 +1570,22 @@ class DraggableBase:\n         else:\n             self.canvas.mpl_disconnect(c1)\n \n+    @property\n+    def canvas(self):\n+        # Lazily look up the canvas from the ref_artist's figure.  This\n+        # way the canvas reference is never stored in ``__dict__`` and so\n+        # is not pickled; after unpickling the property transparently\n+        # returns the (new) canvas of the restored figure.\n+        return self.ref_artist.figure.canvas\n+\n+    def __getstate__(self):\n+        state = self.__dict__.copy()\n+        # The canvas belongs to a GUI backend (e.g. QtAgg) and is not\n+        # picklable.  Drop it from the state; it can be re-derived from\n+        # ``self.ref_artist.figure.canvas`` after unpickling.\n+        state.pop(\"canvas\", None)\n+        return state\n+\n     def save_offset(self):\n         pass\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/offsetbox.py",
+          "line": 1508,
+          "statement": "        self.canvas = self.ref_artist.figure.canvas"
+        }
+      ],
+      "reasoning": "The DraggableBase.__init__ stored the figure's canvas in self.canvas, placing it in the instance's __dict__. When pickling a figure that contains a draggable legend or annotation, this canvas reference is included in the pickle. For GUI backends (e.g. QtAgg) the canvas (FigureCanvasQTAgg) is not picklable, causing TypeError: cannot pickle 'FigureCanvasQTAgg' object. The fix makes canvas a lazy property that looks up self.ref_artist.figure.canvas on demand, so it is never stored in __dict__ and is not pickled.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

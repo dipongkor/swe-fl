@@ -1,0 +1,9 @@
+{
+  "sympy__sympy-19783": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sympy__sympy-19783",
+    "model_patch": "",
+    "localization": null,
+    "localization_parse_error": null
+  }
+}

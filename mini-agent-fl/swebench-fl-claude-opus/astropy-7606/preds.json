@@ -1,0 +1,19 @@
+{
+  "astropy__astropy-7606": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "astropy__astropy-7606",
+    "model_patch": "diff --git a/astropy/units/core.py b/astropy/units/core.py\nindex e9bd986d3..69f678989 100644\n--- a/astropy/units/core.py\n+++ b/astropy/units/core.py\n@@ -1710,7 +1710,11 @@ class UnrecognizedUnit(IrreducibleUnit):\n         _unrecognized_operator\n \n     def __eq__(self, other):\n-        other = Unit(other, parse_strict='silent')\n+        try:\n+            other = Unit(other, parse_strict='silent')\n+        except (ValueError, UnitsError, TypeError):\n+            return False\n+\n         return isinstance(other, UnrecognizedUnit) and self.name == other.name\n \n     def __ne__(self, other):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "astropy/units/core.py",
+          "line": 1713,
+          "statement": "        other = Unit(other, parse_strict='silent')"
+        }
+      ],
+      "reasoning": "UnrecognizedUnit.__eq__ passes other directly to Unit() without catching exceptions, so comparing with None (or other non-unit values) raises TypeError instead of returning False.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

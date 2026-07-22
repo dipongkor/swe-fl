@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8548": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "sphinx-doc__sphinx-8548",
+    "model_patch": "diff --git a/sphinx/ext/autodoc/importer.py b/sphinx/ext/autodoc/importer.py\nindex d6e73d36a..4a770cd0b 100644\n--- a/sphinx/ext/autodoc/importer.py\n+++ b/sphinx/ext/autodoc/importer.py\n@@ -309,12 +309,13 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,\n \n     if analyzer:\n         # append instance attributes (cf. self.attr1) if analyzer knows\n-        namespace = '.'.join(objpath)\n-        for (ns, name), docstring in analyzer.attr_docs.items():\n-            if namespace == ns and name not in members:\n-                members[name] = ClassAttribute(subject, name, INSTANCEATTR,\n-                                               '\\n'.join(docstring))\n-\n+        for cls in subject.__mro__:\n+            if cls is object:\n+                continue\n+            for (ns, name), docstring in analyzer.attr_docs.items():\n+                if ns == cls.__name__ and name not in members:\n+                    members[name] = ClassAttribute(subject, name, INSTANCEATTR,\n+                                                   \"\\n\".join(docstring))\n     return members\n \n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/autodoc/importer.py",
+          "line": 312,
+          "statement": "for cls in subject.__mro__:"
+        }
+      ],
+      "reasoning": "The original code only checked the current class's namespace for attribute documentation, ignoring inherited attributes from base classes. The fix iterates through the MRO to include documentation from base classes.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

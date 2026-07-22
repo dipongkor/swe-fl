@@ -1,0 +1,24 @@
+{
+  "scikit-learn__scikit-learn-25232": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "scikit-learn__scikit-learn-25232",
+    "model_patch": "diff --git a/sklearn/impute/_iterative.py b/sklearn/impute/_iterative.py\nindex 1d918bc0c..8ebaf1270 100644\n--- a/sklearn/impute/_iterative.py\n+++ b/sklearn/impute/_iterative.py\n@@ -112,13 +112,18 @@ class IterativeImputer(_BaseImputer):\n         imputed target feature. Can provide significant speed-up when the\n         number of features is huge. If `None`, all features will be used.\n \n-    initial_strategy : {'mean', 'median', 'most_frequent', 'constant'}, \\\n-            default='mean'\n+    initial_strategy : {\"mean\", \"median\", \"most_frequent\", \"constant\"}, \n+            default=\"mean\"\n         Which strategy to use to initialize the missing values. Same as the\n         `strategy` parameter in :class:`~sklearn.impute.SimpleImputer`.\n \n-    imputation_order : {'ascending', 'descending', 'roman', 'arabic', \\\n-            'random'}, default='ascending'\n+    fill_value : str or numerical, default=None\n+        When strategy == \"constant\", fill_value is used to replace all\n+        occurrences of missing_values. If left to the default, fill_value\n+        will be 0 when imputing numerical data and \"missing_value\" for strings or object data types.\n+\n+    imputation_order : {\"ascending\", \"descending\", \"roman\", \"arabic\", \n+            \"random\"}, default=\"ascending\"\n         The order in which the features will be imputed. Possible values:\n \n         - `'ascending'`: From features with fewest missing values to most.\n@@ -302,6 +307,7 @@ class IterativeImputer(_BaseImputer):\n         n_nearest_features=None,\n         initial_strategy=\"mean\",\n         imputation_order=\"ascending\",\n+        fill_value=None,\n         skip_complete=False,\n         min_value=-np.inf,\n         max_value=np.inf,\n@@ -321,6 +327,7 @@ class IterativeImputer(_BaseImputer):\n         self.max_iter = max_iter\n         self.tol = tol\n         self.n_nearest_features = n_nearest_features\n+        self.fill_value = fill_value\n         self.initial_strategy = initial_strategy\n         self.imputation_order = imputation_order\n         self.skip_complete = skip_complete\n@@ -611,6 +618,7 @@ class IterativeImputer(_BaseImputer):\n         mask_missing_values = X_missing_mask.copy()\n         if self.initial_imputer_ is None:\n             self.initial_imputer_ = SimpleImputer(\n+                fill_value=self.fill_value,\n                 missing_values=self.missing_values,\n                 strategy=self.initial_strategy,\n                 keep_empty_features=self.keep_empty_features,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/impute/_iterative.py",
+          "line": 305,
+          "statement": "fill_value=None,"
+        },
+        {
+          "file": "sklearn/impute/_iterative.py",
+          "line": 616,
+          "statement": "fill_value=self.fill_value,"
+        }
+      ],
+      "reasoning": "The IterativeImputer lacked a fill_value parameter, which is necessary when using the 'constant' initial_strategy. I added the parameter to the __init__ method and passed it to the underlying SimpleImputer.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

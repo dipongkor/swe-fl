@@ -1,0 +1,15 @@
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..caf499fc1e 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -1873,7 +1873,9 @@ def _contains(self, other):
+                 for e in self.args)
+ 
+     def _eval_is_subset(self, other):
+-        return fuzzy_and(other._contains(e) for e in self.args)
++        if other.is_ProductSet:
++            return fuzzy_and(other._contains(e) for e in self.args)
++
+ 
+     @property
+     def _boundary(self):

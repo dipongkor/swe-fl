@@ -1,0 +1,19 @@
+{
+  "psf__requests-1724": {
+    "model_name_or_path": "gemini/gemini-3.1-flash-lite",
+    "instance_id": "psf__requests-1724",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex f82f56a..f45107f 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -307,7 +307,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):\n         \"\"\"Prepares the given HTTP method.\"\"\"\n         self.method = method\n         if self.method is not None:\n-            self.method = self.method.upper()\n+            self.method = self.method.upper().encode(\"ascii\") if (is_py2 and isinstance(self.method, str)) else self.method.upper()\n \n     def prepare_url(self, url, params):\n         \"\"\"Prepares the given HTTP URL.\"\"\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 310,
+          "statement": "self.method = self.method.upper().encode(\"ascii\") if (is_py2 and isinstance(self.method, str)) else self.method.upper()"
+        }
+      ],
+      "reasoning": "In Python 2, unicode method names cause UnicodeDecodeError when passed to httplib. The fix is to explicitly encode the method to ascii if it's a unicode string (which is `str` in Python 2's `compat` module) and we are in Python 2.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

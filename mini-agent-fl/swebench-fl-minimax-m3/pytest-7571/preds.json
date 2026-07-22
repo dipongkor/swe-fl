@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7571": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-7571",
+    "model_patch": "diff --git a/src/_pytest/logging.py b/src/_pytest/logging.py\nindex 11031f2f2..d19acb0f1 100644\n--- a/src/_pytest/logging.py\n+++ b/src/_pytest/logging.py\n@@ -346,6 +346,9 @@ class LogCaptureFixture:\n         self._item = item\n         # dict of log name -> log level\n         self._initial_logger_levels = {}  # type: Dict[Optional[str], int]\n+        self._initial_handler_level = (\n+            None\n+        )  # type: Optional[int]\n \n     def _finalize(self) -> None:\n         \"\"\"Finalizes the fixture.\n@@ -356,6 +359,9 @@ class LogCaptureFixture:\n         for logger_name, level in self._initial_logger_levels.items():\n             logger = logging.getLogger(logger_name)\n             logger.setLevel(level)\n+        # restore the level of the handler\n+        if self._initial_handler_level is not None:\n+            self.handler.setLevel(self._initial_handler_level)\n \n     @property\n     def handler(self) -> LogCaptureHandler:\n@@ -433,6 +439,8 @@ class LogCaptureFixture:\n         logger_obj = logging.getLogger(logger)\n         # save the original log-level to restore it during teardown\n         self._initial_logger_levels.setdefault(logger, logger_obj.level)\n+        if self._initial_handler_level is None:\n+            self._initial_handler_level = self.handler.level\n         logger_obj.setLevel(level)\n         self.handler.setLevel(level)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/logging.py",
+          "line": 437,
+          "statement": "self.handler.setLevel(level)"
+        }
+      ],
+      "reasoning": "The set_level method modifies the shared LogCaptureHandler's level but does not save the original level for later restoration. As a result, _finalize (the caplog fixture's cleanup) only restores logger levels via _initial_logger_levels and never restores the handler level, causing the level to leak into subsequent tests.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "django__django-16938": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "django__django-16938",
+    "model_patch": "diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py\nindex 36048601af..f1e94e7a71 100644\n--- a/django/core/serializers/python.py\n+++ b/django/core/serializers/python.py\n@@ -76,10 +76,12 @@ class Serializer(base.Serializer):\n             else:\n \n                 def m2m_value(value):\n-                    return self._value_from_field(value, value._meta.pk)\n+                    if hasattr(value, \"_meta\"):\n+                        return self._value_from_field(value, value._meta.pk)\n+                    return value if is_protected_type(value) else str(value)\n \n                 def queryset_iterator(obj, field):\n-                    return getattr(obj, field.name).only(\"pk\").iterator()\n+                    return getattr(obj, field.name).values_list(\"pk\", flat=True)\n \n             m2m_iter = getattr(obj, \"_prefetched_objects_cache\", {}).get(\n                 field.name,\ndiff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py\nindex 1d3269c41a..cc77172287 100644\n--- a/django/core/serializers/xml_serializer.py\n+++ b/django/core/serializers/xml_serializer.py\n@@ -152,10 +152,11 @@ class Serializer(base.Serializer):\n             else:\n \n                 def handle_m2m(value):\n-                    self.xml.addQuickElement(\"object\", attrs={\"pk\": str(value.pk)})\n+                    pk = value.pk if hasattr(value, \"_meta\") else value\n+                    self.xml.addQuickElement(\"object\", attrs={\"pk\": str(pk)})\n \n                 def queryset_iterator(obj, field):\n-                    return getattr(obj, field.name).only(\"pk\").iterator()\n+                    return getattr(obj, field.name).values_list(\"pk\", flat=True)\n \n             m2m_iter = getattr(obj, \"_prefetched_objects_cache\", {}).get(\n                 field.name,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/core/serializers/python.py",
+          "line": 82,
+          "statement": "                    return getattr(obj, field.name).only(\"pk\").iterator()"
+        },
+        {
+          "file": "django/core/serializers/xml_serializer.py",
+          "line": 158,
+          "statement": "                    return getattr(obj, field.name).only(\"pk\").iterator()"
+        }
+      ],
+      "reasoning": "The .only(\"pk\") call on the m2m queryset conflicts with select_related() set on a custom manager's get_queryset(). When select_related traverses an FK field that is also deferred by .only(), Django raises a FieldError because the field cannot be both deferred and traversed at the same time. The fix is to use values_list(\"pk\", flat=True) which doesn't conflict with select_related, and to update m2m_value/handle_m2m to work with the resulting raw pk values.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

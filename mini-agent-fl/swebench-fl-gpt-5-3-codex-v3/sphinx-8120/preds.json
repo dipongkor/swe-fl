@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-8120": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "model_patch": "diff --git a/sphinx/locale/__init__.py b/sphinx/locale/__init__.py\nindex 385ca3566..cb23267be 100644\n--- a/sphinx/locale/__init__.py\n+++ b/sphinx/locale/__init__.py\n@@ -134,7 +134,8 @@ def init(locale_dirs: List[str], language: str,\n             if translator is None:\n                 translator = trans\n             else:\n-                translator.add_fallback(trans)\n+                trans.add_fallback(translator)\n+                translator = trans\n         except Exception:\n             # Language couldn't be found in the specified path\n             pass\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/locale/__init__.py",
+          "line": 137,
+          "statement": "                translator.add_fallback(trans)"
+        }
+      ],
+      "reasoning": "Fallbacks were chained in the wrong direction, so built-in translations were checked before user locale_dirs and user overrides for the sphinx catalog were ignored.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

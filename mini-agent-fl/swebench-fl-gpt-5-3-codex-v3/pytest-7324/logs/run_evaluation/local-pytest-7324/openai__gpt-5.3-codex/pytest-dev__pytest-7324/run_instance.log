@@ -1,0 +1,51 @@
+2026-06-30 17:57:47,152 - INFO - Creating container for pytest-dev__pytest-7324...
+2026-06-30 17:57:47,241 - INFO - Container for pytest-dev__pytest-7324 created: 8ede62570458b5208bbca45d311b90e36d2a74144e437e0f1d46202dcbf248fb
+2026-06-30 17:57:47,703 - INFO - Container for pytest-dev__pytest-7324 started: 8ede62570458b5208bbca45d311b90e36d2a74144e437e0f1d46202dcbf248fb
+2026-06-30 17:57:47,706 - INFO - Intermediate patch for pytest-dev__pytest-7324 written to logs/run_evaluation/local-pytest-7324/openai__gpt-5.3-codex/pytest-dev__pytest-7324/patch.diff, now applying to container...
+2026-06-30 17:57:48,235 - INFO - >>>>> Applied Patch:
+Checking patch src/_pytest/mark/expression.py...
+Applied patch src/_pytest/mark/expression.py cleanly.
+
+2026-06-30 17:57:48,542 - INFO - Git diff before:
+diff --git a/src/_pytest/mark/expression.py b/src/_pytest/mark/expression.py
+index 04c73411a..c86f479c5 100644
+--- a/src/_pytest/mark/expression.py
++++ b/src/_pytest/mark/expression.py
+@@ -161,6 +161,12 @@ def not_expr(s: Scanner) -> ast.expr:
+         return ret
+     ident = s.accept(TokenType.IDENT)
+     if ident:
++        if ident.value == "True":
++            return ast.NameConstant(True)
++        if ident.value == "False":
++            return ast.NameConstant(False)
++        if ident.value == "None":
++            return ast.NameConstant(None)
+         return ast.Name(ident.value, ast.Load())
+     s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))
+2026-06-30 17:57:48,546 - INFO - Eval script for pytest-dev__pytest-7324 written to logs/run_evaluation/local-pytest-7324/openai__gpt-5.3-codex/pytest-dev__pytest-7324/eval.sh; copying to container...
+2026-06-30 17:57:54,373 - INFO - Test runtime: 5.55 seconds
+2026-06-30 17:57:54,377 - INFO - Test output for pytest-dev__pytest-7324 written to logs/run_evaluation/local-pytest-7324/openai__gpt-5.3-codex/pytest-dev__pytest-7324/test_output.txt
+2026-06-30 17:57:54,634 - INFO - Git diff after:
+diff --git a/src/_pytest/mark/expression.py b/src/_pytest/mark/expression.py
+index 04c73411a..c86f479c5 100644
+--- a/src/_pytest/mark/expression.py
++++ b/src/_pytest/mark/expression.py
+@@ -161,6 +161,12 @@ def not_expr(s: Scanner) -> ast.expr:
+         return ret
+     ident = s.accept(TokenType.IDENT)
+     if ident:
++        if ident.value == "True":
++            return ast.NameConstant(True)
++        if ident.value == "False":
++            return ast.NameConstant(False)
++        if ident.value == "None":
++            return ast.NameConstant(None)
+         return ast.Name(ident.value, ast.Load())
+     s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))
+2026-06-30 17:57:54,635 - INFO - Grading answer for pytest-dev__pytest-7324...
+2026-06-30 17:57:54,640 - INFO - report: {'pytest-dev__pytest-7324': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': ['testing/test_mark_expression.py::test_valid_idents[True]'], 'failure': ['testing/test_mark_expression.py::test_valid_idents[False]', 'testing/test_mark_expression.py::test_valid_idents[None]']}, 'PASS_TO_PASS': {'success': ['testing/test_mark_expression.py::test_empty_is_false', 'testing/test_mark_expression.py::test_basic[true-True0]', 'testing/test_mark_expression.py::test_basic[true-True1]', 'testing/test_mark_expression.py::test_basic[false-False]', 'testing/test_mark_expression.py::test_basic[not', 'testing/test_mark_expression.py::test_basic[true', 'testing/test_mark_expression.py::test_basic[false', 'testing/test_mark_expression.py::test_basic[(not', 'testing/test_mark_expression.py::test_syntax_oddeties[', 'testing/test_mark_expression.py::test_syntax_oddeties[(', 'testing/test_mark_expression.py::test_syntax_oddeties[not', 'testing/test_mark_expression.py::test_syntax_errors[(-2-expected', 'testing/test_mark_expression.py::test_syntax_errors[', 'testing/test_mark_expression.py::test_syntax_errors[)-1-expected', 'testing/test_mark_expression.py::test_syntax_errors[)', 'testing/test_mark_expression.py::test_syntax_errors[not-4-expected', 'testing/test_mark_expression.py::test_syntax_errors[not', 'testing/test_mark_expression.py::test_syntax_errors[(not)-5-expected', 'testing/test_mark_expression.py::test_syntax_errors[and-1-expected', 'testing/test_mark_expression.py::test_syntax_errors[ident', 'testing/test_mark_expression.py::test_valid_idents[.]', 'testing/test_mark_expression.py::test_valid_idents[...]', 'testing/test_mark_expression.py::test_valid_idents[:::]', 'testing/test_mark_expression.py::test_valid_idents[a:::c]', 'testing/test_mark_expression.py::test_valid_idents[a+-b]', 'testing/test_mark_expression.py::test_valid_idents[\\u05d0\\u05d1\\u05d2\\u05d3]', 'testing/test_mark_expression.py::test_valid_idents[aa\\u05d0\\u05d1\\u05d2\\u05d3cc]', 'testing/test_mark_expression.py::test_valid_idents[a[bcd]]', 'testing/test_mark_expression.py::test_valid_idents[1234]', 'testing/test_mark_expression.py::test_valid_idents[1234abcd]', 'testing/test_mark_expression.py::test_valid_idents[1234and]', 'testing/test_mark_expression.py::test_valid_idents[notandor]', 'testing/test_mark_expression.py::test_valid_idents[not_and_or]', 'testing/test_mark_expression.py::test_valid_idents[not[and]or]', 'testing/test_mark_expression.py::test_valid_idents[1234+5678]', 'testing/test_mark_expression.py::test_valid_idents[123.232]', 'testing/test_mark_expression.py::test_valid_idents[if]', 'testing/test_mark_expression.py::test_valid_idents[else]', 'testing/test_mark_expression.py::test_valid_idents[while]', 'testing/test_mark_expression.py::test_invalid_idents[/]', 'testing/test_mark_expression.py::test_invalid_idents[\\\\]', 'testing/test_mark_expression.py::test_invalid_idents[^]', 'testing/test_mark_expression.py::test_invalid_idents[*]', 'testing/test_mark_expression.py::test_invalid_idents[=]', 'testing/test_mark_expression.py::test_invalid_idents[&]', 'testing/test_mark_expression.py::test_invalid_idents[%]', 'testing/test_mark_expression.py::test_invalid_idents[$]', 'testing/test_mark_expression.py::test_invalid_idents[#]', 'testing/test_mark_expression.py::test_invalid_idents[@]', 'testing/test_mark_expression.py::test_invalid_idents[!]', 'testing/test_mark_expression.py::test_invalid_idents[~]', 'testing/test_mark_expression.py::test_invalid_idents[{]', 'testing/test_mark_expression.py::test_invalid_idents[}]', 'testing/test_mark_expression.py::test_invalid_idents["]', "testing/test_mark_expression.py::test_invalid_idents[']", 'testing/test_mark_expression.py::test_invalid_idents[|]', 'testing/test_mark_expression.py::test_invalid_idents[;]', 'testing/test_mark_expression.py::test_invalid_idents[\\u2190]'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for pytest-dev__pytest-7324: resolved: False
+2026-06-30 17:57:54,644 - INFO - Attempting to stop container sweb.eval.pytest-dev__pytest-7324.local-pytest-7324...
+2026-06-30 17:58:10,086 - INFO - Attempting to remove container sweb.eval.pytest-dev__pytest-7324.local-pytest-7324...
+2026-06-30 17:58:10,152 - INFO - Container sweb.eval.pytest-dev__pytest-7324.local-pytest-7324 removed.

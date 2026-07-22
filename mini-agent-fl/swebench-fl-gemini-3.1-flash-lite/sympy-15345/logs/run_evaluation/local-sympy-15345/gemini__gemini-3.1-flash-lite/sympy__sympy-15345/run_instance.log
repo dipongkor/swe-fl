@@ -1,0 +1,53 @@
+2026-07-19 18:47:10,017 - INFO - Creating container for sympy__sympy-15345...
+2026-07-19 18:47:10,099 - INFO - Container for sympy__sympy-15345 created: 2c2765db416cc663580ccbba336be293fcc61dafbd4738f768603bcc5908bdac
+2026-07-19 18:47:10,590 - INFO - Container for sympy__sympy-15345 started: 2c2765db416cc663580ccbba336be293fcc61dafbd4738f768603bcc5908bdac
+2026-07-19 18:47:10,594 - INFO - Intermediate patch for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/gemini__gemini-3.1-flash-lite/sympy__sympy-15345/patch.diff, now applying to container...
+2026-07-19 18:47:11,059 - INFO - >>>>> Applied Patch:
+Checking patch sympy/printing/mathematica.py...
+Applied patch sympy/printing/mathematica.py cleanly.
+
+2026-07-19 18:47:11,536 - INFO - Git diff before:
+diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py
+index ea7e3a2d9..4b7aefc23 100644
+--- a/sympy/printing/mathematica.py
++++ b/sympy/printing/mathematica.py
+@@ -111,6 +111,12 @@ def _print_Integral(self, expr):
+     def _print_Sum(self, expr):
+         return "Hold[Sum[" + ', '.join(self.doprint(a) for a in expr.args) + "]]"
+ 
++    def _print_Max(self, expr):
++        return "Max[%s]" % self.stringify(expr.args, ", ")
++
++    def _print_Min(self, expr):
++        return "Min[%s]" % self.stringify(expr.args, ", ")
++
+     def _print_Derivative(self, expr):
+         dexpr = expr.expr
+         dvars = [i[0] if i[1] == 1 else i for i in expr.variable_count]
+2026-07-19 18:47:11,540 - INFO - Eval script for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/gemini__gemini-3.1-flash-lite/sympy__sympy-15345/eval.sh; copying to container...
+2026-07-19 18:47:15,728 - INFO - Test runtime: 3.88 seconds
+2026-07-19 18:47:15,731 - INFO - Test output for sympy__sympy-15345 written to logs/run_evaluation/local-sympy-15345/gemini__gemini-3.1-flash-lite/sympy__sympy-15345/test_output.txt
+2026-07-19 18:47:15,944 - INFO - Git diff after:
+diff --git a/sympy/printing/mathematica.py b/sympy/printing/mathematica.py
+index ea7e3a2d9..4b7aefc23 100644
+--- a/sympy/printing/mathematica.py
++++ b/sympy/printing/mathematica.py
+@@ -111,6 +111,12 @@ def _print_Integral(self, expr):
+     def _print_Sum(self, expr):
+         return "Hold[Sum[" + ', '.join(self.doprint(a) for a in expr.args) + "]]"
+ 
++    def _print_Max(self, expr):
++        return "Max[%s]" % self.stringify(expr.args, ", ")
++
++    def _print_Min(self, expr):
++        return "Min[%s]" % self.stringify(expr.args, ", ")
++
+     def _print_Derivative(self, expr):
+         dexpr = expr.expr
+         dvars = [i[0] if i[1] == 1 else i for i in expr.variable_count]
+2026-07-19 18:47:15,946 - INFO - Grading answer for sympy__sympy-15345...
+2026-07-19 18:47:15,950 - INFO - report: {'sympy__sympy-15345': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_Function'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_Integer', 'test_Rational', 'test_Pow', 'test_Mul', 'test_constants', 'test_containers', 'test_Integral', 'test_Derivative'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-15345: resolved: True
+2026-07-19 18:47:15,953 - INFO - Attempting to stop container sweb.eval.sympy__sympy-15345.local-sympy-15345...
+2026-07-19 18:47:31,387 - INFO - Attempting to remove container sweb.eval.sympy__sympy-15345.local-sympy-15345...
+2026-07-19 18:47:31,459 - INFO - Container sweb.eval.sympy__sympy-15345.local-sympy-15345 removed.

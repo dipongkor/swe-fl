@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-23299": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "matplotlib__matplotlib-23299",
+    "model_patch": "diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py\nindex c268a56724..295e165740 100644\n--- a/lib/matplotlib/__init__.py\n+++ b/lib/matplotlib/__init__.py\n@@ -1095,7 +1095,18 @@ def rc_context(rc=None, fname=None):\n             rcParams.update(rc)\n         yield\n     finally:\n-        dict.update(rcParams, orig)  # Revert to the original rcs.\n+        # Revert to the original rcs.  If the original backend was the\n+        # auto-resolution sentinel, the context block may have triggered\n+        # auto-resolution of the backend; in that case, keep the\n+        # resolved value rather than resetting it to the sentinel, so\n+        # that further access to rcParams['backend'] does not\n+        # unnecessarily re-resolve (and re-close all figures) the\n+        # backend.\n+        backend_before = dict.__getitem__(rcParams, 'backend')\n+        dict.update(rcParams, orig)\n+        if (orig['backend'] is rcsetup._auto_backend_sentinel\n+                and backend_before is not rcsetup._auto_backend_sentinel):\n+            rcParams['backend'] = backend_before\n \n \n def use(backend, *, force=True):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/__init__.py",
+          "line": 1098,
+          "statement": "        dict.update(rcParams, orig)  # Revert to the original rcs."
+        }
+      ],
+      "reasoning": "The rc_context context manager uses dict.update to revert rcParams to their original values on exit. This bypasses RcParams.__setitem__'s check that would prevent resetting the 'backend' key to the auto-resolution sentinel if a backend is already set. As a result, exiting rc_context after the context block triggered auto-resolution of the backend causes the backend to revert to the sentinel. Subsequent access to rcParams['backend'] (e.g., via matplotlib.get_backend()) then triggers plt.switch_backend(sentinel), which calls close('all') and destroys all open figures managed by Gcf.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

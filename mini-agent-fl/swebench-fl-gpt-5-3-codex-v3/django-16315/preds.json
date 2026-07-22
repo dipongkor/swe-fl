@@ -1,0 +1,24 @@
+{
+  "django__django-16315": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-16315",
+    "model_patch": "diff --git a/django/db/backends/postgresql/operations.py b/django/db/backends/postgresql/operations.py\nindex 62273fc43c..96f8fb4559 100644\n--- a/django/db/backends/postgresql/operations.py\n+++ b/django/db/backends/postgresql/operations.py\n@@ -354,11 +354,11 @@ class DatabaseOperations(BaseDatabaseOperations):\n             return \"ON CONFLICT DO NOTHING\"\n         if on_conflict == OnConflict.UPDATE:\n             return \"ON CONFLICT(%s) DO UPDATE SET %s\" % (\n-                \", \".join(map(self.quote_name, unique_fields)),\n+                \", \".join(self.quote_name(field.column) for field in unique_fields),\n                 \", \".join(\n                     [\n                         f\"{field} = EXCLUDED.{field}\"\n-                        for field in map(self.quote_name, update_fields)\n+                        for field in (self.quote_name(field.column) for field in update_fields)\n                     ]\n                 ),\n             )\ndiff --git a/django/db/backends/sqlite3/operations.py b/django/db/backends/sqlite3/operations.py\nindex bb84d52071..3dd07acea2 100644\n--- a/django/db/backends/sqlite3/operations.py\n+++ b/django/db/backends/sqlite3/operations.py\n@@ -418,11 +418,11 @@ class DatabaseOperations(BaseDatabaseOperations):\n             and self.connection.features.supports_update_conflicts_with_target\n         ):\n             return \"ON CONFLICT(%s) DO UPDATE SET %s\" % (\n-                \", \".join(map(self.quote_name, unique_fields)),\n+                \", \".join(self.quote_name(field.column) for field in unique_fields),\n                 \", \".join(\n                     [\n                         f\"{field} = EXCLUDED.{field}\"\n-                        for field in map(self.quote_name, update_fields)\n+                        for field in (self.quote_name(field.column) for field in update_fields)\n                     ]\n                 ),\n             )\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/backends/postgresql/operations.py",
+          "line": 357,
+          "statement": "                \", \".join(self.quote_name(field.column) for field in unique_fields),"
+        },
+        {
+          "file": "django/db/backends/sqlite3/operations.py",
+          "line": 421,
+          "statement": "                \", \".join(self.quote_name(field.column) for field in unique_fields),"
+        }
+      ],
+      "reasoning": "The ON CONFLICT target and update assignment columns were built from model field identifiers instead of database column names, producing invalid SQL when db_column differs in case or spelling. Using each Field.column fixes both conflict target and EXCLUDED references.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

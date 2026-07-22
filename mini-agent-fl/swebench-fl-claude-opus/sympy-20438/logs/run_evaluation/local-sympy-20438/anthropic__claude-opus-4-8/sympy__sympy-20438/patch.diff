@@ -1,0 +1,57 @@
+diff --git a/sympy/core/relational.py b/sympy/core/relational.py
+index e2e0b7fbcc..a097d00f8a 100644
+--- a/sympy/core/relational.py
++++ b/sympy/core/relational.py
+@@ -557,7 +557,13 @@ def binary_symbols(self):
+ 
+     def _eval_simplify(self, **kwargs):
+         from .add import Add
++        from sympy.core.expr import Expr
+         from sympy.solvers.solveset import linear_coeffs
++        # If either side is not an Expr (e.g. a Set) then the generic
++        # Relational simplification (which subtracts lhs - rhs) is not
++        # applicable, so just simplify the two sides.
++        if not all(isinstance(arg, Expr) for arg in self.args):
++            return self.func(*[arg.simplify(**kwargs) for arg in self.args])
+         # standard simplify
+         e = super()._eval_simplify(**kwargs)
+         if not isinstance(e, Equality):
+diff --git a/sympy/sets/handlers/issubset.py b/sympy/sets/handlers/issubset.py
+index fdca06025a..ac3effe092 100644
+--- a/sympy/sets/handlers/issubset.py
++++ b/sympy/sets/handlers/issubset.py
+@@ -1,7 +1,7 @@
+ from sympy import S, Symbol
+ from sympy.core.logic import fuzzy_and, fuzzy_bool, fuzzy_not, fuzzy_or
+ from sympy.core.relational import Eq
+-from sympy.sets.sets import FiniteSet, Interval, Set, Union
++from sympy.sets.sets import FiniteSet, Interval, Set, Union, ProductSet
+ from sympy.sets.fancysets import Complexes, Reals, Range, Rationals
+ from sympy.multipledispatch import dispatch
+ 
+@@ -133,3 +133,8 @@ def is_subset_sets(a, b): # noqa:F811
+ @dispatch(Rationals, Range)  # type: ignore # noqa:F811
+ def is_subset_sets(a, b): # noqa:F811
+     return False
++
++
++@dispatch(ProductSet, FiniteSet)  # type: ignore # noqa:F811
++def is_subset_sets(a_ps, b_fs): # noqa:F811
++    return fuzzy_and(b_fs.contains(x) for x in a_ps)
+diff --git a/sympy/sets/sets.py b/sympy/sets/sets.py
+index 3c4aa86e36..de4298c82e 100644
+--- a/sympy/sets/sets.py
++++ b/sympy/sets/sets.py
+@@ -801,6 +801,12 @@ def _contains(self, element):
+ 
+         return fuzzy_and(s._contains(e) for s, e in zip(self.sets, element))
+ 
++    def _eval_rewrite_as_FiniteSet(self, *args, **kwargs):
++        if self.is_iterable:
++            return FiniteSet(*self)
++        else:
++            return self
++
+     def as_relational(self, *symbols):
+         symbols = [_sympify(s) for s in symbols]
+         if len(symbols) != len(self.sets) or not all(

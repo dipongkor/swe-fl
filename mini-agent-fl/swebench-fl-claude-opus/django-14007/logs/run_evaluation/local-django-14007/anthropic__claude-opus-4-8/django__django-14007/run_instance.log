@@ -1,0 +1,99 @@
+2026-06-30 04:37:52,771 - INFO - Creating container for django__django-14007...
+2026-06-30 04:37:52,846 - INFO - Container for django__django-14007 created: 7d92364a4788bdb67094f5085fdf941f377bbcd1bc958b2f9e9c26ae9be44bfe
+2026-06-30 04:37:53,276 - INFO - Container for django__django-14007 started: 7d92364a4788bdb67094f5085fdf941f377bbcd1bc958b2f9e9c26ae9be44bfe
+2026-06-30 04:37:53,280 - INFO - Intermediate patch for django__django-14007 written to logs/run_evaluation/local-django-14007/anthropic__claude-opus-4-8/django__django-14007/patch.diff, now applying to container...
+2026-06-30 04:37:53,776 - INFO - >>>>> Applied Patch:
+Checking patch django/db/models/sql/compiler.py...
+Applied patch django/db/models/sql/compiler.py cleanly.
+
+2026-06-30 04:37:54,767 - INFO - Git diff before:
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index f02199d97c..11ad4fde90 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1405,6 +1405,7 @@ class SQLInsertCompiler(SQLCompiler):
+             returning_fields and len(self.query.objs) != 1 and
+             not self.connection.features.can_return_rows_from_bulk_insert
+         )
++        opts = self.query.get_meta()
+         self.returning_fields = returning_fields
+         with self.connection.cursor() as cursor:
+             for sql, params in self.as_sql():
+@@ -1412,13 +1413,21 @@ class SQLInsertCompiler(SQLCompiler):
+             if not self.returning_fields:
+                 return []
+             if self.connection.features.can_return_rows_from_bulk_insert and len(self.query.objs) > 1:
+-                return self.connection.ops.fetch_returned_insert_rows(cursor)
+-            if self.connection.features.can_return_columns_from_insert:
++                rows = self.connection.ops.fetch_returned_insert_rows(cursor)
++            elif self.connection.features.can_return_columns_from_insert:
+                 assert len(self.query.objs) == 1
+-                return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]
+-            return [(self.connection.ops.last_insert_id(
+-                cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
+-            ),)]
++                rows = [self.connection.ops.fetch_returned_insert_columns(
++                    cursor, self.returning_params,
++                )]
++            else:
++                rows = [(self.connection.ops.last_insert_id(
++                    cursor, opts.db_table, opts.pk.column,
++                ),)]
++        cols = [field.get_col(opts.db_table) for field in self.returning_fields]
++        converters = self.get_converters(cols)
++        if converters:
++            rows = list(self.apply_converters(rows, converters))
++        return rows
+ 
+ 
+ class SQLDeleteCompiler(SQLCompiler):
+2026-06-30 04:37:54,771 - INFO - Eval script for django__django-14007 written to logs/run_evaluation/local-django-14007/anthropic__claude-opus-4-8/django__django-14007/eval.sh; copying to container...
+2026-06-30 04:38:02,650 - INFO - Test runtime: 7.61 seconds
+2026-06-30 04:38:02,657 - INFO - Test output for django__django-14007 written to logs/run_evaluation/local-django-14007/anthropic__claude-opus-4-8/django__django-14007/test_output.txt
+2026-06-30 04:38:02,931 - INFO - Git diff after:
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index f02199d97c..11ad4fde90 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1405,6 +1405,7 @@ class SQLInsertCompiler(SQLCompiler):
+             returning_fields and len(self.query.objs) != 1 and
+             not self.connection.features.can_return_rows_from_bulk_insert
+         )
++        opts = self.query.get_meta()
+         self.returning_fields = returning_fields
+         with self.connection.cursor() as cursor:
+             for sql, params in self.as_sql():
+@@ -1412,13 +1413,21 @@ class SQLInsertCompiler(SQLCompiler):
+             if not self.returning_fields:
+                 return []
+             if self.connection.features.can_return_rows_from_bulk_insert and len(self.query.objs) > 1:
+-                return self.connection.ops.fetch_returned_insert_rows(cursor)
+-            if self.connection.features.can_return_columns_from_insert:
++                rows = self.connection.ops.fetch_returned_insert_rows(cursor)
++            elif self.connection.features.can_return_columns_from_insert:
+                 assert len(self.query.objs) == 1
+-                return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]
+-            return [(self.connection.ops.last_insert_id(
+-                cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
+-            ),)]
++                rows = [self.connection.ops.fetch_returned_insert_columns(
++                    cursor, self.returning_params,
++                )]
++            else:
++                rows = [(self.connection.ops.last_insert_id(
++                    cursor, opts.db_table, opts.pk.column,
++                ),)]
++        cols = [field.get_col(opts.db_table) for field in self.returning_fields]
++        converters = self.get_converters(cols)
++        if converters:
++            rows = list(self.apply_converters(rows, converters))
++        return rows
+ 
+ 
+ class SQLDeleteCompiler(SQLCompiler):
+2026-06-30 04:38:02,932 - INFO - Grading answer for django__django-14007...
+2026-06-30 04:38:02,936 - INFO - report: {'django__django-14007': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_auto_field_subclass_create (custom_pk.tests.CustomPKTests)'], 'failure': []}, 'PASS_TO_PASS': {'success': ['Get can accept pk or the real attribute name', 'Custom pks work with in_bulk, both for integer and non-integer types', 'pk and attribute name are available on the model', 'Both pk and custom attribute_name can be used in filter and friends', "Custom pk doesn't affect related_name based lookups", 'Queries across tables, involving primary key', 'custom pks do not affect save', 'test_custom_field_pk (custom_pk.tests.CustomPKTests)', 'New objects can be created both with pk and the custom name', 'test_unicode_pk (custom_pk.tests.CustomPKTests)', 'test_unique_pk (custom_pk.tests.CustomPKTests)', 'test_zero_non_autoincrement_pk (custom_pk.tests.CustomPKTests)'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for django__django-14007: resolved: True
+2026-06-30 04:38:02,938 - INFO - Attempting to stop container sweb.eval.django__django-14007.local-django-14007...
+2026-06-30 04:38:18,358 - INFO - Attempting to remove container sweb.eval.django__django-14007.local-django-14007...
+2026-06-30 04:38:18,445 - INFO - Container sweb.eval.django__django-14007.local-django-14007 removed.

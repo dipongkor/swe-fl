@@ -1,0 +1,29 @@
+{
+  "sphinx-doc__sphinx-8056": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "model_patch": "diff --git a/sphinx/ext/napoleon/docstring.py b/sphinx/ext/napoleon/docstring.py\nindex b3daa06f1..af64934d4 100644\n--- a/sphinx/ext/napoleon/docstring.py\n+++ b/sphinx/ext/napoleon/docstring.py\n@@ -408,13 +408,20 @@ class GoogleDocstring:\n         has_desc = any(_desc)\n         separator = ' -- ' if has_desc else ''\n         if _name:\n+            _name = _name.strip()\n+            if _name.startswith(r'\\*') or _name.startswith('\\\\'):\n+                # avoid splitting on '*' or '\\\\' inside a name\n+                _name = re.sub(r'^\\\\?\\*?(.+)$', r'\\\\*\\1', _name)\n+                _name = '**%s**' % _name\n+            else:\n+                _name = ', '.join('**%s**' % n.strip() for n in _name.split(','))\n             if _type:\n                 if '`' in _type:\n-                    field = '**%s** (%s)%s' % (_name, _type, separator)\n+                    field = '%s (%s)%s' % (_name, _type, separator)\n                 else:\n-                    field = '**%s** (*%s*)%s' % (_name, _type, separator)\n+                    field = '%s (*%s*)%s' % (_name, _type, separator)\n             else:\n-                field = '**%s**%s' % (_name, separator)\n+                field = '%s%s' % (_name, separator)\n         elif _type:\n             if '`' in _type:\n                 field = '%s%s' % (_type, separator)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/ext/napoleon/docstring.py",
+          "line": 413,
+          "statement": "                    field = '**%s** (%s)%s' % (_name, _type, separator)"
+        },
+        {
+          "file": "sphinx/ext/napoleon/docstring.py",
+          "line": 415,
+          "statement": "                    field = '**%s** (*%s*)%s' % (_name, _type, separator)"
+        },
+        {
+          "file": "sphinx/ext/napoleon/docstring.py",
+          "line": 417,
+          "statement": "                field = '**%s**%s' % (_name, separator)"
+        }
+      ],
+      "reasoning": "The _format_field method in GoogleDocstring bolds the entire _name string as a single field with '**%s**'. When a parameter has multiple comma-separated names like 'x1, x2', this results in '**x1, x2**' being bolded as one item instead of '**x1**, **x2**' with each name bolded separately. The fix splits the name by comma and bolds each name individually, except for special cases like '*args, **kwargs' which are kept as a single field.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

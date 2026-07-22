@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-11445": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-11445",
+    "model_patch": "diff --git a/sphinx/util/rst.py b/sphinx/util/rst.py\nindex 7a1538325..6f96cfa7a 100644\n--- a/sphinx/util/rst.py\n+++ b/sphinx/util/rst.py\n@@ -25,7 +25,7 @@ except ImportError:\n \n logger = logging.getLogger(__name__)\n \n-docinfo_re = re.compile(':\\\\w+:.*?')\n+docinfo_re = re.compile(r':(?![: ])([^:\\\\]|\\\\.|:(?!([ `]|$)))*(?<! ):( +|$)')\n symbols_re = re.compile(r'([!-\\-/:-@\\[-`{-~])')  # symbols without dot(0x2e)\n SECTIONING_CHARS = ['=', '-', '~']\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/util/rst.py",
+          "line": 28,
+          "statement": "docinfo_re = re.compile(':\\w+:.*?')"
+        }
+      ],
+      "reasoning": "The original docinfo_re regex pattern was overly permissive, matching any line starting with ':word:', including heading lines like ':mod:`mypackage2`' (which uses a role as a heading). This caused prepend_prolog to insert the rst_prolog between the heading text and its underline, breaking the heading and removing it from the toctree. The fix replaces the regex with the docutils 'field_marker' pattern, which correctly recognizes docinfo lines (e.g., ':Author: Some Name') without matching role-based headings.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

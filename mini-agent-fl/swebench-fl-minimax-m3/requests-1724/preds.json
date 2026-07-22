@@ -1,0 +1,19 @@
+{
+  "psf__requests-1724": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "psf__requests-1724",
+    "model_patch": "diff --git a/requests/models.py b/requests/models.py\nindex f82f56a..d35fea6 100644\n--- a/requests/models.py\n+++ b/requests/models.py\n@@ -308,6 +308,8 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):\n         self.method = method\n         if self.method is not None:\n             self.method = self.method.upper()\n+            if not isinstance(self.method, builtin_str):\n+                self.method = to_native_string(self.method)\n \n     def prepare_url(self, url, params):\n         \"\"\"Prepares the given HTTP URL.\"\"\"\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "requests/models.py",
+          "line": 310,
+          "statement": "            self.method = self.method.upper()"
+        }
+      ],
+      "reasoning": "The prepare_method method in PreparedRequest only uppercases the method string but does not ensure it is a native string type. When a unicode method name (e.g., u'POST') is passed in Python 2, the .upper() call returns a unicode string, which then gets passed to httplib and causes a UnicodeDecodeError when concatenated with the bytes message body in _send_output.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

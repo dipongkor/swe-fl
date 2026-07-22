@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-26466": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "matplotlib__matplotlib-26466",
+    "model_patch": "diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py\nindex d4922fc517..9f2055531b 100644\n--- a/lib/matplotlib/text.py\n+++ b/lib/matplotlib/text.py\n@@ -1456,7 +1456,10 @@ class _AnnotationBase:\n                  xycoords='data',\n                  annotation_clip=None):\n \n-        self.xy = xy\n+        # Store the original xy as it is needed for the xy property and\n+        # because we want to ensure that the user-provided xy is not modified\n+        # by Annotation/AnnotationBbox.\n+        self.xy = np.array(xy)\n         self.xycoords = xycoords\n         self.set_annotation_clip(annotation_clip)\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/text.py",
+          "line": 1459,
+          "statement": "        self.xy = xy"
+        }
+      ],
+      "reasoning": "In _AnnotationBase.__init__, the user-provided xy is stored directly as self.xy without making a copy. This means that if the user passes a mutable object (like a numpy array), any subsequent modifications to that object will affect the annotation. The fix is to make a copy using np.array(xy), which always copies the data and handles both tuples and arrays uniformly.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

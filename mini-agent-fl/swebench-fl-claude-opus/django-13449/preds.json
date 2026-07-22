@@ -1,0 +1,19 @@
+{
+  "django__django-13449": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-13449",
+    "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 90d90119d0..0e5561e50f 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -1253,7 +1253,7 @@ class OrderBy(BaseExpression):\n         self.descending = True\n \n \n-class Window(Expression):\n+class Window(SQLiteNumericMixin, Expression):\n     template = '%(expression)s OVER (%(window)s)'\n     # Although the main expression may either be an aggregate or an\n     # expression with an aggregate function, the GROUP BY that will\n@@ -1302,7 +1302,17 @@ class Window(Expression):\n         connection.ops.check_expression_support(self)\n         if not connection.features.supports_over_clause:\n             raise NotSupportedError('This backend does not support window expressions.')\n-        expr_sql, params = compiler.compile(self.source_expression)\n+        source_expression = self.source_expression\n+        # On backends that require DecimalField expressions to be cast to\n+        # numeric (e.g. SQLite), the cast must wrap the whole OVER clause\n+        # rather than the inner window function; otherwise it produces\n+        # invalid SQL such as ``CAST(LAG(...) AS NUMERIC) OVER (...)``. The\n+        # Window expression applies that cast itself (via SQLiteNumericMixin),\n+        # so compile the source expression without its own cast here.\n+        if hasattr(source_expression, 'as_sqlite') and connection.vendor == 'sqlite':\n+            expr_sql, params = source_expression.as_sql(compiler, connection)\n+        else:\n+            expr_sql, params = compiler.compile(source_expression)\n         window_sql, window_params = [], []\n \n         if self.partition_by is not None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/expressions.py",
+          "line": 1256,
+          "statement": "class Window(Expression):"
+        }
+      ],
+      "reasoning": "Window did not inherit SQLiteNumericMixin, so on SQLite the DecimalField cast was applied by the inner window function (e.g. Lag), producing invalid SQL 'CAST(LAG(...) AS NUMERIC) OVER (...)'. The cast must wrap the whole OVER clause, which requires Window to apply the cast and the inner source expression to be compiled without its own cast.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

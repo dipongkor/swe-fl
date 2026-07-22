@@ -1,0 +1,47 @@
+2026-06-29 19:01:36,952 - INFO - Creating container for sympy__sympy-17318...
+2026-06-29 19:01:37,024 - INFO - Container for sympy__sympy-17318 created: 1b0a969a02fe16ac09b4b56093238b61d3c796163e69fddbb6d2406b86a89d7e
+2026-06-29 19:01:37,481 - INFO - Container for sympy__sympy-17318 started: 1b0a969a02fe16ac09b4b56093238b61d3c796163e69fddbb6d2406b86a89d7e
+2026-06-29 19:01:37,483 - INFO - Intermediate patch for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/anthropic__claude-opus-4-8/sympy__sympy-17318/patch.diff, now applying to container...
+2026-06-29 19:01:37,945 - INFO - >>>>> Applied Patch:
+Checking patch sympy/simplify/sqrtdenest.py...
+Applied patch sympy/simplify/sqrtdenest.py cleanly.
+
+2026-06-29 19:01:38,568 - INFO - Git diff before:
+diff --git a/sympy/simplify/sqrtdenest.py b/sympy/simplify/sqrtdenest.py
+index f0b7653ea8..e437987d83 100644
+--- a/sympy/simplify/sqrtdenest.py
++++ b/sympy/simplify/sqrtdenest.py
+@@ -156,7 +156,8 @@ def _sqrt_match(p):
+         res = (p, S.Zero, S.Zero)
+     elif p.is_Add:
+         pargs = sorted(p.args, key=default_sort_key)
+-        if all((x**2).is_Rational for x in pargs):
++        sqargs = [x**2 for x in pargs]
++        if all(sq.is_Rational and sq.is_positive for sq in sqargs):
+             r, b, a = split_surds(p)
+             res = a, b, r
+             return list(res)
+2026-06-29 19:01:38,571 - INFO - Eval script for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/anthropic__claude-opus-4-8/sympy__sympy-17318/eval.sh; copying to container...
+2026-06-29 19:02:00,345 - INFO - Test runtime: 21.52 seconds
+2026-06-29 19:02:00,349 - INFO - Test output for sympy__sympy-17318 written to logs/run_evaluation/local-sympy-17318/anthropic__claude-opus-4-8/sympy__sympy-17318/test_output.txt
+2026-06-29 19:02:00,531 - INFO - Git diff after:
+diff --git a/sympy/simplify/sqrtdenest.py b/sympy/simplify/sqrtdenest.py
+index f0b7653ea8..e437987d83 100644
+--- a/sympy/simplify/sqrtdenest.py
++++ b/sympy/simplify/sqrtdenest.py
+@@ -156,7 +156,8 @@ def _sqrt_match(p):
+         res = (p, S.Zero, S.Zero)
+     elif p.is_Add:
+         pargs = sorted(p.args, key=default_sort_key)
+-        if all((x**2).is_Rational for x in pargs):
++        sqargs = [x**2 for x in pargs]
++        if all(sq.is_Rational and sq.is_positive for sq in sqargs):
+             r, b, a = split_surds(p)
+             res = a, b, r
+             return list(res)
+2026-06-29 19:02:00,532 - INFO - Grading answer for sympy__sympy-17318...
+2026-06-29 19:02:00,536 - INFO - report: {'sympy__sympy-17318': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_issue_12420'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_sqrtdenest', 'test_sqrtdenest2', 'test_sqrtdenest_rec', 'test_issue_6241', 'test_sqrtdenest3', 'test_sqrtdenest4', 'test_sqrt_symbolic_denest', 'test_issue_5857', 'test_subsets', 'test_issue_5653'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-17318: resolved: True
+2026-06-29 19:02:00,539 - INFO - Attempting to stop container sweb.eval.sympy__sympy-17318.local-sympy-17318...
+2026-06-29 19:02:16,016 - INFO - Attempting to remove container sweb.eval.sympy__sympy-17318.local-sympy-17318...
+2026-06-29 19:02:16,102 - INFO - Container sweb.eval.sympy__sympy-17318.local-sympy-17318 removed.

@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7490": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-7490",
+    "model_patch": "diff --git a/src/_pytest/skipping.py b/src/_pytest/skipping.py\nindex 335e10996..9e6c55c89 100644\n--- a/src/_pytest/skipping.py\n+++ b/src/_pytest/skipping.py\n@@ -262,6 +262,8 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]):\n     outcome = yield\n     rep = outcome.get_result()\n     xfailed = item._store.get(xfailed_key, None)\n+    if xfailed is None:\n+        xfailed = item._store[xfailed_key] = evaluate_xfail_marks(item)\n     # unittest special case, see setting of unexpectedsuccess_key\n     if unexpectedsuccess_key in item._store and rep.when == \"call\":\n         reason = item._store[unexpectedsuccess_key]\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/skipping.py",
+          "line": 264,
+          "statement": "    xfailed = item._store.get(xfailed_key, None)"
+        }
+      ],
+      "reasoning": "The xfailed state is retrieved from the store without re-evaluation, so dynamically added xfail markers (added via request.node.add_marker inside the test function) are not detected. The fix re-evaluates xfail marks in pytest_runtest_makereport when xfailed is None.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

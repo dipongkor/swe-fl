@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-18698": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-18698",
+    "model_patch": "diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py\nindex c9e77a901f..733af9200f 100644\n--- a/sympy/polys/polytools.py\n+++ b/sympy/polys/polytools.py\n@@ -2,7 +2,8 @@\n \n from __future__ import print_function, division\n \n-from functools import wraps\n+from functools import reduce, wraps\n+from operator import mul\n \n from sympy.core import (\n     S, Basic, Expr, I, Integer, Add, Mul, Dummy, Tuple\n@@ -5949,6 +5950,9 @@ def _symbolic_factor_list(expr, opt, method):\n                         other.append((f, k))\n \n                 factors.append((_factors_product(other), exp))\n+    if method == 'sqf':\n+        factors = [(reduce(mul, (f for f, _ in factors if _ == k)), k)\n+                   for k in set(i for _, i in factors)]\n \n     return coeff, factors\n \n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/polys/polytools.py",
+          "line": 5957,
+          "statement": "    return coeff, factors"
+        }
+      ],
+      "reasoning": "In _symbolic_factor_list (used by sqf_list), when the input is an already-factored Mul such as (x-2)**3 * (x-3)**3, each factor is square-free decomposed independently and appended separately, so square-free factors sharing the same multiplicity are never merged. The fix combines factors with equal multiplicity into a single square-free factor for method 'sqf' before returning.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

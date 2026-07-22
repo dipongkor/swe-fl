@@ -1,0 +1,59 @@
+2026-06-30 15:03:26,447 - INFO - Creating container for sympy__sympy-19783...
+2026-06-30 15:03:26,525 - INFO - Container for sympy__sympy-19783 created: 530d16ad92511130cf43b5b59bcb6f88fd45cd06b9536ed22b6fd2ca35367028
+2026-06-30 15:03:26,998 - INFO - Container for sympy__sympy-19783 started: 530d16ad92511130cf43b5b59bcb6f88fd45cd06b9536ed22b6fd2ca35367028
+2026-06-30 15:03:27,009 - INFO - Intermediate patch for sympy__sympy-19783 written to logs/run_evaluation/local-sympy-19783/openai__gpt-5.3-codex/sympy__sympy-19783/patch.diff, now applying to container...
+2026-06-30 15:03:30,161 - INFO - >>>>> Applied Patch:
+Checking patch sympy/physics/quantum/operator.py...
+Applied patch sympy/physics/quantum/operator.py cleanly.
+
+2026-06-30 15:03:31,625 - INFO - Git diff before:
+diff --git a/sympy/physics/quantum/operator.py b/sympy/physics/quantum/operator.py
+index 306bfee64f..dfefc53f50 100644
+--- a/sympy/physics/quantum/operator.py
++++ b/sympy/physics/quantum/operator.py
+@@ -16,6 +16,7 @@
+ from sympy.physics.quantum.dagger import Dagger
+ from sympy.physics.quantum.qexpr import QExpr, dispatch_method
+ from sympy.matrices import eye
++from sympy.functions.elementary.complexes import adjoint
+ 
+ __all__ = [
+     'Operator',
+@@ -181,6 +182,9 @@ def __mul__(self, other):
+         if isinstance(other, IdentityOperator):
+             return self
+ 
++        if isinstance(self, adjoint) and isinstance(other, Operator):
++            return Mul(self, other).expand()
++
+         return Mul(self, other)
+2026-06-30 15:03:31,628 - INFO - Eval script for sympy__sympy-19783 written to logs/run_evaluation/local-sympy-19783/openai__gpt-5.3-codex/sympy__sympy-19783/eval.sh; copying to container...
+2026-06-30 15:03:39,175 - INFO - Test runtime: 7.28 seconds
+2026-06-30 15:03:39,178 - INFO - Test output for sympy__sympy-19783 written to logs/run_evaluation/local-sympy-19783/openai__gpt-5.3-codex/sympy__sympy-19783/test_output.txt
+2026-06-30 15:03:39,386 - INFO - Git diff after:
+diff --git a/sympy/physics/quantum/operator.py b/sympy/physics/quantum/operator.py
+index 306bfee64f..dfefc53f50 100644
+--- a/sympy/physics/quantum/operator.py
++++ b/sympy/physics/quantum/operator.py
+@@ -16,6 +16,7 @@
+ from sympy.physics.quantum.dagger import Dagger
+ from sympy.physics.quantum.qexpr import QExpr, dispatch_method
+ from sympy.matrices import eye
++from sympy.functions.elementary.complexes import adjoint
+ 
+ __all__ = [
+     'Operator',
+@@ -181,6 +182,9 @@ def __mul__(self, other):
+         if isinstance(other, IdentityOperator):
+             return self
+ 
++        if isinstance(self, adjoint) and isinstance(other, Operator):
++            return Mul(self, other).expand()
++
+         return Mul(self, other)
+2026-06-30 15:03:39,387 - INFO - Grading answer for sympy__sympy-19783...
+2026-06-30 15:03:39,391 - INFO - report: {'sympy__sympy-19783': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_dagger_mul', 'test_identity']}, 'PASS_TO_PASS': {'success': ['test_scalars', 'test_matrix', 'test_eval_adjoint', 'test_operator', 'test_operator_inv', 'test_hermitian', 'test_unitary', 'test_outer_product', 'test_operator_dagger'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-19783: resolved: False
+2026-06-30 15:03:39,394 - INFO - Attempting to stop container sweb.eval.sympy__sympy-19783.local-sympy-19783...
+2026-06-30 15:03:54,837 - INFO - Attempting to remove container sweb.eval.sympy__sympy-19783.local-sympy-19783...
+2026-06-30 15:03:54,922 - INFO - Container sweb.eval.sympy__sympy-19783.local-sympy-19783 removed.

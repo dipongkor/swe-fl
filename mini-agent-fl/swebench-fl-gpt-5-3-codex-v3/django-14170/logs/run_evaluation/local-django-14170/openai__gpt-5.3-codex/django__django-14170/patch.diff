@@ -1,0 +1,33 @@
+diff --git a/django/db/models/lookups.py b/django/db/models/lookups.py
+index 916478d075..2189820c6d 100644
+--- a/django/db/models/lookups.py
++++ b/django/db/models/lookups.py
+@@ -539,6 +539,13 @@ class IRegex(Regex):
+ 
+ class YearLookup(Lookup):
+     def year_lookup_bounds(self, connection, year):
++        # "iso_year" uses ISO week-numbering years, which can span across
++        # adjacent Gregorian years and therefore cannot be reduced to simple
++        # calendar year bounds.
++        iso_year = isinstance(self.lhs, Transform) and self.lhs.lookup_name == "iso_year"
++        if iso_year:
++            return None
++
+         output_field = self.lhs.lhs.output_field
+         if isinstance(output_field, DateTimeField):
+             bounds = connection.ops.year_lookup_bounds_for_datetime_field(year)
+@@ -555,9 +562,11 @@ class YearLookup(Lookup):
+             lhs_sql, params = self.process_lhs(compiler, connection, self.lhs.lhs)
+             rhs_sql, _ = self.process_rhs(compiler, connection)
+             rhs_sql = self.get_direct_rhs_sql(connection, rhs_sql)
+-            start, finish = self.year_lookup_bounds(connection, self.rhs)
+-            params.extend(self.get_bound_params(start, finish))
+-            return '%s %s' % (lhs_sql, rhs_sql), params
++            bounds = self.year_lookup_bounds(connection, self.rhs)
++            if bounds is not None:
++                start, finish = bounds
++                params.extend(self.get_bound_params(start, finish))
++                return '%s %s' % (lhs_sql, rhs_sql), params
+         return super().as_sql(compiler, connection)
+ 
+     def get_direct_rhs_sql(self, connection, rhs):

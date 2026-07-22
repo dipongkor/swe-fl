@@ -1,0 +1,18 @@
+diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py
+index c9e77a901f..7a21e14e4f 100644
+--- a/sympy/polys/polytools.py
++++ b/sympy/polys/polytools.py
+@@ -5975,6 +5975,13 @@ def _generic_factor_list(expr, gens, args, method):
+ 
+     expr = sympify(expr)
+ 
++    if method == "sqf":
++        try:
++            p = Poly(expr, *opt.gens)
++            coeff, factors = p.sqf_list()
++            return coeff, [(f.as_expr(), k) for f, k in factors]
++        except:
++            pass
+     if isinstance(expr, (Expr, Poly)):
+         if isinstance(expr, Poly):
+             numer, denom = expr, 1

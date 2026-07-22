@@ -1,0 +1,39 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 1b3285ddc..f5effce8c 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -871,7 +871,8 @@ class Card(_Verify):
+                 valuecomment = "".join(values)
+             else:
+                 # CONTINUE card
+-                valuecomment = f"'{''.join(values)}' / {' '.join(comments)}"
++                value = "".join(values).replace("'", "''")
++                valuecomment = f"'{value}' / {' '.join(comments)}"
+             return keyword, valuecomment
+ 
+         if self.keyword in self._special_keywords:
+@@ -1059,6 +1060,24 @@ class Card(_Verify):
+         # do the value string
+         value = self._value.replace("'", "''")
+         words = _words_group(value, value_length)
++        # An escaped single quote '' must never be split across two words,
++        # otherwise the two halves would each be interpreted as a distinct
++        # (unescaped) single quote when the card is parsed back and the value
++        # would be corrupted.  If a word ends with an odd number of quotes it
++        # means _words_group broke such a pair, so drop the dangling quote from
++        # the end of the word and re-group the rest of the value from that
++        # point.  This keeps every word within value_length characters.
++        idx = 0
++        while idx < len(words) - 1:
++            word = words[idx]
++            n_trailing_quotes = len(word) - len(word.rstrip("'"))
++            if n_trailing_quotes % 2 == 1:
++                # Drop the dangling quote and re-group everything after it so
++                # that no word ever exceeds value_length characters.
++                words[idx] = word[:-1]
++                remainder = "'" + "".join(words[idx + 1 :])
++                words[idx + 1 :] = _words_group(remainder, value_length)
++            idx += 1
+         for idx, word in enumerate(words):
+             if idx == 0:
+                 headstr = "{:{len}}= ".format(self.keyword, len=KEYWORD_LENGTH)

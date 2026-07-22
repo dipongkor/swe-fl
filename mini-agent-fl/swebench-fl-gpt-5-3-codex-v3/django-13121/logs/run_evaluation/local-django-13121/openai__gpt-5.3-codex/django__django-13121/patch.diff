@@ -1,0 +1,28 @@
+diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py
+index a156c5e881..193ff050a8 100644
+--- a/django/db/models/expressions.py
++++ b/django/db/models/expressions.py
+@@ -480,15 +480,14 @@ class CombinedExpression(SQLiteNumericMixin, Expression):
+ 
+ class DurationExpression(CombinedExpression):
+     def compile(self, side, compiler, connection):
+-        if not isinstance(side, DurationValue):
+-            try:
+-                output = side.output_field
+-            except FieldError:
+-                pass
+-            else:
+-                if output.get_internal_type() == 'DurationField':
+-                    sql, params = compiler.compile(side)
+-                    return connection.ops.format_for_duration_arithmetic(sql), params
++        try:
++            output = side.output_field
++        except FieldError:
++            pass
++        else:
++            if output.get_internal_type() == 'DurationField':
++                sql, params = compiler.compile(side)
++                return connection.ops.format_for_duration_arithmetic(sql), params
+         return compiler.compile(side)
+ 
+     def as_sql(self, compiler, connection):

@@ -1,0 +1,37 @@
+diff --git a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+index d7605b078..d3e0588e3 100644
+--- a/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
++++ b/astropy/wcs/wcsapi/wrappers/sliced_wcs.py
+@@ -245,13 +245,23 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+     def world_to_pixel_values(self, *world_arrays):
+         world_arrays = tuple(map(np.asanyarray, world_arrays))
+         world_arrays_new = []
++        pixel_arrays_for_dropped = []
++        for ipix in range(self._wcs.pixel_n_dim):
++            if isinstance(self._slices_pixel[ipix], numbers.Integral):
++                pixel_arrays_for_dropped.append(self._slices_pixel[ipix])
++            else:
++                pixel_arrays_for_dropped.append(0)
++        world_values_for_dropped = self._wcs.pixel_to_world_values(*pixel_arrays_for_dropped)
++        if self._wcs.world_n_dim == 1:
++            world_values_for_dropped = (world_values_for_dropped,)
++
+         iworld_curr = -1
+         for iworld in range(self._wcs.world_n_dim):
+             if iworld in self._world_keep:
+                 iworld_curr += 1
+                 world_arrays_new.append(world_arrays[iworld_curr])
+             else:
+-                world_arrays_new.append(1.)
++                world_arrays_new.append(world_values_for_dropped[iworld])
+ 
+         world_arrays_new = np.broadcast_arrays(*world_arrays_new)
+         pixel_arrays = list(self._wcs.world_to_pixel_values(*world_arrays_new))
+@@ -267,7 +277,6 @@ class SlicedLowLevelWCS(BaseWCSWrapper):
+         if self.pixel_n_dim == 1 and self._wcs.pixel_n_dim > 1:
+             pixel = pixel[0]
+         return pixel
+-
+     @property
+     def world_axis_object_components(self):
+         return [self._wcs.world_axis_object_components[idx] for idx in self._world_keep]

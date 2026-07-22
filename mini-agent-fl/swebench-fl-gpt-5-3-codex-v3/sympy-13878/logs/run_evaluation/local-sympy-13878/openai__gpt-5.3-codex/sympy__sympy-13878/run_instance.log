@@ -1,0 +1,245 @@
+2026-06-30 14:18:17,823 - INFO - Creating container for sympy__sympy-13878...
+2026-06-30 14:18:17,900 - INFO - Container for sympy__sympy-13878 created: 2d9d36f5690596d381a5cb3605eb44b3b08b889f7e76a24f6596e95724a4cf81
+2026-06-30 14:18:18,352 - INFO - Container for sympy__sympy-13878 started: 2d9d36f5690596d381a5cb3605eb44b3b08b889f7e76a24f6596e95724a4cf81
+2026-06-30 14:18:18,355 - INFO - Intermediate patch for sympy__sympy-13878 written to logs/run_evaluation/local-sympy-13878/openai__gpt-5.3-codex/sympy__sympy-13878/patch.diff, now applying to container...
+2026-06-30 14:18:18,851 - INFO - >>>>> Applied Patch:
+Checking patch sympy/stats/crv_types.py...
+Applied patch sympy/stats/crv_types.py cleanly.
+
+2026-06-30 14:18:19,328 - INFO - Git diff before:
+diff --git a/sympy/stats/crv_types.py b/sympy/stats/crv_types.py
+index fff7da80a..f8a342f68 100644
+--- a/sympy/stats/crv_types.py
++++ b/sympy/stats/crv_types.py
+@@ -153,6 +153,12 @@ class ArcsinDistribution(SingleContinuousDistribution):
+     def pdf(self, x):
+         return 1/(pi*sqrt((x - self.a)*(self.b - x)))
+ 
++    def _cdf(self, x):
++        a, b = self.a, self.b
++        return Piecewise((S.Zero, x < a),
++                         (2*asin(sqrt((x - a)/(b - a)))/pi, x <= b),
++                         (S.One, True))
++
+ def Arcsin(name, a=0, b=1):
+     r"""
+     Create a Continuous Random Variable with an arcsin distribution.
+@@ -670,6 +676,11 @@ def pdf(self, x):
+         p, a, b = self.p, self.a, self.b
+         return a*p/x*((x/b)**(a*p)/(((x/b)**a + 1)**(p + 1)))
+ 
++    def _cdf(self, x):
++        p, a, b = self.p, self.a, self.b
++        return Piecewise((S.Zero, x <= 0),
++                         ((1 + (x/b)**(-a))**(-p), True))
++
+ 
+ def Dagum(name, p, a, b):
+     r"""
+@@ -1034,6 +1045,11 @@ class FrechetDistribution(SingleContinuousDistribution):
+ 
+     set = Interval(0, oo)
+ 
++    def _cdf(self, x):
++        a, s, m = self.a, self.s, self.m
++        return Piecewise((S.Zero, x <= m),
++                         (exp(-((x - m)/s)**(-a)), True))
++
+     def __new__(cls, a, s=1, m=0):
+         a, s, m = list(map(sympify, (a, s, m)))
+         return Basic.__new__(cls, a, s, m)
+@@ -1097,6 +1113,11 @@ def Frechet(name, a, s=1, m=0):
+ class GammaDistribution(SingleContinuousDistribution):
+     _argnames = ('k', 'theta')
+ 
++    def _cdf(self, x):
++        k, theta = self.k, self.theta
++        return Piecewise((S.Zero, x <= 0),
++                         (lowergamma(k, x/theta)/gamma(k), True))
++
+     set = Interval(0, oo)
+ 
+     @staticmethod
+@@ -1189,6 +1210,11 @@ def Gamma(name, k, theta):
+ class GammaInverseDistribution(SingleContinuousDistribution):
+     _argnames = ('a', 'b')
+ 
++    def _cdf(self, x):
++        a, b = self.a, self.b
++        return Piecewise((S.Zero, x <= 0),
++                         (uppergamma(a, b/x)/gamma(a), True))
++
+     set = Interval(0, oo)
+ 
+     @staticmethod
+@@ -1497,6 +1523,10 @@ def Laplace(name, mu, b):
+ class LogisticDistribution(SingleContinuousDistribution):
+     _argnames = ('mu', 's')
+ 
++    def _cdf(self, x):
++        mu, s = self.mu, self.s
++        return 1/(1 + exp(-(x - mu)/s))
++
+     def pdf(self, x):
+         mu, s = self.mu, self.s
+         return exp(-(x - mu)/s)/(s*(1 + exp(-(x - mu)/s))**2)
+@@ -1705,6 +1735,11 @@ def Maxwell(name, a):
+ class NakagamiDistribution(SingleContinuousDistribution):
+     _argnames = ('mu', 'omega')
+ 
++    def _cdf(self, x):
++        mu, omega = self.mu, self.omega
++        return Piecewise((S.Zero, x <= 0),
++                         (lowergamma(mu, mu*x**2/omega)/gamma(mu), True))
++
+     set = Interval(0, oo)
+ 
+     def pdf(self, x):
+@@ -2223,6 +2258,10 @@ def ShiftedGompertz(name, b, eta):
+ class StudentTDistribution(SingleContinuousDistribution):
+     _argnames = ('nu',)
+ 
++    def _cdf(self, x):
++        nu = self.nu
++        return S.Half + x*gamma((nu + 1)/2)*hyper((S.Half, (nu + 1)/2), (S(3)/2,), -x**2/nu)/(sqrt(pi*nu)*gamma(nu/2))
++
+     def pdf(self, x):
+         nu = self.nu
+         return 1/(sqrt(nu)*beta_fn(S(1)/2, nu/2))*(1 + x**2/nu)**(-(nu + 1)/2)
+@@ -2544,6 +2583,13 @@ def Uniform(name, left, right):
+ class UniformSumDistribution(SingleContinuousDistribution):
+     _argnames = ('n',)
+ 
++    def _cdf(self, x):
++        n = self.n
++        k = Dummy('k')
++        return Piecewise((S.Zero, x <= 0),
++                         (Sum((-1)**k*binomial(n, k)*(x - k)**n, (k, 0, floor(x)))/factorial(n), x < n),
++                         (S.One, True))
++
+     @property
+     def set(self):
+         return Interval(0, self.n)
+2026-06-30 14:18:19,332 - INFO - Eval script for sympy__sympy-13878 written to logs/run_evaluation/local-sympy-13878/openai__gpt-5.3-codex/sympy__sympy-13878/eval.sh; copying to container...
+2026-06-30 14:18:50,176 - INFO - Test runtime: 30.57 seconds
+2026-06-30 14:18:50,180 - INFO - Test output for sympy__sympy-13878 written to logs/run_evaluation/local-sympy-13878/openai__gpt-5.3-codex/sympy__sympy-13878/test_output.txt
+2026-06-30 14:18:50,429 - INFO - Git diff after:
+diff --git a/sympy/stats/crv_types.py b/sympy/stats/crv_types.py
+index fff7da80a..f8a342f68 100644
+--- a/sympy/stats/crv_types.py
++++ b/sympy/stats/crv_types.py
+@@ -153,6 +153,12 @@ class ArcsinDistribution(SingleContinuousDistribution):
+     def pdf(self, x):
+         return 1/(pi*sqrt((x - self.a)*(self.b - x)))
+ 
++    def _cdf(self, x):
++        a, b = self.a, self.b
++        return Piecewise((S.Zero, x < a),
++                         (2*asin(sqrt((x - a)/(b - a)))/pi, x <= b),
++                         (S.One, True))
++
+ def Arcsin(name, a=0, b=1):
+     r"""
+     Create a Continuous Random Variable with an arcsin distribution.
+@@ -670,6 +676,11 @@ def pdf(self, x):
+         p, a, b = self.p, self.a, self.b
+         return a*p/x*((x/b)**(a*p)/(((x/b)**a + 1)**(p + 1)))
+ 
++    def _cdf(self, x):
++        p, a, b = self.p, self.a, self.b
++        return Piecewise((S.Zero, x <= 0),
++                         ((1 + (x/b)**(-a))**(-p), True))
++
+ 
+ def Dagum(name, p, a, b):
+     r"""
+@@ -1034,6 +1045,11 @@ class FrechetDistribution(SingleContinuousDistribution):
+ 
+     set = Interval(0, oo)
+ 
++    def _cdf(self, x):
++        a, s, m = self.a, self.s, self.m
++        return Piecewise((S.Zero, x <= m),
++                         (exp(-((x - m)/s)**(-a)), True))
++
+     def __new__(cls, a, s=1, m=0):
+         a, s, m = list(map(sympify, (a, s, m)))
+         return Basic.__new__(cls, a, s, m)
+@@ -1097,6 +1113,11 @@ def Frechet(name, a, s=1, m=0):
+ class GammaDistribution(SingleContinuousDistribution):
+     _argnames = ('k', 'theta')
+ 
++    def _cdf(self, x):
++        k, theta = self.k, self.theta
++        return Piecewise((S.Zero, x <= 0),
++                         (lowergamma(k, x/theta)/gamma(k), True))
++
+     set = Interval(0, oo)
+ 
+     @staticmethod
+@@ -1189,6 +1210,11 @@ def Gamma(name, k, theta):
+ class GammaInverseDistribution(SingleContinuousDistribution):
+     _argnames = ('a', 'b')
+ 
++    def _cdf(self, x):
++        a, b = self.a, self.b
++        return Piecewise((S.Zero, x <= 0),
++                         (uppergamma(a, b/x)/gamma(a), True))
++
+     set = Interval(0, oo)
+ 
+     @staticmethod
+@@ -1497,6 +1523,10 @@ def Laplace(name, mu, b):
+ class LogisticDistribution(SingleContinuousDistribution):
+     _argnames = ('mu', 's')
+ 
++    def _cdf(self, x):
++        mu, s = self.mu, self.s
++        return 1/(1 + exp(-(x - mu)/s))
++
+     def pdf(self, x):
+         mu, s = self.mu, self.s
+         return exp(-(x - mu)/s)/(s*(1 + exp(-(x - mu)/s))**2)
+@@ -1705,6 +1735,11 @@ def Maxwell(name, a):
+ class NakagamiDistribution(SingleContinuousDistribution):
+     _argnames = ('mu', 'omega')
+ 
++    def _cdf(self, x):
++        mu, omega = self.mu, self.omega
++        return Piecewise((S.Zero, x <= 0),
++                         (lowergamma(mu, mu*x**2/omega)/gamma(mu), True))
++
+     set = Interval(0, oo)
+ 
+     def pdf(self, x):
+@@ -2223,6 +2258,10 @@ def ShiftedGompertz(name, b, eta):
+ class StudentTDistribution(SingleContinuousDistribution):
+     _argnames = ('nu',)
+ 
++    def _cdf(self, x):
++        nu = self.nu
++        return S.Half + x*gamma((nu + 1)/2)*hyper((S.Half, (nu + 1)/2), (S(3)/2,), -x**2/nu)/(sqrt(pi*nu)*gamma(nu/2))
++
+     def pdf(self, x):
+         nu = self.nu
+         return 1/(sqrt(nu)*beta_fn(S(1)/2, nu/2))*(1 + x**2/nu)**(-(nu + 1)/2)
+@@ -2544,6 +2583,13 @@ def Uniform(name, left, right):
+ class UniformSumDistribution(SingleContinuousDistribution):
+     _argnames = ('n',)
+ 
++    def _cdf(self, x):
++        n = self.n
++        k = Dummy('k')
++        return Piecewise((S.Zero, x <= 0),
++                         (Sum((-1)**k*binomial(n, k)*(x - k)**n, (k, 0, floor(x)))/factorial(n), x < n),
++                         (S.One, True))
++
+     @property
+     def set(self):
+         return Interval(0, self.n)
+2026-06-30 14:18:50,430 - INFO - Grading answer for sympy__sympy-13878...
+2026-06-30 14:18:50,449 - INFO - report: {'sympy__sympy-13878': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': False, 'tests_status': {'FAIL_TO_PASS': {'success': [], 'failure': ['test_arcsin']}, 'PASS_TO_PASS': {'success': ['test_ContinuousDomain', 'test_characteristic_function', 'test_benini', 'test_chi', 'test_chi_noncentral', 'test_chi_squared', 'test_gompertz', 'test_shiftedgompertz', 'test_trapezoidal', 'test_quadratic_u', 'test_von_mises', 'test_prefab_sampling', 'test_input_value_assertions', 'test_probability_unevaluated', 'test_density_unevaluated', 'test_random_parameters', 'test_random_parameters_given', 'test_conjugate_priors', 'test_issue_10003'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-13878: resolved: False
+2026-06-30 14:18:50,451 - INFO - Attempting to stop container sweb.eval.sympy__sympy-13878.local-sympy-13878...
+2026-06-30 14:19:05,873 - INFO - Attempting to remove container sweb.eval.sympy__sympy-13878.local-sympy-13878...
+2026-06-30 14:19:05,948 - INFO - Container sweb.eval.sympy__sympy-13878.local-sympy-13878 removed.

@@ -1,0 +1,19 @@
+{
+  "sympy__sympy-17318": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "sympy__sympy-17318",
+    "model_patch": "diff --git a/sympy/simplify/sqrtdenest.py b/sympy/simplify/sqrtdenest.py\nindex f0b7653ea8..e437987d83 100644\n--- a/sympy/simplify/sqrtdenest.py\n+++ b/sympy/simplify/sqrtdenest.py\n@@ -156,7 +156,8 @@ def _sqrt_match(p):\n         res = (p, S.Zero, S.Zero)\n     elif p.is_Add:\n         pargs = sorted(p.args, key=default_sort_key)\n-        if all((x**2).is_Rational for x in pargs):\n+        sqargs = [x**2 for x in pargs]\n+        if all(sq.is_Rational and sq.is_positive for sq in sqargs):\n             r, b, a = split_surds(p)\n             res = a, b, r\n             return list(res)\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sympy/simplify/sqrtdenest.py",
+          "line": 159,
+          "statement": "        if all((x**2).is_Rational for x in pargs):"
+        }
+      ],
+      "reasoning": "In _sqrt_match, an Add whose terms all have a rational square (including imaginary terms like 3*I whose square is a negative rational) incorrectly enters the split_surds branch even though it contains no real surds, causing split_surds -> _split_gcd to be called with an empty argument list and raise IndexError. Restricting the branch to terms whose squares are positive rationals ensures only genuine real surds trigger it.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

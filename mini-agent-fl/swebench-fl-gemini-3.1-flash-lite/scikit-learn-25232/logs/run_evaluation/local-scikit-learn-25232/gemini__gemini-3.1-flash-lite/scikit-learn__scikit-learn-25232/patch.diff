@@ -1,0 +1,51 @@
+diff --git a/sklearn/impute/_iterative.py b/sklearn/impute/_iterative.py
+index 1d918bc0c..8ebaf1270 100644
+--- a/sklearn/impute/_iterative.py
++++ b/sklearn/impute/_iterative.py
+@@ -112,13 +112,18 @@ class IterativeImputer(_BaseImputer):
+         imputed target feature. Can provide significant speed-up when the
+         number of features is huge. If `None`, all features will be used.
+ 
+-    initial_strategy : {'mean', 'median', 'most_frequent', 'constant'}, \
+-            default='mean'
++    initial_strategy : {"mean", "median", "most_frequent", "constant"}, 
++            default="mean"
+         Which strategy to use to initialize the missing values. Same as the
+         `strategy` parameter in :class:`~sklearn.impute.SimpleImputer`.
+ 
+-    imputation_order : {'ascending', 'descending', 'roman', 'arabic', \
+-            'random'}, default='ascending'
++    fill_value : str or numerical, default=None
++        When strategy == "constant", fill_value is used to replace all
++        occurrences of missing_values. If left to the default, fill_value
++        will be 0 when imputing numerical data and "missing_value" for strings or object data types.
++
++    imputation_order : {"ascending", "descending", "roman", "arabic", 
++            "random"}, default="ascending"
+         The order in which the features will be imputed. Possible values:
+ 
+         - `'ascending'`: From features with fewest missing values to most.
+@@ -302,6 +307,7 @@ class IterativeImputer(_BaseImputer):
+         n_nearest_features=None,
+         initial_strategy="mean",
+         imputation_order="ascending",
++        fill_value=None,
+         skip_complete=False,
+         min_value=-np.inf,
+         max_value=np.inf,
+@@ -321,6 +327,7 @@ class IterativeImputer(_BaseImputer):
+         self.max_iter = max_iter
+         self.tol = tol
+         self.n_nearest_features = n_nearest_features
++        self.fill_value = fill_value
+         self.initial_strategy = initial_strategy
+         self.imputation_order = imputation_order
+         self.skip_complete = skip_complete
+@@ -611,6 +618,7 @@ class IterativeImputer(_BaseImputer):
+         mask_missing_values = X_missing_mask.copy()
+         if self.initial_imputer_ is None:
+             self.initial_imputer_ = SimpleImputer(
++                fill_value=self.fill_value,
+                 missing_values=self.missing_values,
+                 strategy=self.initial_strategy,
+                 keep_empty_features=self.keep_empty_features,

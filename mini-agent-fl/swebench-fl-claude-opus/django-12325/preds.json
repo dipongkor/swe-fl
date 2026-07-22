@@ -1,0 +1,19 @@
+{
+  "django__django-12325": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "django__django-12325",
+    "model_patch": "diff --git a/django/db/models/base.py b/django/db/models/base.py\nindex 8ea6c05ef9..3b9b0c82eb 100644\n--- a/django/db/models/base.py\n+++ b/django/db/models/base.py\n@@ -204,7 +204,7 @@ class ModelBase(type):\n             for field in base._meta.local_fields:\n                 if isinstance(field, OneToOneField):\n                     related = resolve_relation(new_class, field.remote_field.model)\n-                    parent_links[make_model_tuple(related)] = field\n+                    parent_links.setdefault(make_model_tuple(related), []).append(field)\n \n         # Track fields inherited from base models.\n         inherited_attributes = set()\n@@ -237,7 +237,15 @@ class ModelBase(type):\n                 base = base._meta.concrete_model\n                 base_key = make_model_tuple(base)\n                 if base_key in parent_links:\n-                    field = parent_links[base_key]\n+                    # Prefer the OneToOneField explicitly declared as a\n+                    # parent link. Fall back to the last declared\n+                    # OneToOneField so that a missing parent_link=True is\n+                    # reported for it in Options._prepare().\n+                    candidates = parent_links[base_key]\n+                    field = next(\n+                        (f for f in candidates if f.remote_field.parent_link),\n+                        candidates[-1],\n+                    )\n                 elif not is_proxy:\n                     attr_name = '%s_ptr' % base._meta.model_name\n                     field = OneToOneField(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/base.py",
+          "line": 207,
+          "statement": "                    parent_links[make_model_tuple(related)] = field"
+        }
+      ],
+      "reasoning": "When a child model declares multiple OneToOneFields to the same parent, this line overwrites the parent_links entry with the last-declared field regardless of parent_link=True, so field ordering determined which field became the MTI parent link and caused a spurious ImproperlyConfigured error.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

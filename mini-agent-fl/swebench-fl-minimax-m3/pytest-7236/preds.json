@@ -1,0 +1,19 @@
+{
+  "pytest-dev__pytest-7236": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "pytest-dev__pytest-7236",
+    "model_patch": "diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py\nindex 773f545af..62496ca22 100644\n--- a/src/_pytest/unittest.py\n+++ b/src/_pytest/unittest.py\n@@ -121,7 +121,9 @@ class TestCaseFunction(Function):\n             self._request._fillfixtures()\n \n     def teardown(self):\n-        if self._explicit_tearDown is not None:\n+        if self._explicit_tearDown is not None and not self._store.get(\n+            skipped_by_mark_key, False\n+        ):\n             self._explicit_tearDown()\n             self._explicit_tearDown = None\n         self._testcase = None\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "src/_pytest/unittest.py",
+          "line": 124,
+          "statement": "if self._explicit_tearDown is not None:"
+        }
+      ],
+      "reasoning": "The teardown() method in TestCaseFunction always calls self._explicit_tearDown() when it's set, without checking if the test was skipped. When --pdb is given, the explicit tearDown is saved in runtest() and then called later in teardown(). For skipped tests (e.g., decorated with @unittest.skip), the test method and setUp are not called by the unittest framework, so tearDown should not be called either. The fix adds a check for the skipped_by_mark_key in the teardown() method to avoid calling the explicit tearDown for skipped tests.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

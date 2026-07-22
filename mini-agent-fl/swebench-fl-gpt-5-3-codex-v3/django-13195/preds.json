@@ -1,0 +1,19 @@
+{
+  "django__django-13195": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-13195",
+    "model_patch": "diff --git a/django/http/response.py b/django/http/response.py\nindex e00bcacefb..c49ac50560 100644\n--- a/django/http/response.py\n+++ b/django/http/response.py\n@@ -210,13 +210,13 @@ class HttpResponseBase:\n         value = signing.get_cookie_signer(salt=key + salt).sign(value)\n         return self.set_cookie(key, value, **kwargs)\n \n-    def delete_cookie(self, key, path='/', domain=None):\n+    def delete_cookie(self, key, path='/', domain=None, samesite=None):\n         # Most browsers ignore the Set-Cookie header if the cookie name starts\n         # with __Host- or __Secure- and the cookie doesn't use the secure flag.\n-        secure = key.startswith(('__Secure-', '__Host-'))\n+        secure = key.startswith(('__Secure-', '__Host-')) or samesite == 'none'\n         self.set_cookie(\n             key, max_age=0, path=path, domain=domain, secure=secure,\n-            expires='Thu, 01 Jan 1970 00:00:00 GMT',\n+            expires='Thu, 01 Jan 1970 00:00:00 GMT', samesite=samesite,\n         )\n \n     # Common methods used by subclasses\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/http/response.py",
+          "line": 219,
+          "statement": "            expires='Thu, 01 Jan 1970 00:00:00 GMT',"
+        }
+      ],
+      "reasoning": "delete_cookie() expired cookies without passing through the original SameSite attribute, so deletion Set-Cookie headers could omit SameSite and fail browser requirements for SameSite=None cookies.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

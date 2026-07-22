@@ -1,0 +1,19 @@
+{
+  "scikit-learn__scikit-learn-26194": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "model_patch": "diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py\nindex 0cdead923..b4e34fc09 100644\n--- a/sklearn/metrics/_ranking.py\n+++ b/sklearn/metrics/_ranking.py\n@@ -1080,10 +1080,11 @@ def roc_curve(\n         thresholds = thresholds[optimal_idxs]\n \n     # Add an extra threshold position\n-    # to make sure that the curve starts at (0, 0)\n+    # to make sure that the curve starts at (0, 0). This threshold\n+    # corresponds to predicting no instances as positive.\n     tps = np.r_[0, tps]\n     fps = np.r_[0, fps]\n-    thresholds = np.r_[thresholds[0] + 1, thresholds]\n+    thresholds = np.r_[np.inf, thresholds]\n \n     if fps[-1] <= 0:\n         warnings.warn(\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sklearn/metrics/_ranking.py",
+          "line": 1087,
+          "statement": "    thresholds = np.r_[thresholds[0] + 1, thresholds]"
+        }
+      ],
+      "reasoning": "The implementation prepends an artificial threshold by adding 1 to the maximum score, which can produce invalid threshold ranges (e.g., >1 for probabilities). Using an unbounded sentinel threshold avoids assumptions about score scale.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

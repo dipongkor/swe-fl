@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-23299": {
+    "model_name_or_path": "anthropic/claude-opus-4-8",
+    "instance_id": "matplotlib__matplotlib-23299",
+    "model_patch": "diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py\nindex e3c66ea67c..598f1e3f38 100644\n--- a/lib/matplotlib/pyplot.py\n+++ b/lib/matplotlib/pyplot.py\n@@ -222,7 +222,6 @@ def switch_backend(newbackend):\n     global _backend_mod\n     # make sure the init is pulled up so we can assign to it later\n     import matplotlib.backends\n-    close(\"all\")\n \n     if newbackend is rcsetup._auto_backend_sentinel:\n         current_framework = cbook._get_running_interactive_framework()\n@@ -260,6 +259,11 @@ def switch_backend(newbackend):\n             rcParamsOrig[\"backend\"] = \"agg\"\n             return\n \n+    # the last part is a hack to only compare against the backend that is\n+    # actually loaded, if any, rather than the (possibly temporary,\n+    # e.g. within an rc_context) value stored in rcParams['backend'].\n+    old_backend = dict.__getitem__(rcParamsDefault, 'backend')\n+\n     backend_mod = importlib.import_module(\n         cbook._backend_module_name(newbackend))\n     canvas_class = backend_mod.FigureCanvas\n@@ -307,6 +311,10 @@ def switch_backend(newbackend):\n     _log.debug(\"Loaded backend %s version %s.\",\n                newbackend, backend_mod.backend_version)\n \n+    if old_backend != newbackend:\n+        # we need to close all figures registered with the old backend\n+        close(\"all\")\n+\n     rcParams['backend'] = rcParamsDefault['backend'] = newbackend\n     _backend_mod = backend_mod\n     for func_name in [\"new_figure_manager\", \"draw_if_interactive\", \"show\"]:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/pyplot.py",
+          "line": 225,
+          "statement": "    close(\"all\")"
+        }
+      ],
+      "reasoning": "switch_backend() unconditionally closed all figures at the top. When get_backend() resolves the auto-backend sentinel (which happens after an rc_context reverts rcParams['backend'] back to the sentinel even though a backend is already loaded), switch_backend is re-invoked and close('all') wipes Gcf.figs even though the backend is not actually changing. The fix moves close('all') to only run when the loaded backend actually differs from the target backend.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

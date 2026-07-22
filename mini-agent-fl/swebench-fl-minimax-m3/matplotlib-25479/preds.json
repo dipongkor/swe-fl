@@ -1,0 +1,19 @@
+{
+  "matplotlib__matplotlib-25479": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "matplotlib__matplotlib-25479",
+    "model_patch": "diff --git a/lib/matplotlib/pyplot.py b/lib/matplotlib/pyplot.py\nindex 58ce4c03fa..bb0b4a9e11 100644\n--- a/lib/matplotlib/pyplot.py\n+++ b/lib/matplotlib/pyplot.py\n@@ -2278,9 +2278,10 @@ def set_cmap(cmap: Colormap | str) -> None:\n     matplotlib.cm.register_cmap\n     matplotlib.cm.get_cmap\n     \"\"\"\n+    name = cmap if isinstance(cmap, str) else cmap.name\n     cmap = get_cmap(cmap)\n \n-    rc('image', cmap=cmap.name)\n+    rc('image', cmap=name)\n     im = gci()\n \n     if im is not None:\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "lib/matplotlib/pyplot.py",
+          "line": 2283,
+          "statement": "    rc('image', cmap=cmap.name)"
+        }
+      ],
+      "reasoning": "When `set_cmap` is called with a string (the registered name), it converts the string to a Colormap object via `get_cmap(cmap)`. The Colormap object's `name` attribute is the colormap's internal name, not the registered name. The bug is that `rc('image', cmap=cmap.name)` sets the rcParam to the colormap's internal name, not the registered name. This causes the issue when `imshow` is called later, because it uses the rcParam to look up the colormap.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

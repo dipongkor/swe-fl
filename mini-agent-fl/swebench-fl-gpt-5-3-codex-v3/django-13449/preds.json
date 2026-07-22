@@ -1,0 +1,19 @@
+{
+  "django__django-13449": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-13449",
+    "model_patch": "diff --git a/django/db/models/expressions.py b/django/db/models/expressions.py\nindex 90d90119d0..1b5d1c943f 100644\n--- a/django/db/models/expressions.py\n+++ b/django/db/models/expressions.py\n@@ -1253,7 +1253,7 @@ class OrderBy(BaseExpression):\n         self.descending = True\n \n \n-class Window(Expression):\n+class Window(SQLiteNumericMixin, Expression):\n     template = '%(expression)s OVER (%(window)s)'\n     # Although the main expression may either be an aggregate or an\n     # expression with an aggregate function, the GROUP BY that will\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/expressions.py",
+          "line": 1256,
+          "statement": "class Window(SQLiteNumericMixin, Expression):"
+        }
+      ],
+      "reasoning": "Window expressions returning DecimalField on SQLite were not routed through SQLiteNumericMixin, so CAST() was applied to the inner function and produced invalid SQL before OVER. Making Window use the mixin ensures casting wraps the full window expression.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

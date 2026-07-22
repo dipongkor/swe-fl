@@ -1,0 +1,19 @@
+{
+  "django__django-13343": {
+    "model_name_or_path": "openai/gpt-5.3-codex",
+    "instance_id": "django__django-13343",
+    "model_patch": "diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py\nindex e10a5bb6d9..6a1a9be19a 100644\n--- a/django/db/models/fields/files.py\n+++ b/django/db/models/fields/files.py\n@@ -228,8 +228,9 @@ class FileField(Field):\n         self._primary_key_set_explicitly = 'primary_key' in kwargs\n \n         self.storage = storage or default_storage\n-        if callable(self.storage):\n-            self.storage = self.storage()\n+        self._storage_callable = self.storage if callable(self.storage) else None\n+        if self._storage_callable is not None:\n+            self.storage = self._storage_callable()\n             if not isinstance(self.storage, Storage):\n                 raise TypeError(\n                     \"%s.storage must be a subclass/instance of %s.%s\"\n@@ -278,8 +279,9 @@ class FileField(Field):\n         if kwargs.get(\"max_length\") == 100:\n             del kwargs[\"max_length\"]\n         kwargs['upload_to'] = self.upload_to\n-        if self.storage is not default_storage:\n-            kwargs['storage'] = self.storage\n+        storage = self._storage_callable or self.storage\n+        if storage is not default_storage:\n+            kwargs['storage'] = storage\n         return name, path, args, kwargs\n \n     def get_internal_type(self):\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "django/db/models/fields/files.py",
+          "line": 282,
+          "statement": "        if self.storage is not default_storage:"
+        }
+      ],
+      "reasoning": "Deconstruction serialized the evaluated storage instance (self.storage) rather than preserving the originally provided callable, which breaks runtime-varying storage behavior during migrations.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}

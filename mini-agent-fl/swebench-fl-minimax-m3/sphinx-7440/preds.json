@@ -1,0 +1,19 @@
+{
+  "sphinx-doc__sphinx-7440": {
+    "model_name_or_path": "minimax/minimax-m3",
+    "instance_id": "sphinx-doc__sphinx-7440",
+    "model_patch": "diff --git a/sphinx/domains/std.py b/sphinx/domains/std.py\nindex d820cfe5c..db5aa0380 100644\n--- a/sphinx/domains/std.py\n+++ b/sphinx/domains/std.py\n@@ -305,7 +305,7 @@ def make_glossary_term(env: \"BuildEnvironment\", textnodes: Iterable[Node], index\n         term['ids'].append(node_id)\n \n     std = cast(StandardDomain, env.get_domain('std'))\n-    std.note_object('term', termtext.lower(), node_id, location=term)\n+    std.note_object('term', termtext, node_id, location=term)\n \n     # add an index entry too\n     indexnode = addnodes.index()\n@@ -928,8 +928,19 @@ class StandardDomain(Domain):\n                           node: pending_xref, contnode: Element) -> Element:\n         objtypes = self.objtypes_for_role(typ) or []\n         for objtype in objtypes:\n-            if (objtype, target) in self.objects:\n+            if objtype == 'term':\n+                # case-insensitive lookup for terms\n+                ltarget = target.lower()\n+                docname, labelid = '', ''\n+                for (key_objtype, key_name), (dn, lid) in self.objects.items():\n+                    if key_objtype == 'term' and key_name.lower() == ltarget:\n+                        docname, labelid = dn, lid\n+                        break\n+            elif (objtype, target) in self.objects:\n                 docname, labelid = self.objects[objtype, target]\n+            else:\n+                docname, labelid = '', ''\n+            if docname:\n                 break\n         else:\n             docname, labelid = '', ''\n@@ -953,8 +964,14 @@ class StandardDomain(Domain):\n         for objtype in self.object_types:\n             key = (objtype, target)\n             if objtype == 'term':\n-                key = (objtype, ltarget)\n-            if key in self.objects:\n+                # case-insensitive lookup for terms\n+                for (key_objtype, key_name), (docname, labelid) in self.objects.items():\n+                    if key_objtype == 'term' and key_name.lower() == ltarget:\n+                        results.append(('std:' + self.role_for_objtype(objtype),\n+                                        make_refnode(builder, fromdocname, docname,\n+                                                     labelid, contnode)))\n+                        break\n+            elif key in self.objects:\n                 docname, labelid = self.objects[key]\n                 results.append(('std:' + self.role_for_objtype(objtype),\n                                 make_refnode(builder, fromdocname, docname,\n",
+    "localization": {
+      "root_cause": [
+        {
+          "file": "sphinx/domains/std.py",
+          "line": 308,
+          "statement": "    std.note_object('term', termtext.lower(), node_id, location=term)"
+        }
+      ],
+      "reasoning": "The term text is lowercased before being stored as a glossary object via note_object(). This causes the duplicate detection check in note_object() to be case-insensitive, so 'MySQL' and 'mysql' are incorrectly treated as duplicate terms. The fix removes the .lower() call so the original case is preserved, making the duplicate check case-sensitive. The cross-reference lookup methods (_resolve_obj_xref and resolve_any_xref) are updated to perform case-insensitive lookups for terms to maintain backward compatibility.",
+      "confidence": "high"
+    },
+    "localization_parse_error": null
+  }
+}
