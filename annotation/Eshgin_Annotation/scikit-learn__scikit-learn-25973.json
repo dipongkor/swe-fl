@@ -1,0 +1,24 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25973",
+  "root_cause": [
+    {
+      "file": "sklearn/feature_selection/_sequential.py",
+      "line": 312,
+      "statement": "cv=self.cv,",
+      "method": "_get_best_new_feature_score",
+      "class": "SequentialFeatureSelector",
+      "note": "Each candidate feature evaluation passes the original cv object to cross_val_score. When cv is a one-shot generator, the first candidate consumes its splits and the next evaluation receives an exhausted iterator, producing no validation results and an IndexError during aggregation."
+    }
+  ],
+  "reasoning": "SequentialFeatureSelector evaluates many candidate feature masks, calling cross_val_score once per candidate and across multiple selection iterations. The base implementation repeatedly supplies self.cv. Integer and reusable splitter inputs work, but an iterable returned by LeaveOneGroupOut.split is a generator and is exhausted by the first call. The next candidate produces an empty results list, which fails in _aggregate_score_dicts. The minimal faulty base statement is line 312's repeated use of the raw cv parameter. The fix normalizes cv once in fit with check_cv, whose iterable wrapper materializes the splits, and passes that reusable object through the scoring helper.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/feature_selection/tests/test_sequential.py",
+      "line": 336,
+      "statement": "sfs.fit(X, y)",
+      "note": "fit evaluates successive feature candidates using the generator supplied at construction. The first cross-validation consumes it; the second reaches line 312 with the exhausted generator and fails with IndexError: list index out of range."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}
