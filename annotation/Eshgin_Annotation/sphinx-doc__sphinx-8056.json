@@ -33,6 +33,6 @@
       "note": "The expected output contains distinct :param/:type: pairs for x1 and x2, exposing the combined-name output from the buggy path."
     }
   ],
-  "human_spent_time_minutes": 35,
+  "time_minutes": 35,
   "confidence": "high"
 }

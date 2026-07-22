@@ -121,6 +121,6 @@
       "note": "The new regression reruns the existing Permutation tests after replacing the module's Permutation name with CustomPermutation, thereby reaching and exposing the remaining subclass-losing constructor and operation paths."
     }
   ],
-  "human_spent_time_minutes": 75,
+  "time_minutes": 75,
   "confidence": "high"
 }
