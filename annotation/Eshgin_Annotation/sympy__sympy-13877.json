@@ -19,6 +19,6 @@
       "note": "The newly added regression constructs a rank-deficient symbolic matrix and calls the default Bareiss determinant path. Its recursive pivot search reaches base line 180 and incorrectly accepts a candidate that should be recognized as zero; the buggy result is nan instead of 0."
     }
   ],
-  "human_spent_time_minutes": 35,
+  "human_spent_time_minutes": 50,
   "confidence": "high"
 }
