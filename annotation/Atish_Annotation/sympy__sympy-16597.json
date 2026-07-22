@@ -1,0 +1,51 @@
+{
+  "instance_id": "sympy__sympy-16597",
+  "root_cause": [
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 166,
+      "statement": "'rational       ->  real',",
+      "note": "Rule in the _assume_rules FactRules knowledge base. It omits finiteness: rationality only implies realness, so the deduction closure of even=True (even -> integer -> rational -> real -> ...) never reaches 'finite' and is_finite stays None. Conversely, for oo (infinite=True, hence finite=False) there is no finite-dependent rule to falsify rationality, so oo.is_rational and everything below it (is_integer, is_even, ...) stays None instead of False."
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 168,
+      "statement": "'algebraic      ->  complex',",
+      "note": "Same omission for the algebraic branch: algebraic does not imply finite, so is_algebraic on infinite quantities stays None and algebraic symbols get is_finite None."
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 179,
+      "statement": "'transcendental ==  complex & !algebraic',",
+      "note": "Same omission: transcendental is defined without finiteness, so oo.is_transcendental stays None."
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 194,
+      "statement": "'irrational     ==  real & !rational',",
+      "note": "Same omission: irrational is defined without finiteness, so irrational=True symbols get is_finite None and oo.is_irrational stays None."
+    }
+  ],
+  "reasoning": "Old-style assumption queries are answered by taking the transitive closure of a symbol's declared facts under the _assume_rules knowledge base. None of the rules connect rational/algebraic/transcendental/irrational to 'finite', so the predicates form a chain (even -> integer -> rational -> real) that is disconnected from finiteness. Hence Symbol('m', even=True).is_finite returns None instead of True, and in the contrapositive direction oo (finite=False) cannot be proven non-integer/non-rational/non-even, so those queries return None instead of False. Each individual rule is true; the fault is the missing finiteness implications in the rule base.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/core/tests/test_assumptions.py",
+      "line": 570,
+      "statement": "assert x.is_finite is True",
+      "note": "In test_other_symbol, added by the test patch, with x = Symbol('x', integer=True) (line 567). Without a rule linking rationality to finiteness, the closure of integer=True never derives finite and is_finite returns None; the assertion fails with AssertionError. The direct form of the reported symptom."
+    },
+    {
+      "file": "sympy/core/tests/test_assumptions.py",
+      "line": 101,
+      "statement": "assert oo.is_integer is False",
+      "note": "In test_infinity; the test patch changed the expectation from None to False. oo has finite=False, but since integer does not imply finite in the rule base, non-finiteness cannot falsify integerness and is_integer returns None. Later asserts in the same test (is_rational, is_algebraic, is_transcendental, is_noninteger, is_irrational, is_even, is_odd, is_composite) fail the same way but the run stops here."
+    },
+    {
+      "file": "sympy/core/tests/test_assumptions.py",
+      "line": 128,
+      "statement": "assert mm.is_integer is False",
+      "note": "In test_neg_infinity with mm = S.NegativeInfinity; identical contrapositive failure as test_infinity line 101."
+    }
+  ],
+  "confidence": "high"
+}
