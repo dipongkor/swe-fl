@@ -1,0 +1,21 @@
+{
+  "instance_id": "pytest-dev__pytest-7236",
+  "root_cause": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": 223,
+      "statement": "if self.config.getoption(\"usepdb\"):",
+      "note": "In TestCaseFunction.runtest. With --pdb, lines 224-225 stash the real tearDown in self._explicit_tearDown and replace it with a no-op so post-mortem debugging can inspect un-torn-down state; pytest's teardown phase later unconditionally calls the stashed method. This condition selects the postponement for every unittest test, including ones marked @unittest.skip, for which unittest.TestCase.run() short-circuits and calls neither setUp, the test, nor tearDown. The stashed tearDown is therefore executed by pytest for a test whose lifecycle never started. Lines 224-225 and the _explicit_tearDown() invocation in teardown() correctly implement the postponement scheme and are not themselves faulty."
+    }
+  ],
+  "reasoning": "For a test decorated with @unittest.skip, unittest.TestCase.run() returns before any lifecycle method; without --pdb nothing ever calls tearDown and the test is cleanly skipped. With --pdb, the postponement in runtest stashes tearDown unconditionally and pytest's teardown phase invokes whatever was stashed, so tearDown runs on an instance whose setUp never ran, for a skipped test - producing an error alongside the skip (NameError in the reported reproducer). The condition lacks any awareness of the __unittest_skip__ flag. A test skipped via @pytest.mark.skip is unaffected because pytest's own skip machinery prevents runtest from being called at all, which is why only the @unittest.skip parametrization fails.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_unittest.py",
+      "line": 1227,
+      "statement": "assert tracked == []",
+      "note": "In test_pdb_teardown_skipped[@unittest.skip], added by the test patch. The inner TestCase records setUp/tearDown calls into a tracked list and its only test is skipped; the inner run under --pdb correctly reports '1 skipped' but tracked contains 'tearDown:...MyTestCase.test_1' (and notably no setUp entry, confirming unittest short-circuited while pytest still invoked the stashed tearDown). The sibling parametrization [@pytest.mark.skip] passes even on the buggy code."
+    }
+  ],
+  "confidence": "high"
+}

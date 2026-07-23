@@ -1,0 +1,33 @@
+{
+  "instance_id": "matplotlib__matplotlib-25479",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/cm.py",
+      "line": 148,
+      "statement": "self._cmaps[name] = cmap.copy()",
+      "note": "In ColormapRegistry.register. The copy is stored under the registered key but its .name attribute keeps whatever the object was constructed with, so the registry entry's key and the stored object's self-identification can disagree (register(name='wrong-cmap', cmap=<name 'test-cmap'>) stores an object still named 'test-cmap'). Consumers legitimately treat .name as a registry key: plt.set_cmap resolves the cmap object and persists rcParams['image.cmap'] = cmap.name, so a later default-cmap lookup (e.g. imshow) searches the registry for the stale built-in name and raises ValueError 'Colormap ... is not recognized' - the reported round-trip failure."
+    },
+    {
+      "file": "lib/matplotlib/colors.py",
+      "line": 777,
+      "statement": "if (not isinstance(other, Colormap) or self.name != other.name or",
+      "note": "In Colormap.__eq__. Equality includes the name label, so two colormaps with identical lookup tables and colorbar_extend compare unequal merely because they are registered/labelled under different names. A dedicated fail-to-pass assertion (test_colormap_equals, expectation flipped by the test patch) requires name-insensitive equality: a copy renamed to 'Test' must still equal the original."
+    }
+  ],
+  "reasoning": "The colormap registry does not maintain the invariant that a stored colormap's .name matches its registration key. Registering under a new name leaves the stored copy self-identified by its old name, and every consumer that round-trips through .name breaks: plt.set_cmap writes the stale name into rcParams['image.cmap'] so subsequent default lookups fail, and plt.get_cmap returns an object whose .name is not the key it was registered under. Independently, Colormap.__eq__ treats the name label as significant, so colormaps carrying identical color data under different names compare unequal, conflating identity labels with content.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_colors.py",
+      "line": 1663,
+      "statement": "assert cmap_returned.name == \"wrong-cmap\"",
+      "note": "In test_set_cmap_mismatched_name, added by the test patch. A viridis variant named 'test-cmap' is registered as 'wrong-cmap' (line 1658); plt.get_cmap('wrong-cmap') returns the stored copy still named 'test-cmap', so the assertion fails ('test-cmap' != 'wrong-cmap'). The equality assert on line 1662 passes even on the buggy code because both objects carry the same (stale) name."
+    },
+    {
+      "file": "lib/matplotlib/tests/test_colors.py",
+      "line": 201,
+      "statement": "assert cm_copy == cmap",
+      "note": "In test_colormap_equals; the test patch flipped this pre-existing assertion from != to == (a copy of plasma renamed to 'Test' on line 200 must still equal the original). Under the buggy __eq__ the name comparison short-circuits to unequal and the assertion fails."
+    }
+  ],
+  "confidence": "high"
+}

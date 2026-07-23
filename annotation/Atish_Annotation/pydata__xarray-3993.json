@@ -1,0 +1,21 @@
+{
+  "instance_id": "pydata__xarray-3993",
+  "root_cause": [
+    {
+      "file": "xarray/core/dataarray.py",
+      "line": 3484,
+      "statement": "self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None",
+      "note": "Signature of DataArray.integrate (def on line 3483). The integration parameter is named 'dim', while the sibling APIs Dataset.integrate, Dataset.differentiate and DataArray.differentiate all name it 'coord'. The name is the entire defect: calling da.integrate(coord='x') raises TypeError (unexpected keyword), da.integrate(dim='x') is accepted silently as the ordinary parameter, and no deprecation path exists. The computation itself is correct; the internal forwarding on line 3531 (self._to_temp_dataset().integrate(dim, datetime_unit)) passes the value positionally and is unaffected by the name. This is a nominal/API-consistency fault, not a behavioral one."
+    }
+  ],
+  "reasoning": "DataArray.integrate names its integration parameter 'dim' whereas the three sibling methods use 'coord'; conceptually the operation is along a coordinate (which carries point spacing), not a bare dimension. Because 'dim' is the real parameter name at this revision, the coord keyword is rejected with TypeError and passing dim='x' completes silently with no FutureWarning, so the deprecation-expecting test fails with DID NOT WARN. There is no incorrect runtime behavior; the fault is the parameter name diverging from the API convention.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_dataset.py",
+      "line": 6607,
+      "statement": "da.integrate(dim=\"x\")",
+      "note": "Added by the test patch inside 'with pytest.warns(FutureWarning):' (line 6606) at the end of the parametrized test_integrate. The call succeeds silently because dim is the ordinary parameter name, so the warns context fails with 'DID NOT WARN' for both dask parametrizations. The test patch also switches method('integrate', dim='x') to coord='x' in xarray/tests/test_units.py:3684, a call site that raises TypeError on this revision when the pint-dependent suite runs."
+    }
+  ],
+  "confidence": "medium"
+}

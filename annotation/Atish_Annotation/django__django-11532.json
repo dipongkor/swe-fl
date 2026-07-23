@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-11532",
+  "root_cause": [
+    {
+      "file": "django/core/mail/utils.py",
+      "line": 16,
+      "statement": "self._fqdn = socket.getfqdn()",
+      "note": "In CachedDnsName.get_fqdn, which lazily caches the machine's FQDN as the process-wide DNS_NAME singleton. DNS_NAME exists to fill ASCII-only mail-protocol slots: EmailMessage.message() uses it as the Message-ID domain (make_msgid(domain=DNS_NAME)) and the SMTP backend passes it as local_hostname for the EHLO command. The raw hostname is cached with no IDNA conversion, so a non-ASCII hostname (e.g. 漢字) flows into those slots verbatim: setting the Message-ID header falls back to Header(val, encoding).encode(), which raises UnicodeEncodeError for non-unicode message encodings such as iso-8859-1 (latin-1 cannot represent CJK), and smtplib raises UnicodeEncodeError encoding 'ehlo 漢字' with its ascii command encoding. The internationalized form belongs on the wire as punycode (xn--p8s937b). The idna-encoding rewrites in sanitize_address, validators and html are consolidation refactors of already-correct sites, not part of the fault."
+    }
+  ],
+  "reasoning": "DNS_NAME supplies the host's FQDN for wire-level mail fields that must be ASCII, but caches socket.getfqdn() without converting an internationalized hostname to its IDNA/punycode form. With a non-ASCII hostname the Message-ID value contains raw non-ASCII, so forbid_multi_line_headers' ascii check fails and the RFC-2047 fallback Header(val, encoding).encode() crashes when the message encoding cannot represent the characters (iso-8859-1 vs CJK). The same unconverted value used as smtplib's local_hostname makes every EHLO crash in smtplib's ascii command encoding. Because the value is cached on a process-wide singleton, one computation of the non-ASCII name poisons all later mail operations in the process.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/mail/tests.py",
+      "line": 374,
+      "statement": "self.assertIn('@xn--p8s937b>', email.message()['Message-ID'])",
+      "note": "In test_non_ascii_dns_non_unicode_email, added by the test patch: socket.getfqdn is mocked to 漢字, the DNS_NAME cache is cleared (line 371), and the message encoding is iso-8859-1 (line 373). email.message() crashes before the assertion: make_msgid(domain=DNS_NAME) puts the raw hostname into the Message-ID and forbid_multi_line_headers raises UnicodeEncodeError ('latin-1' codec) via Header(...).encode()."
+    },
+    {
+      "file": "tests/mail/tests.py",
+      "line": 860,
+      "statement": "num_sent = mail.get_connection().send_messages([email])",
+      "note": "Representative of 18 pre-existing SMTPBackendTests errors (test_send and others). The new test leaves 漢字 cached in the process-wide DNS_NAME singleton after its mock expires; the SMTP backend then passes it as local_hostname, and smtplib's putcmd crashes encoding 'ehlo 漢字' as ascii (UnicodeEncodeError at position 5-6). These failures exercise the second consumer of the unconverted cached value."
+    }
+  ],
+  "confidence": "high"
+}

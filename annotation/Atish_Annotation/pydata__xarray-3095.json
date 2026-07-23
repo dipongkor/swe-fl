@@ -1,0 +1,21 @@
+{
+  "instance_id": "pydata__xarray-3095",
+  "root_cause": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": 1950,
+      "statement": "data = PandasIndexAdapter(self._data.array.copy(deep=True))",
+      "note": "Deep-copy branch of IndexVariable.copy. xarray stores index coordinates as a pandas.Index wrapped in PandasIndexAdapter; pandas holds string indexes with object dtype, so the adapter's _dtype attribute (e.g. '<U3', captured at construction) is the only place the true numpy dtype survives, and __array__ re-materializes values with it. This statement rebuilds the adapter from the copied pandas.Index without forwarding the old adapter's _dtype, so PandasIndexAdapter.__init__ re-infers dtype from the object-dtype index and the unicode dtype is lost. The shallow branch (line 1952, data = self._data) reuses the adapter and keeps the dtype, which is why only deep copies are affected at the Variable level."
+    }
+  ],
+  "reasoning": "PandasIndexAdapter deliberately decouples the exposed numpy dtype from the wrapped pandas.Index dtype, because pandas coerces fixed-width unicode arrays to object. Any code that reconstructs an adapter from the wrapped index alone therefore discards that decoupling: dtype inference from the index yields object. IndexVariable.copy(deep=True) does exactly that reconstruction, so every deep copy of a unicode index coordinate (Dataset.copy(deep=True), DataArray.copy, copy.deepcopy) silently casts '<U*' to object, while shallow Dataset copies that reuse the adapter object are unaffected.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_variable.py",
+      "line": 486,
+      "statement": "assert v.dtype == w.dtype",
+      "note": "Pre-existing assertion in the shared test_copy of VariableSubclassobjects; the test patch added the astype parametrization (line 480) and the .astype(astype) construction (line 482), and the new str case creates a '<U32' variable. For TestIndexVariable with deep=True the copy comes back with dtype object and the assertion fails (dtype('<U32') != dtype('O')); the shallow and non-str parametrizations, and plain Variable copies, pass because they never reconstruct a PandasIndexAdapter from the wrapped index."
+    }
+  ],
+  "confidence": "high"
+}

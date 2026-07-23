@@ -1,0 +1,63 @@
+{
+  "instance_id": "astropy__astropy-8707",
+  "root_cause": [
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": 557,
+      "statement": "card._image = _pad(image)",
+      "note": "In Card.fromstring, documented as accepting the header card image which naturally arrives as bytes when sliced from a FITS file opened in binary mode. The input is stored via _pad without any bytes handling, and _pad concatenates str padding (input + ' ' * n, card.py line 1285), so a bytes image raises TypeError: can't concat str to bytes. The function lacks a decode step for bytes input (latin-1 maps all 256 byte values to codepoints, so it can represent even malformed non-ASCII header bytes)."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 369,
+      "statement": "end_idx = data.index(sep, idx)",
+      "note": "Part of Header.fromstring's card-splitting loop (lines 364-395), which parses the data buffer assuming str throughout; every entry below is the same str-only assumption applied to bytes input. This line scans the buffer for the separator on the non-full-cardlength path (sep containing invalid header characters, e.g. newlines): with bytes data and the str sep it raises TypeError. Not reached by the failing tests (their sep='' takes the full-cardlength branch), but faulty on the bytes path regardless."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 377,
+      "statement": "if next_image[:8] == 'CONTINUE':",
+      "note": "CONTINUE-card detection compares a bytes slice against a str literal, which in Python 3 is silently always False, so long-string continuation cards would never be merged for bytes input."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 380,
+      "statement": "cards.append(Card.fromstring(''.join(image)))",
+      "note": "Joining accumulated bytes card images with the str separator '' raises TypeError: sequence item 0: expected str instance, bytes found - the first crash on the bytes path (with the default sep='', iteration 2 reaches this line); this is where test_header_fromstring_bytes fails."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 383,
+      "statement": "if next_image == END_CARD:",
+      "note": "END-of-header detection on the full-cardlength path compares a bytes card image against the str constant END_CARD - silently always False in Python 3, so even absent the join crash the loop could never terminate at the END card for bytes input."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 387,
+      "statement": "if next_image.split(sep)[0].rstrip() == 'END':",
+      "note": "END detection on the separator path: besides the silent-False str comparison, splitting a bytes image on the str sep raises TypeError. Not reached by the failing tests (sep='' takes the full-cardlength branch)."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 395,
+      "statement": "cards.append(Card.fromstring(''.join(image)))",
+      "note": "The same str join as line 380, applied to the trailing card image after the loop; raises the same TypeError for bytes input."
+    }
+  ],
+  "reasoning": "Header.fromstring is documented as building a header from a byte string, and its natural Python 3 input is bytes read from a FITS file in binary mode, but both it and Card.fromstring assume str end to end. Card.fromstring pads the raw input with str spaces, crashing immediately on bytes (can't concat str to bytes). Header.fromstring's splitting loop joins card images with str separators (TypeError on bytes) and compares byte slices against str constants ('CONTINUE', END_CARD, 'END'), comparisons that are silently always False in Python 3, breaking loop termination. No normalization or bytes-mode handling exists anywhere on the path, so documented byte-string input cannot be processed at all.",
+  "fault_triggering_call_site": [
+    {
+      "file": "astropy/io/fits/tests/test_header.py",
+      "line": 93,
+      "statement": "c = fits.Card.fromstring(b\"ABC     = 'abc'\")",
+      "note": "In test_card_from_bytes, added by the test patch. The bytes card image flows into _pad, which raises TypeError: can't concat str to bytes (astropy/io/fits/card.py line 1285 via line 557), before the keyword/value assertions on lines 94-95 run."
+    },
+    {
+      "file": "astropy/io/fits/tests/test_header.py",
+      "line": 2349,
+      "statement": "pri_hdr_from_bytes = fits.Header.fromstring(fobj.read())",
+      "note": "In test_header_fromstring_bytes, added by the test patch: the raw bytes of test0.fits are fed to Header.fromstring with the default sep=''. The full-cardlength path slices bytes card images; on the second loop iteration ''.join(image) raises TypeError: sequence item 0: expected str instance, bytes found (header.py line 380), before the header-equality assertions on lines 2352-2354."
+    }
+  ],
+  "confidence": "high"
+}

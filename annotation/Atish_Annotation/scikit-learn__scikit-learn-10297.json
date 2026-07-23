@@ -1,0 +1,27 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-10297",
+  "root_cause": [
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "line": 1336,
+      "statement": "normalize=False, scoring=None, cv=None, class_weight=None):",
+      "note": "Continuation line of RidgeClassifierCV.__init__'s signature (lines 1335-1336). The signature omits store_cv_values even though the class docstring documents the cv_values_ attribute as available 'if store_cv_values=True and cv=None', so calling RidgeClassifierCV(store_cv_values=True) raises TypeError: __init__() got an unexpected keyword argument 'store_cv_values'. The parent _BaseRidgeCV.__init__ does accept the parameter (sibling RidgeCV exposes it)."
+    },
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "line": 1339,
+      "statement": "scoring=scoring, cv=cv)",
+      "note": "Final line of the super(RidgeClassifierCV, self).__init__(...) call (lines 1337-1339): store_cv_values is not forwarded to the parent, which therefore falls back to its default store_cv_values=False. Jointly faulty with the signature omission on line 1336: accepting the keyword without forwarding it would silently ignore the flag and never populate cv_values_."
+    }
+  ],
+  "reasoning": "The store_cv_values machinery lives in _BaseRidgeCV, whose fit populates cv_values_ when the flag is set, and RidgeClassifierCV's documentation promises that behavior. But RidgeClassifierCV overrides __init__ with a narrower signature that neither accepts store_cv_values nor passes it to super().__init__, so the documented flag is unreachable: passing it raises TypeError at construction, and without it cv_values_ is never stored. Both lines are jointly the fault: the signature omission produces the reported TypeError, and the non-forwarding super call means the signature alone would not connect the flag to the inherited machinery.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/linear_model/tests/test_ridge.py",
+      "line": 609,
+      "statement": "r = RidgeClassifierCV(alphas=alphas, store_cv_values=True)",
+      "note": "In test_ridge_classifier_cv_store_cv_values, added by the test patch. The constructor call itself raises TypeError: __init__() got an unexpected keyword argument 'store_cv_values' under the buggy code, so the test fails before reaching the cv_values_.shape assertions on lines 614 and 622 that exercise the stored values."
+    }
+  ],
+  "confidence": "high"
+}
