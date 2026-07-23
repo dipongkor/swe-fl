@@ -1,0 +1,30 @@
+{
+  "instance_id": "sphinx-doc__sphinx-11510",
+  "root_cause": [
+    {
+      "file": "sphinx/directives/other.py",
+      "line": 379,
+      "statement": "return super().run()",
+      "method": "run",
+      "class": "Include",
+      "note": "After resolving and recording an included RST file, Sphinx delegates all loading and insertion to docutils' BaseInclude implementation. That path inserts the included lines directly into the current state machine and never emits Sphinx's source-read event for the included source, so event-handler changes are absent from the parsed document."
+    }
+  ],
+  "reasoning": "The top-level reStructuredText parser emits source-read for the document passed to it, but Include.run resolves the child path and then returns BaseInclude.run without placing included RST through the Sphinx source-read lifecycle. BaseInclude reads the child and inserts its original lines into the state machine. Consequently a listener sees and can modify `index`, but never sees `baz/baz`; nested `foo.rst` likewise retains `#magical`. The minimal pre-existing fault is the unconditional delegation at line 379 without an event-aware insertion path. The patch's new _insert_input wrapper is repair code and is not marked as a buggy line.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_directive_other.py",
+      "line": 166,
+      "statement": "restructuredtext.parse(app, text, 'index')",
+      "note": "Parsing index encounters the non-literal baz/baz include and reaches Include.run. The included content is inserted through BaseInclude without emitting source-read, leaving sources_reported with only index."
+    },
+    {
+      "file": "tests/test_directive_other.py",
+      "line": 183,
+      "statement": "doctree = restructuredtext.parse(app, text, 'index')",
+      "note": "The parse traverses baz/baz and its nested foo.rst include. Because neither included source is passed through source-read, the handler's `#magical` to `amazing` replacement never reaches the doctree."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}
