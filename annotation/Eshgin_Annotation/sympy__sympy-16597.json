@@ -1,0 +1,60 @@
+{
+  "instance_id": "sympy__sympy-16597",
+  "root_cause": [
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 166,
+      "statement": "'rational       ->  real',",
+      "method": "N/A",
+      "class": "N/A",
+      "note": "This rule omits finiteness. The deduction chain from integer or even through rational therefore has no direct connection to finite, while an infinite value cannot be rejected as rational through the contrapositive of this rule."
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 168,
+      "statement": "'algebraic      ->  complex',",
+      "method": "N/A",
+      "class": "N/A",
+      "note": "This implication omits that every algebraic number is finite. Consequently, an explicitly non-finite complex value such as positive or negative infinity is not inferred to be non-algebraic."
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 179,
+      "statement": "'transcendental ==  complex & !algebraic',",
+      "method": "N/A",
+      "class": "N/A",
+      "note": "The equivalence permits transcendental values without requiring finiteness. It therefore cannot use infinity's non-finiteness to infer that infinity is not transcendental."
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": 194,
+      "statement": "'irrational     ==  real & !rational',",
+      "method": "N/A",
+      "class": "N/A",
+      "note": "The definition omits finiteness, so a real non-rational infinite value can be treated as possibly irrational and an irrational symbol does not imply that it is finite."
+    }
+  ],
+  "reasoning": "The legacy assumptions knowledge base does not encode that rational, algebraic, transcendental, and irrational numbers are finite. Its transitive closure therefore leaves the even -> integer -> rational -> real chain disconnected from finiteness, and non-finiteness cannot be used contrapositively to reject these predicates for positive or negative infinity. All four base rules are incomplete. Reverting the rational-rule edit after fixing the algebraic rule happens to pass because rational -> algebraic -> finite becomes an alternative deduction path; that masking redundancy does not make base line 166 non-faulty. The other production changes in the PR synchronize the newer Q-assumptions system or generated data and are not needed to explain these legacy .is_* failures.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/core/tests/test_assumptions.py",
+      "line": 570,
+      "statement": "assert x.is_finite is True",
+      "note": "In test_other_symbol, x was created with integer=True. The base closure does not connect the integer/rational chain to finite, so this newly added assertion receives None rather than True."
+    },
+    {
+      "file": "sympy/core/tests/test_assumptions.py",
+      "line": 101,
+      "statement": "assert oo.is_integer is False",
+      "note": "This is the first changed assertion reached in test_infinity. Since the base implication chain does not establish that integers are finite, finite=False cannot prove that positive infinity is non-integer, and the query returns None."
+    },
+    {
+      "file": "sympy/core/tests/test_assumptions.py",
+      "line": 128,
+      "statement": "assert mm.is_integer is False",
+      "note": "This is the corresponding first failure for negative infinity and exercises the same missing connection between the number predicates and finiteness."
+    }
+  ],
+  "time_minutes": 75,
+  "confidence": "high"
+}
