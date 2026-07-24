@@ -1,0 +1,24 @@
+{
+  "instance_id": "pytest-dev__pytest-7236",
+  "root_cause": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": 223,
+      "statement": "if self.config.getoption(\"usepdb\"):",
+      "method": "runtest",
+      "class": "TestCaseFunction",
+      "note": "Under --pdb this condition postpones tearDown for every unittest item, including an item already marked with unittest.skip. The unittest result machinery then invokes the saved teardown for a test whose setup and teardown must never run."
+    }
+  ],
+  "reasoning": "The --pdb path temporarily replaces a unittest TestCase's tearDown so it can be delayed for debugging. The base condition checks only usepdb and ignores unittest's skip marker. A skipped TestCase therefore enters teardown-postponement bookkeeping and its real tearDown is called despite the skip contract. Guarding the branch with the item's unittest-skip state prevents any setup/teardown lifecycle for the skipped test. The PR's two earlier substitutions with a shared _is_skipped helper preserve their existing truth checks and are not separate causes of this regression.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_unittest.py",
+      "line": 1227,
+      "statement": "assert tracked == []",
+      "note": "A unittest-skipped test must invoke neither setUp nor tearDown. Under --pdb the base implementation nevertheless records a tearDown call, so the tracking list is nonempty at this assertion."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

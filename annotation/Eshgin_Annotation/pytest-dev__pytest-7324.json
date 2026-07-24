@@ -1,0 +1,24 @@
+{
+  "instance_id": "pytest-dev__pytest-7324",
+  "root_cause": [
+    {
+      "file": "src/_pytest/mark/expression.py",
+      "line": 164,
+      "statement": "return ast.Name(ident.value, ast.Load())",
+      "method": "not_expr",
+      "class": "N/A",
+      "note": "The parser inserts every marker identifier directly into an ast.Name node. Python reserves True, False, and None as constants, so compiling an expression containing one of those valid marker names rejects the generated AST."
+    }
+  ],
+  "reasoning": "Pytest's marker-expression scanner accepts True, False, and None as identifiers, but not_expr represents them as raw Python AST names. Python's AST validator prohibits those reserved constant spellings in Name nodes, producing ValueError before the matcher can evaluate the marker. The fix safely encodes marker names before AST compilation and decodes them in the matcher adapter. The adapter's base line is not independently faulty; its change is required only by the repair's encoding scheme, so the AST construction line is the minimal pre-existing root cause.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_mark_expression.py",
+      "line": 140,
+      "statement": "assert evaluate(ident, {ident: True}.__getitem__)",
+      "note": "For the newly covered True, False, and None parameter values, evaluate parses and compiles the identifier and reaches the invalid ast.Name construction."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

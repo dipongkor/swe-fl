@@ -1,0 +1,32 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-10297",
+  "root_cause": [
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "line": 1336,
+      "statement": "normalize=False, scoring=None, cv=None, class_weight=None):",
+      "method": "__init__",
+      "class": "RidgeClassifierCV",
+      "note": "The classifier constructor omits the store_cv_values option supported by its _BaseRidgeCV superclass, so requesting cross-validation values raises TypeError before fitting."
+    },
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "line": 1339,
+      "statement": "scoring=scoring, cv=cv)",
+      "method": "__init__",
+      "class": "RidgeClassifierCV",
+      "note": "The superclass call does not forward store_cv_values. Even after the constructor accepts the option, leaving this line unchanged causes fitting to complete without creating cv_values_."
+    }
+  ],
+  "reasoning": "RidgeClassifierCV inherits the cross-validation implementation that can retain per-sample scores, but its wrapper constructor neither accepts nor forwards store_cv_values. Both omissions are independently observable: on the base code, construction with store_cv_values=True raises TypeError; after accepting the parameter but retaining the base superclass call, fitting leaves cv_values_ undefined. The two base lines are therefore the complete minimal propagation fault.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/linear_model/tests/test_ridge.py",
+      "line": 609,
+      "statement": "r = RidgeClassifierCV(alphas=alphas, store_cv_values=True)",
+      "note": "The regression reaches the defect at object construction: the base RidgeClassifierCV signature rejects store_cv_values, raising TypeError before the test can proceed to fit or inspect cv_values_."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

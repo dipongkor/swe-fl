@@ -1,0 +1,24 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-9288",
+  "root_cause": [
+    {
+      "file": "sklearn/cluster/k_means_.py",
+      "line": 372,
+      "statement": "random_state=random_state)",
+      "method": "k_means",
+      "class": "N/A",
+      "note": "The serial path passes the mutable RandomState directly into each K-means initialization, whereas the parallel path first draws one integer seed per initialization. Those different random-number consumption protocols produce different results for the same public random_state when n_jobs changes."
+    }
+  ],
+  "reasoning": "KMeans promises reproducible behavior for a fixed random_state, but the base implementation seeds its serial and parallel execution paths differently. The serial call at line 372 lets each run consume the shared generator internally; the parallel path generates a fixed array of integer seeds first. The regression therefore finds different labels for n_jobs=1 and n_jobs=2. The official patch unifies seed generation. A narrower one-line experiment that retained the base loop but passed random_state.randint(...) at line 372 also made the regression pass, demonstrating that the loop line itself is not a minimal faulty line.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/cluster/tests/test_k_means.py",
+      "line": 963,
+      "statement": "assert_array_equal(result_1, result_2)",
+      "note": "The two preceding fits differ only in n_jobs. This assertion exposes that the serial and parallel seed paths produce different label assignments despite receiving the same data and random_state."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}
