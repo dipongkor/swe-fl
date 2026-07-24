@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-11532",
+  "root_cause": [
+    {
+      "file": "django/core/mail/utils.py",
+      "line": 16,
+      "statement": "self._fqdn = socket.getfqdn()",
+      "method": "get_fqdn",
+      "class": "CachedDnsName",
+      "note": "The local hostname is cached verbatim even when it contains non-ASCII characters. It is later used as the Message-ID domain and cannot be encoded by a message configured with a legacy character set such as ISO-8859-1."
+    }
+  ],
+  "reasoning": "DNS_NAME supplies the domain passed to email.utils.make_msgid(). The base cache accepts a Unicode hostname such as '漢字' without converting it to its ASCII-compatible IDNA form. Building the Message-ID under ISO-8859-1 first fails ASCII header validation and then raises UnicodeEncodeError while encoding the fallback Header. The fix applies Punycode when the hostname is cached. The other production edits centralize existing IDNA conversions through the new helper and do not cause this mail-hostname failure.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/mail/tests.py",
+      "line": 374,
+      "statement": "self.assertIn('@xn--p8s937b>', email.message()['Message-ID'])",
+      "note": "The assertion calls email.message(), which reaches DNS_NAME after socket.getfqdn() was mocked to return '漢字'. In the base run this assertion raises UnicodeEncodeError instead of observing the expected Punycode domain."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

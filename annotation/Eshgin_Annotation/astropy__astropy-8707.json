@@ -1,0 +1,78 @@
+{
+  "instance_id": "astropy__astropy-8707",
+  "root_cause": [
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": 557,
+      "statement": "card._image = _pad(image)",
+      "method": "fromstring",
+      "class": "Card",
+      "note": "Card.fromstring forwards bytes directly to a padding helper that concatenates text spaces. For a short bytes card this mixes bytes and str and raises TypeError."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 369,
+      "statement": "end_idx = data.index(sep, idx)",
+      "method": "fromstring",
+      "class": "Header",
+      "note": "For bytes data with a nonempty text separator, bytes.index() cannot search for a str separator. The separator must be converted to the input's type before splitting."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 377,
+      "statement": "if next_image[:8] == 'CONTINUE':",
+      "method": "fromstring",
+      "class": "Header",
+      "note": "A bytes slice never equals the text literal 'CONTINUE', so continuation cards in a bytes header aren't recognized."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 380,
+      "statement": "cards.append(Card.fromstring(''.join(image)))",
+      "method": "fromstring",
+      "class": "Header",
+      "note": "Header.fromstring accumulates bytes slices for a bytes input but joins them with a text separator, causing the observed 'expected str instance, bytes found' TypeError."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 383,
+      "statement": "if next_image == END_CARD:",
+      "method": "fromstring",
+      "class": "Header",
+      "note": "The raw FITS END card is bytes while END_CARD is text, so this comparison can never detect the end of a bytes header. Even after the join mismatch is repaired, the parser would continue into the data block."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 387,
+      "statement": "if next_image.split(sep)[0].rstrip() == 'END':",
+      "method": "fromstring",
+      "class": "Header",
+      "note": "The separator-based path combines a bytes card with a text separator and text END marker. It either raises during splitting or silently fails the END comparison."
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": 395,
+      "statement": "cards.append(Card.fromstring(''.join(image)))",
+      "method": "fromstring",
+      "class": "Header",
+      "note": "If parsing finishes with a pending bytes card, the final-card path repeats the invalid str join and raises TypeError."
+    }
+  ],
+  "reasoning": "The FITS parsing entry points are written with text-only operations even though callers can naturally supply data read from a binary FITS file. Card.fromstring passes bytes to a str-padding helper. Header.fromstring searches and splits bytes with a text separator, joins bytes with '', and compares bytes slices to text CONTINUE and END markers. The fix handles the input type explicitly: Card decodes bytes with latin-1, and Header uses type-matched separators and marker constants before delegating each card. The focused base run raises at card.py:557 for the direct Card test and header.py:380 for the raw Header test; the remaining listed lines are independently reachable failures or silent misparses for separator, continuation, end-card, and trailing-card variants of the same supported bytes input.",
+  "fault_triggering_call_site": [
+    {
+      "file": "astropy/io/fits/tests/test_header.py",
+      "line": 93,
+      "statement": "c = fits.Card.fromstring(b\"ABC     = 'abc'\")",
+      "note": "This construction call reaches _pad() with bytes and raises TypeError before the following keyword/value assertions can execute."
+    },
+    {
+      "file": "astropy/io/fits/tests/test_header.py",
+      "line": 2349,
+      "statement": "pri_hdr_from_bytes = fits.Header.fromstring(fobj.read())",
+      "note": "Reading the FITS file in binary mode supplies bytes. The base method fails while joining its first accumulated card image, before the equality assertions can execute."
+    }
+  ],
+  "time_minutes": 50,
+  "confidence": "high"
+}

@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-15572",
+  "root_cause": [
+    {
+      "file": "django/template/autoreload.py",
+      "line": 20,
+      "statement": "items.update(cwd / to_path(dir) for dir in backend.engine.dirs)",
+      "method": "get_template_directories",
+      "class": "N/A",
+      "note": "An empty configured template directory is converted to Path('') and joined with cwd, so the autoreloader incorrectly watches the current working directory."
+    },
+    {
+      "file": "django/template/autoreload.py",
+      "line": 28,
+      "statement": "if not is_django_path(directory)",
+      "method": "get_template_directories",
+      "class": "N/A",
+      "note": "Loader-provided directories are filtered only for Django's own paths. An empty directory survives this condition and is likewise normalized to the current working directory."
+    }
+  ],
+  "reasoning": "Path('') denotes the current directory rather than an absent path. Both comprehensions in get_template_directories accept empty strings and prepend cwd, causing an empty template-directory setting to add the project root to the watched set. The fix filters falsey directory values in both the backend DIRS and loader get_dirs paths. The regression directly exercises the backend DIRS path; the second line is the same independently reachable defect for loader-provided directories.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/template_tests/test_autoreloader.py",
+      "line": 93,
+      "statement": "self.assertEqual(autoreload.get_template_directories(), set())",
+      "note": "With TEMPLATES['DIRS'] set to [''], the base method returns {Path('/testbed')} instead of an empty set. This is the sole focused-test failure."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

@@ -1,0 +1,38 @@
+{
+  "instance_id": "matplotlib__matplotlib-26466",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": 1392,
+      "statement": "self._ref_coord = ref_coord",
+      "method": "__init__",
+      "class": "OffsetFrom",
+      "note": "OffsetFrom retains the caller's mutable coordinate array by reference. Mutating that array later silently changes the stored offset origin and therefore the annotation placement."
+    },
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": 1459,
+      "statement": "self.xy = xy",
+      "method": "__init__",
+      "class": "_AnnotationBase",
+      "note": "Annotations likewise retain the caller-owned mutable xy object. A later in-place update changes an already-created annotation instead of preserving the coordinates supplied at construction."
+    }
+  ],
+  "reasoning": "Both constructors store coordinate inputs by alias rather than copying their two scalar components. The regression uses NumPy arrays, then mutates them after creating OffsetFrom and Annotation objects; the base objects immediately reflect [1, 1] and [2, 2] instead of retaining [0.5, 0.5]. The fix unpacks each coordinate pair and stores a tuple, which both validates the shape and breaks the alias. These two assignments are independent instances of the same mutation bug.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_text.py",
+      "line": 1001,
+      "statement": "of_xy[:] = 1",
+      "note": "The in-place mutation reaches the array still referenced by OffsetFrom in the base code. The check_figures_equal decorator later detects that the rendered text moved."
+    },
+    {
+      "file": "lib/matplotlib/tests/test_text.py",
+      "line": 1006,
+      "statement": "an_xy[:] = 2",
+      "note": "This mutates the same array retained as Annotation.xy in the base implementation, changing the annotation position after construction. The image-comparison decorator serves as the test oracle, so there is no explicit assertion in the test body."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

@@ -1,0 +1,24 @@
+{
+  "instance_id": "psf__requests-1724",
+  "root_cause": [
+    {
+      "file": "requests/sessions.py",
+      "line": 314,
+      "statement": "method = method.upper(),",
+      "method": "request",
+      "class": "Session",
+      "note": "On Python 2, uppercasing a unicode method name still produces unicode. The Request therefore carries u'POST' into httplib, where the unicode request/header data is combined with an uploaded byte body and implicit ASCII decoding can raise UnicodeDecodeError."
+    }
+  ],
+  "reasoning": "Session.request normalizes the method's case but not its native string type. In Python 2, u'POST'.upper() remains unicode, which contaminates the HTTP request buffer; concatenating it with multipart bytes containing non-ASCII data triggers implicit ASCII decoding. The fix converts method to compat.builtin_str before building Request. This regression is specific to Python 2 because u'POST' is already native str on Python 3.",
+  "fault_triggering_call_site": [
+    {
+      "file": "test_requests.py",
+      "line": 440,
+      "statement": "assert r.status_code == 200",
+      "note": "This is the regression oracle for a request whose method was supplied as u'POST'. On affected Python 2 runs, the request on the preceding line raises UnicodeDecodeError before this assertion can be evaluated; with the fix, it completes and returns status 200."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}
