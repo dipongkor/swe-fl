@@ -1,0 +1,13 @@
+diff --git a/xarray/core/computation.py b/xarray/core/computation.py
+index 823cbe02..5b018d54 100644
+--- a/xarray/core/computation.py
++++ b/xarray/core/computation.py
+@@ -1932,7 +1932,7 @@ def _ensure_numeric(data: T_Xarray) -> T_Xarray:
+     """
+     from .dataset import Dataset
+ 
+-    def to_floatable(x: DataArray) -> DataArray:
++    def to_floatable(x: DataArray, _spt_unused=None) -> DataArray:
+         if x.dtype.kind in "mM":
+             return x.copy(
+                 data=datetime_to_numeric(

@@ -1,0 +1,37 @@
+diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py
+index 55874bf..f18a949 100644
+--- a/seaborn/_core/scales.py
++++ b/seaborn/_core/scales.py
+@@ -370,10 +370,6 @@ class ContinuousBase(Scale):
+             return np.min(np.diff(np.sort(x)))
+         new._spacer = spacer
+ 
+-        # TODO How to allow disabling of legend for all uses of property?
+-        # Could add a Scale parameter, or perhaps Scale.suppress()?
+-        # Are there other useful parameters that would be in Scale.legend()
+-        # besides allowing Scale.legend(False)?
+         if prop.legend:
+             axis.set_view_interval(vmin, vmax)
+             locs = axis.major.locator()
+diff --git a/seaborn/utils.py b/seaborn/utils.py
+index 2407853..f383bb8 100644
+--- a/seaborn/utils.py
++++ b/seaborn/utils.py
+@@ -688,7 +688,6 @@ def locator_to_legend_entries(locator, limits, dtype):
+     """Return levels and formatted levels for brief numeric legends."""
+     raw_levels = locator.tick_values(*limits).astype(dtype)
+ 
+-    # The locator can return ticks outside the limits, clip them here
+     raw_levels = [l for l in raw_levels if l >= limits[0] and l <= limits[1]]
+ 
+     class dummy_axis:
+@@ -701,9 +700,6 @@ def locator_to_legend_entries(locator, limits, dtype):
+         formatter = mpl.ticker.ScalarFormatter()
+     formatter.axis = dummy_axis()
+ 
+-    # TODO: The following two lines should be replaced
+-    # once pinned matplotlib>=3.1.0 with:
+-    # formatted_levels = formatter.format_ticks(raw_levels)
+     formatter.set_locs(raw_levels)
+     formatted_levels = [formatter(x) for x in raw_levels]
+ 

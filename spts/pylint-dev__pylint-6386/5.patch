@@ -1,0 +1,15 @@
+diff --git a/pylint/config/utils.py b/pylint/config/utils.py
+index 8c790416..f93124b0 100644
+--- a/pylint/config/utils.py
++++ b/pylint/config/utils.py
+@@ -211,7 +211,9 @@ PREPROCESSABLE_OPTIONS: dict[
+ }
+ 
+ 
+-def _preprocess_options(run: Run, args: Sequence[str]) -> list[str]:
++def _preprocess_options(
++    run: Run, args: Sequence[str], _spt_unused: object = None
++) -> list[str]:
+     """Preprocess options before full config parsing has started."""
+     processed_args: list[str] = []
+ 

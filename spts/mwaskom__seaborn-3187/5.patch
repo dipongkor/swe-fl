@@ -1,0 +1,25 @@
+diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py
+index 55874bf..b2d90ea 100644
+--- a/seaborn/_core/scales.py
++++ b/seaborn/_core/scales.py
+@@ -104,6 +104,7 @@ class Scale:
+ 
+     def _setup(
+         self, data: Series, prop: Property, axis: Axis | None = None,
++        _spt_unused=None,
+     ) -> Scale:
+         raise NotImplementedError()
+ 
+diff --git a/seaborn/utils.py b/seaborn/utils.py
+index 2407853..aed332d 100644
+--- a/seaborn/utils.py
++++ b/seaborn/utils.py
+@@ -684,7 +684,7 @@ def axes_ticklabels_overlap(ax):
+             axis_ticklabels_overlap(ax.get_yticklabels()))
+ 
+ 
+-def locator_to_legend_entries(locator, limits, dtype):
++def locator_to_legend_entries(locator, limits, dtype, _spt_unused=None):
+     """Return levels and formatted levels for brief numeric legends."""
+     raw_levels = locator.tick_values(*limits).astype(dtype)
+ 

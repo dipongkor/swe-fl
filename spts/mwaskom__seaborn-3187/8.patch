@@ -1,0 +1,33 @@
+diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py
+index 55874bf..0004312 100644
+--- a/seaborn/_core/scales.py
++++ b/seaborn/_core/scales.py
+@@ -374,7 +374,9 @@ class ContinuousBase(Scale):
+         # Could add a Scale parameter, or perhaps Scale.suppress()?
+         # Are there other useful parameters that would be in Scale.legend()
+         # besides allowing Scale.legend(False)?
+-        if prop.legend:
++        if not prop.legend:
++            pass
++        else:
+             axis.set_view_interval(vmin, vmax)
+             locs = axis.major.locator()
+             locs = locs[(vmin <= locs) & (locs <= vmax)]
+diff --git a/seaborn/utils.py b/seaborn/utils.py
+index 2407853..3823285 100644
+--- a/seaborn/utils.py
++++ b/seaborn/utils.py
+@@ -695,10 +695,10 @@ def locator_to_legend_entries(locator, limits, dtype):
+         def get_view_interval(self):
+             return limits
+ 
+-    if isinstance(locator, mpl.ticker.LogLocator):
+-        formatter = mpl.ticker.LogFormatter()
+-    else:
++    if not isinstance(locator, mpl.ticker.LogLocator):
+         formatter = mpl.ticker.ScalarFormatter()
++    else:
++        formatter = mpl.ticker.LogFormatter()
+     formatter.axis = dummy_axis()
+ 
+     # TODO: The following two lines should be replaced

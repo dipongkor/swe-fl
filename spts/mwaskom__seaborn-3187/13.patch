@@ -1,0 +1,45 @@
+diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py
+index 55874bf..5972ef5 100644
+--- a/seaborn/_core/scales.py
++++ b/seaborn/_core/scales.py
+@@ -370,6 +370,9 @@ class ContinuousBase(Scale):
+             return np.min(np.diff(np.sort(x)))
+         new._spacer = spacer
+ 
++        def format_legend_ticks(formatter, locations):
++            return formatter.format_ticks(locations)
++
+         # TODO How to allow disabling of legend for all uses of property?
+         # Could add a Scale parameter, or perhaps Scale.suppress()?
+         # Are there other useful parameters that would be in Scale.legend()
+@@ -378,7 +381,7 @@ class ContinuousBase(Scale):
+             axis.set_view_interval(vmin, vmax)
+             locs = axis.major.locator()
+             locs = locs[(vmin <= locs) & (locs <= vmax)]
+-            labels = axis.major.formatter.format_ticks(locs)
++            labels = format_legend_ticks(axis.major.formatter, locs)
+             new._legend = list(locs), list(labels)
+ 
+         return new
+diff --git a/seaborn/utils.py b/seaborn/utils.py
+index 2407853..3d60feb 100644
+--- a/seaborn/utils.py
++++ b/seaborn/utils.py
+@@ -695,10 +695,13 @@ def locator_to_legend_entries(locator, limits, dtype):
+         def get_view_interval(self):
+             return limits
+ 
+-    if isinstance(locator, mpl.ticker.LogLocator):
+-        formatter = mpl.ticker.LogFormatter()
+-    else:
+-        formatter = mpl.ticker.ScalarFormatter()
++    def make_formatter(tick_locator):
++        if isinstance(tick_locator, mpl.ticker.LogLocator):
++            return mpl.ticker.LogFormatter()
++        else:
++            return mpl.ticker.ScalarFormatter()
++
++    formatter = make_formatter(locator)
+     formatter.axis = dummy_axis()
+ 
+     # TODO: The following two lines should be replaced

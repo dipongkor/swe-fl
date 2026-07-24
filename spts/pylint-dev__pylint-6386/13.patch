@@ -1,0 +1,19 @@
+diff --git a/pylint/config/utils.py b/pylint/config/utils.py
+index 8c790416..a71ccaf6 100644
+--- a/pylint/config/utils.py
++++ b/pylint/config/utils.py
+@@ -215,10 +215,13 @@ def _preprocess_options(run: Run, args: Sequence[str]) -> list[str]:
+     """Preprocess options before full config parsing has started."""
+     processed_args: list[str] = []
+ 
++    def is_long_option(argument: str) -> bool:
++        return argument.startswith("--")
++
+     i = 0
+     while i < len(args):
+         argument = args[i]
+-        if not argument.startswith("--"):
++        if not is_long_option(argument):
+             processed_args.append(argument)
+             i += 1
+             continue

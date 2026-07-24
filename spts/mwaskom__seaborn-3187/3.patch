@@ -1,0 +1,41 @@
+diff --git a/seaborn/_core/scales.py b/seaborn/_core/scales.py
+index 55874bf..c2c0a57 100644
+--- a/seaborn/_core/scales.py
++++ b/seaborn/_core/scales.py
+@@ -378,8 +378,8 @@ class ContinuousBase(Scale):
+             axis.set_view_interval(vmin, vmax)
+             locs = axis.major.locator()
+             locs = locs[(vmin <= locs) & (locs <= vmax)]
+-            labels = axis.major.formatter.format_ticks(locs)
+-            new._legend = list(locs), list(labels)
++            formatted_labels = axis.major.formatter.format_ticks(locs)
++            new._legend = list(locs), list(formatted_labels)
+ 
+         return new
+ 
+diff --git a/seaborn/utils.py b/seaborn/utils.py
+index 2407853..7423a5c 100644
+--- a/seaborn/utils.py
++++ b/seaborn/utils.py
+@@ -696,16 +696,16 @@ def locator_to_legend_entries(locator, limits, dtype):
+             return limits
+ 
+     if isinstance(locator, mpl.ticker.LogLocator):
+-        formatter = mpl.ticker.LogFormatter()
++        tick_formatter = mpl.ticker.LogFormatter()
+     else:
+-        formatter = mpl.ticker.ScalarFormatter()
+-    formatter.axis = dummy_axis()
++        tick_formatter = mpl.ticker.ScalarFormatter()
++    tick_formatter.axis = dummy_axis()
+ 
+     # TODO: The following two lines should be replaced
+     # once pinned matplotlib>=3.1.0 with:
+     # formatted_levels = formatter.format_ticks(raw_levels)
+-    formatter.set_locs(raw_levels)
+-    formatted_levels = [formatter(x) for x in raw_levels]
++    tick_formatter.set_locs(raw_levels)
++    formatted_levels = [tick_formatter(x) for x in raw_levels]
+ 
+     return raw_levels, formatted_levels
+ 

@@ -1,0 +1,30 @@
+diff --git a/pylint/config/utils.py b/pylint/config/utils.py
+index 8c790416..a73874f6 100644
+--- a/pylint/config/utils.py
++++ b/pylint/config/utils.py
+@@ -217,19 +217,19 @@ def _preprocess_options(run: Run, args: Sequence[str]) -> list[str]:
+ 
+     i = 0
+     while i < len(args):
+-        argument = args[i]
+-        if not argument.startswith("--"):
+-            processed_args.append(argument)
++        current_argument = args[i]
++        if not current_argument.startswith("--"):
++            processed_args.append(current_argument)
+             i += 1
+             continue
+ 
+         try:
+-            option, value = argument.split("=", 1)
++            option, value = current_argument.split("=", 1)
+         except ValueError:
+-            option, value = argument, None
++            option, value = current_argument, None
+ 
+         if option not in PREPROCESSABLE_OPTIONS:
+-            processed_args.append(argument)
++            processed_args.append(current_argument)
+             i += 1
+             continue
+ 
