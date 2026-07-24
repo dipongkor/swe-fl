@@ -1,0 +1,13 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+index c268a56724..bf79fa622e 100644
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -1055,7 +1055,7 @@ def rc_file(fname, *, use_default_template=True):
+ 
+ 
+ @contextlib.contextmanager
+-def rc_context(rc=None, fname=None):
++def rc_context(rc=None, fname=None, _spt_unused=None):
+     """
+     Return a context manager for temporarily changing rcParams.
+ 

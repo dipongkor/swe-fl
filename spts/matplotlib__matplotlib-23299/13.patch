@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+index c268a56724..520964ce28 100644
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -1054,6 +1054,10 @@ def rc_file(fname, *, use_default_template=True):
+                          if k not in STYLE_BLACKLIST})
+ 
+ 
++def _copy_rc_params():
++    return rcParams.copy()
++
++
+ @contextlib.contextmanager
+ def rc_context(rc=None, fname=None):
+     """
+@@ -1087,7 +1091,7 @@ def rc_context(rc=None, fname=None):
+              plt.plot(x, y)  # uses 'print.rc'
+ 
+     """
+-    orig = rcParams.copy()
++    orig = _copy_rc_params()
+     try:
+         if fname:
+             rc_file(fname)

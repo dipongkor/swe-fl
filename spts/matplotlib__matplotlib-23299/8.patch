@@ -1,0 +1,20 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+index c268a56724..14357b8f98 100644
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -1089,9 +1089,13 @@ def rc_context(rc=None, fname=None):
+     """
+     orig = rcParams.copy()
+     try:
+-        if fname:
++        if not fname:
++            pass
++        else:
+             rc_file(fname)
+-        if rc:
++        if not rc:
++            pass
++        else:
+             rcParams.update(rc)
+         yield
+     finally:

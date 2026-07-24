@@ -1,0 +1,15 @@
+diff --git a/sphinx/extension.py b/sphinx/extension.py
+index 7ec6c8518..4e9f410bd 100644
+--- a/sphinx/extension.py
++++ b/sphinx/extension.py
+@@ -39,7 +39,9 @@ class Extension:
+         self.parallel_write_safe = kwargs.pop('parallel_write_safe', True)
+ 
+ 
+-def verify_needs_extensions(app: "Sphinx", config: Config) -> None:
++def verify_needs_extensions(
++    app: "Sphinx", config: Config, _spt_unused: Any = None
++) -> None:
+     """Verify the required Sphinx extensions are loaded."""
+     if config.needs_extensions is None:
+         return

@@ -1,0 +1,22 @@
+diff --git a/lib/matplotlib/__init__.py b/lib/matplotlib/__init__.py
+index c268a56724..ea8a93f827 100644
+--- a/lib/matplotlib/__init__.py
++++ b/lib/matplotlib/__init__.py
+@@ -1087,7 +1087,7 @@ def rc_context(rc=None, fname=None):
+              plt.plot(x, y)  # uses 'print.rc'
+ 
+     """
+-    orig = rcParams.copy()
++    original_params = rcParams.copy()
+     try:
+         if fname:
+             rc_file(fname)
+@@ -1095,7 +1095,7 @@ def rc_context(rc=None, fname=None):
+             rcParams.update(rc)
+         yield
+     finally:
+-        dict.update(rcParams, orig)  # Revert to the original rcs.
++        dict.update(rcParams, original_params)  # Revert to the original rcs.
+ 
+ 
+ def use(backend, *, force=True):
