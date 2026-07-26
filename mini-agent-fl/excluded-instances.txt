@@ -21,3 +21,5 @@ django__django-12325
 astropy__astropy-13033
 astropy__astropy-14369
 pydata__xarray-3993
+sphinx-doc__sphinx-10673
+scikit-learn__scikit-learn-25232

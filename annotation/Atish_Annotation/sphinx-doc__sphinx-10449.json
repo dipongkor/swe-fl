@@ -1,0 +1,27 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10449",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": 126,
+      "statement": "if 'return' in annotations and 'return' not in arguments:",
+      "note": "In modify_field_list (rtype block, lines 126-129): whenever the recorded annotations contain a return entry that is not already documented, an ':rtype:' field is appended, with no awareness of what kind of object is being documented. For a class, the recorded signature is __init__'s, whose idiomatic '-> None' annotation therefore surfaces as a visible 'Return type: None' on the class documentation. The function cannot distinguish the class case at this revision - no objtype context is passed in - so this line is jointly faulty with the caller (line 62). Incidentally, line 129 renders 'annotation' as a leftover loop variable from the earlier for-loop, which happens to hold annotations['return']; sloppy but not the fault."
+    },
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": 62,
+      "statement": "modify_field_list(field_list, annotations[fullname])",
+      "note": "In merge_typehints, the autodoc_typehints_description_target == 'all' branch: this caller has the objtype in scope but conveys no class context to modify_field_list, applying uniform merging to functions, methods and classes alike. Jointly faulty with line 126: the decision site lacks the information and the information site makes no decision; every fix must either thread the objtype through this call or strip the return annotation here for classes."
+    }
+  ],
+  "reasoning": "With autodoc_typehints = 'description', autodoc records signature annotations and merge_typehints later injects them into the rendered body as Parameters/Return type fields. A class's recorded signature is its __init__'s, including the conventional '-> None' return annotation, and the merge path treats every object type identically: modify_field_list appends an ':rtype:' field for any undocumented return annotation, and its caller passes no object-type context. As a result every annotated class is rendered with a meaningless 'Return type: None' block, while the same field on the __init__ method itself is correct - the defect is specific to merging a constructor's return annotation into the class documentation.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_ext_autodoc_configs.py",
+      "line": 1037,
+      "statement": "assert ('class target.typehints._ClassWithDocumentedInit(x)\\n'",
+      "note": "Pre-existing test_autodoc_typehints_description_with_documented_init (autoclass of _ClassWithDocumentedInit with :special-members: __init__, built as text); the test patch flipped the expectation by deleting the class-level 'Return type:\\n None' block from the expected output, which the old expectation had codified. Under the buggy code the built text contains that extra block between the class Parameters and the __init__ section, failing the multi-line equality that starts on this line. The expectation retains 'Return type: None' inside the __init__ method's own section (lines 1051-1052), isolating the fault to the class objtype."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,39 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9602",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 182,
+      "statement": "if isinstance(node, nodes.Text) and node.strip():",
+      "note": "Classifier of _parse_annotation's post-pass (lines 181-183): after unparse() flattens the annotation AST, every non-whitespace Text node is treated as a type name to cross-reference. The assumption is false for Literal[...] contents, which are values, not types - but the classifier cannot tell, because the flattening (line 150) conveys no marking. Jointly faulty with lines 183 and 150: this side is faithful to its inputs but context-starved."
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 183,
+      "statement": "result[i] = type_to_xref(str(node), env)",
+      "note": "The action selected by line 182's classification: manufactures a py:class pending_xref for the token, so Literal values like True become unresolvable class references and nitpick mode (-n -W) fails the build with 'reference target not found: True'."
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 150,
+      "statement": "result.extend(unparse(node.slice))",
+      "note": "Subscript branch of unparse(): flattens the subscript contents into unmarked Text nodes. This is the site that holds the discriminating context - the subscript's base name ('Literal'/'typing.Literal') is visible in this very branch - yet it emits value tokens indistinguishable from type names, losing the value-vs-type distinction across the interface to the post-pass. The information site makes no decision; the decision site (line 182) lacks the information."
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 126,
+      "statement": "return [nodes.Text(node.value)]",
+      "note": "Constant branch of unparse(): emits the constant's raw value as an unmarked Text node - the token that line 183 then misclassifies - and renders string constants without quotes (Literal[0, 1, 'abc'] shows abc instead of 'abc'), which the quoted expectation on test line 362 checks; it also passes non-str values (bool/int) directly into nodes.Text."
+    }
+  ],
+  "reasoning": "_parse_annotation renders an annotation by flattening its AST into doctree nodes and then cross-referencing every textual token as a type. The flattening discards the distinction between type names and literal values: the Subscript branch emits Literal[...] contents as ordinary Text (despite seeing the Literal base name), and the Constant branch emits raw, unquoted values. The post-pass then faithfully applies its every-token-is-a-type rule, turning values such as True into py:class pending_xrefs. Nothing in the pipeline can resolve a class named 'True', so nitpick builds (-n -W) fail on every Literal annotation value; string values additionally render unquoted. The fault is the interface losing the value-vs-type context between the flattening side, which has the information, and the classifying side, which makes the decision.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 348,
+      "statement": "assert_node(doctree, ([pending_xref, \"Literal\"],",
+      "note": "First assertion of test_parse_annotation_Literal, added by the test patch (skipif < py3.8), on _parse_annotation('Literal[True, False]') (line 347): Literal itself must be a pending_xref but True/False plain text. Under the buggy code node [2] is <pending_xref: <#text: 'True'>> and assert_node fails. The second block (lines 355-363, typing.Literal[0, 1, 'abc']) is not reached; its quoted expectation \"'abc'\" on line 362 additionally exercises the Constant branch's unquoted rendering."
+    }
+  ],
+  "confidence": "high"
+}

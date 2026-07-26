@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-15345",
+  "root_cause": [
+    {
+      "file": "sympy/printing/mathematica.py",
+      "line": 102,
+      "statement": "return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")",
+      "note": "Anchor for a pure omission - no faulty statement exists in the base file. This is _print_Function's name-fallback, which renders any function application in Mathematica's bracket syntax and would print Max/Min correctly - but it is unreachable for them: printer dispatch selects a method by walking the expression class's MRO for _print_<ClassName>, Max's MRO (Max, MinMaxBase, Application, LatticeOp, AssocOp, Expr, ...) contains no class named Function, and MCodePrinter defines no _print_MinMaxBase, _print_Max or _print_Min. Dispatch therefore falls through to the generic emptyPrinter, which returns str(expr) - the default SymPy form with Python-style parentheses, 'Max(2, x)', which is not valid Mathematica code. The missing dispatch binding is the sole defect: the Max/Min entries the fix also adds to the known_functions table are registry hygiene with no behavioral effect, since the name-fallback prints identical output for functions absent from the table."
+    }
+  ],
+  "reasoning": "MCodePrinter has no printing path for Min/Max. SymPy printers dispatch by looking up _print_<ClassName> along the expression's MRO; Max is an Application/LatticeOp, not a Function subclass, so MCodePrinter._print_Function - the only method that knows Mathematica's bracket application syntax - is never selected, and no _print_MinMaxBase/_print_Max handler exists. The printer falls back to the generic emptyPrinter, returning the default str() form with parentheses, so mathematica_code(Max(x, 2)) yields 'Max(2, x)': syntactically invalid Mathematica emitted silently. The '2, x' ordering is Max's canonical argument sorting and is not itself wrong; the invalid parenthesis syntax is the defect.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_mathematica.py",
+      "line": 31,
+      "statement": "assert mcode(Max(x,y,z)*Min(y,z)) == \"Max[x, y, z]*Min[y, z]\"",
+      "note": "Added by the test patch to the pre-existing test_Function. Under the buggy code both factors fall through to the default str printer, producing 'Max(x, y, z)*Min(y, z)' with parentheses instead of brackets, so the equality fails."
+    }
+  ],
+  "confidence": "high"
+}

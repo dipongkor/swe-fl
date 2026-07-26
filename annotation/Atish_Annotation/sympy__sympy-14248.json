@@ -1,0 +1,75 @@
+{
+  "instance_id": "sympy__sympy-14248",
+  "root_cause": [
+    {
+      "file": "sympy/printing/str.py",
+      "line": 307,
+      "statement": "return '*'.join([self.parenthesize(arg, precedence(expr))",
+      "note": "StrPrinter._print_MatMul (lines 306-308): joins all factors with '*' including a numeric -1 coefficient, so MatMul(-1, B) prints as '(-1)*B' instead of '-B'. CodePrinter extends StrPrinter, so ccode/fcode/jscode/julia/octave/rcode inherit this method and print matrix-element parents like '((-1)*B + A)[0]' - the shared cause of the six code-printer test failures."
+    },
+    {
+      "file": "sympy/printing/str.py",
+      "line": 316,
+      "statement": "return ' + '.join([self.parenthesize(arg, precedence(expr))",
+      "note": "StrPrinter._print_MatAdd (lines 315-317): joins terms with ' + ' unconditionally, never folding a term's negative coefficient into a '-' separator the way scalar _print_Add does, yielding '(-1)*B + (-1)*A*B + A'. Also inherited by all CodePrinter subclasses."
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": 1481,
+      "statement": "tex = \" + \".join(map(self._print, terms))",
+      "note": "LatexPrinter._print_MatAdd (lines 1479-1482): the same unconditional ' + ' join for matrix sums."
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": 1491,
+      "statement": "return ' '.join(map(parens, expr.args))",
+      "note": "LatexPrinter._print_MatMul: joins factors with spaces including the numeric coefficient, so MatMul(-1, A) renders as '-1 A' instead of '-A'; combined with line 1481 a difference prints as '-1 B + -1 A B + A'."
+    },
+    {
+      "file": "sympy/printing/pretty/pretty.py",
+      "line": 822,
+      "statement": "return self._print_seq(expr.args, None, None, ' + ')",
+      "note": "PrettyPrinter._print_MatAdd: unconditional ' + ' separators. Pretty's MatMul already folds a -1 coefficient into a leading '-' on the term, so the symptom here is only the separator ('-A*B + -B*C + A*B*C'); two-term sums whose first printed term carries the '-' coincidentally look right, which is why only the multi-negative-term assertion fails."
+    }
+  ],
+  "reasoning": "A matrix difference is represented as MatAdd with MatMul(-1, ...) terms, and printers are expected to render that as subtraction, as the scalar Add printers do by folding negative leading coefficients into '-' separators. The matrix printers never got that logic: the str and latex _print_MatMul print the -1 coefficient literally ('(-1)*B', '-1 B') and the str, latex and pretty _print_MatAdd join terms with unconditional ' + ', so A - A*B - B prints as '(-1)*B + (-1)*A*B + A', '-1 B + -1 A B + A' and '-B + -A*B + A' respectively. Because CodePrinter inherits StrPrinter's two methods, the same defect surfaces in ccode, fcode, jscode, julia, octave and rcode wherever a MatAdd parent is printed, e.g. matrix elements '((-1)*B + A)[0]'.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_str.py",
+      "line": 794,
+      "statement": "assert str(A - A*B - B) == \"-B - A*B + A\"",
+      "note": "First assert of test_MatrixSymbol_printing, added by the test patch; the buggy output is '(-1)*B + (-1)*A*B + A' (exercises both str.py lines). The second assert (line 795) is not reached."
+    },
+    {
+      "file": "sympy/printing/tests/test_str.py",
+      "line": 787,
+      "statement": "assert str(F) == \"(-B + A)[0, 0]\"",
+      "note": "Pre-existing test_MatrixElement_printing assert with its expectation flipped by the test patch from '((-1)*B + A)[0, 0]' (the buggy form) to the subtraction form. F = C[0, 0].subs(C, A - B) keeps a MatrixElement with an unexpanded MatAdd parent, which routes through the faulty MatAdd/MatMul printing."
+    },
+    {
+      "file": "sympy/printing/tests/test_latex.py",
+      "line": 1722,
+      "statement": "assert latex(-A) == r\"-A\"",
+      "note": "First assert of the patch-added test_MatrixSymbol_printing; buggy output '-1 A' (latex.py line 1491). Lines 1723-1724, exercising the MatAdd join as well, are not reached."
+    },
+    {
+      "file": "sympy/printing/tests/test_latex.py",
+      "line": 1713,
+      "statement": "assert latex(F) == r\"\\left(-B + A\\right)_{0, 0}\"",
+      "note": "Pre-existing element test, expectation flipped from r'\\left(-1 B + A\\right)_{0, 0}'."
+    },
+    {
+      "file": "sympy/printing/pretty/tests/test_pretty.py",
+      "line": 6100,
+      "statement": "assert pretty(A*B*C - A*B - B*C) == \"-A*B -B*C + A*B*C\"",
+      "note": "Third assert of the patch-added test_MatrixSymbol_printing; buggy output '-A*B + -B*C + A*B*C'. The earlier asserts (6098-6099) pass even on the buggy code because pretty's MatMul folds the -1 into the term and a two-term blind join happens to match."
+    },
+    {
+      "file": "sympy/printing/tests/test_ccode.py",
+      "line": 758,
+      "statement": "assert(ccode(F) == \"(-B + A)[0]\")",
+      "note": "Pre-existing element test, expectation flipped from '((-1)*B + A)[0]'. Representative of the six code printers failing identically through CodePrinter's inheritance of StrPrinter._print_MatAdd/_print_MatMul: test_fcode.py:759, test_jscode.py:385, test_julia.py:377, test_octave.py:397, test_rcode.py:491."
+    }
+  ],
+  "confidence": "high"
+}

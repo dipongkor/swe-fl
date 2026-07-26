@@ -1,0 +1,39 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14983",
+  "root_cause": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 1066,
+      "statement": "class _RepeatedSplits(metaclass=ABCMeta):",
+      "note": "Anchors an absence: _RepeatedSplits, the base of RepeatedKFold and RepeatedStratifiedKFold, is a standalone class rather than a BaseCrossValidator subclass, and defines no __repr__ of its own. Every other splitter inherits BaseCrossValidator.__repr__ (line 105), which delegates to _build_repr for the parameter-form display; these two classes fall back to object.__repr__ and print the '<... object at 0x...>' address form - the reported symptom."
+    },
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 2160,
+      "statement": "value = getattr(self, key, None)",
+      "note": "In _build_repr: each constructor-signature parameter is fetched as a same-named instance attribute, per scikit-learn's store-params-as-attributes convention. Jointly faulty with the subclass routing on lines 1217/1270: n_splits never exists as an attribute, so the lookup yields None and even a wired-up repr would print n_splits=None instead of the actual value the fail-to-pass test expects (n_splits=2). Faithful reader starved by nonconforming storage. (_RepeatedSplits' own 'self.cvargs = cvargs' at line 1104 is faithful storage of its own signature parameter and is not the fault.)"
+    },
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 1217,
+      "statement": "KFold, n_repeats, random_state, n_splits=n_splits)",
+      "note": "Continuation of RepeatedKFold.__init__'s super().__init__ call (starts line 1216): n_splits is declared as a named signature parameter - which _build_repr reflects over - but is demoted here into _RepeatedSplits' anonymous **cvargs dict without ever being stored as self.n_splits, breaking the store-params-as-attributes convention the repr machinery relies on. The storage side of the jointly-faulty pair with line 2160."
+    },
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 1270,
+      "statement": "StratifiedKFold, n_repeats, random_state, n_splits=n_splits)",
+      "note": "Same demotion in RepeatedStratifiedKFold.__init__ (call starts line 1269); exercised by the second test parametrization."
+    }
+  ],
+  "reasoning": "Two layered defects deny these splitters a parameter repr. First, _RepeatedSplits is outside the BaseCrossValidator hierarchy and defines no __repr__, so Python's default address-form repr is used - the reported symptom. Second, the shared repr builder resolves constructor parameters by reading same-named instance attributes, while _RepeatedSplits subclasses store n_splits only inside the cvargs dict, so the value would resolve to None even with a repr method present. The expected output RepeatedKFold(n_repeats=6, n_splits=2, random_state=None) requires both a repr entry point and visibility into cvargs, which is why the failing test exercises both layers.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/model_selection/tests/test_split.py",
+      "line": 991,
+      "statement": "assert repeated_cv_repr == repr(repeated_cv)",
+      "note": "In test_repeated_cv_repr, added by the test patch and parametrized over RepeatedKFold and RepeatedStratifiedKFold (n_splits=2, n_repeats=6). Both parametrizations fail identically: repr() returns the object.__repr__ address form instead of '<Class>(n_repeats=6, n_splits=2, random_state=None)'. The expected string's n_splits=2 also covers the cvargs-visibility defect - with only a repr method added, the output would be n_splits=None and the assertion would still fail."
+    }
+  ],
+  "confidence": "high"
+}
