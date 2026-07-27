@@ -1,0 +1,50 @@
+diff --git a/lib/matplotlib/axes/_base.py b/lib/matplotlib/axes/_base.py
+index 5203e3232..382c7caa1 100644
+--- a/lib/matplotlib/axes/_base.py
++++ b/lib/matplotlib/axes/_base.py
+@@ -4433,15 +4433,15 @@ class _AxesBase(martist.Artist):
+         For those who are 'picking' artists while using twinx, pick
+         events are only called for the artists in the top-most Axes.
+         """
+-        ax2 = self._make_twin_axes(sharex=self)
+-        ax2.yaxis.tick_right()
+-        ax2.yaxis.set_label_position('right')
+-        ax2.yaxis.set_offset_position('right')
+-        ax2.set_autoscalex_on(self.get_autoscalex_on())
++        twin_axes = self._make_twin_axes(sharex=self)
++        twin_axes.yaxis.tick_right()
++        twin_axes.yaxis.set_label_position('right')
++        twin_axes.yaxis.set_offset_position('right')
++        twin_axes.set_autoscalex_on(self.get_autoscalex_on())
+         self.yaxis.tick_left()
+-        ax2.xaxis.set_visible(False)
+-        ax2.patch.set_visible(False)
+-        return ax2
++        twin_axes.xaxis.set_visible(False)
++        twin_axes.patch.set_visible(False)
++        return twin_axes
+ 
+     def twiny(self):
+         """
+@@ -4463,14 +4463,14 @@ class _AxesBase(martist.Artist):
+         For those who are 'picking' artists while using twiny, pick
+         events are only called for the artists in the top-most Axes.
+         """
+-        ax2 = self._make_twin_axes(sharey=self)
+-        ax2.xaxis.tick_top()
+-        ax2.xaxis.set_label_position('top')
+-        ax2.set_autoscaley_on(self.get_autoscaley_on())
++        twin_axes = self._make_twin_axes(sharey=self)
++        twin_axes.xaxis.tick_top()
++        twin_axes.xaxis.set_label_position('top')
++        twin_axes.set_autoscaley_on(self.get_autoscaley_on())
+         self.xaxis.tick_bottom()
+-        ax2.yaxis.set_visible(False)
+-        ax2.patch.set_visible(False)
+-        return ax2
++        twin_axes.yaxis.set_visible(False)
++        twin_axes.patch.set_visible(False)
++        return twin_axes
+ 
+     def get_shared_x_axes(self):
+         """Return an immutable view on the shared x-axes Grouper."""

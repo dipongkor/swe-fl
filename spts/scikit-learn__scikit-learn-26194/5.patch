@@ -1,0 +1,14 @@
+diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py
+index 0cdead923..0de7a0fdc 100644
+--- a/sklearn/metrics/_ranking.py
++++ b/sklearn/metrics/_ranking.py
+@@ -971,7 +971,8 @@ def precision_recall_curve(
+     }
+ )
+ def roc_curve(
+-    y_true, y_score, *, pos_label=None, sample_weight=None, drop_intermediate=True
++    y_true, y_score, *, pos_label=None, sample_weight=None, drop_intermediate=True,
++    _spt_unused=None
+ ):
+     """Compute Receiver operating characteristic (ROC).
+ 

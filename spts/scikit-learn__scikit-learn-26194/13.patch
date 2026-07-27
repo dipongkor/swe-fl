@@ -1,0 +1,20 @@
+diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py
+index 0cdead923..5f5bb9e72 100644
+--- a/sklearn/metrics/_ranking.py
++++ b/sklearn/metrics/_ranking.py
+@@ -1079,11 +1079,14 @@ def roc_curve(
+         tps = tps[optimal_idxs]
+         thresholds = thresholds[optimal_idxs]
+ 
++    def prepend_sentinel(values):
++        return np.r_[values[0] + 1, values]
++
+     # Add an extra threshold position
+     # to make sure that the curve starts at (0, 0)
+     tps = np.r_[0, tps]
+     fps = np.r_[0, fps]
+-    thresholds = np.r_[thresholds[0] + 1, thresholds]
++    thresholds = prepend_sentinel(thresholds)
+ 
+     if fps[-1] <= 0:
+         warnings.warn(

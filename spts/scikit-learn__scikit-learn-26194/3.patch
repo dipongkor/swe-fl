@@ -1,0 +1,36 @@
+diff --git a/sklearn/metrics/_ranking.py b/sklearn/metrics/_ranking.py
+index 0cdead923..f9ff1fffb 100644
+--- a/sklearn/metrics/_ranking.py
++++ b/sklearn/metrics/_ranking.py
+@@ -1064,5 +1064,5 @@ def roc_curve(
+     """
+-    fps, tps, thresholds = _binary_clf_curve(
++    fps, tps, score_thresholds = _binary_clf_curve(
+         y_true, y_score, pos_label=pos_label, sample_weight=sample_weight
+     )
+ 
+@@ -1077,13 +1077,13 @@ def roc_curve(
+         )[0]
+         fps = fps[optimal_idxs]
+         tps = tps[optimal_idxs]
+-        thresholds = thresholds[optimal_idxs]
++        score_thresholds = score_thresholds[optimal_idxs]
+ 
+     # Add an extra threshold position
+     # to make sure that the curve starts at (0, 0)
+     tps = np.r_[0, tps]
+     fps = np.r_[0, fps]
+-    thresholds = np.r_[thresholds[0] + 1, thresholds]
++    score_thresholds = np.r_[score_thresholds[0] + 1, score_thresholds]
+ 
+     if fps[-1] <= 0:
+         warnings.warn(
+@@ -1103,7 +1103,7 @@ def roc_curve(
+     else:
+         tpr = tps / tps[-1]
+ 
+-    return fpr, tpr, thresholds
++    return fpr, tpr, score_thresholds
+ 
+ 
+ @validate_params(
