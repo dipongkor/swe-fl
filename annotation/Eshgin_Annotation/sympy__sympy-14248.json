@@ -1,0 +1,74 @@
+{
+  "instance_id": "sympy__sympy-14248",
+  "root_cause": [
+    {
+      "file": "sympy/printing/str.py",
+      "line": 307,
+      "statement": "return '*'.join([self.parenthesize(arg, precedence(expr))",
+      "method": "_print_MatMul",
+      "class": "StrPrinter",
+      "note": "The matrix-product printer emits every factor literally, including a leading -1 coefficient, so a negated matrix term becomes (-1)*B instead of -B."
+    },
+    {
+      "file": "sympy/printing/str.py",
+      "line": 315,
+      "statement": "return ' + '.join([self.parenthesize(arg, precedence(expr))",
+      "method": "_print_MatAdd",
+      "class": "StrPrinter",
+      "note": "The matrix-sum printer always inserts a plus separator and never converts a negative term into subtraction. Code-printer subclasses inherit this behavior as well."
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": 1481,
+      "statement": "tex = \" + \".join(map(self._print, terms))",
+      "method": "_print_MatAdd",
+      "class": "LatexPrinter",
+      "note": "The LaTeX matrix-sum path also joins every rendered term with plus, producing sequences such as -1 B + -1 A B + A."
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": 1491,
+      "statement": "return ' '.join(map(parens, expr.args))",
+      "method": "_print_MatMul",
+      "class": "LatexPrinter",
+      "note": "The LaTeX matrix-product path prints a leading -1 as an ordinary factor rather than folding it into a minus sign."
+    },
+    {
+      "file": "sympy/printing/pretty/pretty.py",
+      "line": 822,
+      "statement": "return self._print_seq(expr.args, None, None, ' + ')",
+      "method": "_print_MatAdd",
+      "class": "PrettyPrinter",
+      "note": "Pretty printing uses an unconditional plus separator. Its MatMul already renders the negative coefficient as a sign, so multiple negative terms appear as '+ -term' instead of subtraction."
+    }
+  ],
+  "reasoning": "Matrix subtraction is represented internally as MatAdd containing MatMul(-1, ...) terms. Unlike the scalar printers, these five base paths do not normalize the leading coefficient and/or choose a sign-aware separator. The result exposes internal -1 factors and joins negative terms with plus signs. Each changed printer path is independently required for its corresponding output family.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_str.py",
+      "line": 794,
+      "statement": "assert str(A - A*B - B) == \"-B - A*B + A\"",
+      "note": "The base StrPrinter returns (-1)*B + (-1)*A*B + A, exercising both faulty string-printer statements."
+    },
+    {
+      "file": "sympy/printing/tests/test_latex.py",
+      "line": 1722,
+      "statement": "assert latex(-A) == r\"-A\"",
+      "note": "The base LaTeX MatMul path renders this as -1 A."
+    },
+    {
+      "file": "sympy/printing/tests/test_latex.py",
+      "line": 1723,
+      "statement": "assert latex(A - A*B - B) == r\"-B - A B + A\"",
+      "note": "This assertion additionally exercises the unconditional LaTeX MatAdd separator."
+    },
+    {
+      "file": "sympy/printing/pretty/tests/test_pretty.py",
+      "line": 6100,
+      "statement": "assert pretty(A*B*C - A*B - B*C) == \"-A*B -B*C + A*B*C\"",
+      "note": "The buggy pretty output inserts a plus before the second negative term."
+    }
+  ],
+  "time_minutes": 50,
+  "confidence": "high"
+}

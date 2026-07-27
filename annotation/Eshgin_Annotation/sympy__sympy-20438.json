@@ -1,0 +1,74 @@
+{
+  "instance_id": "sympy__sympy-20438",
+  "root_cause": [
+    {
+      "file": "sympy/sets/handlers/issubset.py",
+      "line": 13,
+      "statement": "return None",
+      "method": "is_subset_sets",
+      "class": "N/A",
+      "note": "The generic Set/Set fallback is selected because the dispatch table has no ProductSet/FiniteSet rule. It returns unknown even when the finite product can be exhaustively checked against the FiniteSet."
+    },
+    {
+      "file": "sympy/sets/handlers/comparison.py",
+      "line": 59,
+      "statement": "return None",
+      "method": "_eval_is_eq",
+      "class": "N/A",
+      "note": "The generic set-equality handler gives up instead of using the necessary-and-sufficient mutual-subset test, leaving decidable equalities unevaluated."
+    },
+    {
+      "file": "sympy/sets/handlers/comparison.py",
+      "line": 29,
+      "statement": "return False",
+      "method": "_eval_is_eq",
+      "class": "N/A",
+      "note": "The FiniteSet/Interval handler declares inequality unconditionally. This is unsound for symbolic intervals that later degenerate to the same finite set; for example, Eq(FiniteSet(x), Interval(x, y)) becomes False before substituting y=x, although a freshly constructed equality after that substitution is True."
+    },
+    {
+      "file": "sympy/core/relational.py",
+      "line": 308,
+      "statement": "dif = r.lhs - r.rhs",
+      "method": "_eval_simplify",
+      "class": "Relational",
+      "note": "Relational simplification assumes arithmetic Expr operands. For sets, subtraction creates a set Complement, and the following arithmetic comparison path raises instead of preserving the set equality."
+    },
+    {
+      "file": "sympy/core/relational.py",
+      "line": 569,
+      "statement": "m, b = linear_coeffs(",
+      "method": "_eval_simplify",
+      "class": "Equality",
+      "note": "Equality's single-symbol simplification also assumes Expr operands. After the general Relational guard is applied, this call still rewrites a set equality as an Add and fails while negating a FiniteSet, so Equality needs its own non-Expr guard."
+    }
+  ],
+  "reasoning": "The subset dispatch lacks the finite ProductSet case, and generic set equality does not exploit mutual subset results. Those omissions produce None for queries that are decidable. A separate hardcoded FiniteSet/Interval result is symbolically unsound. Finally, both layers of relational simplification assume arithmetic expressions and crash on unevaluated set equalities; a partial-patch run with only the general Relational guard moved the failure into Equality's linear_coeffs path, confirming that both guards are required.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/sets/tests/test_sets.py",
+      "line": 1604,
+      "statement": "assert b.is_subset(c) is True",
+      "note": "The equal finite ProductSet/FiniteSet pair reaches the generic subset fallback and returns None on the base revision."
+    },
+    {
+      "file": "sympy/sets/tests/test_sets.py",
+      "line": 1254,
+      "statement": "assert Eq(ProductSet({1}, {2}), Interval(1, 2)) is S.false",
+      "note": "The generic Set/Set equality handler returns None, leaving this decidable unequal pair unevaluated."
+    },
+    {
+      "file": "sympy/sets/tests/test_sets.py",
+      "line": 1607,
+      "statement": "assert Eq(c, b).simplify() is S.true",
+      "note": "This exercises equality of extensionally equal Set subclasses and the non-arithmetic Relational simplification path."
+    },
+    {
+      "file": "sympy/sets/tests/test_sets.py",
+      "line": 1609,
+      "statement": "assert Eq({1}, {x}).simplify() == Eq({1}, {x})",
+      "note": "The undecidable symbolic set equality must remain unchanged. On the buggy simplification paths it raises instead; with only the first guard applied, it still fails in Equality's rewrite/linear-coefficient processing."
+    }
+  ],
+  "time_minutes": 75,
+  "confidence": "high"
+}

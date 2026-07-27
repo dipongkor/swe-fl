@@ -1,0 +1,32 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10449",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": 62,
+      "statement": "modify_field_list(field_list, annotations[fullname])",
+      "method": "merge_typehints",
+      "class": "N/A",
+      "note": "The caller has objtype available but invokes the same merge operation for classes and callables without communicating that class-level constructor return annotations must be suppressed."
+    },
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": 126,
+      "statement": "if 'return' in annotations and 'return' not in arguments:",
+      "method": "modify_field_list",
+      "class": "N/A",
+      "note": "This condition appends an rtype field for every undocumented return annotation. For autoclass, the annotation comes from __init__ and the conventional -> None is incorrectly displayed as the class's return type."
+    }
+  ],
+  "reasoning": "The description-typehint merge treats a class like a function. Its caller discards the object-kind context, and the callee unconditionally adds a return field whenever a return annotation exists. Thus __init__'s -> None leaks into the class section, while retaining it in the separately documented __init__ section is correct. Both the context-passing and decision sites are required.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_ext_autodoc_configs.py",
+      "line": 1037,
+      "statement": "assert ('class target.typehints._ClassWithDocumentedInit(x)\\n'",
+      "note": "The multiline expected output excludes a class-level Return type block but retains the method-level one. The base output contains the extra class block, so the assertion fails."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

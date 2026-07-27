@@ -1,0 +1,38 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8551",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 274,
+      "statement": "result['refspecific'] = True",
+      "method": "make_xref",
+      "class": "PyXrefMixin",
+      "note": "The implicit type reference is made specific without attaching the current py:module and py:class scope. Unqualified targets therefore suffix-match globally and can resolve ambiguously or incorrectly."
+    },
+    {
+      "file": "sphinx/util/docfields.py",
+      "line": 293,
+      "statement": "xrefs = typed_field.make_xrefs(",
+      "method": "transform",
+      "class": "DocFieldTransformer",
+      "note": "The separately typed-field path creates cross-references without forwarding the document environment, so PyXrefMixin has no access to the originating Python module/class context."
+    }
+  ],
+  "reasoning": "Implicit :type:, :rtype:, and typed :param: references lack the scope attributes carried by explicit Python-domain roles. PyXrefMixin marks them refspecific but omits py:module/py:class, while one DocFieldTransformer call path also omits env entirely. Both defects must be corrected so resolution begins in the current class/module instead of suffix-matching every candidate.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 807,
+      "statement": "assert_node(doctree[3][1][0][0][1][0][0][0][2], pending_xref,",
+      "note": "The typed :param: reference must carry py:module='example' and py:class='Class'; the base node has neither attribute."
+    },
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 819,
+      "statement": "assert_node(doctree[3][1][0][0][1][0][1][0][2], pending_xref,",
+      "note": "The separate :type age: int path checks the same scope attributes and additionally exercises the env omission in DocFieldTransformer."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

@@ -1,0 +1,46 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9602",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 126,
+      "statement": "return [nodes.Text(node.value)]",
+      "method": "unparse",
+      "class": "N/A",
+      "note": "Constants are emitted from their raw values. String Literal values consequently lose their quotes, and all constants remain indistinguishable from type-name text."
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 150,
+      "statement": "result.extend(unparse(node.slice))",
+      "method": "unparse",
+      "class": "N/A",
+      "note": "The Subscript path flattens Literal contents into the surrounding result without marking them as values, even though this branch can see that the subscript base is Literal."
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 182,
+      "statement": "if isinstance(node, nodes.Text) and node.strip():",
+      "method": "_parse_annotation",
+      "class": "N/A",
+      "note": "The post-pass classifies every nonblank Text node as a type reference. Because Literal values arrive as ordinary Text, True, False, numbers, and strings are incorrectly converted to pending py-domain cross-references."
+    }
+  ],
+  "reasoning": "The parser loses the distinction between a subscripted type and the values inside Literal: constants are represented without faithful repr formatting, the Subscript branch emits them without a value marker, and the final classifier assumes all text is a type. The fix must preserve quoted constant rendering, mark Literal contents while flattening, and prevent those marked values from becoming cross-references. The assignment on base line 183 is the consequence of the overbroad line-182 condition, not a separate root-cause statement.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 348,
+      "statement": "assert_node(doctree, ([pending_xref, \"Literal\"],",
+      "note": "The expected tree keeps Literal as a pending reference but True and False as plain text. The base tree instead contains a pending_xref for True and fails here."
+    },
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 356,
+      "statement": "assert_node(doctree, ([pending_xref, \"typing.Literal\"],",
+      "note": "This assertion additionally expects the string value to remain quoted as 'abc', exercising the raw-constant formatting fault."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}
