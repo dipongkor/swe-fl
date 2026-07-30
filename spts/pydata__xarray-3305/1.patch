@@ -1,0 +1,103 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+index d6f0da42..aa696707 100644
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4694,50 +4694,6 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+     def quantile(
+         self, q, dim=None, interpolation="linear", numeric_only=False, keep_attrs=None
+     ):
+-        """Compute the qth quantile of the data along the specified dimension.
+-
+-        Returns the qth quantiles(s) of the array elements for each variable
+-        in the Dataset.
+-
+-        Parameters
+-        ----------
+-        q : float in range of [0,1] or array-like of floats
+-            Quantile to compute, which must be between 0 and 1 inclusive.
+-        dim : str or sequence of str, optional
+-            Dimension(s) over which to apply quantile.
+-        interpolation : {'linear', 'lower', 'higher', 'midpoint', 'nearest'}
+-            This optional parameter specifies the interpolation method to
+-            use when the desired quantile lies between two data points
+-            ``i < j``:
+-
+-                * linear: ``i + (j - i) * fraction``, where ``fraction`` is
+-                  the fractional part of the index surrounded by ``i`` and
+-                  ``j``.
+-                * lower: ``i``.
+-                * higher: ``j``.
+-                * nearest: ``i`` or ``j``, whichever is nearest.
+-                * midpoint: ``(i + j) / 2``.
+-        keep_attrs : bool, optional
+-            If True, the dataset's attributes (`attrs`) will be copied from
+-            the original object to the new one.  If False (default), the new
+-            object will be returned without attributes.
+-        numeric_only : bool, optional
+-            If True, only apply ``func`` to variables with a numeric dtype.
+-
+-        Returns
+-        -------
+-        quantiles : Dataset
+-            If `q` is a single quantile, then the result is a scalar for each
+-            variable in data_vars. If multiple percentiles are given, first
+-            axis of the result corresponds to the quantile and a quantile
+-            dimension is added to the return Dataset. The other dimensions are
+-            the dimensions that remain after the reduction of the array.
+-
+-        See Also
+-        --------
+-        numpy.nanpercentile, pandas.Series.quantile, DataArray.quantile
+-        """
+-
+         if isinstance(dim, str):
+             dims = {dim}
+         elif dim is None:
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+index 2e9906ce..93b4592d 100644
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1593,43 +1593,6 @@ class Variable(
+         return self.broadcast_equals(other, equiv=duck_array_ops.array_notnull_equiv)
+ 
+     def quantile(self, q, dim=None, interpolation="linear"):
+-        """Compute the qth quantile of the data along the specified dimension.
+-
+-        Returns the qth quantiles(s) of the array elements.
+-
+-        Parameters
+-        ----------
+-        q : float in range of [0,1] (or sequence of floats)
+-            Quantile to compute, which must be between 0 and 1
+-            inclusive.
+-        dim : str or sequence of str, optional
+-            Dimension(s) over which to apply quantile.
+-        interpolation : {'linear', 'lower', 'higher', 'midpoint', 'nearest'}
+-            This optional parameter specifies the interpolation method to
+-            use when the desired quantile lies between two data points
+-            ``i < j``:
+-                * linear: ``i + (j - i) * fraction``, where ``fraction`` is
+-                  the fractional part of the index surrounded by ``i`` and
+-                  ``j``.
+-                * lower: ``i``.
+-                * higher: ``j``.
+-                * nearest: ``i`` or ``j``, whichever is nearest.
+-                * midpoint: ``(i + j) / 2``.
+-
+-        Returns
+-        -------
+-        quantiles : Variable
+-            If `q` is a single quantile, then the result
+-            is a scalar. If multiple percentiles are given, first axis of
+-            the result corresponds to the quantile and a quantile dimension
+-            is added to the return array. The other dimensions are the
+-             dimensions that remain after the reduction of the array.
+-
+-        See Also
+-        --------
+-        numpy.nanpercentile, pandas.Series.quantile, Dataset.quantile,
+-        DataArray.quantile
+-        """
+         if isinstance(self.data, dask_array_type):
+             raise TypeError(
+                 "quantile does not work for arrays stored as dask "

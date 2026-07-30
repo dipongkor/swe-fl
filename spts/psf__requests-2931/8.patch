@@ -1,0 +1,20 @@
+diff --git a/requests/models.py b/requests/models.py
+index 9c624d3..6a5624b 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -90,10 +90,11 @@ class RequestEncodingMixin(object):
+                 if isinstance(vs, basestring) or not hasattr(vs, '__iter__'):
+                     vs = [vs]
+                 for v in vs:
+-                    if v is not None:
+-                        result.append(
+-                            (k.encode('utf-8') if isinstance(k, str) else k,
+-                             v.encode('utf-8') if isinstance(v, str) else v))
++                    if v is None:
++                        continue
++                    result.append(
++                        (k.encode('utf-8') if isinstance(k, str) else k,
++                         v.encode('utf-8') if isinstance(v, str) else v))
+             return urlencode(result, doseq=True)
+         else:
+             return data

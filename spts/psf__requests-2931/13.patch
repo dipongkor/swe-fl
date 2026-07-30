@@ -1,0 +1,107 @@
+diff --git a/requests/models.py b/requests/models.py
+index 9c624d3..253f1d4 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -71,33 +71,6 @@ class RequestEncodingMixin(object):
+ 
+         return ''.join(url)
+ 
+-    @staticmethod
+-    def _encode_params(data):
+-        """Encode parameters in a piece of data.
+-
+-        Will successfully encode parameters when passed as a dict or a list of
+-        2-tuples. Order is retained if data is a list of 2-tuples but arbitrary
+-        if parameters are supplied as a dict.
+-        """
+-
+-        if isinstance(data, (str, bytes)):
+-            return to_native_string(data)
+-        elif hasattr(data, 'read'):
+-            return data
+-        elif hasattr(data, '__iter__'):
+-            result = []
+-            for k, vs in to_key_val_list(data):
+-                if isinstance(vs, basestring) or not hasattr(vs, '__iter__'):
+-                    vs = [vs]
+-                for v in vs:
+-                    if v is not None:
+-                        result.append(
+-                            (k.encode('utf-8') if isinstance(k, str) else k,
+-                             v.encode('utf-8') if isinstance(v, str) else v))
+-            return urlencode(result, doseq=True)
+-        else:
+-            return data
+-
+     @staticmethod
+     def _encode_files(files, data):
+         """Build the body for a multipart/form-data request.
+@@ -157,6 +130,50 @@ class RequestEncodingMixin(object):
+ 
+         return body, content_type
+ 
++    @staticmethod
++    def _encode_data(data, encoding='utf-8'):
++        print('[_encode_data] called with type=%s' % type(data).__name__)
++
++        if isinstance(data, (str, bytes)):
++            print('[_encode_data] branch=string, len=%s' % len(data))
++            encoded = to_native_string(data)
++            print('[_encode_data] returning native string, len=%s' % len(encoded))
++            return encoded
++        elif hasattr(data, 'read'):
++            print('[_encode_data] branch=file-like, passing through unread')
++            return data
++        elif hasattr(data, '__iter__'):
++            print('[_encode_data] branch=iterable')
++            pairs = []
++            items = to_key_val_list(data)
++            i = 0
++            while i < len(items):
++                key, values = items[i]
++                i += 1
++                if isinstance(values, basestring) or not hasattr(values, '__iter__'):
++                    values = [values]
++                else:
++                    # Materialise so the inner loop can index; values may be
++                    # any iterable (set, tuple, generator) at this point.
++                    values = list(values)
++                print('[_encode_data]   key=%r -> %s value(s)' % (key, len(values)))
++                j = 0
++                while j < len(values):
++                    value = values[j]
++                    j += 1
++                    if value is None:
++                        print('[_encode_data]     skipping None for key=%r' % key)
++                        continue
++                    pairs.append(
++                        (key.encode(encoding) if isinstance(key, str) else key,
++                         value.encode(encoding) if isinstance(value, str) else value))
++            encoded = urlencode(pairs, doseq=True)
++            print('[_encode_data] encoded %s pair(s) -> %r' % (len(pairs), encoded))
++            return encoded
++        else:
++            print('[_encode_data] branch=passthrough, no encoding applied')
++            return data
++
+ 
+ class RequestHooksMixin(object):
+     def register_hook(self, event, hook):
+@@ -385,7 +402,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
+             if isinstance(fragment, str):
+                 fragment = fragment.encode('utf-8')
+ 
+-        enc_params = self._encode_params(params)
++        enc_params = self._encode_data(params)
+         if enc_params:
+             if query:
+                 query = '%s&%s' % (query, enc_params)
+@@ -444,7 +461,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
+                 (body, content_type) = self._encode_files(files, data)
+             else:
+                 if data:
+-                    body = self._encode_params(data)
++                    body = self._encode_data(data)
+                     if isinstance(data, basestring) or hasattr(data, 'read'):
+                         content_type = None
+                     else:

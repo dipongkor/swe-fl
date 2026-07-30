@@ -8,5 +8,6 @@
 **8**: if-else branch swap with negation
 **9**: For <--> While
 **10**: if-else <--> match
-**12**: if-else <--> ternary
-**13**: function extraction
+**11**: if-else <--> ternary
+**12**: function extraction
+**13**: all rules that apply

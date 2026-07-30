@@ -1,0 +1,31 @@
+diff --git a/requests/models.py b/requests/models.py
+index 9c624d3..bcdec41 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -72,7 +72,7 @@ class RequestEncodingMixin(object):
+         return ''.join(url)
+ 
+     @staticmethod
+-    def _encode_params(data):
++    def _encode_data(data):
+         """Encode parameters in a piece of data.
+ 
+         Will successfully encode parameters when passed as a dict or a list of
+@@ -385,7 +385,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
+             if isinstance(fragment, str):
+                 fragment = fragment.encode('utf-8')
+ 
+-        enc_params = self._encode_params(params)
++        enc_params = self._encode_data(params)
+         if enc_params:
+             if query:
+                 query = '%s&%s' % (query, enc_params)
+@@ -444,7 +444,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
+                 (body, content_type) = self._encode_files(files, data)
+             else:
+                 if data:
+-                    body = self._encode_params(data)
++                    body = self._encode_data(data)
+                     if isinstance(data, basestring) or hasattr(data, 'read'):
+                         content_type = None
+                     else:

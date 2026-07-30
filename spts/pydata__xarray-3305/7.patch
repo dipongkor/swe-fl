@@ -1,0 +1,176 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+index d6f0da42..c3dd39f4 100644
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4738,12 +4738,28 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+         numpy.nanpercentile, pandas.Series.quantile, DataArray.quantile
+         """
+ 
++        print(
++            "[Dataset.quantile] ENTER q=%r dim=%r interpolation=%r "
++            "numeric_only=%r keep_attrs=%r self.dims=%r data_vars=%r coords=%r"
++            % (
++                q,
++                dim,
++                interpolation,
++                numeric_only,
++                keep_attrs,
++                dict(self.dims),
++                list(self.data_vars),
++                list(self.coords),
++            )
++        )
++
+         if isinstance(dim, str):
+             dims = {dim}
+         elif dim is None:
+             dims = set(self.dims)
+         else:
+             dims = set(dim)
++        print("[Dataset.quantile] resolved dims to reduce: %r" % (sorted(dims),))
+ 
+         _assert_empty(
+             [d for d in dims if d not in self.dims],
+@@ -4751,10 +4767,18 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+         )
+ 
+         q = np.asarray(q, dtype=np.float64)
++        print(
++            "[Dataset.quantile] q as array: %r (ndim=%d shape=%r)"
++            % (q, q.ndim, q.shape)
++        )
+ 
+         variables = OrderedDict()
+         for name, var in self.variables.items():
+             reduce_dims = [d for d in var.dims if d in dims]
++            print(
++                "[Dataset.quantile]   var %r dims=%r is_coord=%r dtype=%r "
++                "reduce_dims=%r" % (name, var.dims, name in self.coords, var.dtype, reduce_dims)
++            )
+             if reduce_dims or not var.dims:
+                 if name not in self.coords:
+                     if (
+@@ -4767,26 +4791,57 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+                             # axis=(0, 1) if they will be equivalent, because
+                             # the former is often more efficient
+                             reduce_dims = None
++                            print(
++                                "[Dataset.quantile]   var %r: full reduction -> "
++                                "reduce_dims=None" % (name,)
++                            )
++                        print(
++                            "[Dataset.quantile]   var %r: calling Variable.quantile "
++                            "with dim=%r" % (name, reduce_dims)
++                        )
+                         variables[name] = var.quantile(
+                             q, dim=reduce_dims, interpolation=interpolation
+                         )
++                    else:
++                        print(
++                            "[Dataset.quantile]   var %r: skipped by numeric_only "
++                            "(dtype=%r)" % (name, var.dtype)
++                        )
++                else:
++                    print(
++                        "[Dataset.quantile]   var %r: coord touched by reduction -> "
++                        "dropped" % (name,)
++                    )
+ 
+             else:
++                print("[Dataset.quantile]   var %r: unaffected -> passed through" % (name,))
+                 variables[name] = var
+ 
++        print("[Dataset.quantile] variables kept: %r" % (list(variables),))
++
+         # construct the new dataset
+         coord_names = {k for k in self.coords if k in variables}
+         indexes = OrderedDict((k, v) for k, v in self.indexes.items() if k in variables)
+         if keep_attrs is None:
+             keep_attrs = _get_keep_attrs(default=False)
+         attrs = self.attrs if keep_attrs else None
++        print(
++            "[Dataset.quantile] coord_names=%r indexes=%r keep_attrs=%r"
++            % (sorted(coord_names), list(indexes), keep_attrs)
++        )
+         new = self._replace_with_new_dims(
+             variables, coord_names=coord_names, attrs=attrs, indexes=indexes
+         )
+         if "quantile" in new.dims:
++            print("[Dataset.quantile] attaching 'quantile' dim coord")
+             new.coords["quantile"] = Variable("quantile", q)
+         else:
++            print("[Dataset.quantile] attaching scalar 'quantile' coord")
+             new.coords["quantile"] = q
++        print(
++            "[Dataset.quantile] EXIT dims=%r data_vars=%r coords=%r"
++            % (dict(new.dims), list(new.data_vars), list(new.coords))
++        )
+         return new
+ 
+     def rank(self, dim, pct=False, keep_attrs=None):
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+index 2e9906ce..b360d03c 100644
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1630,7 +1630,22 @@ class Variable(
+         numpy.nanpercentile, pandas.Series.quantile, Dataset.quantile,
+         DataArray.quantile
+         """
++        print(
++            "[quantile] ENTER q=%r dim=%r interpolation=%r self.dims=%r "
++            "self.shape=%r self.dtype=%r data_type=%s"
++            % (
++                q,
++                dim,
++                interpolation,
++                self.dims,
++                self.shape,
++                self.dtype,
++                type(self.data).__name__,
++            )
++        )
++
+         if isinstance(self.data, dask_array_type):
++            print("[quantile] data is dask-backed -> raising TypeError")
+             raise TypeError(
+                 "quantile does not work for arrays stored as dask "
+                 "arrays. Load the data via .compute() or .load() "
+@@ -1638,10 +1653,12 @@ class Variable(
+             )
+ 
+         q = np.asarray(q, dtype=np.float64)
++        print("[quantile] q as array: %r (ndim=%d shape=%r)" % (q, q.ndim, q.shape))
+ 
+         new_dims = list(self.dims)
+         if dim is not None:
+             axis = self.get_axis_num(dim)
++            print("[quantile] dim=%r -> axis=%r" % (dim, axis))
+             if utils.is_scalar(dim):
+                 new_dims.remove(dim)
+             else:
+@@ -1650,15 +1667,24 @@ class Variable(
+         else:
+             axis = None
+             new_dims = []
++            print("[quantile] dim is None -> reducing over all axes")
++        print("[quantile] new_dims after reduction: %r" % (new_dims,))
+ 
+         # only add the quantile dimension if q is array like
+         if q.ndim != 0:
+             new_dims = ["quantile"] + new_dims
++            print("[quantile] q is array-like -> new_dims=%r" % (new_dims,))
+ 
+         qs = np.nanpercentile(
+             self.data, q * 100.0, axis=axis, interpolation=interpolation
+         )
+-        return Variable(new_dims, qs)
++        print(
++            "[quantile] nanpercentile result shape=%r dtype=%r"
++            % (np.shape(qs), np.asarray(qs).dtype)
++        )
++        result = Variable(new_dims, qs)
++        print("[quantile] EXIT dims=%r shape=%r" % (result.dims, result.shape))
++        return result
+ 
+     def rank(self, dim, pct=False):
+         """Ranks the data.

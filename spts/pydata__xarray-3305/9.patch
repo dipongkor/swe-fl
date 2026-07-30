@@ -1,0 +1,42 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+index d6f0da42..a75fecda 100644
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4753,7 +4753,10 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+         q = np.asarray(q, dtype=np.float64)
+ 
+         variables = OrderedDict()
+-        for name, var in self.variables.items():
++        items = list(self.variables.items())
++        i = 0
++        while i < len(items):
++            name, var = items[i]
+             reduce_dims = [d for d in var.dims if d in dims]
+             if reduce_dims or not var.dims:
+                 if name not in self.coords:
+@@ -4773,6 +4776,7 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+ 
+             else:
+                 variables[name] = var
++            i += 1
+ 
+         # construct the new dataset
+         coord_names = {k for k in self.coords if k in variables}
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+index 2e9906ce..35595468 100644
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1645,8 +1645,11 @@ class Variable(
+             if utils.is_scalar(dim):
+                 new_dims.remove(dim)
+             else:
+-                for d in dim:
+-                    new_dims.remove(d)
++                dims_to_remove = list(dim)
++                i = 0
++                while i < len(dims_to_remove):
++                    new_dims.remove(dims_to_remove[i])
++                    i += 1
+         else:
+             axis = None
+             new_dims = []

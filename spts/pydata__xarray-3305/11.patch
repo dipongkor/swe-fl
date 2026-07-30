@@ -1,0 +1,48 @@
+diff --git a/xarray/core/dataset.py b/xarray/core/dataset.py
+index d6f0da42..702ae533 100644
+--- a/xarray/core/dataset.py
++++ b/xarray/core/dataset.py
+@@ -4783,10 +4783,9 @@ class Dataset(Mapping, ImplementsDatasetReduce, DataWithCoords):
+         new = self._replace_with_new_dims(
+             variables, coord_names=coord_names, attrs=attrs, indexes=indexes
+         )
+-        if "quantile" in new.dims:
+-            new.coords["quantile"] = Variable("quantile", q)
+-        else:
+-            new.coords["quantile"] = q
++        new.coords["quantile"] = (
++            Variable("quantile", q) if "quantile" in new.dims else q
++        )
+         return new
+ 
+     def rank(self, dim, pct=False, keep_attrs=None):
+diff --git a/xarray/core/variable.py b/xarray/core/variable.py
+index 2e9906ce..dbde6ef4 100644
+--- a/xarray/core/variable.py
++++ b/xarray/core/variable.py
+@@ -1639,17 +1639,16 @@ class Variable(
+ 
+         q = np.asarray(q, dtype=np.float64)
+ 
++        axis = self.get_axis_num(dim) if dim is not None else None
++
+         new_dims = list(self.dims)
+-        if dim is not None:
+-            axis = self.get_axis_num(dim)
+-            if utils.is_scalar(dim):
+-                new_dims.remove(dim)
+-            else:
+-                for d in dim:
+-                    new_dims.remove(d)
+-        else:
+-            axis = None
++        if dim is None:
+             new_dims = []
++        elif utils.is_scalar(dim):
++            new_dims.remove(dim)
++        else:
++            for d in dim:
++                new_dims.remove(d)
+ 
+         # only add the quantile dimension if q is array like
+         if q.ndim != 0:

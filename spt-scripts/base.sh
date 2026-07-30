@@ -12,8 +12,8 @@
 set -uo pipefail   # NOTE: intentionally NOT `set -e` — failing base-run tests
                    # are expected and must not abort the script.
 
-INSTANCE_ID="pydata__xarray-3305"
-BASE_COMMIT="69c7e01e5167a3137c285cb50d1978252bb8bcbf"
+INSTANCE_ID="psf__requests-2931"
+BASE_COMMIT="5f7a3a74aab1625c2bb65f643197ee885e3da576"
 
 # Resolve the directory this script lives in (portable).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -60,7 +60,7 @@ REMOTE_URL="https://github.com/$OWNER_REPO.git"
 dexec "git checkout $BASE_COMMIT"
 
 dexec "source /opt/miniconda3/bin/activate testbed && \
-       python -m pip install -e . pytest-cov --verbose"
+       python -m pip install -e ."
 
 dexec "mkdir -p /reports"
 
@@ -69,18 +69,45 @@ copy_to_container "$SCRIPT_DIR/run-suite.sh"        /run-suite.sh
 copy_to_container "$SCRIPT_DIR/../../parse_junit.py" /parse_junit.py
 docker exec "$INSTANCE_ID" chmod +x /run-suite.sh
 
+# Django doesn't use pytest — its suite is driven by ./tests/runtests.py
+# (a thin wrapper around unittest's DiscoverRunner). runtests.py has no
+# --testrunner CLI flag, so we point TEST_RUNNER at our own DiscoverRunner
+# subclass via a settings shim that inherits everything from test_sqlite.
+# The runner wraps unittest-xml-reporting's XMLTestRunner with a single
+# output file (writing to a file object — passing a directory would emit
+# one XML per test class, which the diff comparison can't consume).
+dexec "source /opt/miniconda3/bin/activate testbed && \
+       python -m pip install unittest-xml-reporting"
+
+dexec "cat > /testbed/tests/test_sqlite_junit.py <<'PY'
+from test_sqlite import *
+import os
+from django.test.runner import DiscoverRunner
+
+class _SingleFileXMLRunner(DiscoverRunner):
+    def run_suite(self, suite, **kwargs):
+        import xmlrunner
+        output_file = os.environ['JUNIT_OUTPUT_FILE']
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        with open(output_file, 'wb') as f:
+            runner = xmlrunner.XMLTestRunner(
+                output=f, verbosity=self.verbosity,
+                failfast=self.failfast, buffer=self.buffer,
+            )
+            return runner.run(suite)
+
+TEST_RUNNER = 'test_sqlite_junit._SingleFileXMLRunner'
+PY"
+
 run_suite() {
   local prefix="$1"
   dexec "source /opt/miniconda3/bin/activate testbed && \
-     pytest -rA -vv \
-       -o console_output_style=classic \
-       --tb=short \
-       --cov-config=/testbed/.coveragerc \
-       --cov-report=term-missing \
-       --junitxml=/reports/${prefix}-junit.xml \
-       --log-file=/reports/${prefix}-pytest.log \
-       --log-file-level=DEBUG \
-       2>&1 | tee /reports/${prefix}-pytest.out"
+     JUNIT_OUTPUT_FILE=/reports/${prefix}-junit.xml \
+     ./tests/runtests.py \
+       --verbosity 2 \
+       --settings=test_sqlite_junit \
+       --parallel 4 \
+       2>&1 | tee /reports/${prefix}-runtests.out"
 }
 
 run_suite base_run1

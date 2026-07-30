@@ -1,0 +1,28 @@
+diff --git a/requests/models.py b/requests/models.py
+index 9c624d3..db6fd7d 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -86,10 +86,21 @@ class RequestEncodingMixin(object):
+             return data
+         elif hasattr(data, '__iter__'):
+             result = []
+-            for k, vs in to_key_val_list(data):
++            items = to_key_val_list(data)
++            i = 0
++            while i < len(items):
++                k, vs = items[i]
++                i += 1
+                 if isinstance(vs, basestring) or not hasattr(vs, '__iter__'):
+                     vs = [vs]
+-                for v in vs:
++                else:
++                    # Materialise so the inner loop can index; vs may be any
++                    # iterable (set, tuple, generator) at this point.
++                    vs = list(vs)
++                j = 0
++                while j < len(vs):
++                    v = vs[j]
++                    j += 1
+                     if v is not None:
+                         result.append(
+                             (k.encode('utf-8') if isinstance(k, str) else k,

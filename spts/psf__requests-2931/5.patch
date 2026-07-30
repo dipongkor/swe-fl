@@ -1,0 +1,32 @@
+diff --git a/requests/models.py b/requests/models.py
+index 9c624d3..cfbb7da 100644
+--- a/requests/models.py
++++ b/requests/models.py
+@@ -72,12 +72,15 @@ class RequestEncodingMixin(object):
+         return ''.join(url)
+ 
+     @staticmethod
+-    def _encode_params(data):
++    def _encode_params(data, encoding='utf-8'):
+         """Encode parameters in a piece of data.
+ 
+         Will successfully encode parameters when passed as a dict or a list of
+         2-tuples. Order is retained if data is a list of 2-tuples but arbitrary
+         if parameters are supplied as a dict.
++
++        :param encoding: charset used to encode text keys and values before
++            they are urlencoded. Defaults to utf-8.
+         """
+ 
+         if isinstance(data, (str, bytes)):
+@@ -92,8 +95,8 @@ class RequestEncodingMixin(object):
+                 for v in vs:
+                     if v is not None:
+                         result.append(
+-                            (k.encode('utf-8') if isinstance(k, str) else k,
+-                             v.encode('utf-8') if isinstance(v, str) else v))
++                            (k.encode(encoding) if isinstance(k, str) else k,
++                             v.encode(encoding) if isinstance(v, str) else v))
+             return urlencode(result, doseq=True)
+         else:
+             return data
