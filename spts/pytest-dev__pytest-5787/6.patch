@@ -1,0 +1,11 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -221,7 +221,6 @@ class BaseReport:
+                 reprcrash = reportdict["longrepr"]["reprcrash"]
+ 
+                 unserialized_entries = []
+-                reprentry = None
+                 for entry_data in reprtraceback["reprentries"]:
+                     data = entry_data["data"]
+                     entry_type = entry_data["type"]

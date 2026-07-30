@@ -1,0 +1,44 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -165,7 +165,7 @@ class BaseReport:
+             reprtraceback = rep.longrepr.reprtraceback.__dict__.copy()
+             reprcrash = rep.longrepr.reprcrash.__dict__.copy()
+ 
+-            new_entries = []
++            serialized_entries = []
+             for entry in reprtraceback["reprentries"]:
+                 entry_data = {
+                     "type": type(entry).__name__,
+@@ -174,9 +174,9 @@ class BaseReport:
+                 for key, value in entry_data["data"].items():
+                     if hasattr(value, "__dict__"):
+                         entry_data["data"][key] = value.__dict__.copy()
+-                new_entries.append(entry_data)
++                serialized_entries.append(entry_data)
+ 
+-            reprtraceback["reprentries"] = new_entries
++            reprtraceback["reprentries"] = serialized_entries
+ 
+             return {
+                 "reprcrash": reprcrash,
+@@ -220,7 +220,7 @@ class BaseReport:
+                 reprtraceback = reportdict["longrepr"]["reprtraceback"]
+                 reprcrash = reportdict["longrepr"]["reprcrash"]
+ 
+-                unserialized_entries = []
++                deserialized_entries = []
+                 reprentry = None
+                 for entry_data in reprtraceback["reprentries"]:
+                     data = entry_data["data"]
+@@ -247,8 +247,8 @@ class BaseReport:
+                         reprentry = ReprEntryNative(data["lines"])
+                     else:
+                         _report_unserialization_failure(entry_type, cls, reportdict)
+-                    unserialized_entries.append(reprentry)
+-                reprtraceback["reprentries"] = unserialized_entries
++                    deserialized_entries.append(reprentry)
++                reprtraceback["reprentries"] = deserialized_entries
+ 
+                 exception_info = ReprExceptionInfo(
+                     reprtraceback=ReprTraceback(**reprtraceback),

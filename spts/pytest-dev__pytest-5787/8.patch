@@ -1,0 +1,22 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -185,15 +185,15 @@ class BaseReport:
+             }
+ 
+         d = self.__dict__.copy()
+-        if hasattr(self.longrepr, "toterminal"):
++        if not hasattr(self.longrepr, "toterminal"):
++            d["longrepr"] = self.longrepr
++        else:
+             if hasattr(self.longrepr, "reprtraceback") and hasattr(
+                 self.longrepr, "reprcrash"
+             ):
+                 d["longrepr"] = disassembled_report(self)
+             else:
+                 d["longrepr"] = str(self.longrepr)
+-        else:
+-            d["longrepr"] = self.longrepr
+         for name in d:
+             if isinstance(d[name], (py.path.local, Path)):
+                 d[name] = str(d[name])

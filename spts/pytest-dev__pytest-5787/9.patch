@@ -1,0 +1,17 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -166,7 +166,12 @@ class BaseReport:
+             reprcrash = rep.longrepr.reprcrash.__dict__.copy()
+ 
+             new_entries = []
+-            for entry in reprtraceback["reprentries"]:
++            entries = iter(reprtraceback["reprentries"])
++            while True:
++                try:
++                    entry = next(entries)
++                except StopIteration:
++                    break
+                 entry_data = {
+                     "type": type(entry).__name__,
+                     "data": entry.__dict__.copy(),

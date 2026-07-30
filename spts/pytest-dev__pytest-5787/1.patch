@@ -1,0 +1,41 @@
+diff --git a/src/_pytest/reports.py b/src/_pytest/reports.py
+index 4682d5b6e..1c5e9785c 100644
+--- a/src/_pytest/reports.py
++++ b/src/_pytest/reports.py
+@@ -152,15 +152,6 @@ class BaseReport:
+         return verbose
+ 
+     def _to_json(self):
+-        """
+-        This was originally the serialize_report() function from xdist (ca03269).
+-
+-        Returns the contents of this report as a dict of builtin entries, suitable for
+-        serialization.
+-
+-        Experimental method.
+-        """
+-
+         def disassembled_report(rep):
+             reprtraceback = rep.longrepr.reprtraceback.__dict__.copy()
+             reprcrash = rep.longrepr.reprcrash.__dict__.copy()
+@@ -198,19 +189,11 @@ class BaseReport:
+             if isinstance(d[name], (py.path.local, Path)):
+                 d[name] = str(d[name])
+             elif name == "result":
+-                d[name] = None  # for now
++                d[name] = None
+         return d
+ 
+     @classmethod
+     def _from_json(cls, reportdict):
+-        """
+-        This was originally the serialize_report() function from xdist (ca03269).
+-
+-        Factory method that returns either a TestReport or CollectReport, depending on the calling
+-        class. It's the callers responsibility to know which class to pass here.
+-
+-        Experimental method.
+-        """
+         if reportdict["longrepr"]:
+             if (
+                 "reprcrash" in reportdict["longrepr"]
