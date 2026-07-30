@@ -1,5 +1,5 @@
 {
-  "instance_id": "pytest-dev__pytest-5786",
+  "instance_id": "pytest-dev__pytest-5787",
   "root_cause": [
     {
       "file": "src/_pytest/reports.py",
