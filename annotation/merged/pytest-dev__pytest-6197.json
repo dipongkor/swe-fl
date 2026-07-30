@@ -1,0 +1,41 @@
+{
+  "instance_id": "pytest-dev__pytest-6197",
+  "root_cause": [
+    {
+      "file": "src/_pytest/python.py",
+      "line": 642,
+      "statement": "self._mount_obj_if_needed()",
+      "note": "First statement of Package.collect(). A Package collector is created for every directory containing an __init__.py while the session walks the rootdir, and this call imports that __init__.py immediately (_mount_obj_if_needed -> _getobj -> _importtestmodule -> fspath.pyimport), before the python_files pattern check performed further down in collect(). Two consequences: an __init__.py that fails to import (e.g. platform-specific package, or 'assert False') aborts the whole run with a collection error even though it matches no test pattern; and pyimport inserts the package's base directory (e.g. 'src') into sys.path as a side effect, making packages importable that should not be. The _mount_obj_if_needed/obj property split (lines 251-267) and the Module.__init__ _ALLOW_MARKERS override (lines 435-441) are supporting machinery from the same change but do not themselves trigger the eager import."
+    }
+  ],
+  "reasoning": "Previously Package.collect() only constructed a Module for the package's __init__.py after it passed the python_files pattern filter, and the actual import happened lazily when a collected module's obj was accessed. Placing _mount_obj_if_needed() at the top of Package.collect() moves the import to collection time for every package directory under the rootdir, unconditionally. Unimportable __init__.py files (which previously were simply never imported) now produce 'Interrupted: 1 errors during collection', and the import's sys.path side effect leaks package parent directories like src/ onto sys.path during the test run.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_collection.py",
+      "line": 1267,
+      "statement": "assert result.ret == ExitCode.OK",
+      "note": "In test_does_not_eagerly_collect_packages, added by the test patch. A non-test package foopkg/ with __init__.py containing 'assert False' exists next to a passing test file; the inner pytest run should ignore it and exit OK, but the eager import raises AssertionError during collection and the run exits INTERRUPTED (2)."
+    },
+    {
+      "file": "testing/test_collection.py",
+      "line": 1280,
+      "statement": "assert result.ret == ExitCode.OK",
+      "note": "In test_does_not_put_src_on_path, added by the test patch. src/nope/__init__.py exists but src/ is not on sys.path, so the inner test expects 'import nope' to raise ImportError. Eagerly importing the nope package during collection inserts src/ into sys.path, the import succeeds, pytest.raises reports DID NOT RAISE, and the inner run exits TESTS_FAILED (1)."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 1,
+      "locations_Atish": 1,
+      "locations_Eshgin": 1
+    },
+    "reasoning_Eshgin": "Package.collect should traverse files without importing an otherwise irrelevant package. The unconditional _mount_obj_if_needed call materializes Package.obj, which imports __init__.py and mutates import state before collection decisions are made. This executes arbitrary package initialization code and leaks directories such as src onto sys.path. Removing this eager call restores lazy import through the normal obj property when an actual Python object is required. The PR's surrounding PyobjMixin refactor and removal of the __init__.py marker workaround support that lazy design but are not additional fault-triggering base lines."
+  }
+}

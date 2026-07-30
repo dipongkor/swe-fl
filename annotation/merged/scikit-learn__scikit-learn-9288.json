@@ -1,0 +1,35 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-9288",
+  "root_cause": [
+    {
+      "file": "sklearn/cluster/k_means_.py",
+      "line": 372,
+      "statement": "random_state=random_state)",
+      "note": "In k_means(), sequential branch (effective_n_jobs(n_jobs) == 1): the loop 'for it in range(n_init):' (line 366) passes the same mutating RandomState object into every kmeans_single restart, so each restart resumes the random stream where the previous one stopped. The parallel branch (line 382) instead pre-draws n_init integer seeds with random_state.randint(np.iinfo(np.int32).max, size=n_init) and gives each restart its own seed. The two branches therefore consume randomness in structurally different ways, producing different initialization sequences for the same random_state."
+    }
+  ],
+  "reasoning": "k_means restarts kmeans_single n_init times and keeps the best run. With n_jobs=1 the restarts share one RandomState consumed sequentially; with n_jobs>1 each restart gets an independent pre-drawn integer seed. Every individual run is a valid k-means either way, but the initialization sequences differ between the branches, so a different restart can win the best-of-n_init selection and all fitted attributes (labels_, inertia_, cluster_centers_) diverge between n_jobs=1 and n_jobs>1 despite a fixed random_state. This violates the reproducibility contract of random_state; duplicate reports observed the same divergence via inertia_ and via labels_ (where a worse local optimum won on one branch).",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/cluster/tests/test_k_means.py",
+      "line": 963,
+      "statement": "assert_array_equal(result_1, result_2)",
+      "note": "In test_result_of_kmeans_equal_in_diff_n_jobs, added by the test patch. Lines 961-962 fit KMeans(n_clusters=3, random_state=0) on the same data with n_jobs=1 and n_jobs=2; the labels are expected to be identical. Under the buggy code the two branches use different seed schemes and 39/50 labels differ, failing the assertion."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 1,
+      "locations_Atish": 1,
+      "locations_Eshgin": 1
+    },
+    "reasoning_Eshgin": "KMeans promises reproducible behavior for a fixed random_state, but the base implementation seeds its serial and parallel execution paths differently. The serial call at line 372 lets each run consume the shared generator internally; the parallel path generates a fixed array of integer seeds first. The regression therefore finds different labels for n_jobs=1 and n_jobs=2. The official patch unifies seed generation. A narrower one-line experiment that retained the base loop but passed random_state.randint(...) at line 372 also made the regression pass, demonstrating that the loop line itself is not a minimal faulty line."
+  }
+}

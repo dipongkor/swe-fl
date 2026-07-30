@@ -1,0 +1,59 @@
+{
+  "instance_id": "sympy__sympy-19495",
+  "root_cause": [
+    {
+      "file": "sympy/sets/conditionset.py",
+      "line": 245,
+      "statement": "if cond is S.true:",
+      "note": "In ConditionSet._eval_subs, this guard introduces a special case for free-symbol substitution (old != self.sym) when the substituted condition evaluates to S.true. The special case itself is wrong: no branch is needed, and the condition can become S.true purely from symbol assumptions (e.g. (n < p) with n negative, p positive), which routes correct substitutions into the buggy return on line 246. The fix deletes this branch entirely so the method always returns self.func(self.sym, cond, base)."
+    },
+    {
+      "file": "sympy/sets/conditionset.py",
+      "line": 246,
+      "statement": "return ConditionSet(new, Contains(new, base), base)",
+      "note": "The statement that produces the wrong value: the set is rebuilt with 'new' as the bound variable instead of keeping self.sym, conflating the substitution value with the dummy symbol. E.g. subs(y, 1/3) on ConditionSet(x, Contains(y, Interval(-1,1)), ImageSet(...)) yields ConditionSet(1/3, Contains(1/3, ...), ...); with assumption-driven conditions the Contains(new, base) check can also collapse the set to EmptySet. Every failing assertion fails because this statement executed."
+    }
+  ],
+  "reasoning": "For a ConditionSet, self.sym is a bound (dummy) variable, so substituting a free symbol must leave it untouched. The buggy branch special-cased 'condition became true after subs' and returned ConditionSet(new, Contains(new, base), base), injecting the substitution target 'new' as the bound variable. This produces the nonsensical output in the issue ({1/3 | 1/3 ∊ ...}) and, when the condition evaluates to true purely from symbol assumptions (e.g. n negative, p positive makes (n < p) == True), silently collapses the set to EmptySet via the Contains check. xreplace and subs(simultaneous=True) behave correctly because they bypass _eval_subs, confirming the fault is localized there.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/sets/tests/test_conditionset.py",
+      "line": 127,
+      "statement": "assert ConditionSet(n, n < x, Interval(-oo, 0)).subs(x, p) == Interval(-oo, 0)",
+      "note": "Assertion modified by the test patch (old expectation was S.EmptySet). With n negative and p positive, (n < p) evaluates to S.true after subs, so the buggy branch returns ConditionSet(p, Contains(p, Interval(-oo, 0)), ...) which collapses to EmptySet. This is the first assertion to fail in test_subs_CondSet; the reverse-applied run's traceback goes through basic.py _subs into conditionset.py _eval_subs."
+    },
+    {
+      "file": "sympy/sets/tests/test_conditionset.py",
+      "line": 137,
+      "statement": "assert ConditionSet(x, Contains(y, Interval(-1,1)), img1).subs(y, S.One/3).dummy_eq(img2)",
+      "note": "Regression test added by the test patch for issue 17341 (the scenario from the problem statement). Substituting y makes Contains(1/3, Interval(-1,1)) evaluate to S.true, so the buggy branch replaces the bound variable x with 1/3 instead of returning the ImageSet img2."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 2,
+      "locations_Atish": 2,
+      "locations_Eshgin": 2
+    },
+    "reasoning_Eshgin": "When a substitution targets a free symbol in a ConditionSet condition and base set, _eval_subs first substitutes both expressions. If assumptions make the condition S.true, the base implementation enters lines 245-246 and replaces self.sym with new. That conflates the free symbol being substituted with the bound ConditionSet variable. It also incorrectly changes a ConditionSet over Interval(-oo, 0) into EmptySet merely because the positive replacement is not in the base. The minimal fault is the pre-existing true-condition special case; the fix removes it and always reconstructs with self.sym, letting __new__ consistently simplify the true condition to the substituted base set.",
+    "informational_differences": [
+      {
+        "type": "ftcs_differs",
+        "Atish": [
+          "sympy/sets/tests/test_conditionset.py:127  assert ConditionSet(n, n < x, Interval(-oo, 0)).subs(x, p) == Interval(-oo, 0)",
+          "sympy/sets/tests/test_conditionset.py:137  assert ConditionSet(x, Contains(y, Interval(-1,1)), img1).subs(y, S.One/3).dummy_eq(img2)"
+        ],
+        "Eshgin": [
+          "sympy/sets/tests/test_conditionset.py:None  assert ConditionSet(x, Contains( y, Interval(-1,1)), img1).subs(y, S.One/3).dummy_eq(img2)"
+        ]
+      }
+    ]
+  }
+}

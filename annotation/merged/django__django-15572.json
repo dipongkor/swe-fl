@@ -1,0 +1,41 @@
+{
+  "instance_id": "django__django-15572",
+  "root_cause": [
+    {
+      "file": "django/template/autoreload.py",
+      "line": 20,
+      "statement": "items.update(cwd / to_path(dir) for dir in backend.engine.dirs)",
+      "note": "In get_template_directories(), which builds the set of directories the template autoreloader watches. The generator admits every entry of engine.dirs including falsy ones: to_path('') is Path('.') and cwd / Path('.') is cwd itself, so an empty string in TEMPLATES DIRS (e.g. from os.getenv(...).split(',')) puts the project root into the watched set. template_changed() then treats every changed file as inside a template directory (template_dir in file_path.parents holds for cwd), returns True for all file events, and the autoreload framework consequently skips the server restart for application-code changes."
+    },
+    {
+      "file": "django/template/autoreload.py",
+      "line": 28,
+      "statement": "if not is_django_path(directory)",
+      "note": "Filter of the loader-directories collection in the same function (items.update over loader.get_dirs(), lines 25-29): the condition excludes django-internal paths but not falsy entries, so an empty string returned by a loader's get_dirs() (the filesystem loader reflects engine.dirs) normalizes to cwd identically. Same omission as line 20 on the second collection path; the failing test reaches it only if the configured loader chain exposes get_dirs at this revision, but the defect is present regardless."
+    }
+  ],
+  "reasoning": "get_template_directories() must contain only real template directories because template_changed() classifies any changed file under one of them as a template change and, by returning True, suppresses the dev-server restart. Both collection points in the function admit empty strings, and pathlib normalization (cwd / to_path('')) turns an empty string into the project root, so a configuration like DIRS=[''] makes every file in the project count as a template: template caches are reset but application-code changes no longer trigger an autoreload restart. Before dirs were normalized with pathlib the empty string never matched any file path and was latent and harmless, which is why the symptom appeared as a regression when normalization was introduced.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/template_tests/test_autoreloader.py",
+      "line": 93,
+      "statement": "self.assertEqual(autoreload.get_template_directories(), set())",
+      "note": "In test_template_dirs_ignore_empty_path, added by the test patch, under override_settings with TEMPLATES DIRS=[''] (line 87) and the DjangoTemplates backend. With the empty entry admitted and normalized, the returned set contains the project root instead of being empty; the assertion fails with 'Items in the first set but not the second: PosixPath(/testbed)'."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 2,
+      "locations_Atish": 2,
+      "locations_Eshgin": 2
+    },
+    "reasoning_Eshgin": "Path('') denotes the current directory rather than an absent path. Both comprehensions in get_template_directories accept empty strings and prepend cwd, causing an empty template-directory setting to add the project root to the watched set. The fix filters falsey directory values in both the backend DIRS and loader get_dirs paths. The regression directly exercises the backend DIRS path; the second line is the same independently reachable defect for loader-provided directories."
+  }
+}

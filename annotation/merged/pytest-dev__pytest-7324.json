@@ -1,0 +1,35 @@
+{
+  "instance_id": "pytest-dev__pytest-7324",
+  "root_cause": [
+    {
+      "file": "src/_pytest/mark/expression.py",
+      "line": 164,
+      "statement": "return ast.Name(ident.value, ast.Load())",
+      "note": "In not_expr(), the match-expression parser converts every identifier token directly into a Python ast.Name node with the raw identifier as its id. In pytest's match-expression language 'True', 'False' and 'None' are ordinary identifiers (a test or mark may be named so), but in the Python AST they are reserved: since CPython 3.8 they must be ast.Constant nodes and a Name node with those ids is forbidden. The invalid node is detected when Expression.compile() calls the compile() builtin (line 202): release builds raise ValueError (\"Name node can't be used with 'True' constant\"), debug builds fail the compiler_nameop assertion in Python/compile.c and abort the whole interpreter. MatcherAdapter.__getitem__ (line 175) is only the lookup side and is not itself faulty."
+    }
+  ],
+  "reasoning": "The parser lifts identifiers from a language where True/False/None are ordinary names into Python AST, where they are reserved constants, without any escaping. Any match expression containing such an identifier therefore produces an illegal ast.Name node, and compiling it either raises ValueError (release CPython 3.8+) or aborts a debug interpreter via the compiler_nameop assertion, as in the reported reproducer Expression.compile(\"False\"). Identifiers not colliding with reserved constants are unaffected, which is why only the True/False/None cases fail.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_mark_expression.py",
+      "line": 140,
+      "statement": "assert evaluate(ident, {ident: True}.__getitem__)",
+      "note": "In the parametrized test_valid_idents; the failing cases are ident='True' and 'False' (pre-existing parametrize entries) and 'None' (added by the test patch at line 133). evaluate() calls Expression.compile(ident), which builds the forbidden ast.Name and raises ValueError at the compile() builtin (src/_pytest/mark/expression.py:202) before evaluation; on a debug CPython build the same path aborts the interpreter instead."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 1,
+      "locations_Atish": 1,
+      "locations_Eshgin": 1
+    },
+    "reasoning_Eshgin": "Pytest's marker-expression scanner accepts True, False, and None as identifiers, but not_expr represents them as raw Python AST names. Python's AST validator prohibits those reserved constant spellings in Name nodes, producing ValueError before the matcher can evaluate the marker. The fix safely encodes marker names before AST compilation and decodes them in the matcher adapter. The adapter's base line is not independently faulty; its change is required only by the repair's encoding scheme, so the AST construction line is the minimal pre-existing root cause."
+  }
+}

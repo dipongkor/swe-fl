@@ -1,0 +1,47 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8551",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 274,
+      "statement": "result['refspecific'] = True",
+      "note": "In PyXrefMixin.make_xref (lines 269-284), which builds the pending_xref nodes for info-field types (:type:/:rtype:/:param TYPE name:). Anchors an omission: the function marks the xref refspecific - enabling suffix ('fuzzy') matching so unqualified names can resolve - but stamps no py:module/py:class scoping attributes, although env is in hand (parameter, line 271; on the make_field path env is actually supplied, docfields.py line 364, and discarded unused). Explicit roles get these attributes from PyXRefRole.process_link; without them PythonDomain.find_obj suffix-matches 'A' across every module, producing 'more than one target found' warnings and resolving to the wrong class. Alternative absence locus: PythonDomain defines no process_field_xref override (base no-op at sphinx/domains/__init__.py:312), unlike the c and cpp domains which stamp scope there."
+    },
+    {
+      "file": "sphinx/util/docfields.py",
+      "line": 293,
+      "statement": "xrefs = typed_field.make_xrefs(",
+      "note": "In DocFieldTransformer.transform, the call (lines 293-298) that creates the type xref for separately-typed fields (:type age: int): env is not passed, so on this path no creation-time stamping is even possible - Field.make_xref's process_field_xref hook (docfields.py line 77) is behind 'if env:' and PyXrefMixin.make_xref would have nothing to read ref_context from. The sibling make_field call (line 364) does pass env, isolating the omission to this call site. Must change under any fix that captures scope at xref creation, which is the only time the originating module/class context is known."
+    }
+  ],
+  "reasoning": "Cross-references created implicitly by info fields resolve differently from explicit roles because they are created without scoping context. Explicit py-domain roles stamp py:module and py:class onto the pending_xref from env.ref_context, and the resolver uses those to search the current module, then parents. The info-field pipeline builds its xrefs in PyXrefMixin.make_xref with refspecific=True - permitting suffix matching for unqualified names - but stamps no scope, and one of its two call paths does not even forward env. An unqualified 'A' in :type:/:rtype: therefore suffix-matches candidates in every module, emitting 'more than one target found for cross-reference' warnings under nitpick and resolving to an arbitrary wrong class instead of the current module's.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 807,
+      "statement": "assert_node(doctree[3][1][0][0][1][0][0][0][2], pending_xref,",
+      "note": "In test_info_field_list, added by the test patch: a class in module 'example' documented with ':param str name:'; the assertion (lines 807-809) requires the 'str' pending_xref to carry py:module='example' and py:class='Class'. Fails with \"The node does not have 'py:module' attribute\" - this path had env available (make_field, docfields.py:364) and still stamped nothing, isolating the mixin-side omission."
+    },
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 819,
+      "statement": "assert_node(doctree[3][1][0][0][1][0][1][0][2], pending_xref,",
+      "note": "Same test, the separately-typed field ':type age: int' (lines 819-821, expecting the same scope attributes on the 'int' xref); exercises the env-less transform call site (docfields.py:293-298). Not reached in the failing run, which stops at line 807."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 2,
+      "locations_Atish": 2,
+      "locations_Eshgin": 2
+    },
+    "reasoning_Eshgin": "Implicit :type:, :rtype:, and typed :param: references lack the scope attributes carried by explicit Python-domain roles. PyXrefMixin marks them refspecific but omits py:module/py:class, while one DocFieldTransformer call path also omits env entirely. Both defects must be corrected so resolution begins in the current class/module instead of suffix-matching every candidate."
+  }
+}

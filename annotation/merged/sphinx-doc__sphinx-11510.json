@@ -1,0 +1,54 @@
+{
+  "instance_id": "sphinx-doc__sphinx-11510",
+  "root_cause": [
+    {
+      "file": "sphinx/directives/other.py",
+      "line": 379,
+      "statement": "return super().run()",
+      "note": "Final statement of Include.run() (lines 371-379). After resolving the path relative to the source dir, it delegates entirely to docutils' BaseInclude.run(), which opens the included file itself and splices its raw lines into the current document via self.state_machine.insert_input(). That docutils path knows nothing about Sphinx's event system, so no 'source-read' event is emitted for the transcluded text and handler modifications never reach it. The identical delegation on line 375 (the '<...>' docutils-standard include branch) has the same omission. The included file only gets a 'source-read' when Sphinx reads it as a standalone document, which affects that document's own output, not the copy spliced into the including document."
+    }
+  ],
+  "reasoning": "Included content reaches the build through the docutils include machinery, not through Sphinx's read phase: Include.run() hands off to BaseInclude.run(), which reads the file and inserts its lines directly into the state machine. The 'source-read' event is only emitted in Sphinx's own document-reading path, so text pulled in via '.. include::' bypasses all source-read handlers. If the included file also happens to be a standalone document, handlers do run for it (which is why the reporter saw the handler being called), but only the standalone page is affected; the transcluded copy in the including document keeps the raw file text.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_directive_other.py",
+      "line": 169,
+      "statement": "assert \"baz/baz\" in sources_reported",
+      "note": "In test_include_source_read_event, added by the test patch. A source-read handler records every (docname, source) it sees, then 'index' containing '.. include:: baz/baz.rst' is parsed. The event fires only for 'index'; no event is emitted for the included baz/baz.rst, so sources_reported == {'index': ...} and the assertion fails."
+    },
+    {
+      "file": "tests/test_directive_other.py",
+      "line": 187,
+      "statement": "assert doctree.children[1].rawsource == \"The amazing foo.\"",
+      "note": "In test_include_source_read_event_nested_includes, added by the test patch. The handler rewrites '#magical' to 'amazing' in every source it receives; since no source-read is emitted for text transcluded through nested includes, the raw 'The #magical foo.' lands in the parsed doctree and the assertion fails."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 1,
+      "locations_Atish": 1,
+      "locations_Eshgin": 1
+    },
+    "reasoning_Eshgin": "The top-level reStructuredText parser emits source-read for the document passed to it, but Include.run resolves the child path and then returns BaseInclude.run without placing included RST through the Sphinx source-read lifecycle. BaseInclude reads the child and inserts its original lines into the state machine. Consequently a listener sees and can modify `index`, but never sees `baz/baz`; nested `foo.rst` likewise retains `#magical`. The minimal pre-existing fault is the unconditional delegation at line 379 without an event-aware insertion path. The patch's new _insert_input wrapper is repair code and is not marked as a buggy line.",
+    "informational_differences": [
+      {
+        "type": "ftcs_differs",
+        "Atish": [
+          "tests/test_directive_other.py:169  assert \"baz/baz\" in sources_reported",
+          "tests/test_directive_other.py:187  assert doctree.children[1].rawsource == \"The amazing foo.\""
+        ],
+        "Eshgin": [
+          "tests/test_directive_other.py:166  restructuredtext.parse(app, text, 'index')",
+          "tests/test_directive_other.py:183  doctree = restructuredtext.parse(app, text, 'index')"
+        ]
+      }
+    ]
+  }
+}

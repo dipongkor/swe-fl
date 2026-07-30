@@ -1,0 +1,35 @@
+{
+  "instance_id": "pylint-dev__pylint-4604",
+  "root_cause": [
+    {
+      "file": "pylint/checkers/variables.py",
+      "line": 1829,
+      "statement": "if not isinstance(type_annotation, astroid.Subscript):",
+      "note": "Catch-all filter (with its 'return' on line 1830) in VariablesChecker._store_type_annotation_node, the recorder that registers names mentioned in type comments so imports used only there are exempted from unused-import. The dispatch handles astroid.Name (bare identifiers, lines 1824-1827) and astroid.Subscript (which records names nested inside the subscript, so 'foo' within 'foo.Bar[Boo]' is captured), but a dotted reference like 'abc.ABC' or 'Bar.Boo' parses as an astroid.Attribute, matches neither branch, and is silently discarded here — its root name never reaches self._type_annotation_names, so the corresponding import is reported as unused-import (W0611)."
+    }
+  ],
+  "reasoning": "Type-comment usage tracking is an explicit dispatch over annotation AST node types, and the Attribute case is missing: a module referenced only as a dotted name in a type comment (X = ...  # type: abc.ABC) leaves no record, so the unused-import check sees the import as unused. Bare names are handled by the Name branch and names nested under subscripts are recorded by the Subscript branch, which is why in the regression test only the top-level attribute case 'Bar.Boo' produces the false positive ('Bar imported from foo') while 'foo' is captured via the subscripted line.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/checkers/unittest_variables.py",
+      "line": 212,
+      "statement": "self.walk(module)",
+      "note": "In test_attribute_in_type_comment (added by the test patch, skipIf IS_PYPY), inside the assertNoMessages() context on line 211. The walked module imports foo/Bar/Boo and uses them only in type comments (lines 206-208, including the attribute forms foo.Bar and Bar.Boo); walking it emits unused-import for 'Bar imported from foo' (the top-level Attribute case Bar.Boo is dropped by the recorder), so assertNoMessages fails. Note: the test module imports IS_PYPY from pylint/constants.py, which is added by the fix patch — reverse-apply only the pylint/checkers/variables.py hunk (git apply -R --include='pylint/checkers/variables.py' patch.diff) or the test file fails to import."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 1,
+      "locations_Atish": 1,
+      "locations_Eshgin": 1
+    },
+    "reasoning_Eshgin": "VariablesChecker records imports referenced only by type comments so they are not reported as unused. The base function handles Name and Subscript nodes but prematurely rejects Attribute nodes, even though qualified type comments are represented by astroid.Attribute. The imports forming the attribute expression consequently remain in the unused-import set. The fix adds an Attribute branch that recursively records its expression. Because that branch did not exist in the base commit, the minimal annotatable pre-existing fault is the overly narrow type guard at line 1829, not the newly added repair code. The constants.py change only supports conditionally skipping the regression on PyPy."
+  }
+}

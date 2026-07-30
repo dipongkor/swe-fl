@@ -1,0 +1,47 @@
+{
+  "instance_id": "matplotlib__matplotlib-26466",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": 1459,
+      "statement": "self.xy = xy",
+      "note": "In _AnnotationBase.__init__. The annotation's anchor point is stored as a reference to the caller-supplied object; when xy is a numpy array, the annotation and the caller share the same mutable array. The anchor is resolved from self.xy lazily at draw time, so mutating the array after annotate() moves the already-created annotation/arrow - the reported symptom. Lazily-read constructor input must be snapshotted at construction; storing the borrowed reference couples artist geometry to later caller mutations."
+    },
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": 1392,
+      "statement": "self._ref_coord = ref_coord",
+      "note": "In OffsetFrom.__init__, the same borrow-instead-of-snapshot fault for the offset reference coordinate: __call__ reads self._ref_coord at render time to build the offset transform, so mutating the array after constructing the OffsetFrom shifts where the annotated text lands. Independent of the self.xy site - each is exercised separately by the regression test. The removal of _get_scale and inlining of the scale computation in OffsetFrom.__call__ is a semantics-preserving refactor, not part of the fault."
+    }
+  ],
+  "reasoning": "annotate() parameters that are read lazily at draw time are stored by reference rather than snapshotted: _AnnotationBase keeps the caller's xy object as the anchor and OffsetFrom keeps the caller's ref_coord for its offset transform. When these are numpy arrays, the caller and the artist alias the same mutable data, so mutations made after the annotate()/OffsetFrom construction retroactively move arrows and text at the next draw. Passing a copy (xy=arr.copy()) avoids the symptom, confirming aliasing as the mechanism.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_text.py",
+      "line": 1006,
+      "statement": "an_xy[:] = 2",
+      "note": "In test_annotate_and_offsetfrom_copy_input (added by the test patch, check_figures_equal with png output). The reference figure annotates with xy=an_xy (line 1005, xycoords=l) and then mutates the array; under the buggy code self.xy aliases an_xy and the annotation drawn at savefig time is displaced. Both figures should render identically ('foo' placed (10, 0) pixels from the line center)."
+    },
+    {
+      "file": "lib/matplotlib/tests/test_text.py",
+      "line": 1001,
+      "statement": "of_xy[:] = 1",
+      "note": "Same test, test-figure side: the annotation uses textcoords=OffsetFrom(l, of_xy) (line 999) and the array is mutated afterwards; under the buggy code _ref_coord aliases of_xy and the offset transform shifts. With both figures displaced by their respective (different) mutations the image comparison fails (RMS 3.353); with inputs snapshotted both mutations are inert and the figures match."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 2,
+      "locations_Atish": 2,
+      "locations_Eshgin": 2
+    },
+    "reasoning_Eshgin": "Both constructors store coordinate inputs by alias rather than copying their two scalar components. The regression uses NumPy arrays, then mutates them after creating OffsetFrom and Annotation objects; the base objects immediately reflect [1, 1] and [2, 2] instead of retaining [0.5, 0.5]. The fix unpacks each coordinate pair and stores a tuple, which both validates the shape and breaks the alias. These two assignments are independent instances of the same mutation bug."
+  }
+}

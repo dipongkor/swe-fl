@@ -1,0 +1,35 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25973",
+  "root_cause": [
+    {
+      "file": "sklearn/feature_selection/_sequential.py",
+      "line": 312,
+      "statement": "cv=self.cv,",
+      "note": "In the cross_val_score call (starting line 308) inside _get_best_new_feature_score, which fit() invokes once per candidate feature per iteration. The raw user-supplied cv is re-passed on every invocation; each cross_val_score internally runs check_cv, which wraps a plain iterable in a fresh _CVIterableWrapper that materializes it with list(cv). When cv is a generator (e.g. LeaveOneGroupOut().split(...)), the first invocation drains it; every later invocation gets list(exhausted_generator) == [], i.e. zero splits, so cross_validate produces an empty results list and _aggregate_score_dicts fails on scores[0] with IndexError."
+    }
+  ],
+  "reasoning": "SequentialFeatureSelector documents that cv may be an iterable of (train, test) splits, but its greedy search evaluates cross_val_score many times and hands the same raw iterable to each call. A generator of splits is one-shot: the first cross_val_score consumes it and all subsequent calls see an empty split sequence, producing an empty scores list whose aggregation raises IndexError: list index out of range in _aggregate_score_dicts. The crash site in model_selection/_validation.py is only where the emptiness surfaces; the consumable iterable is never normalized to a reusable form before repeated use.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/feature_selection/tests/test_sequential.py",
+      "line": 336,
+      "statement": "sfs.fit(X, y)",
+      "note": "In test_cv_generator_support, added by the test patch (non-regression test for issue #25957). The SequentialFeatureSelector is constructed on line 335 with cv=splits where splits = LeaveOneGroupOut().split(X, y, groups=groups), a generator. fit's first candidate-feature evaluation drains the generator; the second evaluation gets zero splits and raises IndexError inside cross_val_score -> cross_validate -> _aggregate_score_dicts."
+    }
+  ],
+  "confidence": "high",
+  "merge_metadata": {
+    "status": "agree",
+    "annotators": [
+      "Atish",
+      "Eshgin"
+    ],
+    "primary": "Atish",
+    "root_cause_agreement": {
+      "exact_matches": 1,
+      "locations_Atish": 1,
+      "locations_Eshgin": 1
+    },
+    "reasoning_Eshgin": "SequentialFeatureSelector evaluates many candidate feature masks, calling cross_val_score once per candidate and across multiple selection iterations. The base implementation repeatedly supplies self.cv. Integer and reusable splitter inputs work, but an iterable returned by LeaveOneGroupOut.split is a generator and is exhausted by the first call. The next candidate produces an empty results list, which fails in _aggregate_score_dicts. The minimal faulty base statement is line 312's repeated use of the raw cv parameter. The fix normalizes cv once in fit with check_cv, whose iterable wrapper materializes the splits, and passes that reusable object through the scoring helper."
+  }
+}
