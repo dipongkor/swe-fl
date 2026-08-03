@@ -10,7 +10,7 @@
       "note": "The conversion returns the original mutable IndexVariable rather than an independent variable. Callers that adjust the returned variable's dimensions therefore mutate the source object as an unintended side effect."
     }
   ],
-  "reasoning": "Variable conversion methods are expected to return an independent variable that callers may safely modify. IndexVariable.to_index_variable violates that contract by aliasing self. Dataset.swap_dims calls this method and then assigns to var.dims, so an IndexVariable input can be changed in place during what should be a derived conversion. Returning self.copy() removes the alias. The dataset.py edit in the PR is only a type annotation, and the other variable.py edits are typing/internal-attribute cleanup; they do not cause the behavioral failure.",
+  "reasoning": "Variable conversion methods are expected to return an independent variable that callers may safely modify. IndexVariable.to_index_variable instead aliases self. Dataset.swap_dims calls this method and then assigns to var.dims, so an IndexVariable input is changed in place during what appears to be a derived conversion. The returned and source variables consequently have identical object identity and shared mutable state.",
   "fault_triggering_call_site": [
     {
       "file": "xarray/tests/test_variable.py",

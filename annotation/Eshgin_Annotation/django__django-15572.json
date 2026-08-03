@@ -18,7 +18,7 @@
       "note": "Loader-provided directories are filtered only for Django's own paths. An empty directory survives this condition and is likewise normalized to the current working directory."
     }
   ],
-  "reasoning": "Path('') denotes the current directory rather than an absent path. Both comprehensions in get_template_directories accept empty strings and prepend cwd, causing an empty template-directory setting to add the project root to the watched set. The fix filters falsey directory values in both the backend DIRS and loader get_dirs paths. The regression directly exercises the backend DIRS path; the second line is the same independently reachable defect for loader-provided directories.",
+  "reasoning": "Path('') denotes the current directory rather than an absent path. Both comprehensions in get_template_directories accept empty strings and prepend cwd, causing an empty template-directory setting to add the project root to the watched set. The regression directly exercises the backend DIRS path; the second line is the same independently reachable defect for loader-provided directories.",
   "fault_triggering_call_site": [
     {
       "file": "tests/template_tests/test_autoreloader.py",

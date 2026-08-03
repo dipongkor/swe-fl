@@ -34,13 +34,13 @@
       "note": "The vertical origin accumulates only row ratios and therefore places rows contiguously instead of accounting for hspace."
     }
   ],
-  "reasoning": "FigureBase.subfigures accepts wspace and hspace and passes them to GridSpec, but without a layout engine SubFigure._redo_transform_rel_fig computes width, height, and origins solely from width_ratios and height_ratios. Those four calculations discard GridSpec's inter-cell spacing, so the returned grid remains contiguous. The fix obtains spacing-aware positions from GridSpec.get_grid_positions() and passes explicit bounding boxes to _redo_transform_rel_fig(), bypassing the four incomplete ratio-only calculations when spacing was requested. These statements are lines 2279-2282 in the SWE-Bench base commit 1d0d255b79e84dfc9f2123c5eb85a842d342f72b. GitHub's PR diff shows them as old lines 2272-2275 because that page compares against the PR branch-point commit 7d7f6da20ef11afb8eed37bce32286ad4ec43431, which is not this instance's recorded base commit.",
+  "reasoning": "FigureBase.subfigures accepts wspace and hspace and passes them to GridSpec, but without a layout engine SubFigure._redo_transform_rel_fig computes width, height, and origins solely from width_ratios and height_ratios. Those four calculations discard GridSpec's inter-cell spacing, so the returned grid remains contiguous.",
   "fault_triggering_call_site": [
     {
       "file": "lib/matplotlib/tests/test_figure.py",
       "line": 1458,
       "statement": "np.testing.assert_allclose(sub_figs[0, 0].bbox.min, [0., h * 0.6])",
-      "note": "This is the first failure in the focused base run. The top-left subfigure begins at y=240 instead of y=288 because the requested vertical spacing was ignored."
+      "note": "The top-left subfigure begins at y=240 instead of y=288 because the requested vertical spacing was ignored."
     }
   ],
   "time_minutes": 45,

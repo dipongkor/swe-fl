@@ -10,7 +10,7 @@
       "note": "The deep-copy path rebuilds the adapter from only the pandas Index. A pandas Index containing NumPy Unicode values uses an object backing dtype, while the original PandasIndexAdapter separately preserves the logical Unicode dtype. Reconstructing without that saved dtype changes the copy from '<U...' to object."
     }
   ],
-  "reasoning": "IndexVariable stores its index through PandasIndexAdapter, which can preserve a logical dtype distinct from the underlying pandas Index dtype. Base line 1950 bypasses the adapter state during a deep copy and constructs a new adapter solely from the copied pandas Index. For string data, the new adapter infers object dtype and loses the original Unicode dtype. The fix gives PandasIndexAdapter a dtype-preserving copy operation and makes IndexVariable delegate to it. The newly added adapter method is repair code, not a base-code faulty line, so the pre-existing reconstruction at line 1950 is the minimal root cause.",
+  "reasoning": "IndexVariable stores its index through PandasIndexAdapter, which can preserve a logical dtype distinct from the underlying pandas Index dtype. Base line 1950 bypasses the adapter state during a deep copy and constructs a new adapter solely from the copied pandas Index. For string data, the new adapter infers object dtype and loses the original Unicode dtype.",
   "fault_triggering_call_site": [
     {
       "file": "xarray/tests/test_variable.py",

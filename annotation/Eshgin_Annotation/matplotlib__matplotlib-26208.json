@@ -1,38 +1,38 @@
 {
-    "instance_id": "matplotlib__matplotlib-26208",
-    "root_cause": [
-        {
-            "file": "lib/matplotlib/axes/_base.py",
-            "line": 4442,
-            "statement": "ax2.xaxis.set_visible(False)",
-            "note": "twinx created an axes sharing the x-axis but did not copy the original xaxis units to the hidden twin x-axis. With categorical/unit-converted data, the twin axis could operate without the converter state expected by the shared axis machinery."
-        },
-        {
-            "file": "lib/matplotlib/axes/_base.py",
-            "line": 4472,
-            "statement": "ax2.yaxis.set_visible(False)",
-            "note": "twiny had the symmetric omission for y-axis units, leaving the twin y-axis without the original axis units."
-        }
-    ],
-    "reasoning": "The bug appears when plotting unit-converted categorical data with shared twin axes. The twin axis shares limits but did not inherit the units object from the source axis, so later plotting on the twin could disturb dataLim state on the original axis. Copying xaxis.units in twinx and yaxis.units in twiny keeps the shared unit conversion state consistent.",
-    "fault_triggering_call_site": [
-        {
-            "file": "lib/matplotlib/tests/test_axes.py",
-            "line": 389,
-            "statement": "ax1.plot(a, b)",
-            "note": "Initial plot with string categories establishes non-None units on the source axis."
-        },
-        {
-            "file": "lib/matplotlib/tests/test_axes.py",
-            "line": 391,
-            "statement": "ax2 = getattr(ax1, twin_func)()",
-            "note": "Creates the twin axis. Before the fix, getattr(ax2, axis_name).units remains None instead of sharing ax1's units."
-        }
-    ],
-    "rc_ftcs_same": false,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": true
+  "instance_id": "matplotlib__matplotlib-26208",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/axes/_base.py",
+      "line": 4442,
+      "statement": "ax2.xaxis.set_visible(False)",
+      "note": "twinx created an axes sharing the x-axis but did not copy the original xaxis units to the hidden twin x-axis. With categorical/unit-converted data, the twin axis could operate without the converter state expected by the shared axis machinery."
+    },
+    {
+      "file": "lib/matplotlib/axes/_base.py",
+      "line": 4472,
+      "statement": "ax2.yaxis.set_visible(False)",
+      "note": "twiny had the symmetric omission for y-axis units, leaving the twin y-axis without the original axis units."
+    }
+  ],
+  "reasoning": "The bug appears when plotting unit-converted categorical data with shared twin axes. The twin axis shares limits but did not inherit the units object from the source axis, so later plotting on the twin could disturb dataLim state on the original axis. Copying xaxis.units in twinx and yaxis.units in twiny keeps the shared unit conversion state consistent.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_axes.py",
+      "line": 389,
+      "statement": "ax1.plot(a, b)",
+      "note": "Initial plot with string categories establishes non-None units on the source axis."
+    },
+    {
+      "file": "lib/matplotlib/tests/test_axes.py",
+      "line": 391,
+      "statement": "ax2 = getattr(ax1, twin_func)()",
+      "note": "Creates the twin axis. in the base implementation, getattr(ax2, axis_name).units remains None instead of sharing ax1's units."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true
 }

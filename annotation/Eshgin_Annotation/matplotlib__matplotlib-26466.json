@@ -18,7 +18,7 @@
       "note": "Annotations likewise retain the caller-owned mutable xy object. A later in-place update changes an already-created annotation instead of preserving the coordinates supplied at construction."
     }
   ],
-  "reasoning": "Both constructors store coordinate inputs by alias rather than copying their two scalar components. The regression uses NumPy arrays, then mutates them after creating OffsetFrom and Annotation objects; the base objects immediately reflect [1, 1] and [2, 2] instead of retaining [0.5, 0.5]. The fix unpacks each coordinate pair and stores a tuple, which both validates the shape and breaks the alias. These two assignments are independent instances of the same mutation bug.",
+  "reasoning": "Both constructors store coordinate inputs by alias rather than copying their two scalar components. The regression uses NumPy arrays, then mutates them after creating OffsetFrom and Annotation objects; the base objects immediately reflect [1, 1] and [2, 2] instead of retaining [0.5, 0.5]. These two assignments are independent instances of the same mutation bug.",
   "fault_triggering_call_site": [
     {
       "file": "lib/matplotlib/tests/test_text.py",

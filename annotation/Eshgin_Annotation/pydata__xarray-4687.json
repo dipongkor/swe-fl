@@ -1,43 +1,38 @@
 {
-    "instance_id": "pydata__xarray-4687",
-    "root_cause": [
-        {
-            "file": "xarray/core/computation.py",
-            "line": 1730,
-            "statement": "def where(cond, x, y):",
-            "note": "Docker verified. The old top-level xr.where signature did not accept keep_attrs, so callers could not request attr preservation. Reverting the PR to this signature makes test_where_attrs fail with TypeError when it calls xr.where(..., keep_attrs=True)."
-        },
-        {
-            "file": "xarray/core/computation.py",
-            "line": 1812,
-            "statement": "apply_ufunc(..., dask=\"allowed\") without keep_attrs=keep_attrs",
-            "note": "The old implementation also did not pass an attrs policy to apply_ufunc, so even an accepted API would have dropped attrs instead of preserving attrs from x."
-        }
-    ],
-    "reasoning": "The fixed PR branch passes xarray/tests/test_computation.py::test_where_attrs. Reverting xr.where to its old signature and removing the keep_attrs handling reproduces the bug immediately: xr.where(cond, x, y, keep_attrs=True) raises TypeError. The added lambda attrs policy is needed so keep_attrs=True uses attrs from x, matching DataArray.where/Dataset.where semantics.",
-    "fault_triggering_call_site": [
-        {
-            "file": "xarray/tests/test_computation.py",
-            "line": 1929,
-            "statement": "actual = xr.where(cond, x, y, keep_attrs=True)",
-            "note": "Direct regression trigger. Old xr.where rejects keep_attrs; fixed xr.where accepts it and preserves attrs from x."
-        },
-        {
-            "file": "xarray/tests/test_computation.py",
-            "line": 1931,
-            "statement": "assert_identical(expected, actual)",
-            "note": "Verifies that the resulting DataArray includes attrs={\"attr\": \"x\"}, not dropped attrs."
-        }
-    ],
-    "rc_ftcs_same": false,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": true,
-    "verification": {
-        "container": "pydata__xarray-4687",
-        "fixed_test": "/opt/miniconda3/envs/testbed/bin/pytest -q xarray/tests/test_computation.py::test_where_attrs -rA -> passed",
-        "reverted_test": "same test after reverting xr.where keep_attrs API -> failed with TypeError unexpected keyword argument keep_attrs"
+  "instance_id": "pydata__xarray-4687",
+  "root_cause": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1730,
+      "statement": "def where(cond, x, y):",
+      "note": "The old top-level xr.where signature did not accept keep_attrs, so callers could not request attr preservation."
+    },
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1812,
+      "statement": "apply_ufunc(..., dask=\"allowed\") without keep_attrs=keep_attrs",
+      "note": "The old implementation also did not pass an attrs policy to apply_ufunc, so even an accepted API would have dropped attrs instead of preserving attrs from x."
     }
+  ],
+  "reasoning": "The top-level xr.where signature rejects keep_attrs, so callers cannot request the attribute behavior exposed by DataArray.where and Dataset.where. Its apply_ufunc call also supplies no attribute policy and therefore drops the attributes of x. The regression first reaches the unsupported keyword error; without that keyword, the result still lacks the expected metadata.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_computation.py",
+      "line": 1929,
+      "statement": "actual = xr.where(cond, x, y, keep_attrs=True)",
+      "note": "This call passes keep_attrs to the top-level xr.where function, whose base signature rejects the keyword with TypeError."
+    },
+    {
+      "file": "xarray/tests/test_computation.py",
+      "line": 1931,
+      "statement": "assert_identical(expected, actual)",
+      "note": "Verifies that the resulting DataArray includes attrs={\"attr\": \"x\"}, not dropped attrs."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true
 }

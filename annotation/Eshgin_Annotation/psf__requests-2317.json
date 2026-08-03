@@ -1,31 +1,26 @@
 {
-    "instance_id": "psf__requests-2317",
-    "root_cause": [
-        {
-            "file": "requests/sessions.py",
-            "line": 428,
-            "statement": "method = builtin_str(method)",
-            "note": "Docker verified. In the original behavior, bytes methods such as b'GET' are converted to the literal text \"b'GET'\". The prepared request sends that malformed method and httpbin returns 400. The fix uses to_native_string(method), which decodes bytes to the native method string GET."
-        }
-    ],
-    "reasoning": "The patched PR branch passes test_requests.py::TestTimeout::test_encoded_methods. Reverting requests/sessions.py to import builtin_str and execute method = builtin_str(method) reproduces the failure: requests.request(b'GET', httpbin('get')) returns Response [400], making assert r.ok fail. A partial revert of only the method line produced NameError because the import-removal hunk is mechanically coupled; with the import restored, the real pre-fix behavior is the malformed HTTP method.",
-    "fault_triggering_call_site": [
-        {
-            "file": "test_requests.py",
-            "line": 1394,
-            "statement": "r = requests.request(b'GET', httpbin('get'))",
-            "note": "Direct regression trigger. Passing the method as bytes reaches Session.request; with builtin_str it is represented as \"b'GET'\" and the server rejects it, while to_native_string decodes it correctly."
-        }
-    ],
-    "rc_ftcs_same": false,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": false,
-    "verification": {
-        "container": "psf__requests-2317",
-        "fixed_test": "/opt/miniconda3/envs/testbed/bin/pytest -q test_requests.py::TestTimeout::test_encoded_methods -rA -> passed",
-        "reverted_test": "same test with builtin_str restored -> failed with Response [400] and assert r.ok false"
+  "instance_id": "psf__requests-2317",
+  "root_cause": [
+    {
+      "file": "requests/sessions.py",
+      "line": 428,
+      "statement": "method = builtin_str(method)",
+      "note": "In the original behavior, bytes methods such as b'GET' are converted to the literal text \"b'GET'\". The prepared request sends that malformed method and httpbin returns 400."
     }
+  ],
+  "reasoning": "Session.request coerces the method with builtin_str. When the caller supplies b'GET', that coercion produces the literal text \"b'GET'\" rather than the native method name GET. The prepared request sends the malformed token to the server, which responds with status 400 and makes Response.ok false.",
+  "fault_triggering_call_site": [
+    {
+      "file": "test_requests.py",
+      "line": 1394,
+      "statement": "r = requests.request(b'GET', httpbin('get'))",
+      "note": "Passing the method as bytes reaches Session.request, where builtin_str represents it as \"b'GET'\"; the server rejects that malformed HTTP method."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": false
 }

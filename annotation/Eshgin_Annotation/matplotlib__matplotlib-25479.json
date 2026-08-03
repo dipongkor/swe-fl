@@ -18,13 +18,13 @@
       "note": "Equality treats the descriptive name as part of colormap content. Once registration correctly changes the stored copy's name to the registry key, this condition incorrectly reports it unequal to an otherwise identical source colormap."
     }
   ],
-  "reasoning": "Registering a modified colormap under an explicit name has two coupled base-code defects. ColormapRegistry.register copies the object without synchronizing the copy's name with its key, so retrieval exposes the old name. Correcting that name would then make the stored copy compare unequal to the source because Colormap.__eq__ also requires name equality even when the lookup table and extension behavior match. The fix updates the registered copy's name and removes names from value equality. Both base lines are required to satisfy the intended registration and comparison semantics.",
+  "reasoning": "Registering a modified colormap under an explicit name has two coupled base-code defects. ColormapRegistry.register copies the object without synchronizing the copy's name with its key, so retrieval exposes the old name. Both base lines are required to satisfy the intended registration and comparison semantics.",
   "fault_triggering_call_site": [
     {
       "file": "lib/matplotlib/tests/test_colors.py",
       "line": 201,
       "statement": "assert cm_copy == cmap",
-      "note": "The focused base run fails here because two colormaps with identical lookup data but different names are rejected by Colormap.__eq__."
+      "note": "This assertion fails because two colormaps with identical lookup data but different names are rejected by Colormap.__eq__."
     },
     {
       "file": "lib/matplotlib/tests/test_colors.py",
