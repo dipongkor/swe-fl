@@ -15,7 +15,7 @@
       "statement": "end_idx = data.index(sep, idx)",
       "method": "fromstring",
       "class": "Header",
-      "note": "For bytes data with a nonempty text separator, bytes.index() cannot search for a str separator. The separator must be converted to the input's type before splitting."
+      "note": "For bytes data with a nonempty text separator, this passes a str separator to bytes.index(). The incompatible operand types raise TypeError before the header can be split."
     },
     {
       "file": "astropy/io/fits/header.py",
@@ -23,7 +23,7 @@
       "statement": "if next_image[:8] == 'CONTINUE':",
       "method": "fromstring",
       "class": "Header",
-      "note": "A bytes slice never equals the text literal 'CONTINUE', so continuation cards in a bytes header aren't recognized."
+      "note": "A bytes slice never equals the text literal 'CONTINUE', so continuation cards in a bytes header are not recognized."
     },
     {
       "file": "astropy/io/fits/header.py",
@@ -39,7 +39,7 @@
       "statement": "if next_image == END_CARD:",
       "method": "fromstring",
       "class": "Header",
-      "note": "The raw FITS END card is bytes while END_CARD is text, so this comparison can never detect the end of a bytes header. Even after the join mismatch is repaired, the parser would continue into the data block."
+      "note": "The raw FITS END card is bytes while END_CARD is text, so this comparison never detects the end of a bytes header and the parser continues into the data block."
     },
     {
       "file": "astropy/io/fits/header.py",
@@ -58,7 +58,7 @@
       "note": "If parsing finishes with a pending bytes card, the final-card path repeats the invalid str join and raises TypeError."
     }
   ],
-  "reasoning": "The FITS parsing entry points are written with text-only operations even though callers can naturally supply data read from a binary FITS file. Card.fromstring passes bytes to a str-padding helper. Header.fromstring searches and splits bytes with a text separator, joins bytes with '', and compares bytes slices to text CONTINUE and END markers. The fix handles the input type explicitly: Card decodes bytes with latin-1, and Header uses type-matched separators and marker constants before delegating each card. The focused base run raises at card.py:557 for the direct Card test and header.py:380 for the raw Header test; the remaining listed lines are independently reachable failures or silent misparses for separator, continuation, end-card, and trailing-card variants of the same supported bytes input.",
+  "reasoning": "The FITS parsing entry points are written with text-only operations even though callers can naturally supply data read from a binary FITS file. Card.fromstring passes bytes to a str-padding helper. Header.fromstring searches and splits bytes with a text separator, joins bytes with '', and compares bytes slices to text CONTINUE and END markers. The direct Card path raises at card.py:557 and the raw Header path raises at header.py:380; the remaining listed lines independently cause failures or silent misparses for separator, continuation, end-card, and trailing-card variants of the same supported bytes input.",
   "fault_triggering_call_site": [
     {
       "file": "astropy/io/fits/tests/test_header.py",

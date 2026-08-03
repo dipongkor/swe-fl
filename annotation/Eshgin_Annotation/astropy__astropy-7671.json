@@ -8,7 +8,7 @@
             "note": "minversion passed version strings containing suffixes such as 'dev' and 'rc1' directly to LooseVersion. LooseVersion can produce mixed integer/string component lists for those versions, and comparing them to installed versions such as '0.12.2' can raise TypeError."
         }
     ],
-    "reasoning": "The failure is not in module resolution; it occurs at the LooseVersion comparison. Normalizing the requested version to its leading dotted numeric release before comparison avoids LooseVersion's mixed-type comparison bug for inputs such as '0.12dev' while preserving the intended minimum-version check.",
+    "reasoning": "The failure occurs at the LooseVersion comparison. A requested version such as '0.12dev' produces mixed string and integer components, while the installed version '0.12.2' produces numeric components. Python cannot order those heterogeneous component lists, so minversion raises TypeError instead of returning the version check result.",
     "fault_triggering_call_site": [
         {
             "file": "astropy/utils/tests/test_introspection.py",
