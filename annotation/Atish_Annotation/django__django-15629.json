@@ -1,0 +1,45 @@
+{
+  "instance_id": "django__django-15629",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/related.py",
+      "line": 1183,
+      "statement": "return {\"type\": self.db_type(connection), \"check\": self.db_check(connection)}",
+      "note": "ForeignKey.db_parameters. A foreign key column must replicate the referenced column's storage parameters, and db_type just above (line 1180) accordingly delegates to self.target_field.rel_db_type, but this dict omits the target's collation. Everything that renders column DDL from db_parameters, column_sql at table creation and the schema editor's alter paths, therefore emits the FK column without COLLATE, so a FK pointing to a PK with db_collation gets a mismatched collation (MySQL then rejects the ADD CONSTRAINT, since FK and PK collations must match). Reached by both failing tests."
+    },
+    {
+      "file": "django/db/backends/sqlite3/schema.py",
+      "line": 458,
+      "statement": "if new_field.unique and old_type != new_type:",
+      "note": "In the SQLite _alter_field: after remaking the altered model's table, this predicate decides whether tables with FKs pointing at the field must also be rebuilt. It triggers only on a type change, but a db_collation change equally alters the referenced column's definition, so on a pure collation change the referencing tables keep their old FK column definitions. Reached by test_alter_field_pk_fk_db_collation on the sqlite testbed; together with the db_parameters omission, it is why rider.pony_id stays collation-less after AlterField."
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 832,
+      "statement": "and old_type != new_type",
+      "note": "In the base _alter_field's drop_foreign_keys condition: incoming FK constraints on a changing PK/unique target are dropped and later restored only when the column type changes, but a collation change also invalidates the constraints (the FK columns must be re-collated before the constraints can be recreated). Faulty on the same grounds as the sqlite predicate, but not reached by the failing tests, which run on SQLite where _alter_field is overridden by the table-remake implementation."
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 1041,
+      "statement": "fragment, other_actions = self._alter_column_type_sql(",
+      "note": "In the base _alter_field's rels_to_update loop that rewrites FK columns after their target changed: it unconditionally generates a type-only alteration (statement spans lines 1041-1043), so when the target's change is a collation change the emitted MODIFY carries the type without COLLATE, exactly the broken SQL in the report ('MODIFY account_id varchar(22) NOT NULL' with no collation). Wrong-in-context for collation changes; not reached by the failing tests (SQLite remake path)."
+    }
+  ],
+  "reasoning": "A foreign key column must have the same type and collation as the primary key it references; MySQL enforces this when the FK constraint is added. Django propagates the type, ForeignKey.db_type delegates to the target field, but collation is dropped at every layer. ForeignKey.db_parameters returns only type and check, omitting the target's collation, so DDL generated from it creates FK columns without COLLATE. In the schema editors, altering a PK's collation does not propagate either: the base editor drops and rebuilds incoming FK constraints and rewrites the dependent FK columns only when the column type changes, and even when that loop runs it emits a type-only alteration with no collation fragment; the SQLite editor likewise rebuilds tables with FKs pointing at the altered field only on a type change. The net effect is that adding db_collation to a primary key leaves every referencing foreign key column at its old collation, producing mismatched-collation FK constraint failures on MySQL and stale column definitions elsewhere.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/migrations/test_operations.py",
+      "line": 299,
+      "statement": "self.assertColumnCollation(f\"{app_label}_rider\", \"pony_id\", collation)",
+      "note": "In the patch-added test_create_fk_models_to_pk_field_db_collation: after creating Rider with a FK to Pony's collated CharField PK, the pony_id column is introspected with collation None instead of 'nocase' (related.py fault: column_sql saw no collation in the FK's db_parameters). The OneToOneField assertion at line 324 exercises the same fault but is not reached."
+    },
+    {
+      "file": "tests/migrations/test_operations.py",
+      "line": 2037,
+      "statement": "self.assertColumnCollation(f\"{app_label}_rider\", \"pony_id\", collation)",
+      "note": "In the patch-added test_alter_field_pk_fk_db_collation: AlterField adds db_collation to Pony's PK; the PK assertion on line 2036 passes at base, but rider.pony_id stays uncollated because the SQLite editor does not rebuild referencing tables on a collation-only change (line 458) and the FK's db_parameters carries no collation to apply (line 1183). The M2M through-table assertion at line 2038 is not reached."
+    }
+  ],
+  "confidence": "high"
+}

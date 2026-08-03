@@ -1,0 +1,39 @@
+{
+  "instance_id": "pydata__xarray-6992",
+  "root_cause": [
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4180,
+      "statement": "coord_names = set(new_variables) | self._coord_names",
+      "note": "In Dataset.reset_index. Builds the result's coordinate-name set as a pure union that never subtracts the names collected in drop_variables, although the variables dict computed at lines 4175-4177 does remove them. Whenever anything is dropped, the result violates the Dataset invariant coord_names is a subset of variables: DataVariables.__len__ (line 368) computes len(_variables) - len(_coord_names), which goes negative and raises ValueError('__len__() should return >= 0') from the repr. The correct form exists in set_index itself (line 4102 subtracts drop_variables before the union)."
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4182,
+      "statement": "return self._replace(variables, coord_names=coord_names, indexes=indexes)",
+      "note": "reset_index builds the result with _replace, whose contract assumes the dimensions are unchanged and therefore reuses the cached _dims. Dropping the only variable along a dimension (e.g. reset_index('x', drop=True) on a dataset whose sole variable is the x coordinate) leaves a phantom dimension {'x': 2} on a dataset with no variables using it."
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4169,
+      "statement": "if drop:",
+      "note": "Anchors an absence: this is the only per-name disposition logic in the reset_index loop, and it has no path that converts a de-indexed coordinate from IndexVariable to a plain Variable. After the index is removed (line 4172 filters it out), coordinates that survive keep their IndexVariable wrapper backed by the now-removed pandas index, an inconsistent state in the post-index-refactor data model where IndexVariable is supposed to correspond to an existing index."
+    }
+  ],
+  "reasoning": "A Dataset must keep _coord_names a subset of _variables; DataVariables.__len__ is computed as len(_variables) - len(_coord_names). Dataset.reset_index filters dropped names out of the variables dict but assembles the new coordinate-name set as set(new_variables) | self._coord_names, a union that never removes the dropped names. Resetting an index with drop=True therefore produces a dataset with more coordinate names than variables, making len() of its data variables negative and crashing repr and anything else that sizes the dataset with ValueError: __len__() should return >= 0 (e.g. after set_index creates a multi-index z from coordinates a and b, reset_index('z', drop=True) removes the z variable but leaves z among the coordinate names). Two further inconsistencies accompany it: the result is built with _replace, which reuses the cached dimension sizes, so a dimension whose last variable was dropped persists as a phantom entry in dims; and coordinates whose index was removed stay wrapped as IndexVariable objects backed by the deleted pandas index instead of being demoted to plain variables.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_dataset.py",
+      "line": 3285,
+      "statement": "assert len(reset.dims) == 0",
+      "note": "In the patch-added test_reset_index_drop_dims: reset_index('x', drop=True) on Dataset(coords={'x': [1, 2]}) leaves the phantom dimension {'x': 2} (line 4182 fault), so the assertion fails; pytest's attempt to repr the dataset simultaneously raises ValueError('__len__() should return >= 0'), witnessing the coord_names corruption (line 4180 fault) on the same object."
+    },
+    {
+      "file": "xarray/tests/test_dataset.py",
+      "line": 3314,
+      "statement": "assert_identical(reset[name].variable, ds[name].variable.to_base_variable())",
+      "note": "In the patch-added test_reset_index_drop_convert, for the drop=False parametrizations (e.g. arg='x'): the de-indexed level coordinates foo and bar are still IndexVariable objects at the base commit instead of plain Variables, witnessing the missing-conversion absence (line 4169). Note the remaining fail-to-pass assertions in this suite (the dropped lists for drop=True, the renamed mapping at line 3316, the changed expectations in test_reset_index for Dataset and DataArray, and test_groupby_drops_nans) encode semantics redesigned by the fix, level coordinates dropped together with their multi-index dimension and a surviving single level renamed to the dimension name, rather than the base-state faults."
+    }
+  ],
+  "confidence": "medium"
+}

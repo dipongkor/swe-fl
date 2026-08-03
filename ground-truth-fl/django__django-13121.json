@@ -20,7 +20,7 @@
             "note": "DurationValue emitted raw backend interval SQL, such as a microsecond string on SQLite. The result could come back in a form that convert_durationfield_value could not parse, causing decimal.InvalidOperation."
         }
     ],
-    "reasoning": "The reported query is duration-only arithmetic: F('estimated_time') + datetime.timedelta(...). The ORM treated the timedelta as a special SQL interval and routed the whole expression through DurationExpression whenever either side was a DurationField. On backends without native duration support, that produced SQL values that were not converted back as duration microseconds. The fix represents timedeltas as normal Value(..., output_field=DurationField()), only uses DurationExpression when exactly one side is a DurationField, and removes DurationValue/date_interval_sql.",
+    "reasoning": "The reported query is duration-only arithmetic: F('estimated_time') + datetime.timedelta(...). The ORM treated the timedelta as a special SQL interval and routed the whole expression through DurationExpression whenever either side was a DurationField. On backends without native duration support, that produced SQL values that were not converted back as duration microseconds.",
     "fault_triggering_call_site": [
         {
             "file": "tests/expressions/tests.py",

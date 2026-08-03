@@ -1,0 +1,39 @@
+{
+  "instance_id": "django__django-13344",
+  "root_cause": [
+    {
+      "file": "django/middleware/security.py",
+      "line": 22,
+      "statement": "self.get_response = get_response",
+      "note": "SecurityMiddleware.__init__ re-implements MiddlewareMixin's initialization by storing get_response manually but omits the mixin's _async_check() call (django/utils/deprecation.py lines 100-108), which stamps self._is_coroutine on the instance when get_response is a coroutine function. Without the stamp, asyncio.iscoroutinefunction(instance) is False even though the middleware operates asynchronously at runtime, so the handler's chain assembly wraps it as sync: convert_exception_to_response builds a sync wrapper that returns the middleware's coroutine unawaited, while load_middleware still records the layer as async from the class's async_capable flag. The next-outer middleware then sees a sync-looking get_response, takes MiddlewareMixin.__call__'s sync path, and hands the unawaited coroutine to its process_response."
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 73,
+      "statement": "self.get_response = get_response",
+      "note": "Same fault in UpdateCacheMiddleware.__init__: manual storage of get_response with no _async_check(), leaving the instance unstamped as a coroutine function under an async get_response."
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 135,
+      "statement": "self.get_response = get_response",
+      "note": "Same fault in FetchFromCacheMiddleware.__init__."
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 177,
+      "statement": "self.get_response = get_response",
+      "note": "Same fault in CacheMiddleware.__init__. SessionMiddleware, also touched by the fix, is not faulty at the base commit: its __init__ already calls self._async_check() (django/contrib/sessions/middleware.py line 18), so its rewrite to super().__init__ is a pure refactor, as is CacheMiddleware's reshuffled kwargs handling that the super() delegation necessitates."
+    }
+  ],
+  "reasoning": "Django's middleware chain decides sync/async adaptation per layer from asyncio.iscoroutinefunction(middleware_instance). MiddlewareMixin instances are sync callables that dispatch to an async __acall__ at runtime, so MiddlewareMixin.__init__ runs _async_check(), which stamps self._is_coroutine on the instance when its get_response is a coroutine function, making iscoroutinefunction report True. SecurityMiddleware, UpdateCacheMiddleware, FetchFromCacheMiddleware, and CacheMiddleware override __init__, store get_response themselves, and never run _async_check, so under ASGI their instances are unstamped. During load_middleware the exception-conversion wrapper around such an instance is therefore built sync and returns the middleware's coroutine without awaiting it, while the chain still records that layer as async, so no adapter is inserted. The middleware listed immediately before the unstamped one consequently sees a sync-looking get_response, takes MiddlewareMixin.__call__'s synchronous path, and receives the unawaited coroutine object as its response, which it passes to process_response, e.g. the first middleware in MIDDLEWARE getting a coroutine instead of an HttpResponse when SecurityMiddleware is second.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/deprecation/test_middleware_mixin.py",
+      "line": 85,
+      "statement": "self.assertIs(asyncio.iscoroutinefunction(middleware_instance), True)",
+      "note": "In the patch-added test_coroutine, which instantiates every stock middleware with an async get_response and requires the instance to report as a coroutine function. Exactly the four subtests for SecurityMiddleware, UpdateCacheMiddleware, FetchFromCacheMiddleware, and CacheMiddleware fail with 'False is not True'; SessionMiddleware passes at base since it already runs _async_check. test_deprecation, also listed in fail_to_pass, passes at the base commit in a direct run; its listing appears to be a harness log-parsing artifact of the subtest output."
+    }
+  ],
+  "confidence": "high"
+}

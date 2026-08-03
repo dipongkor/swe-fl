@@ -1,0 +1,21 @@
+{
+  "instance_id": "pydata__xarray-7229",
+  "root_cause": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1863,
+      "statement": "keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})",
+      "note": "In xr.where's keep_attrs=True handling. The lambda is installed as the combine_attrs strategy for the whole apply_ufunc operation, but it ignores both of its arguments and unconditionally returns x's top-level attrs. apply_ufunc applies the strategy to every attrs merge in the operation, not just the output object's: merge_attrs (xarray/core/merge.py line 640) calls it once per merged object, including each output coordinate built by build_output_coords_and_indexes. Every coordinate therefore gets its attrs replaced by the data variable x's attrs (and, for Dataset inputs, every data variable gets the dataset's global attrs). A correct strategy would need to use its attrs/context arguments to return the right attrs for each merge level; the enclosing guard 'if keep_attrs is True:' (line 1860) is not itself faulty since some keep_attrs=True handling must exist."
+    }
+  ],
+  "reasoning": "xr.where(cond, x, y, keep_attrs=True) implements 'keep the attributes of x' by replacing the keep_attrs flag with a lambda that returns getattr(x, 'attrs', {}) and passing it to apply_ufunc as the attribute-combining strategy. That strategy is invoked for every attrs merge the operation performs: xarray's merge_attrs calls a callable combine_attrs once for the output object and once for each output coordinate. Because the lambda ignores its attrs and context arguments, every one of those merges yields x's top-level attribute dict, so each coordinate of the result has its own attributes overwritten by the data variable's attributes (e.g. a time coordinate ends up carrying 'units': 'degK' and the rest of the air-temperature metadata instead of its own standard_name/long_name).",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_computation.py",
+      "line": 1939,
+      "statement": "assert_identical(expected, actual)",
+      "note": "First assertion of the rewritten test_where_attrs: xr.where(cond, x, y, keep_attrs=True) on DataArrays whose coordinate 'a' carries attr 'x_coord' produces a result whose coordinate attrs are {'attr': 'x_da'}, x's DataArray-level attrs, so the identity check fails. The later patch-added cases (scalar x taking no attrs, Dataset inputs at lines 1942-1984) exercise the same strategy misapplied at other merge levels but are not reached because the test fails here first."
+    }
+  ],
+  "confidence": "high"
+}

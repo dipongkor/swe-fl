@@ -1,6 +1,6 @@
 **1**: Comment removal from
 **2**: Function-declaration reordering/Changing the location
-**3**: Identifier renaming
+**3**: Identifier renaming/required parameter renaming
 **4**: Parameter reordering
 **5**: Parameter addition
 **6**: Dead-code removal

@@ -1,0 +1,21 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25931",
+  "root_cause": [
+    {
+      "file": "sklearn/ensemble/_iforest.py",
+      "line": 348,
+      "statement": "self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)",
+      "note": "In IsolationForest.fit, on the contamination != 'auto' path. By this point X is no longer the user's input: fit's own validation (line 291) converted it to a bare ndarray while recording the DataFrame's column names in feature_names_in_. Routing this internally-stripped array back through the public score_samples entry point re-enters input validation (line 436, _validate_data with reset=False), whose feature-name consistency check treats the argument as fresh user input: the estimator has feature_names_in_ but the array has none, so a spurious 'X does not have valid feature names' UserWarning fires during fit. The downstream statements are faithful: score_samples's validation is correct for genuine external calls, and the warning in _check_feature_names (sklearn/base.py line 451) correctly reports what it is shown."
+    }
+  ],
+  "reasoning": "When contamination is not 'auto', IsolationForest.fit computes offset_ by scoring the training data through the public score_samples method. But fit has already validated X at that point, converting a DataFrame to a bare float ndarray while recording its column names in feature_names_in_. score_samples validates its input again with reset=False, and that validation's feature-name consistency check compares the estimator's recorded names against the argument's: it sees an estimator fitted with feature names receiving an array without any, and emits the UserWarning 'X does not have valid feature names, but IsolationForest was fitted with feature names'. The warning is designed to flag a real train/inference mismatch in user calls, but here it fires from inside fit itself on data the user did supply with names, purely because the internal call re-enters the public validation path with the already-converted array.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/ensemble/tests/test_iforest.py",
+      "line": 359,
+      "statement": "model.fit(X)",
+      "note": "In the patch-added test_iforest_preserve_feature_names: X is a single-column DataFrame and the model has contamination=0.05, so fit reaches the offset_ computation and triggers the feature-name warning; warnings.simplefilter('error', UserWarning) on line 358 escalates it to an error raised from sklearn/base.py line 451."
+    }
+  ],
+  "confidence": "high"
+}

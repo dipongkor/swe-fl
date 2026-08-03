@@ -1,0 +1,21 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14629",
+  "root_cause": [
+    {
+      "file": "sklearn/multioutput.py",
+      "line": 300,
+      "statement": "class MultiOutputClassifier(MultiOutputEstimator, ClassifierMixin):",
+      "note": "Anchors an absence, not a faulty statement: the class exposes no classes_ attribute anywhere. It is a ClassifierMixin, and fitted sklearn classifiers are expected to expose classes_ (multi-output ones as a list of per-output arrays: multi-output RandomForestClassifier does, and ClassifierChain.fit sets self.classes_ at line 586). After the inherited MultiOutputEstimator.fit (line 124) fits the per-target estimators into self.estimators_ (line 167), the per-output class labels exist only on self.estimators_[i].classes_ and are never aggregated onto the wrapper. The class's own predict_proba docstring (line 345) even states the returned probability columns are ordered as 'in the attribute classes_'. Any consumer reading the documented attribute, e.g. cross_val_predict(method='predict_proba'), gets AttributeError."
+    }
+  ],
+  "reasoning": "MultiOutputClassifier fits one classifier per output and stores them in estimators_, but never exposes a classes_ attribute: the inherited MultiOutputEstimator.fit only populates estimators_, so the per-output class labels live solely on estimators_[i].classes_. Fitted sklearn classifiers are expected to expose classes_, and multi-output classifiers expose it as a list of per-output label arrays (multi-output RandomForestClassifier and ClassifierChain both do); MultiOutputClassifier's own predict_proba docstring also refers to the attribute classes_ for the column order of its output. Any code that reads the documented attribute on the fitted wrapper, such as cross_val_predict with method='predict_proba', which uses estimator.classes_ to order probability columns per output, raises AttributeError: 'MultiOutputClassifier' object has no attribute 'classes_'.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/tests/test_multioutput.py",
+      "line": 542,
+      "statement": "assert isinstance(estimator.classes_, list)",
+      "note": "In the patch-added test_multi_output_classes_, parametrization estimator1 = MultiOutputClassifier(RandomForestClassifier(n_estimators=2)). The fit on line 541 succeeds, then the estimator.classes_ attribute access here raises AttributeError before isinstance evaluates; the content assertions on lines 543-546 are never reached. The sibling parametrizations (bare RandomForestClassifier, ClassifierChain) pass at the base commit."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,21 @@
+{
+  "instance_id": "matplotlib__matplotlib-25311",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": 1508,
+      "statement": "self.canvas = self.ref_artist.figure.canvas",
+      "note": "In DraggableBase.__init__. Stores the backend canvas, a transient GUI object, as a persistent instance attribute on an object that lives inside the picklable figure graph: enabling legend dragging sets legend._draggable = DraggableLegend(...) (lib/matplotlib/legend.py line 1198), so pickling the figure serializes this object's __dict__ including the canvas. Figures stay picklable only because Figure's own state handling drops its canvas reference; this attribute smuggles a second, unmanaged reference past that, so pickle either crashes on GUI canvases (TypeError: cannot pickle 'FigureCanvasQTAgg' object) or embeds the canvas in the stream for picklable backends like Agg. The stored value is pure derived state, always recomputable as ref_artist.figure.canvas, and the consumers (e.g. self.canvas.supports_blit on line 1509 and the callback connections below) are faithful readers of it."
+    }
+  ],
+  "reasoning": "Making a legend or annotation draggable attaches a DraggableBase helper to the artist (legend._draggable), placing the helper inside the object graph that pickling a figure traverses. DraggableBase.__init__ caches the figure's backend canvas in an instance attribute, although the canvas is a transient GUI-toolkit object and is exactly what matplotlib's figure serialization deliberately excludes to keep figures picklable. When the figure is pickled, the helper's __dict__ carries this canvas reference: with GUI backends pickling fails with TypeError (e.g. cannot pickle 'FigureCanvasQTAgg' object), and even with a picklable canvas such as Agg the canvas is wrongly embedded in the pickle stream. The cached value is redundant, since the canvas is always reachable through ref_artist.figure.canvas at the moment of use.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_pickle.py",
+      "line": 105,
+      "statement": "assert \"FigureCanvasAgg\" not in [arg for op, arg, pos in pickletools.genops(pkl)]",
+      "note": "In test_complete, after the test patch adds plt.legend(draggable=True) to the reference figure (line 92): under the Agg backend the pickle at line 101 succeeds, but the DraggableLegend's stored canvas attribute puts a FigureCanvasAgg global reference into the pickle stream, so this pickletools scan finds it and the assertion fails. Under a GUI backend the same fault would make pickle.dumps itself raise."
+    }
+  ],
+  "confidence": "high"
+}

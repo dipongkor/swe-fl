@@ -1,0 +1,27 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25747",
+  "root_cause": [
+    {
+      "file": "sklearn/utils/_set_output.py",
+      "line": 58,
+      "statement": "if index is not None:",
+      "note": "Jointly faulty with line 59: this branch of _wrap_in_pandas_container handles data that is already a DataFrame, and the guard's only semantics is 'whenever the caller supplied an index, enact the overwrite on line 59'. The wrapper is always called with index=getattr(original_input, 'index', None), so for DataFrame input the overwrite is unconditional."
+    },
+    {
+      "file": "sklearn/utils/_set_output.py",
+      "line": 59,
+      "statement": "data_to_wrap.index = index",
+      "note": "The locally wrong statement: the transformer already returned a valid DataFrame whose index is part of its output, yet this line overwrites that index in place with the original input's index. When the transformer changes the number of rows (e.g. a groupby aggregation), pandas raises ValueError: Length mismatch; when row counts happen to match, the transformer's meaningful index (e.g. group keys or relabeled samples) is silently replaced. The wrapping is only needed for non-DataFrame output, which the fall-through pd.DataFrame construction on line 62 already handles correctly."
+    }
+  ],
+  "reasoning": "With transform_output='pandas', every transform result passes through _wrap_in_pandas_container, which receives the original input's index. When the transformer's result is already a DataFrame, the function overwrites that DataFrame's index in place with the original input's index. A transformer that aggregates or otherwise changes the number of rows returns fewer rows than the input, so assigning the input-length index raises ValueError: Length mismatch (e.g. 96 hourly rows aggregated to 4 daily groups). Even when the row count is unchanged, a transformer-assigned index is silently discarded in favor of the input's. The index replacement serves no purpose on this path: an already-constructed DataFrame carries its own correct index, and only non-DataFrame output needs an index attached when a new DataFrame is built.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/utils/tests/test_set_output.py",
+      "line": 294,
+      "statement": "assert_array_equal(X_trans.index, [\"s0\", \"s1\"])",
+      "note": "In the patch-added test_set_output_pandas_keep_index: est.transform(X) on line 293 returns a DataFrame with index ['s0', 's1'] (EstimatorWithSetOutputIndex, lines 265-277), and the pandas-output wrapper overwrites it with the input's index [0, 1], failing this assertion. The row count matches here, so the failure shows the silent-replacement half of the fault rather than the ValueError. The patch-modified assertion at line 38 (test__wrap_in_pandas_container_dense_update_columns_and_index) does not exercise the fault: new_df aliases X_df because the wrapper mutates in place, so comparing new_df.index to X_df.index passes even at the base commit."
+    }
+  ],
+  "confidence": "high"
+}

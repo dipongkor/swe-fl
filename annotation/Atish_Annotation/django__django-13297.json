@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-13297",
+  "root_cause": [
+    {
+      "file": "django/views/generic/base.py",
+      "line": 172,
+      "statement": "@SimpleLazyObject",
+      "note": "In _wrap_url_kwargs_with_deprecation_warning, which wraps each URL kwarg passed to TemplateView.get_context_data so that first access emits a deprecation warning. Decorating access_value with SimpleLazyObject is the wrong lazy-wrapper choice: SimpleLazyObject is a LazyObject attribute proxy, not a Promise, so the machinery that resolves lazy values in ORM queries never unwraps it (Field.get_prep_value only casts isinstance(value, Promise), django/db/models/fields/__init__.py line 807). When the kwarg is used in a queryset filter, the raw SimpleLazyObject reaches the DB driver as a bind parameter and sqlite3 rejects it (InterfaceError: Error binding parameter 0 - probably unsupported type). The storage at line 181 (context_kwargs[key] = access_value) is faithful plumbing for whatever wrapper is produced, and the sqlite parameter-binding code is a faithful emitter."
+    }
+  ],
+  "reasoning": "Since the TemplateView URL-kwargs deprecation, each kwarg forwarded to get_context_data is wrapped in a lazy object whose first evaluation emits a RemovedInDjango40Warning. The wrapper used is SimpleLazyObject, an attribute-forwarding proxy whose class remains SimpleLazyObject rather than the wrapped value's type and which is not a Promise. Django's ORM resolves Promise instances when preparing query parameters (Field.get_prep_value casts them), but it has no handling for SimpleLazyObject, so passing a wrapped URL kwarg into a queryset lookup, e.g. Model.objects.get(slug=kwargs['slug']), sends the proxy object itself to the database driver as a bind parameter; sqlite3 cannot adapt it and raises InterfaceError: Error binding parameter 0 - probably unsupported type. Code that worked in Django 3.0, where URL kwargs arrived as plain strings, therefore crashes in 3.1 unless the value is explicitly coerced with str().",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/generic_views/test_base.py",
+      "line": 622,
+      "statement": "response = ArtistView.as_view()(self.rf.get('/'), artist_name=artist.name)",
+      "note": "In the patch-added test_template_params_filtering: the view call wraps artist_name in the deprecation lazy object and passes it to get_context_data, whose Artist.objects.get(name=artist_name) lookup (line 618) sends the SimpleLazyObject to sqlite as a bind parameter, raising InterfaceError from django/db/backends/sqlite3/base.py line 412. The equality assertion on line 623 is not reached."
+    }
+  ],
+  "confidence": "high"
+}

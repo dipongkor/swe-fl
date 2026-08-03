@@ -1,0 +1,21 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13124",
+  "root_cause": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 623,
+      "statement": "rng = self.random_state",
+      "note": "First statement of StratifiedKFold._make_test_folds. Its contract is to produce the random source that drives per-class shuffling, but it hands back the raw random_state unconverted. When random_state is an int seed, the per-class KFold splitters built at lines 654-657 (KFold(self.n_splits, shuffle=self.shuffle, random_state=rng)) each seed a fresh identical RandomState from that same int, so every class is permuted identically. Those KFold constructions are faithful consumers of an rng and are not themselves faulty."
+    }
+  ],
+  "reasoning": "StratifiedKFold._make_test_folds assigns the raw random_state attribute to rng and passes it as the random_state of one internal shuffling KFold per class. With an integer seed, each of those per-class KFolds seeds its own identical random number generator, so all classes receive the same permutation. Sample i of every class therefore always lands in the same fold: the fold compositions are exactly the unshuffled ones, only the order in which folds are emitted changes, and different integer seeds produce the same set of test batches. shuffle=True thus never varies which samples are grouped together, defeating its purpose for cross-validation. The bug is masked when random_state is None, because each per-class KFold then draws from the global generator and the permutations differ.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/model_selection/tests/test_split.py",
+      "line": 505,
+      "statement": "assert test_set1 != test_set2",
+      "note": "Patch-added tail of test_shuffle_stratifiedkfold: lines 502-504 collect the sorted test-fold tuples from two StratifiedKFold(5, shuffle=True) instances with seeds 0 and 1 over y = [0]*5 + [1]*5. Both come back as the unshuffled pairings [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)], so the inequality assertion fails."
+    }
+  ],
+  "confidence": "high"
+}

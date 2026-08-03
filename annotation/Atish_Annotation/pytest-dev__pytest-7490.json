@@ -1,0 +1,27 @@
+{
+  "instance_id": "pytest-dev__pytest-7490",
+  "root_cause": [
+    {
+      "file": "src/_pytest/skipping.py",
+      "line": 257,
+      "statement": "yield",
+      "note": "Anchors an absence, not a faulty statement: pytest_runtest_call is the hookwrapper that brackets the test body, and after this yield returns nothing re-evaluates the item's xfail marks. The stored evaluation (item._store[xfailed_key]) is produced only before the body runs, at setup (line 242) or pre-yield (lines 249-251), so a mark added dynamically during the test via request.node.add_marker is never seen: the store keeps the pre-call result None. The downstream consumer in pytest_runtest_makereport (line 264, xfailed = item._store.get(xfailed_key, None)) is a faithful reader of the store; with the stale None it skips both the failed-becomes-xfail branch (lines 279-286) and the strict-xpass branch (lines 287-290). A re-evaluation anywhere between the end of the test body and that read would supply the missing information; this line marks the start of that span."
+    }
+  ],
+  "reasoning": "Whether a test's outcome is converted to xfail is decided in pytest_runtest_makereport from item._store[xfailed_key], a cached evaluation of the item's xfail marks. That cache is populated only before the test body executes, in pytest_runtest_setup or at the start of the pytest_runtest_call hookwrapper, and is never refreshed after the body runs. A test that adds an xfail marker to itself dynamically (request.node.add_marker(pytest.mark.xfail(...))) therefore leaves the cached value at None: when the test then fails, makereport takes none of the xfail branches and reports an ordinary failure instead of an expected failure, and when the test passes under a dynamically added strict xfail, the strict-XPASS branch is likewise skipped and the run reports a plain pass instead of a failure.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_skipping.py",
+      "line": 440,
+      "statement": "result.assert_outcomes(xfailed=1)",
+      "note": "In the patch-added test_dynamic_xfail_set_during_runtest_failed: the inner test adds pytest.mark.xfail dynamically and then fails (assert 0). The stale None in the store makes makereport report a plain failure, so the run has failed=1 instead of xfailed=1."
+    },
+    {
+      "file": "testing/test_skipping.py",
+      "line": 454,
+      "statement": "result.assert_outcomes(failed=1)",
+      "note": "In the patch-added test_dynamic_xfail_set_during_runtest_passed_strict: the inner test adds pytest.mark.xfail(strict=True) dynamically and passes. The strict-XPASS branch in makereport is skipped because the stored evaluation is still None, so the run reports passed=1 instead of failed=1."
+    }
+  ],
+  "confidence": "high"
+}

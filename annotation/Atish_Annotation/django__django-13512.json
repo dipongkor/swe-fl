@@ -1,0 +1,33 @@
+{
+  "instance_id": "django__django-13512",
+  "root_cause": [
+    {
+      "file": "django/forms/fields.py",
+      "line": 1261,
+      "statement": "return json.dumps(value, cls=self.encoder)",
+      "note": "forms.JSONField.prepare_value produces the text shown in the form widget (the admin's edit textarea), a human-facing rendering. json.dumps defaults to ensure_ascii=True, which escapes every non-ASCII character as \\uXXXX, so a stored value like '中国' is displayed to the user as \"\\u4e2d\\u56fd\". For display output the dump must keep the characters readable (ensure_ascii=False); the ASCII default is only appropriate for wire/storage serialization."
+    },
+    {
+      "file": "django/contrib/admin/utils.py",
+      "line": 403,
+      "statement": "return field.get_prep_value(value)",
+      "note": "display_for_field renders a read-only JSONField value in the admin, but delegates to the model field's get_prep_value, the database-preparation serializer (django/db/models/fields/json.py lines 81-84), which is a plain json.dumps with the ASCII-escaping default. Using the DB-prep serialization for human display is wrong-in-context: non-ASCII content is shown as \\uXXXX escapes. get_prep_value itself is faithful to its own storage contract and is unchanged by any display fix; the fault is this call site's choice of it for display."
+    }
+  ],
+  "reasoning": "Both places that render a JSONField's contents for humans serialize with json.dumps in its default configuration, where ensure_ascii=True replaces every non-ASCII character with \\uXXXX escape sequences. forms.JSONField.prepare_value, which fills the edit widget, calls json.dumps(value, cls=self.encoder) directly; and the admin's read-only rendering in display_for_field delegates to the model field's get_prep_value, the database-preparation serializer that is likewise a default json.dumps. As a result, editing or viewing a JSONField containing e.g. Chinese text in the Django admin shows \"\\u4e2d\\u56fd\" instead of the characters themselves, even though the escaped and unescaped forms denote the same JSON value.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/forms_tests/field_tests/test_jsonfield.py",
+      "line": 32,
+      "statement": "self.assertEqual(field.prepare_value('你好，世界'), '\"你好，世界\"')",
+      "note": "First patch-added unicode case in test_prepare_value: prepare_value returns the ASCII-escaped '\"\\u4f60\\u597d\\uff0c\\u4e16\\u754c\"' instead of the readable string, so the assertion fails (forms fault, line 1261). The emoji and mixed-language cases on lines 33-37 exercise the same fault but are not reached."
+    },
+    {
+      "file": "tests/admin_utils/tests.py",
+      "line": 196,
+      "statement": "self.assertEqual(display_for_field(value, models.JSONField(), self.empty_value), display_value)",
+      "note": "In test_json_display_for_field, for the patch-added case ({'a': '你好 世界'}, '{\"a\": \"你好 世界\"}') from line 189: display_for_field returns the ASCII-escaped dump via get_prep_value (admin fault, line 403), so the subtest fails. test_label_for_field, also listed in fail_to_pass, passes at the base commit; its listing appears to be an artifact of the harness's log parsing."
+    }
+  ],
+  "confidence": "high"
+}

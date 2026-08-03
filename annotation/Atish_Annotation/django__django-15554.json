@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-15554",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1030,
+      "statement": "if (reuse is None or a in reuse) and j.equals(join)",
+      "note": "The reuse predicate of Query.join (comprehension at lines 1027-1031), which decides whether a requested join can share an existing alias. It compares candidates with Join.equals, which deliberately ignores the filtered_relation component of a join's identity (django/db/models/sql/datastructures.py lines 164-166: 'Ignore filtered_relation in equality check'), unlike Join.__eq__ which includes it (line 153). Two FilteredRelation annotations over the same relation path produce joins that differ only in filtered_relation, so when the second one is added this predicate matches the first one's alias and the join is reused instead of created: only one JOIN with the first condition appears in the SQL and every reference to the second relation silently resolves to the first. The equals method itself is a faithful utility for the one context that must ignore filtered_relation, resolving a FilteredRelation's own condition against its join; the fault is this call site using the filtered_relation-blind comparison for general alias reuse."
+    }
+  ],
+  "reasoning": "Every relation traversal in a queryset goes through Query.join, which reuses an existing table alias when an equivalent join is already present. A join's full identity includes the FilteredRelation attached to it, and Join provides two comparisons: __eq__, which includes the filtered_relation, and equals, which deliberately ignores it. The reuse check in Query.join uses the ignoring variant, so two FilteredRelation annotations over the same relation path, whose joins differ only in their filter condition, are treated as the same join: the second annotation reuses the alias of the first instead of creating its own JOIN. The generated SQL contains a single join carrying only the first condition, and columns referenced through the second alias come from that join, so the second FilteredRelation's condition is silently ignored (e.g. book_title_jane returns the Alice-filtered rows' NULLs instead of Jane's books).",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/filtered_relation/tests.py",
+      "line": 228,
+      "statement": "self.assertCountEqual(",
+      "note": "In the patch-added test_multiple: two FilteredRelations on 'book' with different title conditions (lines 213-220) are annotated on the same queryset. At the base commit the book_title_jane join reuses book_title_alice's alias, so both values() columns read the Alice-filtered join and 'book_title_jane__title' is None instead of 'The book by Jane A'/'The book by Jane B', failing this comparison against the expected rows (lines 229-239)."
+    }
+  ],
+  "confidence": "high"
+}

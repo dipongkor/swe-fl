@@ -1,0 +1,21 @@
+{
+  "instance_id": "matplotlib__matplotlib-24637",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": 1443,
+      "statement": "def draw(self, renderer):",
+      "note": "Anchors an absence, not a faulty statement: AnnotationBbox.draw renders the artist entirely through its child artists (self.arrow_patch.draw, self.patch.draw, self.offsetbox.draw at lines 1453-1455) and at no point communicates the AnnotationBbox's own gid to the renderer. Composite artists propagate their gid by bracketing their child draws in renderer.open_group(..., gid=self.get_gid()) / renderer.close_group(...), which the SVG backend turns into a <g id=...> element; this method has no such bracketing, so a gid set via set_gid exists on the artist but never reaches the output. The child draw calls themselves are faithful, since each child correctly emits its own (unset) gid."
+    }
+  ],
+  "reasoning": "An artist's gid reaches SVG output only if its draw path hands the gid to the renderer, either on a graphics context for primitive draws or via renderer.open_group(name, gid=...) for composite artists, which the SVG backend writes as a <g id=...> element wrapping the children. AnnotationBbox is a composite artist: its draw method only updates positions and delegates to the arrow patch, the frame patch, and the offsetbox, each of which emits its own gid, and nothing emits the AnnotationBbox's. A gid attached with set_gid is therefore stored on the artist and retrievable with get_gid, but saving to SVG produces the image and box with no trace of the id, so the elements cannot be located in the exported document.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_backend_svg.py",
+      "line": 622,
+      "statement": "assert expected in buf",
+      "note": "In the patch-added test_annotationbbox_gid: an AnnotationBbox wrapping an OffsetImage gets set_gid('a test for issue 20044') (line 613), the figure is saved as SVG into a buffer (lines 617-619), and this assertion checks the buffer for '<g id=\"a test for issue 20044\">'. At the base commit the rendered SVG contains the image and frame but no group carrying the gid, so the assertion fails."
+    }
+  ],
+  "confidence": "high"
+}

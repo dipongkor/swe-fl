@@ -1,0 +1,21 @@
+{
+  "instance_id": "matplotlib__matplotlib-20859",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/legend.py",
+      "line": 437,
+      "statement": "elif isinstance(parent, Figure):",
+      "note": "In Legend.__init__'s parent type dispatch. The figure-level legend() method is defined on FigureBase (lib/matplotlib/figure.py line 941) and inherited by both Figure and SubFigure (both FigureBase subclasses, lines 2112 and 1924), and it constructs Legend(self, ...), so every FigureBase is a legitimate legend parent. This check tests against the narrower Figure class, so a SubFigure parent matches neither the Axes branch nor this one and falls into the else. The supporting import of Figure at line 363 is plumbing for this check, and the raise at line 441 is the faithful else-branch that merely reports what the dispatch decided."
+    }
+  ],
+  "reasoning": "SubFigure and Figure are sibling subclasses of FigureBase, which provides the shared legend() method; calling subfig.legend() constructs Legend(subfig, ...). Legend.__init__ classifies its parent with two isinstance checks, Axes or Figure, and raises TypeError('Legend needs either Axes or Figure as parent') otherwise. A SubFigure is a FigureBase but not a Figure, so it fails both checks and the constructor raises, making it impossible to add a legend to a subfigure even though the SubFigure API itself offers legend(). Nothing downstream requires the parent to be a full Figure; the classification is simply narrower than the class hierarchy that feeds it.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_legend.py",
+      "line": 881,
+      "statement": "leg = subfig.legend()",
+      "note": "In the patch-added test_subfigure_legend: FigureBase.legend on the SubFigure constructs Legend(self, ...), whose parent dispatch rejects the SubFigure and raises TypeError from legend.py line 441. The assertion 'leg.figure is subfig' on line 882 is not reached."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,45 @@
+{
+  "instance_id": "pytest-dev__pytest-8399",
+  "root_cause": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": 147,
+      "statement": "name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\",",
+      "note": "Names the auto-generated fixture that wraps unittest setUpClass/setUpModule for a TestCase. The name lacks the leading underscore that marks a fixture as private, so this internal, docstring-less fixture is treated as public: pytest --fixtures hides only names starting with '_' when not verbose (the filter at src/_pytest/python.py line 1429, a faithful reader of the naming convention). This is the occurrence reached by the failing test (unittest_setUpClass_fixture_MyTestCase appears in plain --fixtures output)."
+    },
+    {
+      "file": "src/_pytest/python.py",
+      "line": 531,
+      "statement": "name=f\"xunit_setup_module_fixture_{self.obj.__name__}\",",
+      "note": "Same fault for the auto-generated fixture wrapping xunit-style setup_module/teardown_module: no leading underscore, so the internal fixture is public and shown by plain --fixtures. Not reached by the failing test, which only defines a unittest.TestCase."
+    },
+    {
+      "file": "src/_pytest/python.py",
+      "line": 560,
+      "statement": "name=f\"xunit_setup_function_fixture_{self.obj.__name__}\",",
+      "note": "Same fault for the fixture wrapping xunit-style setup_function/teardown_function. Not reached by the failing test."
+    },
+    {
+      "file": "src/_pytest/python.py",
+      "line": 812,
+      "statement": "name=f\"xunit_setup_class_fixture_{self.obj.__qualname__}\",",
+      "note": "Same fault for the fixture wrapping xunit-style setup_class/teardown_class. Not reached by the failing test."
+    },
+    {
+      "file": "src/_pytest/python.py",
+      "line": 841,
+      "statement": "name=f\"xunit_setup_method_fixture_{self.obj.__qualname__}\",",
+      "note": "Same fault for the fixture wrapping xunit-style setup_method/teardown_method. Not reached by the failing test."
+    }
+  ],
+  "reasoning": "pytest auto-generates internal autouse fixtures to run unittest setUpClass/setUpModule and xunit-style setup_module/setup_function/setup_class/setup_method hooks, giving each an explicit unique name to speed up fixture lookup. pytest's convention is that fixtures whose names start with an underscore are private: the --fixtures listing skips them unless -v is passed. The five generated names omit the leading underscore, so these implementation-detail fixtures are classified as public and appear in plain pytest --fixtures output as e.g. 'unittest_setUpClass_fixture_Tests ... no docstring available', with no way for users to document or hide them; documentation-enforcing CI scripts that scan --fixtures output therefore start flagging every legacy unittest/xunit test module.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/test_unittest.py",
+      "line": 322,
+      "statement": "result.stdout.no_fnmatch_line(\"*no docstring available*\")",
+      "note": "In the patch-added test_fixtures_setup_setUpClass_issue8394: the inner module defines a TestCase with setUpClass, and plain --fixtures output (runpytest on line 318) contains 'unittest_setUpClass_fixture_MyTestCase [class scope] ... no docstring available', so this no-match assertion fails. The -v assertions on lines 324-326 pass either way since the fixture is legitimately listed in verbose mode."
+    }
+  ],
+  "confidence": "high"
+}

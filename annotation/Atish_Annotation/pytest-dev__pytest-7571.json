@@ -1,0 +1,27 @@
+{
+  "instance_id": "pytest-dev__pytest-7571",
+  "root_cause": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": 437,
+      "statement": "self.handler.setLevel(level)",
+      "note": "In LogCaptureFixture.set_level, whose own docstring (lines 423-424) promises 'The level will be restored to its previous value at the end of the test'. This statement mutates the capture handler's level without saving the prior value anywhere, in direct contrast to the logger mutation just above it (lines 435-436), which first records the original level via _initial_logger_levels.setdefault. The handler is not per-test state: it is the single LogCaptureHandler created once in LoggingPlugin.__init__ (line 526) and exposed to every test through the item store (property at line 365), so the unrecorded mutation outlives the test. Jointly faulty with the restore side at line 356."
+    },
+    {
+      "file": "src/_pytest/logging.py",
+      "line": 356,
+      "statement": "for logger_name, level in self._initial_logger_levels.items():",
+      "note": "Anchors an absence, not a faulty statement in itself: _finalize's restore section ('This restores the log levels changed by set_level') iterates only the recorded logger levels; no statement restores the handler level that set_level also changed. Jointly faulty with line 437: between them the invariant that every level set_level changes is undone at teardown is broken for the handler."
+    }
+  ],
+  "reasoning": "caplog.set_level changes two levels: the target logger's, whose original value it first records in _initial_logger_levels for teardown, and the capture handler's, which it sets with no record of the prior value. The fixture's teardown, _finalize, restores only the recorded logger levels, so the handler level is never restored. The capture handler is a single LogCaptureHandler owned by the LoggingPlugin for the whole session and shared by every test via the item store, so a level set in one test persists into all subsequent tests: after a test calls caplog.set_level(42), later tests observe caplog.handler.level == 42 instead of 0, and records below that level are silently not captured for them, contradicting the documented guarantee that levels set by set_level are restored automatically at the end of the test.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/logging/test_fixture.py",
+      "line": 81,
+      "statement": "result.assert_outcomes(passed=3)",
+      "note": "In the patch-added test_change_level_undos_handler_level (lines 57-81): the inner testdir suite has test1 set caplog.set_level(41), then test2 and test3 each assert caplog.handler.level == 0. Both inner assertions fail with 'assert 41 == 0' on the same shared LogCaptureHandler object, so the run is 2 failed / 1 passed and this outcome assertion fails."
+    }
+  ],
+  "confidence": "high"
+}
