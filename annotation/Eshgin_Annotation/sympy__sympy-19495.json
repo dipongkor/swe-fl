@@ -7,7 +7,7 @@
       "statement": "if cond is S.true:",
       "method": "_eval_subs",
       "class": "ConditionSet",
-      "note": "This special case treats a condition that becomes true after substitution as a reason to replace the ConditionSet's bound symbol and rebuild membership around the substituted value. A true condition should instead leave the original bound symbol in place and allow normal ConditionSet construction to simplify against the substituted base set."
+      "note": "This special case treats a condition that becomes true after substitution as a reason to replace the ConditionSet's bound symbol and rebuild membership around the substituted value. The free-symbol substitution consequently changes the bound variable and tests the replacement value for membership in the base set."
     },
     {
       "file": "sympy/sets/conditionset.py",
@@ -18,15 +18,15 @@
       "note": "The erroneous branch constructs a new set bound to the replacement expression. For substitutions such as y -> 1/3, this mistakes 1/3 for the ConditionSet variable and tests whether that value belongs to the ImageSet, producing the malformed result instead of the substituted ImageSet."
     }
   ],
-  "reasoning": "When a substitution targets a free symbol in a ConditionSet condition and base set, _eval_subs first substitutes both expressions. If assumptions make the condition S.true, the base implementation enters lines 245-246 and replaces self.sym with new. That conflates the free symbol being substituted with the bound ConditionSet variable. It also incorrectly changes a ConditionSet over Interval(-oo, 0) into EmptySet merely because the positive replacement is not in the base. The minimal fault is the pre-existing true-condition special case; the fix removes it and always reconstructs with self.sym, letting __new__ consistently simplify the true condition to the substituted base set.",
-    "fault_triggering_call_site": [
-        {
-            "file": "sympy/sets/tests/test_conditionset.py",
-            "line": "137-138",
-            "statement": "assert ConditionSet(x, Contains(\n        y, Interval(-1,1)), img1).subs(y, S.One/3).dummy_eq(img2)",
-            "note": "The newly added regression test substitutes the free parameter y with 1/3. The condition becomes true, causing the buggy ConditionSet._eval_subs branch to confuse the replacement value with the ConditionSet bound variable instead of simplifying to the substituted ImageSet."
-        }
-    ],
+  "reasoning": "When a substitution targets a free symbol in a ConditionSet condition and base set, _eval_subs first substitutes both expressions. If assumptions make the condition S.true, the base implementation enters lines 245-246 and replaces self.sym with new. That conflates the free symbol being substituted with the bound ConditionSet variable. It also incorrectly changes a ConditionSet over Interval(-oo, 0) into EmptySet merely because the positive replacement is not in the base.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/sets/tests/test_conditionset.py",
+      "line": "137-138",
+      "statement": "assert ConditionSet(x, Contains(\n        y, Interval(-1,1)), img1).subs(y, S.One/3).dummy_eq(img2)",
+      "note": "This assertion substitutes the free parameter y with 1/3. The condition becomes true, causing ConditionSet._eval_subs to confuse the replacement value with the ConditionSet bound variable instead of simplifying to the substituted ImageSet."
+    }
+  ],
   "time_minutes": 30,
   "confidence": "high"
 }

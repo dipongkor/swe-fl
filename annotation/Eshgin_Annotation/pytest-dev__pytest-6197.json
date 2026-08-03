@@ -10,7 +10,7 @@
       "note": "Package collection eagerly imports every discovered package __init__.py before pytest has determined that the package contains a collectable test module. Importing also adds the package's parent directory to sys.path."
     }
   ],
-  "reasoning": "Package.collect should traverse files without importing an otherwise irrelevant package. The unconditional _mount_obj_if_needed call materializes Package.obj, which imports __init__.py and mutates import state before collection decisions are made. This executes arbitrary package initialization code and leaks directories such as src onto sys.path. Removing this eager call restores lazy import through the normal obj property when an actual Python object is required. The PR's surrounding PyobjMixin refactor and removal of the __init__.py marker workaround support that lazy design but are not additional fault-triggering base lines.",
+  "reasoning": "Package.collect should traverse files without importing an otherwise irrelevant package. The unconditional _mount_obj_if_needed call materializes Package.obj, which imports __init__.py and mutates import state before collection decisions are made. This executes arbitrary package initialization code and leaks directories such as src onto sys.path.",
   "fault_triggering_call_site": [
     {
       "file": "testing/test_collection.py",

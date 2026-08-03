@@ -10,7 +10,7 @@
       "note": "This dispatch recognizes only a bare Name or a Subscript and sends every Attribute annotation directly to the return below. As a result, the module/name at the base of annotations such as foo.Bar and Bar.Boo is never recorded as used."
     }
   ],
-  "reasoning": "VariablesChecker records imports referenced only by type comments so they are not reported as unused. The base function handles Name and Subscript nodes but prematurely rejects Attribute nodes, even though qualified type comments are represented by astroid.Attribute. The imports forming the attribute expression consequently remain in the unused-import set. The fix adds an Attribute branch that recursively records its expression. Because that branch did not exist in the base commit, the minimal annotatable pre-existing fault is the overly narrow type guard at line 1829, not the newly added repair code. The constants.py change only supports conditionally skipping the regression on PyPy.",
+  "reasoning": "VariablesChecker records imports referenced only by type comments so they are not reported as unused. The base function handles Name and Subscript nodes but prematurely rejects Attribute nodes, even though qualified type comments are represented by astroid.Attribute. The imports forming the attribute expression consequently remain in the unused-import set. The constants.py change only supports conditionally skipping the regression on PyPy.",
   "fault_triggering_call_site": [
     {
       "file": "tests/checkers/unittest_variables.py",

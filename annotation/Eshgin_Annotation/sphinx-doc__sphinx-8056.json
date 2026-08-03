@@ -18,7 +18,7 @@
       "note": "The parameters parser always requests the unsplit generic representation, even when napoleon_use_param selects docutils :param: formatting and each comma-separated name must be emitted separately."
     }
   ],
-  "reasoning": "_consume_field correctly parses `x1, x2 : array_like` into the name string `x1, x2`, but _consume_fields appends that string as a single field. This is acceptable when napoleon_use_param is false because the grouped Parameters rendering preserves the combined display name. When napoleon_use_param is true, _parse_parameters_section sends the same single tuple to _format_docutils_params, yielding one malformed combined parameter instead of separate x1 and x2 directives. The fix adds mode-aware splitting and requests it only for docutils parameter output. The minimal base faults are the unconditional unsplit append and the parameter parser's unconditional use of that mode.",
+  "reasoning": "_consume_field correctly parses `x1, x2 : array_like` into the name string `x1, x2`, but _consume_fields appends that string as a single field. This is acceptable when napoleon_use_param is false because the grouped Parameters rendering preserves the combined display name. When napoleon_use_param is true, _parse_parameters_section sends the same single tuple to _format_docutils_params, yielding one malformed combined parameter instead of separate x1 and x2 directives. The minimal base faults are the unconditional unsplit append and the parameter parser's unconditional use of that mode.",
   "fault_triggering_call_site": [
     {
       "file": "tests/test_ext_napoleon_docstring.py",

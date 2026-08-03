@@ -39,10 +39,10 @@
       "statement": "m, b = linear_coeffs(",
       "method": "_eval_simplify",
       "class": "Equality",
-      "note": "Equality's single-symbol simplification also assumes Expr operands. After the general Relational guard is applied, this call still rewrites a set equality as an Add and fails while negating a FiniteSet, so Equality needs its own non-Expr guard."
+      "note": "Equality's single-symbol simplification assumes Expr operands. For a set equality, this call rewrites the operands as an Add and fails while negating a FiniteSet."
     }
   ],
-  "reasoning": "The subset dispatch lacks the finite ProductSet case, and generic set equality does not exploit mutual subset results. Those omissions produce None for queries that are decidable. A separate hardcoded FiniteSet/Interval result is symbolically unsound. Finally, both layers of relational simplification assume arithmetic expressions and crash on unevaluated set equalities; a partial-patch run with only the general Relational guard moved the failure into Equality's linear_coeffs path, confirming that both guards are required.",
+  "reasoning": "The subset dispatch lacks the finite ProductSet case, and generic set equality does not exploit mutual subset results. Those omissions produce None for queries that are decidable. A separate hardcoded FiniteSet/Interval result is symbolically unsound.",
   "fault_triggering_call_site": [
     {
       "file": "sympy/sets/tests/test_sets.py",
@@ -66,7 +66,7 @@
       "file": "sympy/sets/tests/test_sets.py",
       "line": 1609,
       "statement": "assert Eq({1}, {x}).simplify() == Eq({1}, {x})",
-      "note": "The undecidable symbolic set equality must remain unchanged. On the buggy simplification paths it raises instead; with only the first guard applied, it still fails in Equality's rewrite/linear-coefficient processing."
+      "note": "This assertion exercises an undecidable symbolic set equality, which should remain unevaluated. Equality's rewrite and linear-coefficient processing instead treat the sets as arithmetic expressions and raise."
     }
   ],
   "time_minutes": 75,

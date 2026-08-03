@@ -26,7 +26,7 @@
       "note": "The post-pass classifies every nonblank Text node as a type reference. Because Literal values arrive as ordinary Text, True, False, numbers, and strings are incorrectly converted to pending py-domain cross-references."
     }
   ],
-  "reasoning": "The parser loses the distinction between a subscripted type and the values inside Literal: constants are represented without faithful repr formatting, the Subscript branch emits them without a value marker, and the final classifier assumes all text is a type. The fix must preserve quoted constant rendering, mark Literal contents while flattening, and prevent those marked values from becoming cross-references. The assignment on base line 183 is the consequence of the overbroad line-182 condition, not a separate root-cause statement.",
+  "reasoning": "The parser loses the distinction between a subscripted type and the values inside Literal: constants are represented without faithful repr formatting, the Subscript branch emits them without a value marker, and the final classifier assumes all text is a type. The assignment on base line 183 is the consequence of the overbroad line-182 condition, not a separate root-cause statement.",
   "fault_triggering_call_site": [
     {
       "file": "tests/test_domain_py.py",

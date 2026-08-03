@@ -10,13 +10,13 @@
       "note": "This is the existing Mathematica-bracket fallback and anchors the missing dispatch path. Max and Min inherit from MinMaxBase rather than Function, while the base printer has no _print_MinMaxBase binding, so this correct formatter is never reached and generic printing emits Python-style parentheses."
     }
   ],
-  "reasoning": "MCodePrinter already knows how to render function-like applications with Mathematica brackets, but printer dispatch walks the expression MRO and Max/Min reach MinMaxBase before any class handled by this method. With no _print_MinMaxBase alias, they fall through to generic string output such as Max(2, x). Adding the dispatch binding is the behavioral fix; the added Max/Min known-function entries are not independently necessary because the fallback at line 102 already preserves their names.",
+  "reasoning": "MCodePrinter already knows how to render function-like applications with Mathematica brackets, but printer dispatch walks the expression MRO and Max/Min reach MinMaxBase before any class handled by this method. With no _print_MinMaxBase alias, they fall through to generic string output such as Max(2, x).",
   "fault_triggering_call_site": [
     {
       "file": "sympy/printing/tests/test_mathematica.py",
       "line": 31,
       "statement": "assert mcode(Max(x,y,z)*Min(y,z)) == \"Max[x, y, z]*Min[y, z]\"",
-      "note": "The buggy printer returns Max(x, y, z)*Min(y, z), so this newly added assertion fails on the base commit and passes on the PR."
+      "note": "This statement exercises and exposes the localized faulty behavior."
     }
   ],
   "time_minutes": 25,

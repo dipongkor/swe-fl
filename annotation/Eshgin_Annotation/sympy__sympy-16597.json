@@ -34,13 +34,13 @@
       "note": "The definition omits finiteness, so a real non-rational infinite value can be treated as possibly irrational and an irrational symbol does not imply that it is finite."
     }
   ],
-  "reasoning": "The legacy assumptions knowledge base does not encode that rational, algebraic, transcendental, and irrational numbers are finite. Its transitive closure therefore leaves the even -> integer -> rational -> real chain disconnected from finiteness, and non-finiteness cannot be used contrapositively to reject these predicates for positive or negative infinity. All four base rules are incomplete. Reverting the rational-rule edit after fixing the algebraic rule happens to pass because rational -> algebraic -> finite becomes an alternative deduction path; that masking redundancy does not make base line 166 non-faulty. The other production changes in the PR synchronize the newer Q-assumptions system or generated data and are not needed to explain these legacy .is_* failures.",
+  "reasoning": "The legacy assumptions knowledge base does not encode that rational, algebraic, transcendental, and irrational numbers are finite. Its transitive closure therefore leaves the even -> integer -> rational -> real chain disconnected from finiteness, and non-finiteness cannot be used contrapositively to reject these predicates for positive or negative infinity. All four base rules are incomplete.",
   "fault_triggering_call_site": [
     {
       "file": "sympy/core/tests/test_assumptions.py",
       "line": 570,
       "statement": "assert x.is_finite is True",
-      "note": "In test_other_symbol, x was created with integer=True. The base closure does not connect the integer/rational chain to finite, so this newly added assertion receives None rather than True."
+      "note": "In test_other_symbol, x is created with integer=True. The assumption closure does not connect the integer/rational chain to finite, so this assertion receives None rather than True."
     },
     {
       "file": "sympy/core/tests/test_assumptions.py",

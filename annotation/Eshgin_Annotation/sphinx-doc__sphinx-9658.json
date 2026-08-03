@@ -1,32 +1,32 @@
 {
-    "instance_id": "sphinx-doc__sphinx-9658",
-    "root_cause": [
-        {
-            "file": "sphinx/ext/autodoc/mock.py",
-            "line": 43,
-            "statement": "self.__qualname__ = ''",
-            "note": "__init__ unconditionally resets __qualname__ to empty string on every instantiation, wiping out the name set on the subclass. The fix changes this to self.__qualname__ = self.__name__ so the subclass name is preserved."
-        },
-        {
-            "file": "sphinx/ext/autodoc/mock.py",
-            "line": 74,
-            "statement": "attrs = {'__module__': module, '__display_name__': module + '.' + name, '__sphinx_decorator_args__': decorator_args}",
-            "note": "_make_subclass builds the attrs dict without including '__name__': name. Since restify() relies on __name__ to extract the class name from a mock object, its absence causes the final component of the dotted path to be lost."
-        }
-    ],
-    "reasoning": "When test_restify_mock calls restify(unknown.secret.Class), a chain of nested mock objects is created. restify() needs __name__ to extract the final class name ('Class'). In the original: (1) _MockObject has no __name__ class attribute, (2) _make_subclass never sets __name__ in attrs, and (3) __init__ resets __qualname__ to '' on instantiation, erasing any name the subclass had. Together these cause restify() to see an empty class name and return 'unknown.secret.' instead of 'unknown.secret.Class'. The fix adds __name__ = '' to _MockObject, adds '__name__': name in _make_subclass, and changes __init__ to self.__qualname__ = self.__name__ so the name is preserved through instantiation.",
-    "fault_triggering_call_site": [
-        {
-            "file": "tests/test_util_typing.py",
-            "line": 177,
-            "statement": "assert restify(unknown.secret.Class) == ':py:class:`unknown.secret.Class`'",
-            "note": "Test case that expects the fully qualified class name 'unknown.secret.Class' but receives 'unknown.secret.' because __name__ is absent and __qualname__ is wiped to empty string on instantiation."
-        }
-    ],
-    "rc_ftcs_same": true,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": true
+  "instance_id": "sphinx-doc__sphinx-9658",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/autodoc/mock.py",
+      "line": 43,
+      "statement": "self.__qualname__ = ''",
+      "note": "__init__ unconditionally resets __qualname__ to empty string on every instantiation, wiping out the name set on the subclass."
+    },
+    {
+      "file": "sphinx/ext/autodoc/mock.py",
+      "line": 74,
+      "statement": "attrs = {'__module__': module, '__display_name__': module + '.' + name, '__sphinx_decorator_args__': decorator_args}",
+      "note": "_make_subclass builds the attrs dict without including '__name__': name. Since restify() relies on __name__ to extract the class name from a mock object, its absence causes the final component of the dotted path to be lost."
+    }
+  ],
+  "reasoning": "When test_restify_mock calls restify(unknown.secret.Class), a chain of nested mock objects is created. restify() needs __name__ to extract the final class name ('Class'). In the original: (1) _MockObject has no __name__ class attribute, (2) _make_subclass never sets __name__ in attrs, and (3) __init__ resets __qualname__ to '' on instantiation, erasing any name the subclass had. Together these cause restify() to see an empty class name and return 'unknown.secret.' instead of 'unknown.secret.Class'.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_util_typing.py",
+      "line": 177,
+      "statement": "assert restify(unknown.secret.Class) == ':py:class:`unknown.secret.Class`'",
+      "note": "Test case that expects the fully qualified class name 'unknown.secret.Class' but receives 'unknown.secret.' because __name__ is absent and __qualname__ is wiped to empty string on instantiation."
+    }
+  ],
+  "rc_ftcs_same": true,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true
 }

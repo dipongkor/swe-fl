@@ -18,7 +18,7 @@
       "note": "The separately typed-field path creates cross-references without forwarding the document environment, so PyXrefMixin has no access to the originating Python module/class context."
     }
   ],
-  "reasoning": "Implicit :type:, :rtype:, and typed :param: references lack the scope attributes carried by explicit Python-domain roles. PyXrefMixin marks them refspecific but omits py:module/py:class, while one DocFieldTransformer call path also omits env entirely. Both defects must be corrected so resolution begins in the current class/module instead of suffix-matching every candidate.",
+  "reasoning": "Implicit :type:, :rtype:, and typed :param: references lack the scope attributes carried by explicit Python-domain roles. PyXrefMixin marks them refspecific but omits py:module and py:class, while one DocFieldTransformer call path also omits env entirely. Resolution therefore cannot begin in the current class or module and instead suffix-matches unrelated candidates with the same short name.",
   "fault_triggering_call_site": [
     {
       "file": "tests/test_domain_py.py",

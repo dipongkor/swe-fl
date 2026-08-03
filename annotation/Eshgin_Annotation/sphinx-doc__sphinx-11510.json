@@ -10,7 +10,7 @@
       "note": "After resolving and recording an included RST file, Sphinx delegates all loading and insertion to docutils' BaseInclude implementation. That path inserts the included lines directly into the current state machine and never emits Sphinx's source-read event for the included source, so event-handler changes are absent from the parsed document."
     }
   ],
-  "reasoning": "The top-level reStructuredText parser emits source-read for the document passed to it, but Include.run resolves the child path and then returns BaseInclude.run without placing included RST through the Sphinx source-read lifecycle. BaseInclude reads the child and inserts its original lines into the state machine. Consequently a listener sees and can modify `index`, but never sees `baz/baz`; nested `foo.rst` likewise retains `#magical`. The minimal pre-existing fault is the unconditional delegation at line 379 without an event-aware insertion path. The patch's new _insert_input wrapper is repair code and is not marked as a buggy line.",
+  "reasoning": "The top-level reStructuredText parser emits source-read for the document passed to it, but Include.run resolves the child path and then returns BaseInclude.run without placing included RST through the Sphinx source-read lifecycle. BaseInclude reads the child and inserts its original lines into the state machine. Consequently a listener sees and can modify `index`, but never sees `baz/baz`; nested `foo.rst` likewise retains `#magical`. The minimal pre-existing fault is the unconditional delegation at line 379 without an event-aware insertion path.",
   "fault_triggering_call_site": [
     {
       "file": "tests/test_directive_other.py",

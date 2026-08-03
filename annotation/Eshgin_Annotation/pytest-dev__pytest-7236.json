@@ -10,7 +10,7 @@
       "note": "Under --pdb this condition postpones tearDown for every unittest item, including an item already marked with unittest.skip. The unittest result machinery then invokes the saved teardown for a test whose setup and teardown must never run."
     }
   ],
-  "reasoning": "The --pdb path temporarily replaces a unittest TestCase's tearDown so it can be delayed for debugging. The base condition checks only usepdb and ignores unittest's skip marker. A skipped TestCase therefore enters teardown-postponement bookkeeping and its real tearDown is called despite the skip contract. Guarding the branch with the item's unittest-skip state prevents any setup/teardown lifecycle for the skipped test. The PR's two earlier substitutions with a shared _is_skipped helper preserve their existing truth checks and are not separate causes of this regression.",
+  "reasoning": "The --pdb path temporarily replaces a unittest TestCase's tearDown so it can be delayed for debugging. The base condition checks only usepdb and ignores unittest's skip marker. A skipped TestCase therefore enters teardown-postponement bookkeeping and its real tearDown is called despite the skip contract.",
   "fault_triggering_call_site": [
     {
       "file": "testing/test_unittest.py",

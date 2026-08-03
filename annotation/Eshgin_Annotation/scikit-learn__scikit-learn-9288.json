@@ -10,7 +10,7 @@
       "note": "The serial path passes the mutable RandomState directly into each K-means initialization, whereas the parallel path first draws one integer seed per initialization. Those different random-number consumption protocols produce different results for the same public random_state when n_jobs changes."
     }
   ],
-  "reasoning": "KMeans promises reproducible behavior for a fixed random_state, but the base implementation seeds its serial and parallel execution paths differently. The serial call at line 372 lets each run consume the shared generator internally; the parallel path generates a fixed array of integer seeds first. The regression therefore finds different labels for n_jobs=1 and n_jobs=2. The official patch unifies seed generation. A narrower one-line experiment that retained the base loop but passed random_state.randint(...) at line 372 also made the regression pass, demonstrating that the loop line itself is not a minimal faulty line.",
+  "reasoning": "KMeans promises reproducible behavior for a given random_state, but its serial and parallel execution paths seed their work differently. The serial call at line 372 lets each run consume the shared generator internally; the parallel path generates a predetermined array of integer seeds first. The assertion therefore observes different labels for n_jobs=1 and n_jobs=2.",
   "fault_triggering_call_site": [
     {
       "file": "sklearn/cluster/tests/test_k_means.py",

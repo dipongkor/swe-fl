@@ -18,7 +18,7 @@
       "note": "The superclass call does not forward store_cv_values. Even after the constructor accepts the option, leaving this line unchanged causes fitting to complete without creating cv_values_."
     }
   ],
-  "reasoning": "RidgeClassifierCV inherits the cross-validation implementation that can retain per-sample scores, but its wrapper constructor neither accepts nor forwards store_cv_values. Both omissions are independently observable: on the base code, construction with store_cv_values=True raises TypeError; after accepting the parameter but retaining the base superclass call, fitting leaves cv_values_ undefined. The two base lines are therefore the complete minimal propagation fault.",
+  "reasoning": "RidgeClassifierCV inherits cross-validation behavior capable of retaining per-sample scores, but its constructor does not expose store_cv_values and its superclass call always uses the default setting. Passing store_cv_values=True therefore raises TypeError at construction, and the hard-coded superclass arguments prevent the inherited fitting path from creating cv_values_. These two constructor statements are the complete propagation fault because one defines the accepted API and the other controls the inherited behavior.",
   "fault_triggering_call_site": [
     {
       "file": "sklearn/linear_model/tests/test_ridge.py",

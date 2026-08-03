@@ -1,32 +1,32 @@
 {
-    "instance_id": "pylint-dev__pylint-6386",
-    "root_cause": [
-        {
-            "file": "pylint/config/utils.py",
-            "line": 211,
-            "statement": "\"-v\": (False, _set_verbose_mode),",
-            "note": "The PREPROCESSABLE_OPTIONS dictionary was missing the '-v' short form entry. Without it, passing '-v' on the command line was never intercepted during preprocessing and fell through to argparse, which saw a misconfigured option expecting a value and raised 'expected one argument'."
-        },
-        {
-            "file": "pylint/config/utils.py",
-            "line": 221,
-            "statement": "if not argument.startswith(\"--\"):",
-            "note": "The preprocessing loop that walks command-line arguments and dispatches to PREPROCESSABLE_OPTIONS unconditionally skips any argument not starting with '--'. This means short options like '-v' would never be looked up in PREPROCESSABLE_OPTIONS even after being added to the dict. The fix changes this to 'if not argument.startswith(\"-\"):' so that only plain positional arguments are skipped while both '--long' and '-short' options are processed."
-        }
-    ],
-    "reasoning": "The two root causes are sequentially dependent and both must be fixed together. Adding '-v' to PREPROCESSABLE_OPTIONS is useless as long as the startswith('--') guard skips it before the dict lookup is ever reached. Conversely, relaxing the guard to startswith('-') is harmless without adding '-v' to the dict. Neither fix alone resolves the 'expected one argument' error. The metavar-related changes across argument.py, arguments_manager.py, and utils.py address the misleading 'VERBOSE' label in the help output but are not responsible for the primary failure mode.",
-    "fault_triggering_call_site": [
-        {
-            "file": "tests/config/test_config.py",
-            "line": 107,
-            "statement": "Run([str(EMPTY_MODULE), \"-v\"], exit=False)",
-            "note": "In test_short_verbose. Directly reproduces the reported bug by invoking pylint with the '-v' short flag. Without the two fixes, this raises SystemExit with 'expected one argument' instead of completing normally. The subsequent assertion 'assert \"Using config file\" in output.err' verifies that verbose mode was correctly activated."
-        }
-    ],
-    "rc_ftcs_same": false,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": true
+  "instance_id": "pylint-dev__pylint-6386",
+  "root_cause": [
+    {
+      "file": "pylint/config/utils.py",
+      "line": 211,
+      "statement": "\"-v\": (False, _set_verbose_mode),",
+      "note": "The PREPROCESSABLE_OPTIONS dictionary was missing the '-v' short form entry. Without it, passing '-v' on the command line was never intercepted during preprocessing and fell through to argparse, which saw a misconfigured option expecting a value and raised 'expected one argument'."
+    },
+    {
+      "file": "pylint/config/utils.py",
+      "line": 221,
+      "statement": "if not argument.startswith(\"--\"):",
+      "note": "The preprocessing loop that walks command-line arguments and dispatches to PREPROCESSABLE_OPTIONS unconditionally skips any argument not starting with '--'. This means short options like '-v' would never be looked up in PREPROCESSABLE_OPTIONS even after being added to the dict."
+    }
+  ],
+  "reasoning": "The -v option is absent from PREPROCESSABLE_OPTIONS, and the preprocessing loop skips every argument that does not begin with --. The short option therefore cannot be intercepted by either the lookup table or the loop's dispatch condition. It falls through to argparse as an option configured to require a value, producing SystemExit with 'expected one argument' instead of enabling verbose mode. Both base decisions are necessary parts of that path.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/config/test_config.py",
+      "line": 107,
+      "statement": "Run([str(EMPTY_MODULE), \"-v\"], exit=False)",
+      "note": "Invoking pylint with the -v short flag reaches argparse without preprocessing and raises SystemExit with 'expected one argument' before the output assertion can run."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true
 }

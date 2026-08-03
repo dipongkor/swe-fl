@@ -1,21 +1,21 @@
 {
   "instance_id": "sphinx-doc__sphinx-9711",
   "root_cause": [
-      {
-          "file": "sphinx/extension.py",
-          "line": 54,
-          "statement": "if extension.version == 'unknown version' or reqversion > extension.version:",
-          "note": "String comparison for semantic versions fails because it compares lexicographically rather than semantically. For example, '3.9' > '3.10' returns True (since '9' > '1'), incorrectly treating 3.9 as greater than 3.10."
-      }
+    {
+      "file": "sphinx/extension.py",
+      "line": 54,
+      "statement": "if extension.version == 'unknown version' or reqversion > extension.version:",
+      "note": "String comparison for semantic versions fails because it compares lexicographically rather than semantically. For example, '3.9' > '3.10' returns True (since '9' > '1'), incorrectly treating 3.9 as greater than 3.10."
+    }
   ],
-  "reasoning": "The verify_needs_extensions function uses string comparison to compare version numbers, which fails for semantic versioning. When reqversion='3.9' and extension.version='3.10', the condition reqversion > extension.version incorrectly evaluates to True because '3.9' > '3.10' lexicographically. This causes the function to raise VersionRequirementError when it shouldn't. The fix introduces proper semantic version comparison using packaging.version.Version.",
+  "reasoning": "The verify_needs_extensions function uses string comparison to compare version numbers, which fails for semantic versioning. When reqversion='3.9' and extension.version='3.10', the condition reqversion > extension.version incorrectly evaluates to True because '3.9' > '3.10' lexicographically. This causes the function to raise VersionRequirementError when it shouldn't.",
   "fault_triggering_call_site": [
-      {
-          "file": "tests/test_extension.py",
-          "line": 25,
-          "statement": "verify_needs_extensions(app, app.config)",
-          "note": "Test case that expects version 3.10 to satisfy requirement 3.9 triggers the faulty string comparison."
-      }
+    {
+      "file": "tests/test_extension.py",
+      "line": 25,
+      "statement": "verify_needs_extensions(app, app.config)",
+      "note": "Test case that expects version 3.10 to satisfy requirement 3.9 triggers the faulty string comparison."
+    }
   ],
   "rc_ftcs_same": true,
   "hunk_type": "rc",
