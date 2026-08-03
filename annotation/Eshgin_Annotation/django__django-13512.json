@@ -1,0 +1,38 @@
+{
+  "instance_id": "django__django-13512",
+  "root_cause": [
+    {
+      "file": "django/contrib/admin/utils.py",
+      "line": 403,
+      "statement": "return field.get_prep_value(value)",
+      "method": "display_for_field",
+      "class": "N/A",
+      "note": "Admin display delegates JSON rendering to the model field's database-preparation serialization. That serialization uses JSON's ASCII-safe form, so non-ASCII characters are returned as escape sequences rather than readable text."
+    },
+    {
+      "file": "django/forms/fields.py",
+      "line": 1261,
+      "statement": "return json.dumps(value, cls=self.encoder)",
+      "method": "prepare_value",
+      "class": "JSONField",
+      "note": "json.dumps defaults to ensure_ascii=True, causing form values containing Chinese characters, emoji, or other Unicode text to be escaped before the JSON widget displays them."
+    }
+  ],
+  "reasoning": "JSON values reach the admin through two rendering paths. Read-only field display uses the model field's database-preparation output, while the editable JSON form calls JSONField.prepare_value. Both paths serialize with the default ASCII-only JSON behavior. The stored value remains correct, but the admin receives strings such as \\u4f60\\u597d instead of the original characters. Lines 403 and 1261 are independently faulty because the admin's read-only display and editable form exercise separate serializers and each regression assertion fails on its corresponding path.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/admin_utils/tests.py",
+      "line": 194,
+      "statement": "self.assertEqual(",
+      "note": "For the Unicode dictionary case, this assertion compares readable JSON with the escaped string returned by display_for_field."
+    },
+    {
+      "file": "tests/forms_tests/field_tests/test_jsonfield.py",
+      "line": 32,
+      "statement": "self.assertEqual(field.prepare_value('你好，世界'), '\"你好，世界\"')",
+      "note": "This assertion directly exposes that prepare_value escapes every non-ASCII character in the form's JSON text."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

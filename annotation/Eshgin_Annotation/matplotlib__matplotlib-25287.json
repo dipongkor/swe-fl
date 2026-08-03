@@ -1,0 +1,38 @@
+{
+  "instance_id": "matplotlib__matplotlib-25287",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/axis.py",
+      "line": 2258,
+      "statement": "color=mpl.rcParams['xtick.color'],",
+      "method": "_init",
+      "class": "XAxis",
+      "note": "The x-axis offset text is label text, but its color is initialized unconditionally from the tick-mark color setting. An explicit xtick.labelcolor is therefore ignored."
+    },
+    {
+      "file": "lib/matplotlib/axis.py",
+      "line": 2518,
+      "statement": "color=mpl.rcParams['ytick.color'],",
+      "method": "_init",
+      "class": "YAxis",
+      "note": "The y-axis offset text is initialized from the tick-mark color rather than the tick-label color, so an independently configured ytick.labelcolor does not propagate to the exponent label."
+    }
+  ],
+  "reasoning": "XAxis and YAxis create their offsetText artists during axis initialization. Although these artists display the scale offset or exponent alongside tick labels, each _init method sources their color directly from xtick.color or ytick.color. With labelcolor set to blue or green and the tick color left at its default, the artists remain 'k'. The two color assignments are independently necessary root causes because the x-axis and y-axis instantiate separate artists through separate initialization methods, and each regression assertion reaches its corresponding assignment.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_axes.py",
+      "line": 7817,
+      "statement": "assert ax.xaxis.offsetText.get_color() == 'blue'",
+      "note": "This assertion observes the default tick color 'k' after explicitly configuring the x tick-label color as blue."
+    },
+    {
+      "file": "lib/matplotlib/tests/test_axes.py",
+      "line": 7828,
+      "statement": "assert ax.yaxis.offsetText.get_color() == 'green'",
+      "note": "This assertion observes the default tick color 'k' after explicitly configuring the y tick-label color as green."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

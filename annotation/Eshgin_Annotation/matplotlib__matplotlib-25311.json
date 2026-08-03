@@ -1,0 +1,24 @@
+{
+  "instance_id": "matplotlib__matplotlib-25311",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": 1508,
+      "statement": "self.canvas = self.ref_artist.figure.canvas",
+      "method": "__init__",
+      "class": "DraggableBase",
+      "note": "The draggable helper stores a direct canvas reference in its persistent instance state. Because the helper is reachable from the legend or annotation, serializing the figure also traverses this canvas reference, including GUI canvas objects that cannot be pickled."
+    }
+  ],
+  "reasoning": "Enabling dragging creates a DraggableBase-derived helper owned by the artist. During initialization, line 1508 copies the figure canvas into the helper as an ordinary attribute. The figure's object graph then contains an additional persistent path back to its canvas through the draggable helper. Pickling a draggable legend serializes that path and either includes FigureCanvasAgg in the pickle stream or raises TypeError for an unpicklable GUI canvas. This assignment is the minimal root cause because the callbacks are registered through the picklable callback mechanism; the unwanted serialized canvas is introduced by the stored attribute itself.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_pickle.py",
+      "line": 105,
+      "statement": "assert \"FigureCanvasAgg\" not in [arg for op, arg, pos in pickletools.genops(pkl)]",
+      "note": "This assertion inspects the serialized draggable figure and finds the canvas class reached through the helper's stored canvas attribute."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

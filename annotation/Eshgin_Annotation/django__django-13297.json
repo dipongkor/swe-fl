@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-13297",
+  "root_cause": [
+    {
+      "file": "django/views/generic/base.py",
+      "line": 172,
+      "statement": "@SimpleLazyObject",
+      "method": "_wrap_url_kwargs_with_deprecation_warning",
+      "class": "N/A",
+      "note": "This wraps every URL value in a generic proxy whose type is SimpleLazyObject rather than the type produced by the URL converter. Consumers such as database parameter binding inspect the proxy itself and reject it before string-like behavior can force evaluation."
+    }
+  ],
+  "reasoning": "TemplateView.get passes its URL kwargs through _wrap_url_kwargs_with_deprecation_warning before invoking get_context_data. The decorator on line 172 turns artist_name into a SimpleLazyObject so the warning can be delayed. Artist.objects.get then carries that object into query parameters. SQLite does not recognize SimpleLazyObject as a supported bound type and raises InterfaceError, even though evaluating it would yield the original string. The decorator is the minimal root cause because the URL converter produced a valid string and the proxy type is introduced only at this wrapping point.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/generic_views/test_base.py",
+      "line": 622,
+      "statement": "response = ArtistView.as_view()(self.rf.get('/'), artist_name=artist.name)",
+      "note": "This view call wraps artist_name and reaches the database lookup, where SQLite rejects the SimpleLazyObject query parameter."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

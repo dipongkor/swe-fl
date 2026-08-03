@@ -1,0 +1,24 @@
+{
+  "instance_id": "matplotlib__matplotlib-24637",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": 1461,
+      "statement": "self.offsetbox.draw(renderer)",
+      "method": "draw",
+      "class": "AnnotationBbox",
+      "note": "AnnotationBbox draws its component artists directly without opening a renderer group for the enclosing artist. Vector renderers therefore receive the children but never receive the AnnotationBbox gid that should identify their containing group."
+    }
+  ],
+  "reasoning": "Saving as SVG calls AnnotationBbox.draw, which renders its arrow, frame, and offsetbox children individually. The gid belongs to the enclosing AnnotationBbox, but this draw path enters child rendering without establishing an enclosing renderer group associated with that artist. The SVG contains the image and other components but no group carrying the configured id. Line 1461 is the minimal root-cause operation because it completes the nested rendering while bypassing the only level at which the AnnotationBbox gid is available.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_backend_svg.py",
+      "line": 622,
+      "statement": "assert expected in buf",
+      "note": "This assertion searches the rendered SVG for the AnnotationBbox group id and fails even though the child image was rendered."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

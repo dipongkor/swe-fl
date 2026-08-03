@@ -1,0 +1,48 @@
+{
+  "instance_id": "django__django-13344",
+  "root_cause": [
+    {
+      "file": "django/middleware/cache.py",
+      "line": 73,
+      "statement": "self.get_response = get_response",
+      "method": "__init__",
+      "class": "UpdateCacheMiddleware",
+      "note": "This constructor manually stores get_response instead of using MiddlewareMixin initialization, so an async downstream callable is never detected and the middleware instance is not marked as coroutine-capable."
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 135,
+      "statement": "self.get_response = get_response",
+      "method": "__init__",
+      "class": "FetchFromCacheMiddleware",
+      "note": "The request-side cache middleware bypasses the inherited async classification when storing get_response, leaving an async middleware chain represented as a synchronous callable."
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 177,
+      "statement": "self.get_response = get_response",
+      "method": "__init__",
+      "class": "CacheMiddleware",
+      "note": "The combined cache middleware also performs only a direct assignment and omits the inherited initialization that marks instances wrapping coroutine functions."
+    },
+    {
+      "file": "django/middleware/security.py",
+      "line": 22,
+      "statement": "self.get_response = get_response",
+      "method": "__init__",
+      "class": "SecurityMiddleware",
+      "note": "SecurityMiddleware stores an async get_response without running MiddlewareMixin's coroutine check, so the handler treats the instance as synchronous."
+    }
+  ],
+  "reasoning": "MiddlewareMixin initialization records get_response and classifies the middleware as coroutine-capable when the downstream handler is async. These four overriding constructors duplicate only the assignment and never perform that classification. asyncio.iscoroutinefunction therefore returns False for each instance even when it wraps async_get_response. In an ASGI chain, the outer handler follows the synchronous middleware path and the response-phase hook can receive the unawaited coroutine returned downstream instead of an HttpResponse. The four assignments are independently faulty because each constructor bypasses the same required inherited state transition and each appears as a separate failing subtest.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/deprecation/test_middleware_mixin.py",
+      "line": 85,
+      "statement": "self.assertIs(asyncio.iscoroutinefunction(middleware_instance), True)",
+      "note": "This assertion fails for UpdateCacheMiddleware, FetchFromCacheMiddleware, CacheMiddleware, and SecurityMiddleware after each is constructed with an async response callable."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}

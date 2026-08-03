@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-15554",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1030,
+      "statement": "if (reuse is None or a in reuse) and j.equals(join)",
+      "method": "join",
+      "class": "Query",
+      "note": "The equals() comparison deliberately ignores a join's FilteredRelation condition. General join reuse therefore treats two aliases over the same relation but with different filters as interchangeable and reuses the first SQL join for both annotations."
+    }
+  ],
+  "reasoning": "Resolving each FilteredRelation annotation constructs a Join for the book relation with a distinct filtering condition. Query.join searches existing aliases using Join.equals, whose equality rule omits filtered_relation. The second annotation is consequently mapped to the first annotation's alias rather than receiving a separately filtered join. Both projected columns then come from the Alice-filtered join, producing one row with both titles None instead of two rows containing the Jane titles. Line 1030 is the minimal root cause because it is where distinct filtered joins are collapsed despite their different SQL conditions.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/filtered_relation/tests.py",
+      "line": 228,
+      "statement": "self.assertCountEqual(",
+      "note": "This assertion evaluates the queryset and finds a single row with both filtered titles empty instead of the two independently filtered Jane-book rows."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}
