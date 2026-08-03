@@ -1,0 +1,32 @@
+{
+  "instance_id": "pydata__xarray-6992",
+  "root_cause": [
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4180,
+      "statement": "coord_names = set(new_variables) | self._coord_names",
+      "method": "reset_index",
+      "class": "Dataset",
+      "note": "This carries every old coordinate name into the result even when reset_index(drop=True) removed the corresponding variable. The resulting Dataset can therefore claim coordinate names that are absent from its variable mapping, violating the invariant assumed by DataVariables and representation code."
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4182,
+      "statement": "return self._replace(variables, coord_names=coord_names, indexes=indexes)",
+      "method": "reset_index",
+      "class": "Dataset",
+      "note": "This constructs the result through the low-level replacement path without recalculating dimensions from the filtered variable mapping. When an indexed coordinate is dropped, the old dimension can therefore remain even though no result variable uses it."
+    }
+  ],
+  "reasoning": "reset_index first builds a variables mapping with requested dropped variables removed. It then unconditionally unions the original Dataset's complete coordinate-name set into coord_names. For reset_index('x', drop=True), x is absent from variables but remains in coord_names. The result is also built through _replace without deriving dimensions from the new variables, so the removed coordinate can leave a stale x dimension. This inconsistent internal state can make the calculated number of data variables negative and raise ValueError during repr. Lines 4180 and 4182 are the minimal jointly faulty decisions: one preserves names with no variables, and the other preserves dimensions no longer supported by the filtered mapping.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_dataset.py",
+      "line": 3285,
+      "statement": "assert len(reset.dims) == 0",
+      "note": "After dropping the only indexed coordinate, this assertion observes a stale x dimension instead of an empty dimension mapping."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}
