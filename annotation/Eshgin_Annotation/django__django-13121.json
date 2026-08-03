@@ -1,44 +1,44 @@
 {
-    "instance_id": "django__django-13121",
-    "root_cause": [
-        {
-            "file": "django/db/models/expressions.py",
-            "line": 60,
-            "statement": "other = DurationValue(other, output_field=fields.DurationField())",
-            "note": "Timedelta literals in expressions were wrapped in the special DurationValue class instead of a normal Value with a DurationField output_field. On non-native-duration backends, DurationValue rendered the literal as backend-specific interval SQL rather than a normal duration parameter."
-        },
-        {
-            "file": "django/db/models/expressions.py",
-            "line": 452,
-            "statement": "if (not connection.features.has_native_duration_field and ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):",
-            "note": "CombinedExpression routed any expression with a DurationField operand through DurationExpression, including duration + duration. That path is only needed when combining a duration with a non-duration temporal value; for duration-only arithmetic it produced SQL/conversion behavior that broke SQLite and MySQL."
-        },
-        {
-            "file": "django/db/models/expressions.py",
-            "line": 717,
-            "statement": "return connection.ops.date_interval_sql(self.value), []",
-            "note": "DurationValue emitted raw backend interval SQL, such as a microsecond string on SQLite. The result could come back in a form that convert_durationfield_value could not parse, causing decimal.InvalidOperation."
-        }
-    ],
-    "reasoning": "The reported query is duration-only arithmetic: F('estimated_time') + datetime.timedelta(...). The ORM treated the timedelta as a special SQL interval and routed the whole expression through DurationExpression whenever either side was a DurationField. On backends without native duration support, that produced SQL values that were not converted back as duration microseconds. The fix represents timedeltas as normal Value(..., output_field=DurationField()), only uses DurationExpression when exactly one side is a DurationField, and removes DurationValue/date_interval_sql.",
-    "fault_triggering_call_site": [
-        {
-            "file": "tests/expressions/tests.py",
-            "line": 1473,
-            "statement": "qs = Experiment.objects.annotate(duration=F('estimated_time') + delta)",
-            "note": "Directly builds the duration + timedelta annotation that took the faulty DurationValue/DurationExpression path on SQLite and MySQL."
-        },
-        {
-            "file": "tests/expressions/tests.py",
-            "line": 1475,
-            "statement": "self.assertEqual(obj.duration, obj.estimated_time + delta)",
-            "note": "Forces evaluation and conversion of the annotated duration. Before the fix, conversion fails or returns the wrong value for duration-only expressions."
-        }
-    ],
-    "rc_ftcs_same": false,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": true
+  "instance_id": "django__django-13121",
+  "root_cause": [
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 60,
+      "statement": "other = DurationValue(other, output_field=fields.DurationField())",
+      "note": "Timedelta literals in expressions were wrapped in the special DurationValue class instead of a normal Value with a DurationField output_field. On non-native-duration backends, DurationValue rendered the literal as backend-specific interval SQL rather than a normal duration parameter."
+    },
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 452,
+      "statement": "if (not connection.features.has_native_duration_field and ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):",
+      "note": "CombinedExpression routed any expression with a DurationField operand through DurationExpression, including duration + duration. That path is only needed when combining a duration with a non-duration temporal value; for duration-only arithmetic it produced SQL/conversion behavior that broke SQLite and MySQL."
+    },
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 717,
+      "statement": "return connection.ops.date_interval_sql(self.value), []",
+      "note": "DurationValue emitted raw backend interval SQL, such as a microsecond string on SQLite. The result could come back in a form that convert_durationfield_value could not parse, causing decimal.InvalidOperation."
+    }
+  ],
+  "reasoning": "The reported query is duration-only arithmetic: F('estimated_time') + datetime.timedelta(...). The ORM treated the timedelta as a special SQL interval and routed the whole expression through DurationExpression whenever either side was a DurationField. On backends without native duration support, that produced SQL values that were not converted back as duration microseconds.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/expressions/tests.py",
+      "line": 1473,
+      "statement": "qs = Experiment.objects.annotate(duration=F('estimated_time') + delta)",
+      "note": "Directly builds the duration + timedelta annotation that took the faulty DurationValue/DurationExpression path on SQLite and MySQL."
+    },
+    {
+      "file": "tests/expressions/tests.py",
+      "line": 1475,
+      "statement": "self.assertEqual(obj.duration, obj.estimated_time + delta)",
+      "note": "Forces evaluation and conversion of the annotated duration. in the base implementation, conversion fails or returns the wrong value for duration-only expressions."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true
 }

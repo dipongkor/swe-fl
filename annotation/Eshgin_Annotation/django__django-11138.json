@@ -15,7 +15,7 @@
       "statement": "return \"CAST((FROM_TZ(%s, '0:00') AT TIME ZONE '%s') AS TIMESTAMP)\" % (field_name, tzname)",
       "method": "_convert_field_to_tz",
       "class": "DatabaseOperations",
-      "note": "Oracle has the same hard-coded source-timezone assumption through '0:00'. It must attach the connection timezone to the stored value before converting to the requested timezone."
+      "note": "Oracle has the same hard-coded source-timezone assumption through '0:00'. A stored value from a non-UTC connection is consequently interpreted with the wrong source timezone before conversion."
     },
     {
       "file": "django/db/backends/sqlite3/operations.py",
@@ -34,13 +34,13 @@
       "note": "This conversion applies the target timezone directly to a timestamp that typecast_timestamp has tagged as UTC. The parser never first restores the database connection timezone, so localtime starts from the wrong source zone whenever that connection is non-UTC."
     }
   ],
-  "reasoning": "Database datetime extraction and truncation must convert from the database connection timezone to the query's requested timezone. The base MySQL and Oracle implementations hard-code UTC as the source. SQLite's SQL layer transmits only the destination timezone, and line 409 consequently converts a value tagged as UTC without first restoring its actual connection-timezone meaning. The fix threads connection.timezone_name through each backend and skips conversion when source and destination match. The SQLite function-registration arity changes are plumbing required by that repair, not separate conceptual root causes.",
+  "reasoning": "Database datetime extraction and truncation must convert from the database connection timezone to the query's requested timezone. The base MySQL and Oracle implementations hard-code UTC as the source. SQLite's SQL layer transmits only the destination timezone, and line 409 consequently converts a value tagged as UTC without first establishing its actual connection-timezone meaning. All three backends can therefore derive the wrong local date or time when the connection timezone is non-UTC.",
   "fault_triggering_call_site": [
     {
       "file": "tests/timezones/tests.py",
       "line": 340,
       "statement": "self.assertEqual(Event.objects.filter(dt__date=event_datetime.date()).first(), event)",
-      "note": "With both connection and current timezone set to Africa/Nairobi, the base SQLite path wrongly treats the stored value as UTC and returns None. This is the first failure in the focused base run."
+      "note": "With both connection and current timezone set to Africa/Nairobi, the SQLite path wrongly treats the stored value as UTC and returns None."
     },
     {
       "file": "tests/timezones/tests.py",

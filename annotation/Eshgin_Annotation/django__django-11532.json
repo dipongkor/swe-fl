@@ -10,7 +10,7 @@
       "note": "The local hostname is cached verbatim even when it contains non-ASCII characters. It is later used as the Message-ID domain and cannot be encoded by a message configured with a legacy character set such as ISO-8859-1."
     }
   ],
-  "reasoning": "DNS_NAME supplies the domain passed to email.utils.make_msgid(). The base cache accepts a Unicode hostname such as '漢字' without converting it to its ASCII-compatible IDNA form. Building the Message-ID under ISO-8859-1 first fails ASCII header validation and then raises UnicodeEncodeError while encoding the fallback Header. The fix applies Punycode when the hostname is cached. The other production edits centralize existing IDNA conversions through the new helper and do not cause this mail-hostname failure.",
+  "reasoning": "DNS_NAME supplies the domain passed to email.utils.make_msgid(). The base cache accepts a Unicode hostname such as '漢字' verbatim. Building the Message-ID under ISO-8859-1 first fails ASCII header validation and then raises UnicodeEncodeError while encoding the fallback Header. The failure originates at the cached non-ASCII hostname before the message body or recipient handling is reached.",
   "fault_triggering_call_site": [
     {
       "file": "tests/mail/tests.py",

@@ -1,44 +1,38 @@
 {
-    "instance_id": "astropy__astropy-14365",
-    "root_cause": [
-        {
-            "file": "astropy/io/ascii/qdp.py",
-            "line": 71,
-            "statement": "_line_type_re = re.compile(_type_re)",
-            "note": "Docker verified. Without re.IGNORECASE, lowercase QDP commands such as read terr 1 are not recognized and _line_type raises ValueError."
-        },
-        {
-            "file": "astropy/io/ascii/qdp.py",
-            "line": 309,
-            "statement": "if v == \"NO\":",
-            "note": "Docker verified independently. With command matching fixed but this line reverted, lowercase no values are parsed as numbers and fail with ValueError instead of becoming masked values."
-        }
-    ],
-    "reasoning": "The fixed PR branch passes astropy/io/ascii/tests/test_qdp.py::test_roundtrip for both lowercase parameter values. Reverting both hunks reproduces failure on lowercase commands. Restoring only the regex IGNORECASE hunk exposes the second independent root cause: lowercase no sentinels are not masked unless the comparison uses v.upper() == \"NO\".",
-    "fault_triggering_call_site": [
-        {
-            "file": "astropy/io/ascii/tests/test_qdp.py",
-            "line": 84,
-            "statement": "example_qdp = lowercase_header(example_qdp)",
-            "note": "Creates the lowercase QDP file that exercises case-insensitive command and NO-token parsing."
-        },
-        {
-            "file": "astropy/io/ascii/tests/test_qdp.py",
-            "line": 93,
-            "statement": "table = _read_table_qdp(path, names=[\"MJD\", \"Rate\"], table_id=0)",
-            "note": "Triggers QDP parsing. Old command matching fails on read terr 1; with only that fixed, old NO matching fails on lowercase no."
-        }
-    ],
-    "rc_ftcs_same": false,
-    "hunk_type": "rc",
-    "fault_inducing": true,
-    "rc_in_this_hunk": true,
-    "confidence": "high",
-    "multi_rc": true,
-    "verification": {
-        "container": "astropy__astropy-14365",
-        "fixed_test": "/opt/miniconda3/envs/testbed/bin/pytest -q astropy/io/ascii/tests/test_qdp.py::test_roundtrip -rA -> 2 passed",
-        "reverted_test_1": "revert both qdp hunks -> lowercase=True failed: Unrecognized QDP line: read terr 1",
-        "reverted_test_2": "restore IGNORECASE only, keep v == \"NO\" -> lowercase=True failed: could not convert string to float: no"
+  "instance_id": "astropy__astropy-14365",
+  "root_cause": [
+    {
+      "file": "astropy/io/ascii/qdp.py",
+      "line": 71,
+      "statement": "_line_type_re = re.compile(_type_re)",
+      "note": "Without re.IGNORECASE, lowercase QDP commands such as read terr 1 are not recognized and _line_type raises ValueError."
+    },
+    {
+      "file": "astropy/io/ascii/qdp.py",
+      "line": 309,
+      "statement": "if v == \"NO\":",
+      "note": "lowercase no values are parsed as numbers and fail with ValueError instead of becoming masked values."
     }
+  ],
+  "reasoning": "QDP parsing uses two case-sensitive decisions. The command regex rejects lowercase directives such as read terr 1 before the data section is parsed. When parsing data tokens, the exact comparison with \"NO\" also sends lowercase no through numeric conversion, which raises ValueError instead of producing a masked value. The two statements independently affect command recognition and missing-value recognition.",
+  "fault_triggering_call_site": [
+    {
+      "file": "astropy/io/ascii/tests/test_qdp.py",
+      "line": 84,
+      "statement": "example_qdp = lowercase_header(example_qdp)",
+      "note": "Creates the lowercase QDP file that exercises case-insensitive command and NO-token parsing."
+    },
+    {
+      "file": "astropy/io/ascii/tests/test_qdp.py",
+      "line": 93,
+      "statement": "table = _read_table_qdp(path, names=[\"MJD\", \"Rate\"], table_id=0)",
+      "note": "Triggers QDP parsing. Old command matching fails on read terr 1; the NO matching fails on lowercase no."
+    }
+  ],
+  "rc_ftcs_same": false,
+  "hunk_type": "rc",
+  "fault_inducing": true,
+  "rc_in_this_hunk": true,
+  "confidence": "high",
+  "multi_rc": true
 }
