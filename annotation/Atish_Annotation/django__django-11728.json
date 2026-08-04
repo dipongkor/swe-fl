@@ -1,0 +1,39 @@
+{
+  "instance_id": "django__django-11728",
+  "root_cause": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 172,
+      "statement": "if unmatched_open_brackets == 0:",
+      "note": "In replace_named_groups' bracket-balancing scan over pattern[end:]. The fault is positional: the balance check sits at the top of the loop body, before the current character is classified (lines 178-181), so balance reached by consuming ')' at index idx is only observed on iteration idx+1. A named group that ends at the last character of the pattern has no next iteration — the loop exhausts, the group is never appended to group_pattern_and_name, and the replacement pass (185-186) never rewrites it. Any pattern with at least one more trailing character ('$', '/') masks the fault. Jointly relocated with line 173; the counting lines 178-182 and the replace loop are faithful."
+    },
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 173,
+      "statement": "group_pattern_and_name.append((pattern[start:end + idx], group_name))",
+      "note": "Body of the misplaced check: its slice end + idx is calibrated to the check-one-iteration-late placement (idx already points past the closing parenthesis). It is faulty jointly with line 172 — a fix that detects balance immediately after the decrement must also extend the slice (the gold code uses end + idx + 1) — the pair encodes the same off-by-one-iteration scheme."
+    },
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 204,
+      "statement": "if unmatched_open_brackets == 0:",
+      "note": "Same positional fault in replace_unnamed_groups' scan over pattern[start + 1:]: balance is tested before the current character is processed, so an unnamed group closing at the end of the pattern is never recorded in group_indices and survives simplification."
+    },
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 205,
+      "statement": "group_indices.append((start, start + 1 + idx))",
+      "note": "Joint partner of line 204, exactly as 173 is of 172: the start + 1 + idx end index presumes the late check (gold uses start + 2 + idx after moving the check below the decrement)."
+    }
+  ],
+  "reasoning": "replace_named_groups and replace_unnamed_groups locate each capture group's extent by scanning the characters after the group's opening syntax while counting unescaped parentheses, starting from one unmatched open bracket. In both loops the 'brackets are balanced' test is placed at the top of the loop body, before the current character is examined, so the closing parenthesis that brings the count to zero is only noticed on the following iteration. When the group is the last thing in the pattern there is no following character: the loop simply ends, the group's span is never recorded, and the subsequent replacement pass leaves it untouched. simplify_regex output then retains the raw group syntax — e.g. 'entries/(?P<pk>[^/.]+)/relationships/(?P<related_field>\\w+)' keeps its final group (only mangled by the unconditional '?P<' cleanup) instead of becoming <related_field>. Any trailing character after the group, such as '$' or '/', supplies the extra iteration and hides the bug, which is why patterns ending in a delimiter simplify correctly.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/admin_docs/test_views.py",
+      "line": 364,
+      "statement": "self.assertEqual(simplify_regex(pattern), output)",
+      "note": "Shared per-row subTest assert in test_simplify_regex; the patch-added rows without trailing '$' at lines 351, 353, 355, and 357 fail at base — e.g. pattern '^(?P<a>\\w+)/b/(?P<c>\\w+)' yields '/<a>/b/(P<c>\\w+)' instead of '/<a>/b/<c>' (lines 353/355 witness the replace_unnamed_groups pair). The fail_to_pass list also names test_app_not_found (TestModelDetailView), which passes at base in a direct run — a SWE-bench log-parsing artifact, not a fault witness."
+    }
+  ],
+  "confidence": "high"
+}

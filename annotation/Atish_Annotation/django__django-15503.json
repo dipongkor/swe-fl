@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-15503",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/json.py",
+      "line": 196,
+      "statement": "rhs_params.append(\"%s%s\" % (lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False)))",
+      "note": "Statement spanning base lines 196-202 in HasKeyLookup.as_sql, building the JSON path parameter for each right-hand-side key on the path-based backends (SQLite/MySQL/Oracle templates). The faulty part is the compile_json_path call at line 200 applied to ALL rhs_key_transforms: compile_json_path (lines 129-139) treats any int()-able element as an array index ('[1111]'), a heuristic that is correct for KeyTransform chains (value__array__0) — and thus correct for the intermediate rhs transforms — but wrong for the final element, which under has_key/has_keys/has_any_keys semantics is always an object key name and must compile as '.\"1111\"'. A numeric key therefore yields a path like $[1111] instead of $.\"1111\" and matches nothing. compile_json_path itself is a faithful helper honoring its documented heuristic (the fix keeps it, exempting only the final key). The patch's HasKey→HasKeyOrArrayIndex swaps at lines 390, 404, and 469 (KeyTransformIsNull.as_oracle/as_sqlite, KeyTransformExact.as_oracle) are fix plumbing: those internal callers pass a KeyTransform-chain key that legitimately may be an array index, and they only need the new subclass to preserve their base behavior once HasKey's final-key compilation changes."
+    }
+  ],
+  "reasoning": "On backends without a native has-key operator (SQLite, MySQL/MariaDB, Oracle), HasKeyLookup.as_sql implements has_key/has_keys/has_any_keys by compiling each right-hand-side key into a JSON path and testing path existence. The keys are run through compile_json_path, whose element heuristic is designed for KeyTransform chains: anything parseable as an integer becomes an array-index step '[n]', everything else a member step '.\"name\"'. For the lookup's final element that heuristic is semantically wrong — has_key='1111' asks for the object key \"1111\", never array element 1111 — so numeric string keys compile to $[1111]-style paths that never match an object member, and the filter silently returns no rows. Keys with leading zeros like '000' hit the same misclassification. PostgreSQL is unaffected because its has-key lookups use the native ?/?&/?| operators with the raw key string instead of a compiled path, which is why the same query works there.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_fields/test_jsonfield.py",
+      "line": 601,
+      "statement": "self.assertSequenceEqual(",
+      "note": "Per-condition subTest assert in patch-added test_has_key_number (def at 579): all nine Q conditions at lines 589-597 — has_key/has_keys/has_any_keys with numeric keys at top level, under a nested object, and under an array element — fail at base on SQLite, returning no rows. The fail_to_pass list also names test_has_keys, which passes at base in a direct run (all 9 recorded failures are test_has_key_number subtests) — a SWE-bench subtest log-parsing artifact, not a fault witness."
+    }
+  ],
+  "confidence": "high"
+}

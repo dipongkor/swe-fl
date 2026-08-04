@@ -1,0 +1,39 @@
+{
+  "instance_id": "sympy__sympy-21930",
+  "root_cause": [
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 481,
+      "statement": "return \"b^\\\\dagger_{%s}\" % self.state.name",
+      "note": "CreateBoson._latex emits the boson creation operator as b^\\dagger_{i} with no enclosing brace group. A _latex fragment must compose safely inside larger expressions, but this one already carries a superscript, so when the LaTeX printer attaches another (e.g. printing Bd(a)**2 as <fragment>^{2}) the output contains the double superscript b^\\dagger_{0}^{2}, which LaTeX rejects/misrenders. Reached by test_create and test_issue_19661."
+    },
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 942,
+      "statement": "return \"a^\\\\dagger_{%s}\" % self.state.name",
+      "note": "Same fault in CreateFermion._latex for the fermion creation operator a^\\dagger_{p}. Reached by test_create_f, test_commutation, and test_NO."
+    },
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 221,
+      "statement": "return \"%s^{%s}_{%s}\" % (",
+      "note": "Same fault in AntiSymmetricTensor._latex: the tensor prints as t^{ab}_{ij} unbraced, so raising it to a power likewise yields a double superscript. Reached by test_Tensors."
+    }
+  ],
+  "reasoning": "The secondquant LaTeX printers for creation operators and antisymmetric tensors return fragments that already contain a superscript, b^\\dagger_{i}, a^\\dagger_{p}, t^{ab}_{ij}, without wrapping them in a brace group. A _latex result is embedded verbatim into surrounding constructions, and the generic printer renders a power by appending ^{n} to the base's fragment; applied to these fragments that produces forms like b^\\dagger_{0}^{2}, a LaTeX double superscript, which is invalid and fails to render (e.g. in Jupyter). Standalone the fragments are fine, so the defect only surfaces when the operator is composed under another superscript, as in Commutator(Bd(a)**2, B(a)). Brace-grouping the fragment ({b^\\dagger_{0}}^{2}) makes it an atomic base for further scripts.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/physics/tests/test_secondquant.py",
+      "line": 1260,
+      "statement": "assert latex(Commutator(Bd(a)**2, B(a))\n                 ) == '- \\\\left[b_{0},{b^\\\\dagger_{0}}^{2}\\\\right]'",
+      "note": "The patch-added test_issue_19661, the semantic witness: at the base commit the expression prints as '- \\\\left[b_{0},b^\\\\dagger_{0}^{2}\\\\right]' with the invalid double superscript (CreateBoson fault, line 481 composed under **2)."
+    },
+    {
+      "file": "sympy/physics/tests/test_secondquant.py",
+      "line": 534,
+      "statement": "assert latex(tabij) == '{t^{ab}_{ij}}'",
+      "note": "Updated expectation in test_Tensors reaching the AntiSymmetricTensor fault (line 221). Like the updated assertions in test_create (line 97), test_create_f (line 291), test_commutation (line 261), and test_NO (line 429), it pins the new brace-grouped output; the base fragments are valid LaTeX standalone and only misrender when composed under a further superscript."
+    }
+  ],
+  "confidence": "high"
+}

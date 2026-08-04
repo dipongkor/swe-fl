@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-16631",
+  "root_cause": [
+    {
+      "file": "django/contrib/auth/__init__.py",
+      "line": 202,
+      "statement": "session_hash_verified = session_hash and constant_time_compare(session_hash, user.get_session_auth_hash())",
+      "note": "Statement spanning base lines 202-204: the session-validation decision in get_user. It compares the stored hash against only the hash derived from the current SECRET_KEY (get_session_auth_hash → salted_hmac with the default secret), never consulting SECRET_KEY_FALLBACKS — even though the settings contract documents that sessions signed with a rotated-out key must keep verifying while that key sits in SECRET_KEY_FALLBACKS. A session stamped under the previous key therefore fails verification the moment the key rotates, and the surrounding statements act faithfully on the wrong verdict: the flush/user=None at 206-207 is the correct response to a genuinely invalid session, get_session_auth_hash (base_user.py 134-143) correctly returns the current-key HMAC (the gold fix keeps that behavior and still uses it to re-stamp), and salted_hmac's SECRET_KEY default is its documented contract. The verification decision is the one place every adequate fix must consult the fallback keys; the patch's base_user.py additions (get_session_auth_fallback_hash, _get_session_auth_hash refactor) are the plumbing that supplies fallback hashes to it."
+    }
+  ],
+  "reasoning": "Logged-in sessions store an HMAC of the user's password (HASH_SESSION_KEY), keyed on SECRET_KEY. On every request, django.contrib.auth.get_user recomputes that HMAC via user.get_session_auth_hash() — which salts salted_hmac with the current SECRET_KEY — and treats the session as invalid unless it matches the stored value exactly. SECRET_KEY_FALLBACKS exists precisely so that values signed under a previous key keep validating during rotation, and other consumers of the secret honor it, but this verification never checks the fallback keys. So when SECRET_KEY is rotated and the old key moved into SECRET_KEY_FALLBACKS, every existing session's stored hash — computed under the old key — mismatches the recomputed one, the session is flushed, and all users are logged out, contradicting the documented rotation procedure.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/auth_tests/test_basic.py",
+      "line": 156,
+      "statement": "self.assertIsInstance(user, User)",
+      "note": "In patch-added test_get_user_fallback_secret (def at 143): after logging in under the original SECRET_KEY, settings are overridden to SECRET_KEY='newsecret' with the original key in SECRET_KEY_FALLBACKS; get_user(request) at line 155 should still authenticate the session but at base flushes it and returns AnonymousUser, failing this assert. The later block (lines 162-163) additionally checks the session was re-stamped under the new key so it survives removal of the fallback."
+    }
+  ],
+  "confidence": "high"
+}

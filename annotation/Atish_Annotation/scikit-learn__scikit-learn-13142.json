@@ -1,0 +1,27 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13142",
+  "root_cause": [
+    {
+      "file": "sklearn/mixture/base.py",
+      "line": 263,
+      "statement": "_, log_resp = self._e_step(X)",
+      "note": "The 'final e-step' in BaseMixture.fit_predict, whose own comment (lines 260-262) states its contract: guarantee the returned labels are consistent with fit(X).predict(X). The fault is positional: it executes before self._set_parameters(best_params) at line 272, so it computes responsibilities under whatever parameters the last initialization run left on the model. With n_init > 1 the best run is generally not the last, so log_resp — and the labels returned at line 276 — reflect a discarded initialization while the fitted model that predict() will use holds the best one. With n_init=1 last equals best and the fault is masked. The surrounding statements are faithful: the per-init loop's best_params bookkeeping (255-258) is correct, and _set_parameters at 272 correctly installs the best parameters — merely too late to influence the already-computed log_resp."
+    }
+  ],
+  "reasoning": "BaseMixture.fit_predict runs EM from n_init random initializations, remembering the best parameters seen (by lower bound) in best_params while the model object itself always carries the parameters of the most recent run. After the loop it performs one final e-step to derive the labels to return, and only afterwards restores best_params onto the model. The final e-step therefore scores X under the last initialization's parameters, while the fitted estimator ends up holding the best initialization's parameters. When n_init > 1 and the best run is not the last, the labels returned by fit_predict come from a different model than the one a subsequent predict(X) uses, so fit_predict(X) and fit(X).predict(X) disagree; with the default n_init=1 the two coincide and the inconsistency is invisible.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/mixture/tests/test_gaussian_mixture.py",
+      "line": 607,
+      "statement": "assert_array_equal(y_pred1, y_pred2)",
+      "note": "Patch-added test_gaussian_mixture_fit_predict_n_init: GaussianMixture(n_components=5, n_init=5, random_state=0) on random data; fit_predict labels differ from the subsequent predict labels at base."
+    },
+    {
+      "file": "sklearn/mixture/tests/test_bayesian_mixture.py",
+      "line": 460,
+      "statement": "assert_array_equal(y_pred1, y_pred2)",
+      "note": "Patch-added test_bayesian_mixture_fit_predict_n_init: same witness through BayesianGaussianMixture(n_components=5, n_init=10, random_state=0) — the fault lives in the shared BaseMixture.fit_predict."
+    }
+  ],
+  "confidence": "high"
+}

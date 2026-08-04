@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-24562",
+  "root_cause": [
+    {
+      "file": "sympy/core/numbers.py",
+      "line": 1630,
+      "statement": "q *= p.q",
+      "note": "In Rational.__new__'s two-argument normalization: after converting the numerator p to a Rational, its denominator p.q must be multiplied into the overall denominator. But this in-place multiply runs before q itself has been normalized (q's conversion only happens in the next block, lines 1635-1640), so when q was passed as a string, *= is sequence repetition: Rational('0.5', '100') computes '100' * 2 = '100100' and yields 1/100100, and Rational('1.5', '1.5') computes '1.5' * 2 = '1.51.5', which then crashes the subsequent q = Rational(q) conversion with TypeError('invalid input: 1.51.5') (raised at line 1623). The q-normalization statements themselves (lines 1636-1640) are faithful; the fault is performing arithmetic on the not-yet-converted operand."
+    }
+  ],
+  "reasoning": "Rational(p, q) normalizes its two arguments to integers in sequence: first p is converted (if not an int) to a Rational, whose denominator is folded into q with q *= p.q and whose numerator replaces p; only afterwards is q itself converted. The fold-in therefore applies an arithmetic *= to q while q may still hold its raw argument. When q was given as a string, Python evaluates *= as sequence repetition instead of multiplication: Rational('0.5', '100') turns '100' into '100100' and returns 1/100100 instead of 1/200, and Rational('1.5', '1.5') turns '1.5' into '1.51.5', which the subsequent conversion rejects with TypeError: invalid input: 1.51.5. Mixed calls where the denominator is numeric, e.g. Rational(0.5, 100), are unaffected because the repetition only occurs for string q.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/core/tests/test_numbers.py",
+      "line": 372,
+      "statement": "assert Rational(p, q).as_numer_denom() == Rational('%s/%s'%(p,q)).as_numer_denom()",
+      "note": "In the patch-added test_issue_24543, on the first iteration with p='1.5', q='1.5': the corrupted denominator string '1.51.5' makes Rational(q) raise TypeError('invalid input: 1.51.5') from numbers.py line 1623, so the test errors before any comparison. The reported-value assertion Rational('0.5', '100') == Rational(1, 200) at line 375 exercises the silent-corruption face of the same fault but is not reached."
+    }
+  ],
+  "confidence": "high"
+}

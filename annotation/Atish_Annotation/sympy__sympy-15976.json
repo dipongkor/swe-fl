@@ -1,0 +1,33 @@
+{
+  "instance_id": "sympy__sympy-15976",
+  "root_cause": [
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 789,
+      "statement": "x.appendChild(msub)",
+      "note": "In MathMLPresentationPrinter._print_Symbol, subscript branch: nests the <msub> layout element inside the outer <mi> created at line 746. MathML defines <mi> as a token element whose content is character data; embedding layout markup inside it is invalid, and renderers (e.g. Safari) display such a symbol as nothing — which is exactly what happens to 'x2', since split_super_sub turns trailing digits into a subscript. The msub construction itself (786-788) is faithful and survives in the fix; what must change is that the msub be returned as the symbol's node rather than wrapped in the token element."
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 795,
+      "statement": "x.appendChild(msup)",
+      "note": "Same invalid token-element nesting for the superscript branch (msup built faithfully at 792-794)."
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 801,
+      "statement": "x.appendChild(msubsup)",
+      "note": "Same invalid nesting for the combined sub+super branch (msubsup built faithfully at 797-800). The wrapper creation at line 746 is not itself faulty — for a plain name the branch at 784 produces the valid token <mi>x</mi>, and a fix may keep the wrapper for that case (the gold patch instead reuses the mname element); the bold-style setAttribute lines 748-749 are relocated plumbing."
+    }
+  ],
+  "reasoning": "The MathML presentation printer renders a Symbol by splitting its name into base, subscripts, and superscripts (a trailing digit like the '2' of 'x2' becomes a subscript), building the appropriate <msub>/<msup>/<msubsup> layout element, and then appending that element as a child of an outer <mi> it created up front. In MathML, <mi> is a token element: its content model is character data, not child elements. Wrapping a layout element inside it produces invalid markup — <mi><msub><mi>x</mi><mi>2</mi></msub></mi> — which conforming renderers such as Safari display as an empty box, making every symbol whose name carries a subscript or superscript part invisible. A bare name never triggers the bug because the plain branch only puts text inside the <mi>, which is valid, so 'x' renders while 'x2' vanishes.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_mathml.py",
+      "line": 738,
+      "statement": "assert mml.nodeName == 'msup'",
+      "note": "First failing assert of the patch-rewritten test_presentation_symbol: mpp._print(Symbol('x^2')) must yield the msup element directly, but at base the outer node is the invalid <mi> wrapper. The rewritten expectations below (msup at 745+, msub at 752+, msubsup at 760+ and 771+, and the mrow-joined multi-script cases) witness the other two append sites; the old expectations had enshrined the wrapper structure. None of the asserts use the issue's literal 'x2' spelling, but Symbol('x_2') exercises the identical msub path that trailing-digit names reach via split_super_sub."
+    }
+  ],
+  "confidence": "high"
+}

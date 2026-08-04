@@ -1,0 +1,33 @@
+{
+  "instance_id": "django__django-14315",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/client.py",
+      "line": 24,
+      "statement": "if env:",
+      "note": "Guard in BaseDatabaseClient.runshell around the os.environ merge (line 25, itself faithful when reached). subprocess.run distinguishes env=None (child inherits os.environ) from env={} (child gets an empty environment), but this condition conflates the two falsy cases: for env={} it skips the merge AND passes the {} through unchanged, so the client shell is spawned with no environment at all. For None the pass-through is correct; {} is the value it neither merges nor normalizes. Witnessed directly by test_runshell_use_environ's env={} subtest, which requires runshell to hand subprocess.run env=None for both falsy returns."
+    },
+    {
+      "file": "django/db/backends/postgresql/client.py",
+      "line": 54,
+      "statement": "return args, env",
+      "note": "Tail of DatabaseClient.settings_to_cmd_args_env: env is built up from {} (line 39) with PG-specific vars added only when configured, so with no password/service/ssl/passfile settings it returns the empty dict. Under the runshell consumer's None-means-inherit interface this is the wrong sentinel: {} reads as 'use this as the entire child environment'. Jointly faulty with base/client.py line 24 — the producer emits an ambiguous falsy dict and the consumer misinterprets it; the dbshell tests (test_nopass, test_parameters) pin this return to None independently of the consumer-side fix. The env-building lines 39-53 are faithful accumulation."
+    }
+  ],
+  "reasoning": "subprocess.run treats env=None as 'inherit the parent's os.environ' but env={} as 'run the child with a completely empty environment'. BaseDatabaseClient.runshell merges the backend-provided env over os.environ only under a truthiness guard, passing falsy values straight through to subprocess.run. The PostgreSQL backend's settings_to_cmd_args_env accumulates PG-specific variables into a dict that starts empty, so when the connection settings need no PGPASSWORD/PGSERVICE/PGSSL*/PGPASSFILE entries it returns {}. That empty dict skips the merge and reaches subprocess.run verbatim, so dbshell launches psql with an empty environment instead of the user's: PATH, LANG, PGDATABASE and every other inherited variable are stripped, precisely in the common case where no Django-supplied env vars are needed.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/backends/base/test_client.py",
+      "line": 30,
+      "statement": "run.assert_called_once_with([], env=None, check=True)",
+      "note": "In patch-added test_runshell_use_environ: settings_to_cmd_args_env is mocked to return ([], env) for env in [None, {}]. The env={} subtest fails at base — runshell passes env={} to subprocess.run instead of None. The env=None subtest passes at base; the fail_to_pass list also names test_settings_to_cmd_args_env and eight dbshell tests (test_basic, test_accent, ...) that pass at base in direct runs — SWE-bench log-parsing artifacts, not fault witnesses."
+    },
+    {
+      "file": "tests/dbshell/test_postgresql.py",
+      "line": 42,
+      "statement": "None,",
+      "note": "Patch-changed expected env in test_nopass: with only user/host/port/dbname settings, settings_to_cmd_args_env must return env=None; at base it returns {}. test_parameters (expected tuple at line 137) fails the same way. These pin the postgresql-side fault independently of runshell."
+    }
+  ],
+  "confidence": "high"
+}

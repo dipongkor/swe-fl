@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-21379",
+  "root_cause": [
+    {
+      "file": "sympy/core/mod.py",
+      "line": 169,
+      "statement": "G = gcd(p, q)",
+      "note": "In Mod.eval's final gcd-extraction step. The polys-level gcd refuses non-polynomial structure by raising PolynomialError('Piecewise generators do not make sense') (sympy/polys/polytools.py, a faithful, documented refusal), and Mod's arguments can legitimately contain Piecewise — e.g. Mod(Piecewise(...)/z, pi) constructed by the assumptions machinery. The call is unguarded, so instead of Mod simply forgoing the optional gcd simplification and staying unevaluated, the exception escapes through Mod.eval into whatever triggered it — turning a routine assumption query (or even subs) into a crash. Mod.eval's contract is to simplify when possible and otherwise leave the Mod symbolic, so the unguarded delegation is locally wrong (same unguarded-call shape as astropy-7606). The consumer lines 170-172 (divide out G via gcd_terms) are faithful and survive inside the fix's try block; the polys raise itself is a correct emitter."
+    }
+  ],
+  "reasoning": "Mod.eval ends with an opportunistic simplification: compute the polynomial gcd of its two arguments and divide it out. The polys gcd routine polifies its inputs and deliberately raises PolynomialError when a generator is a Piecewise, since Piecewise cannot serve as a polynomial generator. Mod arguments containing Piecewise arise naturally from the assumptions machinery: for real symbols, sinh(...).is_zero (queried, e.g., while exp evaluates its argument during subs) reduces to asking whether the imaginary part modulo pi vanishes, building Mod(Piecewise(...)/z, pi)-style expressions. With the gcd call unguarded, the PolynomialError propagates out of Mod.eval, through the assumption query, and up to the user as a crash on an innocuous operation like expr.subs({1: 1.0}). The failure is state-dependent — once the assumption results are cached, re-running the same subs succeeds — and only appears under configurations (real x and y, a division supplying a compound argument, sinh/cosh/tanh whose real/imaginary split produces the Mod) that route a Piecewise into Mod's gcd.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/core/tests/test_arit.py",
+      "line": 1921,
+      "statement": "(Piecewise((x_r, y_r > x_r), (y_r, True)) / z) % 1",
+      "note": "Patch-added issue-21373 block in test_Mod (no asserts — a smoke test that these statements no longer raise). This line is the most direct witness: the % builds Mod(Piecewise(...)/z, 1) and at base dies in gcd with PolynomialError. Lines 1922-1923 reproduce the issue's original path (exp(sinh(Piecewise(...)/z)) with real symbols, then subs({1: 1.0})), and line 1924 witnesses the same crash from a direct is_zero assumption query."
+    }
+  ],
+  "confidence": "high"
+}

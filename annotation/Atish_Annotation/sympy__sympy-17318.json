@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-17318",
+  "root_cause": [
+    {
+      "file": "sympy/simplify/sqrtdenest.py",
+      "line": 159,
+      "statement": "if all((x**2).is_Rational for x in pargs):",
+      "note": "In _sqrt_match, the gate guarding the call to split_surds (line 160). split_surds' precondition is a sum of real surds, terms whose squares are positive rationals, since it collects the squares of the Pow (sqrt) terms and gcd-splits them. This predicate only checks is_Rational, so a term like I slips through: I**2 == -1 is Rational but negative, and I is not a Pow, so split_surds builds an empty surds list and _split_gcd() (radsimp.py line 1103) crashes on g = a[0] (line 1116) with IndexError: tuple index out of range. The downstream statements are faithful to their contracts given valid input; the fault is admitting imaginary-square terms at this gate."
+    }
+  ],
+  "reasoning": "While matching a nested radical, _sqrt_match decides whether an Add can be processed by split_surds, which splits a sum of real surds by the gcd of their squares. The gate accepts the Add when every term's square is Rational, but that also holds for purely imaginary terms: I**2 == -1 is a (negative) rational. For an expression like 4 + 3*I every term passes the check, yet neither 4 nor 3*I is a square root, so split_surds extracts no surds and calls _split_gcd with no arguments, which immediately indexes its empty argument tuple and raises IndexError: tuple index out of range. sqrtdenest of any expression containing such a subexpression, e.g. (3 - sqrt(2)*sqrt(4 + 3*I) + 3*I)/2, therefore crashes instead of denesting or returning the input unchanged; the correct precondition is that the squares be positive rationals, i.e. the terms are real surds.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/simplify/tests/test_sqrtdenest.py",
+      "line": 187,
+      "statement": "assert _sqrt_match(4 + I) == []",
+      "note": "First assertion of the patch-added test_issue_12420, probing the gate directly: 4 + I passes the is_Rational check (squares 16 and -1), split_surds finds no Pow terms, and _split_gcd() raises IndexError from radsimp.py line 1116. The subsequent assertions, sqrtdenest((3 - sqrt(2)*sqrt(4 + 3*I) + 3*I)/2) == I and the unchanged-return case at lines 188-190, exercise the same fault through the full sqrtdenest pipeline but are not reached."
+    }
+  ],
+  "confidence": "high"
+}

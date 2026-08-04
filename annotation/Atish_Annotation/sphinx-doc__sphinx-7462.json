@@ -1,0 +1,33 @@
+{
+  "instance_id": "sphinx-doc__sphinx-7462",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 112,
+      "statement": "result.pop()",
+      "note": "Tail of the ast.Tuple branch of _parse_annotation's inner unparse (lines 107-113). Its contract is to remove the trailing ', ' separator the loop appended after each element, but it pops unconditionally, assuming the tuple was non-empty. For the empty tuple in Tuple[()] the loop at 109-111 iterates zero times, result is still [], and pop() raises IndexError from an empty list. The failure is deeper than a missing guard: the branch's join-then-trim algorithm can only render non-empty tuples and has no way to produce the '(' ')' tokens an empty tuple requires, so any adequate fix must change this statement or confine it to the non-empty case. Lines 108-111 are faithful for their zero-iteration run (they build nothing wrong) and are not themselves faulty."
+    },
+    {
+      "file": "sphinx/pycode/ast.py",
+      "line": 117,
+      "statement": "return \", \".join(unparse(e) for e in node.elts)",
+      "note": "The ast.Tuple case of sphinx.pycode.ast.unparse, whose contract is to return source text for the node. For an empty tuple the comma-join of zero elements returns the empty string instead of '()', silently erasing the annotation. Same non-empty-only assumption as the domains/python.py branch, expressed as wrong output rather than a crash; independent fault in a parallel unparser, witnessed by its own failing test."
+    }
+  ],
+  "reasoning": "Sphinx has two parallel AST unparsers, and both assume every ast.Tuple has at least one element, so mypy's empty-tuple annotation Tuple[()] breaks each of them. In sphinx/domains/python.py, _parse_annotation's unparse renders a tuple by appending each element followed by a ', ' separator and then unconditionally popping the trailing separator; when the subscript slice is an empty tuple the loop appends nothing, and pop() on the empty result list raises IndexError, aborting annotation parsing for the whole signature. In sphinx/pycode/ast.py, unparse renders a tuple as a comma-join of its unparsed elements, which for an empty tuple yields the empty string rather than the source text '()', so the annotation silently disappears instead of round-tripping.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 258,
+      "statement": "doctree = _parse_annotation(\"Tuple[()]\")",
+      "note": "Patch-added block in test_parse_annotation. The IndexError from domains/python.py propagates out of this call in the reverse-applied run; the assert_node on lines 259-263 (never reached at base) checks that the empty tuple renders as '(' and ')' punctuation nodes inside the brackets."
+    },
+    {
+      "file": "tests/test_pycode_ast.py",
+      "line": 57,
+      "statement": "(\"()\", \"()\"),                               # Tuple (empty)",
+      "note": "Patch-added parametrize case for test_unparse (fail_to_pass id test_unparse[()-()]). The shared assertion 'assert ast.unparse(module.body[0].value) == expected' fails with '' == '()' at base, witnessing the pycode/ast.py fault."
+    }
+  ],
+  "confidence": "high"
+}

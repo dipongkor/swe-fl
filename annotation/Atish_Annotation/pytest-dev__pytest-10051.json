@@ -1,0 +1,21 @@
+{
+  "instance_id": "pytest-dev__pytest-10051",
+  "root_cause": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": 443,
+      "statement": "self.handler.reset()",
+      "note": "Body of LogCaptureFixture.clear(), whose contract is to reset the captured records — every view of them. During each test stage, _runtest_for stashes a live reference to the handler's list (item.stash[caplog_records_key][when] = caplog_handler.records, line 699), so the stash entry and handler.records are the same object and get_records stays a live view. reset() (line 344-346) discharges its job by rebinding self.records = [], which is correct for its other caller — _runtest_for calls reset() at stage start (line 697) *before* capturing the alias, so each stage gets a fresh list — but wrong here: invoked mid-stage it severs the established alias, leaving the stash frozen on the old list while new records go to the new one. reset()'s rebinding body, the stash aliasing at 699, and get_records (388-399, a faithful stash reader) all honor their own contracts; clear() is the one statement that applies fresh-list semantics where the invariant requires in-place mutation."
+    }
+  ],
+  "reasoning": "caplog.get_records(when) reads per-stage record lists from the item stash. At the start of each stage, pytest stores the capture handler's records list into that stash by reference, so the stash entry and handler.records are one object and the stash stays a live view as the handler appends. caplog.clear() delegates to the handler's reset(), which replaces self.records with a brand-new empty list instead of emptying the existing one. The stash still points at the old list, so the two views diverge permanently: get_records keeps returning the records captured before the clear (it never looks cleared), and records logged after the clear are appended only to the handler's new list (they never appear in get_records). Direct views through caplog.records track the handler attribute and look correct, which makes the divergence surface only through get_records after a clear.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/logging/test_fixture.py",
+      "line": 183,
+      "statement": "assert caplog.get_records(\"call\") == []",
+      "note": "In patch-added test_clear_for_call_stage, immediately after caplog.clear(): fails at base with the pre-clear record still present (frozen stash view). The later assert at line 188 witnesses the second symptom — a record logged after the clear never shows up in get_records(\"call\")."
+    }
+  ],
+  "confidence": "high"
+}

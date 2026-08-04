@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8120",
+  "root_cause": [
+    {
+      "file": "sphinx/application.py",
+      "line": 296,
+      "statement": "locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)",
+      "note": "In Sphinx._init_i18n, building the search list for the 'sphinx' (system-message) catalog. locale.init assigns priority by list order: the first directory whose catalog loads becomes the primary translator and every later one is only an add_fallback (sphinx/locale/__init__.py lines 131-137), so earlier entries win. This line places Sphinx's bundled locale directory ahead of the user's configured locale_dirs (repo.locale_dirs), inverting the documented contract that user locale_dirs can override built-in message translations: any message the bundled catalog already translates never falls through to the user's catalog. locale.init's loader loop is a faithful consumer of the order it is given, and the compile loop at 292-294 correctly builds the user's sphinx.mo — it is then simply out-prioritized. The patch's typing changes (Optional import, List[Optional[str]] on locale.init) are annotation hygiene, not behavior."
+    }
+  ],
+  "reasoning": "For built-in system messages (the 'sphinx' gettext catalog: 'Fig. %s', 'Quick search', ...), Sphinx._init_i18n assembles the catalog search list as [None, <sphinx package locale dir>] + <user locale_dirs>. locale.init loads these in order and merges them with gettext's fallback chaining: the first catalog found becomes the primary translator and each later catalog is only a fallback consulted for messages the earlier ones lack. Because the bundled sphinx catalog for the configured language is listed before the user's locale_dirs, every message that Sphinx's official translation already covers is answered by the bundled catalog, and the user's customized sphinx.po/.mo in locale_dirs — although found, compiled, and loaded — is relegated to a fallback that is never consulted for those messages. User overrides of system-message translations are therefore silently ignored in favor of the official translations.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_intl.py",
+      "line": 1314,
+      "statement": "assert app.translator.gettext('Quick search') == 'QUICK SEARCH'",
+      "note": "In patch-added test_customize_system_message: the test writes a locales/de/LC_MESSAGES/sphinx.po overriding 'Quick search', builds the app with language='de', and checks the override took effect. At base this assert fails with 'Schnellsuche' (Sphinx's bundled German translation) instead of 'QUICK SEARCH'. The preceding assert (sphinx.mo exists, line 1313) passes — the override is compiled, just out-prioritized — and the final 'QUICK SEARCH' in index.html check (line 1318) witnesses the same fault end-to-end."
+    }
+  ],
+  "confidence": "high"
+}

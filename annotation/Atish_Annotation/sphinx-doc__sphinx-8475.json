@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8475",
+  "root_cause": [
+    {
+      "file": "sphinx/builders/linkcheck.py",
+      "line": 175,
+      "statement": "except HTTPError:",
+      "note": "In check_uri's HEAD-request branch: the clause implementing 'retry with GET request if that fails, some servers don't like HEAD requests' catches only HTTPError (non-2xx statuses raised by raise_for_status on line 174). But a server that HEAD-misbehaves by redirecting in a loop makes requests raise TooManyRedirects from the HEAD call itself, which this clause does not catch, so the GET fallback is skipped and the exception propagates to the generic handler (line 190, except Exception), which marks the link broken. The fallback's own contract is to remedy HEAD-specific failures via GET; redirect loops on HEAD are exactly such a failure, so the exception filter is narrower than the contract it implements. The requests library raising TooManyRedirects is a faithful emitter."
+    }
+  ],
+  "reasoning": "Since linkcheck probes URLs with a HEAD request first, it guards that request with a fallback: if the HEAD attempt fails, retry with GET, because some servers mishandle HEAD. The guard's except clause names only HTTPError, the exception produced by raise_for_status for non-2xx responses. A server that enters an infinite redirect loop specifically for HEAD requests makes the requests library abort with TooManyRedirects instead; that exception bypasses the fallback clause entirely and lands in the builder's generic exception handler, which records the link as broken. URLs that respond normally to GET, and that older Sphinx versions using GET reported as working, are therefore flagged broken purely because the HEAD failure mode was not included in the fallback's exception filter.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_build_linkcheck.py",
+      "line": 405,
+      "statement": "assert content == {",
+      "note": "In the patch-added test_TooManyRedirects_on_HEAD: the local test server answers every HEAD with a 302 back to itself (redirect loop) but serves GET with 200 (lines 389-398). At the base commit the HEAD probe raises TooManyRedirects, no GET fallback runs, and output.json records the link with status 'broken' instead of the expected 'working' entry, failing this comparison."
+    }
+  ],
+  "confidence": "high"
+}

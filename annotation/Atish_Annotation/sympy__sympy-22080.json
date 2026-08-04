@@ -1,0 +1,39 @@
+{
+  "instance_id": "sympy__sympy-22080",
+  "root_cause": [
+    {
+      "file": "sympy/printing/precedence.py",
+      "line": 27,
+      "statement": "PRECEDENCE_VALUES = {",
+      "note": "Anchors an absence: the PRECEDENCE_VALUES table, which IS the parenthesization semantics for printers, has no 'Mod' entry, so a Mod expression falls back to function-call precedence (70, above Mul's 50). Code printers render Mod as the binary % operator, whose real Python/C precedence is the multiplication level, so any printer that asks whether an embedded Mod needs parentheses concludes it never does. Inside a Mul this yields e.g. '-x % y', which Python parses as '(-x) % y'."
+    },
+    {
+      "file": "sympy/printing/codeprinter.py",
+      "line": 490,
+      "statement": "a_str = [self.parenthesize(x, prec) for x in a]",
+      "note": "In CodePrinter._print_Mul: numerator factors are parenthesized at the Mul's own precedence (prec = 50) even when sign == '-' and the output begins with a unary minus. Python's unary minus binds between multiplication and exponentiation, so the true enclosing context for a lone negated factor is tighter than Mul; a factor printing as an equal-precedence operator, Mod's %, therefore comes out bare and re-associates: '-x % y' == '(-x) % y' instead of -(x % y). Jointly necessary with the missing precedence entry: fixing only the table still prints '-x % y' because 50 < 50 triggers no parentheses (verified empirically), and fixing only this line is defeated by Mod's inflated default precedence of 70."
+    }
+  ],
+  "reasoning": "Code printers (used by lambdify) render Mod(x, y) as the binary operator x % y, and decide parenthesization from the precedence table. Two defects combine. First, PRECEDENCE_VALUES has no entry for Mod, so it gets generic function-call precedence (70), higher than Mul (50); embedded in a product the printer therefore never parenthesizes it. Second, CodePrinter._print_Mul parenthesizes numerator factors at the Mul's own precedence even for a pure negation, although Python's unary minus binds more tightly than % (between * and **). Together, -Mod(x, y) prints as '-x % y', which Python parses as '(-x) % y': lambdify([x, y], -Mod(x, y))(3, 7) returns 4 instead of -3, silently changing semantics whenever the generated code uses the % operator (modules=[], and on this revision also the default math-module printer).",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_pycode.py",
+      "line": 33,
+      "statement": "assert prntr.doprint(-Mod(x, y)) == '-(x % y)'",
+      "note": "Patch-added assertion in test_PythonCodePrinter: the base printer emits '-x % y', so the assertion fails. The companion assertion Mod(-x, y) == '(-x) % y' on line 34 passes at the base commit (the argument-side parenthesization is already correct) and is not what makes this test fail."
+    },
+    {
+      "file": "sympy/utilities/tests/test_lambdify.py",
+      "line": 275,
+      "statement": "assert no_modules(3, 7) == -3",
+      "note": "In the patch-added test_empty_modules: both lambdified variants of -(x % y) are generated as '-x % y' and return 4, so the cross-check on line 274 passes vacuously and this value assertion fails. On this revision the default-modules printer is affected as well as modules=[]."
+    },
+    {
+      "file": "sympy/codegen/tests/test_rewriting.py",
+      "line": 269,
+      "statement": "assert cc(-x**4) == '-(x*x*x*x)'",
+      "note": "In test_create_expand_pow_optimization: the test patch updated expectations (lines 269-273) to the new unary-minus parenthesization of the C printer. The base outputs '-x*x*x*x' and '-x*x + x*x*x*x' are semantically correct C (unary minus distributes over multiplication), so this test's base failure only tracks the fix's changed-but-equivalent formatting, not a base-state fault."
+    }
+  ],
+  "confidence": "high"
+}

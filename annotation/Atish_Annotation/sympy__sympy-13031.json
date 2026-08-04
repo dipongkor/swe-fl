@@ -1,0 +1,39 @@
+{
+  "instance_id": "sympy__sympy-13031",
+  "root_cause": [
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": 1194,
+      "statement": "if not self:",
+      "note": "Early-out guard of SparseMatrix.row_join (horizontal stacking). Matrix truthiness comes from __len__ = rows*cols, so 'not self' is true for ANY zero-size matrix — including a 0 x n matrix that is carrying n accumulated columns. The guard treats all of them as 'nothing here, safe to replace', jointly with the return on 1195. In hstack's reduce chain over zero-row matrices, each step's accumulator (0 x k) is falsy, so the join degenerates into 'return the newest operand': hstack(0x0, 0x1, 0x2, 0x3) yields 0x3 instead of 0x6. The correct special case is much narrower — only a zero-COLUMN self whose row count disagrees can be freely reshaped to match (a null matrix stacks with anything); everything else, including falsy 0 x n operands, must flow through the real join (the shape check at 1197 and the merge below are faithful)."
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": 1195,
+      "statement": "return type(self)(other)",
+      "note": "Body of the misplaced guard in row_join, jointly faulty with 1194: replacing the accumulated matrix by a copy of other discards self's column count. Any adequate fix must stop this replacement for dimension-carrying zero-size operands."
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": 988,
+      "statement": "if not self:",
+      "note": "Same guard in SparseMatrix.col_join (vertical stacking): an m x 0 accumulator is falsy, so vstack over zero-column matrices keeps replacing the accumulated row count — vstack(0x0, 1x0, 2x0, 3x0) yields 3x0 instead of 6x0. Jointly faulty with the return on 989; the ShapeError check at 991 and the merge below are faithful."
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": 989,
+      "statement": "return type(self)(other)",
+      "note": "Body of the col_join guard, jointly faulty with 988: discards self's row count by replacing the accumulator with other."
+    }
+  ],
+  "reasoning": "Matrix.hstack and vstack reduce their arguments pairwise through row_join and col_join. The SparseMatrix implementations of both joins start with a shortcut: if the left operand is falsy, return a copy of the right operand. A matrix's truth value is its element count (rows*cols), so every zero-size matrix is falsy — but a zero-size matrix is not dimensionless: a 0 x n matrix carries n columns that a horizontal stack must preserve, and an m x 0 matrix carries m rows for a vertical stack. When all operands share a zero dimension, every intermediate accumulator in the reduce chain is falsy, the shortcut fires on each step, and the 'join' collapses into returning the latest operand alone. The accumulated dimension is silently thrown away: hstack of 0x0, 0x1, 0x2, 0x3 produces shape (0, 3) instead of (0, 6), while the same stack with one nonzero row (truthy operands) correctly gives (1, 6). The shortcut was meant for seeding a stack from a genuinely dimensionless empty matrix; a null matrix can be adopted into any compatible shape, but only when its size along the join axis is empty and mismatched — not for every empty operand.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/matrices/tests/test_sparse.py",
+      "line": 31,
+      "statement": "assert SparseMatrix.hstack(*sparse_matrices) == Matrix(0, 6, [])",
+      "note": "Patch-added check in test_sparse_matrix stacking SparseMatrix.zeros(0, n) for n in 0..3; at base the reduce chain returns the last operand and the shape is (0, 3), failing here. The companion assert at line 33 witnesses the col_join pair via vstack of n x 0 matrices."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-10554",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 359,
+      "statement": "raise DatabaseError('ORDER BY term does not match any column in the result set.')",
+      "note": "The for-else of get_order_by's combined-query relabeling loop (lines 345-357): because a UNION can only be ordered by select-list positions, each ORDER BY term is matched against self.select and replaced with its ordinal. When no entry matches, this raise treats every unmatched term as a user error, conflating two cases: a reference to a missing alias (genuinely unresolvable — the gold code keeps raising there) and a plain column that simply was not selected, e.g. order_by('pk') on a union restricted by values_list('order'). The latter is perfectly compilable — the compiler must append the column to the compound select and reference the new position (which is what any adequate fix has to arrange) — but the base code refuses and the queryset crashes on evaluation. The matching loop above is a faithful positional relabeler, and query.py's add_select_col introduced by the patch is fix plumbing (the select-extension primitive the new handling needs)."
+    }
+  ],
+  "reasoning": "SQL permits ordering a compound (UNION) query only by positions or names of the combined select list, so for combined querysets the compiler translates every ORDER BY expression into an ordinal by locating it among the selected columns. If the ordering column is not among them — which is exactly what happens when values()/values_list() narrows the select list of a union queryset and order_by() then names a different column, like ordering by pk while selecting only 'order' — the lookup loop falls through to an unconditional DatabaseError('ORDER BY term does not match any column in the result set.'). The query is expressible: the missing column can be added to each side of the compound select and referenced by its new position. Because the compiler instead raises, any values_list + order_by combination on a union queryset whose ordering column is outside the selection fails at evaluation time.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/queries/test_qs_combinators.py",
+      "line": 177,
+      "statement": "self.assertEqual(list(qs), expected_result)",
+      "note": "In patch-added test_union_with_values_list_and_order (def at 156): each subTest evaluates a union queryset combining values_list('order', flat=True) with order_by on pk or name (querysets built at lines 167-172); at base every one raises DatabaseError from compiler.py line 359. A reporting side effect makes the base module run crash entirely: unittest's error printer reprs the subTest's qs param, re-evaluating the broken queryset and re-raising inside printErrorList. The fail_to_pass list also names test_union_with_values_list_on_annotated_and_unannotated, which passes at base in a direct run — an artifact of that reporter crash swallowing the module's results, not a fault witness."
+    }
+  ],
+  "confidence": "high"
+}

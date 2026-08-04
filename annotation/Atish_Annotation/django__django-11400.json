@@ -1,0 +1,39 @@
+{
+  "instance_id": "django__django-11400",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/__init__.py",
+      "line": 830,
+      "statement": "for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)",
+      "note": "In Field.get_choices for related fields. The unconditional .order_by(*ordering) is locally wrong for the default ordering=(): order_by() with no arguments does not mean 'keep the current ordering' — it CLEARS the queryset's ordering, discarding the related model's Meta.ordering that the default manager's queryset carries. So when no explicit ordering is requested (no related ModelAdmin registered, or none passed), choices come back in arbitrary database order instead of the model's declared default. Witnessed directly by test_get_choices_default_ordering and, through RelatedFieldListFilter, by test_relatedfieldlistfilter_foreignkey_default_ordering."
+    },
+    {
+      "file": "django/db/models/fields/reverse_related.py",
+      "line": 126,
+      "statement": "(x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)",
+      "note": "Same fault in ForeignObjectRel.get_choices, the reverse-relation analog: order_by(*()) wipes the related model's Meta.ordering. Witnessed by test_get_choices_reverse_related_field_default_ordering and test_relatedfieldlistfilter_reverse_relationships_default_ordering."
+    },
+    {
+      "file": "django/contrib/admin/filters.py",
+      "line": 422,
+      "statement": "return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})",
+      "note": "RelatedOnlyFieldListFilter.field_choices. Independent second fault: the override omits the ordering kwarg entirely, discarding the related ModelAdmin's ordering that its parent class looks up and forwards (filters.py lines 197-201), so the limited choice list is never ordered even when the related model's admin defines an ordering. Witnessed specifically by test_relatedonlyfieldlistfilter_foreignkey_ordering (ModelAdmin.ordering case; the Meta.ordering variant is cured by the line 830 fix alone since the omitted kwarg defaults to ()). The parent's ordering lookup at 197-201 is faithful and is only refactored into a shared helper by the patch — its empty-tuple-when-unregistered semantics survive in the fix."
+    }
+  ],
+  "reasoning": "Related-field choice lists are built by two get_choices implementations (forward fields in Field.get_choices, reverse relations in ForeignObjectRel.get_choices), both of which apply .order_by(*ordering) unconditionally to the related model's default manager queryset. Calling order_by() with an empty ordering does not preserve the queryset's existing order — it removes it, including the default ordering the manager derives from the related model's Meta.ordering. RelatedFieldListFilter passes ordering=() whenever the related model has no registered ModelAdmin (or its admin declares no ordering), so in exactly the fallback case the choices lose their declared default order and appear in arbitrary database order. Separately, RelatedOnlyFieldListFilter overrides field_choices to restrict choices to values present in the changelist queryset but drops the ordering argument from its get_choices call altogether, so even an explicitly configured related-ModelAdmin ordering is ignored for that filter.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_fields/tests.py",
+      "line": 248,
+      "statement": "self.field.get_choices(include_blank=False),",
+      "note": "In patch-added test_get_choices_default_ordering (def at 244): with Foo._meta.ordering = ('d',) and no explicit ordering, choices should follow Meta.ordering; at base order_by() strips it. The reverse twin at line 266 (test def at 262) witnesses reverse_related.py line 126."
+    },
+    {
+      "file": "tests/admin_filters/tests.py",
+      "line": 744,
+      "statement": "def test_relatedonlyfieldlistfilter_foreignkey_ordering(self):",
+      "note": "Registers an Employee ModelAdmin with ordering=('name',) and asserts RelatedOnlyFieldListFilter's lookup_choices follow it — fails at base because filters.py line 422 never forwards the ordering. The sibling tests at 594, 715, and 771 (RelatedFieldListFilter forward/reverse Meta.ordering fallback, RelatedOnly Meta.ordering) witness the two get_choices faults through the admin filter path."
+    }
+  ],
+  "confidence": "high"
+}

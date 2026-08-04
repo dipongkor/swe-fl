@@ -1,0 +1,27 @@
+{
+  "instance_id": "matplotlib__matplotlib-22719",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/category.py",
+      "line": 61,
+      "statement": "if is_numlike:",
+      "note": "In StrCategoryConverter.convert. The guard's contract is to fire the numbers-through-unit-converters deprecation warning exactly when the caller actually passed numeric data, but its condition cannot distinguish that from the zero-element case: is_numlike comes from all(...) over the values (lines 58-60), which is vacuously True for an empty array, so empty data — which contains no numbers — takes the deprecation branch and returns early at line 66. Under warning-as-error filters the warning escalates and Axis.convert_units wraps it into ConversionError (axis.py line 1624, a faithful reporter). The all(...) computation itself is faithful to its universally-quantified contract ('every element is numlike' — true of zero elements); the decision to treat that as evidence of numeric pass-through is what is wrong, and it lives in this guard."
+    },
+    {
+      "file": "lib/matplotlib/category.py",
+      "line": 233,
+      "statement": "if convertible:",
+      "note": "Same vacuous-truth shape in UnitData.update: convertible is initialized True (line 224) and only demoted inside the per-value loop, so for empty data it stays vacuously True and the guard emits the 'plotting a list of strings that are all parsable as floats or dates' info log about data containing no strings at all. Not witnessed by the failing test: at base the empty-data path short-circuits at the convert guard (lines 61-66) before unit.update is reached, and a log record would not trip the warnings filter — but the statement is faulty at base by the same contract (log only when convertible strings were actually passed)."
+    }
+  ],
+  "reasoning": "StrCategoryConverter.convert decides whether the caller passed numbers through a categorical axis by testing all(is_numlike(v) for v in values). Python's all() over an empty sequence is vacuously True, so an empty array — produced by plotting empty data on an axis whose units are already categorical — is classified as numeric pass-through. convert then emits the 'Support for passing numbers through unit converters is deprecated' warning even though no numbers were passed, and the suggested remedy (Axis.convert_units) goes through the same code and warns identically. In environments that promote warnings to errors, the warning raised inside converter.convert is caught by Axis.convert_units and re-raised as ConversionError, turning a no-op plot of empty data into a failure. UnitData.update has the same vacuous-truth flaw: its convertible flag starts True and is only ever lowered while iterating values, so empty data vacuously qualifies and triggers the misleading 'strings all parsable as floats or dates' info message.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_category.py",
+      "line": 316,
+      "statement": "ax.plot([], [])",
+      "note": "In patch-added test_no_deprecation_on_empty_data: the axis got categorical units via ax.xaxis.update_units([\"a\", \"b\"]) on line 315, so plotting empty data routes the empty array through StrCategoryConverter.convert; matplotlib's test suite promotes MatplotlibDeprecationWarning to error, and at base the call fails with ConversionError('Failed to convert value(s) to axis units: array([], dtype=float64)')."
+    }
+  ],
+  "confidence": "high"
+}

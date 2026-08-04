@@ -1,0 +1,45 @@
+{
+  "instance_id": "sympy__sympy-21596",
+  "root_cause": [
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": 309,
+      "statement": "base_set -= FiniteSet(xis)",
+      "note": "In the ImageSet-with-Reals handler, after solving im = 0 factor-wise. The set operation is inverted: the roots of the imaginary part are exactly the base points whose images ARE real, so base_set must be restricted to them (intersection); this line removes them instead, keeping every point whose image is non-real. Doubly wrong in form: xis is the tuple of all solutions and FiniteSet(xis) wraps that tuple as a single element, so the (already wrong-direction) subtraction removes nothing from an integer base set and the result survives as an unevaluated Complement — which is why membership tests then accept arbitrary integers (2 in S1.intersect(Reals) is True at base)."
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": 311,
+      "statement": "base_set -= ConditionSet(n, Eq(im, 0), S.Integers)",
+      "note": "Same inversion on the fallback branch (im's factored solutions not all linear in n): it subtracts the set where im vanishes — precisely the set that should become the base set. Reached at base by the rational-im test cases, which line 307 misroutes here."
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": 307,
+      "statement": "x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])",
+      "note": "Collects candidate solutions of im = 0 from ALL Mul factors of im. For a rational im such as (n - 3)*(n + 1)/(2*n + 2), the reciprocal denominator factor contains n but has no root, so solve_linear yields a non-n result, the all-linear check at 308 fails, and solvable cases are misrouted to the ConditionSet fallback. The fix solves only the factors of numer(im); under the test's expectations (exact FiniteSet results for rational im) every adequate fix must likewise exclude denominator factors here. The check at 308 itself is a faithful consumer."
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": 315,
+      "statement": "sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))",
+      "note": "In the denominator-exclusion loop ('exclude values that make denominators 0'): the comprehension's loop variable i shadows the outer i (the denominator from denoms(f)), so this line re-solves the IMAGINARY PART's factors instead of the denominator whose poles it is supposed to find. The denominator's roots are never computed on this branch, so poles are not excluded whenever im has factors containing n."
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": 319,
+      "statement": "base_set -= FiniteSet(xis)",
+      "note": "Here subtraction is the semantically correct operation (excluding poles), but the statement subtracts the wrong values (im-roots, from line 315) and repeats the tuple-wrapping defect — FiniteSet(xis) contains one tuple element, so nothing is ever removed from an integer base set and pole exclusion is a silent no-op. The ConditionSet fallback at 321 is faithful by contrast (it subtracts the poles of the actual outer denominator i) and survives semantically in the fix via _solution_union(denoms(f), n)."
+    }
+  ],
+  "reasoning": "The ImageSet ∩ Reals handler splits the image expression f(n) into real and imaginary parts and must keep exactly the base points where the imaginary part vanishes, minus any points where f's denominators vanish. The base code gets the central set operation backwards: after solving im = 0 (factor-wise with solve_linear, or falling back to a ConditionSet), it SUBTRACTS those solutions from the base set instead of intersecting with them, so the computed intersection consists of the images of points whose values are not real. Compounding this, the solved values are packed as one tuple into FiniteSet, so the subtraction of that tuple-element removes nothing from an integer base set and the result lingers as an unevaluated Complement of the full base set — membership tests against the 'intersection with the reals' then accept integers whose images are plainly complex, while the truly real members are the ones nominally excluded. The pole-exclusion loop below has two further faults: its solve step re-solves the imaginary part's factors (an inner comprehension variable shadows the denominator being processed), and its FiniteSet subtraction repeats the tuple-wrapping mistake, so values that zero f's denominators are never actually removed. Rational imaginary parts additionally derail the factor-wise solving because reciprocal denominator factors of im, which have no roots, defeat the all-linear-solutions check and push solvable cases into the ConditionSet fallback.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/sets/tests/test_fancysets.py",
+      "line": 661,
+      "statement": "assert imageset(Lambda(n, n + (n - 1)*(n + 1)*I), S.Integers).intersect(S.Reals) == FiniteSet(-1, 1)",
+      "note": "Patch-updated first assert of test_imageset_intersect_real (the old expectation enshrined the buggy value Complement(S.Integers, FiniteSet((-1, 1))) — the issue's S1 example). Fails at base and witnesses the line 309 inversion. The patch-added asserts below witness the rest: the im-with-non-integer-roots cases (lines 663-666) and the ConditionSet expectation (667-669) pin the solve/fallback pair at 307/311, and the rational-f denominator cases (670-677) exercise the numer handling and the pole-exclusion faults at 315/319."
+    }
+  ],
+  "confidence": "high"
+}

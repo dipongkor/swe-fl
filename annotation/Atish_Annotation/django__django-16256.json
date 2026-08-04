@@ -1,0 +1,75 @@
+{
+  "instance_id": "django__django-16256",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/related_descriptors.py",
+      "line": 788,
+      "statement": "def create(self, **kwargs):",
+      "note": "Absence anchor, not a faulty statement: in create_reverse_many_to_one_manager's RelatedManager (class line 638), this sync override injects kwargs[self.field.name] = self.instance, but no acreate shadows it. The manager therefore inherits the QuerySet-derived acreate (Manager methods generated from QuerySet), which runs plain QuerySet.create via sync_to_async — creating the object without the foreign key to the parent instance. Witnessed by test_acreate_reverse."
+    },
+    {
+      "file": "django/db/models/fields/related_descriptors.py",
+      "line": 796,
+      "statement": "def get_or_create(self, **kwargs):",
+      "note": "Absence anchor: same RelatedManager; no aget_or_create shadows this FK-injecting override, so the inherited QuerySet aget_or_create creates unlinked objects. Witnessed by test_aget_or_create_reverse (relatedmodel_set.acount() stays 0)."
+    },
+    {
+      "file": "django/db/models/fields/related_descriptors.py",
+      "line": 804,
+      "statement": "def update_or_create(self, **kwargs):",
+      "note": "Absence anchor: same RelatedManager; no aupdate_or_create shadows this override. Witnessed by test_aupdate_or_create_reverse."
+    },
+    {
+      "file": "django/db/models/fields/related_descriptors.py",
+      "line": 1186,
+      "statement": "def create(self, *, through_defaults=None, **kwargs):",
+      "note": "Absence anchor: in create_forward_many_to_many_manager's ManyRelatedManager (class line 949), the sync create creates the object and self.add()s it through the m2m table; with no acreate shadow, the inherited QuerySet acreate creates the object but never writes the through row (and accepts no through_defaults). Witnessed by test_acreate: the created object is invisible to the relation, so the follow-up aget() raises DoesNotExist."
+    },
+    {
+      "file": "django/db/models/fields/related_descriptors.py",
+      "line": 1194,
+      "statement": "def get_or_create(self, *, through_defaults=None, **kwargs):",
+      "note": "Absence anchor: same ManyRelatedManager; no aget_or_create shadow (get-or-create then add through row). Witnessed by test_aget_or_create (acount() returns 0 after aget_or_create reports created=True)."
+    },
+    {
+      "file": "django/db/models/fields/related_descriptors.py",
+      "line": 1207,
+      "statement": "def update_or_create(self, *, through_defaults=None, **kwargs):",
+      "note": "Absence anchor: same ManyRelatedManager; no aupdate_or_create shadow. Witnessed by test_aupdate_or_create."
+    },
+    {
+      "file": "django/contrib/contenttypes/fields.py",
+      "line": 741,
+      "statement": "def create(self, **kwargs):",
+      "note": "Absence anchor: in create_generic_related_manager's GenericRelatedObjectManager (class line 564), the sync create injects the content_type and object_id kwargs; with no acreate shadow, the inherited QuerySet acreate runs QuerySet.create without them, violating the NOT NULL constraints. Witnessed by test_generic_async_acreate (IntegrityError-class failure)."
+    },
+    {
+      "file": "django/contrib/contenttypes/fields.py",
+      "line": 750,
+      "statement": "def get_or_create(self, **kwargs):",
+      "note": "Absence anchor: same GenericRelatedObjectManager; no aget_or_create shadow. Witnessed by test_generic_async_aget_or_create (create branch dies without content_type/object_id)."
+    },
+    {
+      "file": "django/contrib/contenttypes/fields.py",
+      "line": 758,
+      "statement": "def update_or_create(self, **kwargs):",
+      "note": "Absence anchor: same GenericRelatedObjectManager; no aupdate_or_create shadow. Witnessed by test_generic_async_aupdate_or_create."
+    }
+  ],
+  "reasoning": "When QuerySet gained async variants of its mutation methods, acreate/aget_or_create/aupdate_or_create became visible on every manager, since manager classes are generated from QuerySet methods. The dynamically built related managers — reverse many-to-one RelatedManager, many-to-many ManyRelatedManager, and the generic-relation GenericRelatedObjectManager — override only the sync names create/get_or_create/update_or_create to add the relation context: the reverse FK manager injects the foreign key to the parent instance, the m2m manager links the new object through the join table (honoring through_defaults), and the generic manager injects content_type and object_id. Nothing shadows the async names, so awaiting manager.acreate() and friends dispatches to the plain QuerySet implementations, which wrap QuerySet.create/get_or_create/update_or_create — not the manager's overrides. The relation context is silently dropped: reverse-FK objects are created with no foreign key set, m2m objects are created without any through row (so the relation never sees them and through_defaults is not even an accepted argument), and generic-relation objects are created without their content-type and object-id, hitting database constraints. The async read methods (aget, acount) operate on the correctly filtered related queryset, which is why the damage surfaces as missing rows or constraint errors right after an apparently successful async create.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/async/test_async_related_managers.py",
+      "line": 13,
+      "statement": "await self.mtm1.simples.acreate(field=2)",
+      "note": "New test file, test_acreate: the m2m acreate creates a SimpleModel with no through row, so the aget() on line 14 raises DoesNotExist. The sibling tests witness the other omissions — line 18 (reverse acreate, FK never set), lines 23-25 (m2m aget_or_create, acount()==0), and the reverse/update variants below them."
+    },
+    {
+      "file": "tests/generic_relations/tests.py",
+      "line": 49,
+      "statement": "await self.bacon.tags.acreate(tag=\"orange\")",
+      "note": "Patch-added test_generic_async_acreate: acreate bypasses the generic manager's content_type/object_id injection and errors at base. test_generic_async_aget_or_create (line 115) and test_generic_async_aupdate_or_create (line 77) witness the other two generic omissions."
+    }
+  ],
+  "confidence": "high"
+}

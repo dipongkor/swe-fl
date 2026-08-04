@@ -23,3 +23,4 @@ astropy__astropy-14369
 pydata__xarray-3993
 sphinx-doc__sphinx-10673
 scikit-learn__scikit-learn-25232
+sphinx-doc__sphinx-7590

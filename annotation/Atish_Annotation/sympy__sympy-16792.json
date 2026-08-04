@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-16792",
+  "root_cause": [
+    {
+      "file": "sympy/utilities/codegen.py",
+      "line": 742,
+      "statement": "new_args.append(InputArgument(symbol))",
+      "note": "In CodeGen.routine's argument_sequence handling: symbols requested by the caller but absent from the expression are not in name_arg_dict (built only from expression symbols), so this KeyError branch creates their InputArgument, and it does so without any dimensions metadata even when the symbol is a MatrixSymbol or IndexedBase carrying a shape. Code printers emit an InputArgument as an array (double *x) only when dimensions metadata is present, so the unused array argument is declared as a scalar (double x), producing a wrong C signature and the cython wrapper's TypeError at call time. The correct in-tree pattern sits just above at lines 705-714, where expression-derived array symbols get {'dimensions': ...} from their shape."
+    }
+  ],
+  "reasoning": "CodeGen.routine builds the argument list from the symbols appearing in the expression, attaching dimensions metadata to array-like symbols (Indexed bases, MatrixSymbols) so that printers declare them as pointer/array parameters. When the caller supplies argument_sequence, any requested symbol that does not occur in the expression misses the expression-derived lookup table and is reconstructed in a fallback branch as a plain InputArgument with no metadata at all. The symbol's own array nature, a MatrixSymbol's shape, is ignored, so the generated routine declares it as a scalar: autowrap(1.0, args=(x,), backend='cython') with x a 2x1 MatrixSymbol emits double autofunc(double x) instead of double autofunc(double *x), and calling the wrapper with a numpy array fails with TypeError: only size-1 arrays can be converted to Python scalars. Arguments that do appear in the expression are unaffected, which is why adding any dependence on x masks the bug.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/utilities/tests/test_codegen.py",
+      "line": 602,
+      "statement": "assert source == expected",
+      "note": "In the patch-added test_ccode_unused_array_arg: codegen of ('test', 1.0) with argument_sequence=(x,) for a 2x1 MatrixSymbol x (lines 586-591) generates 'double test(double x)' at the base commit instead of the expected 'double test(double *x)', so the source comparison fails."
+    }
+  ],
+  "confidence": "high"
+}
