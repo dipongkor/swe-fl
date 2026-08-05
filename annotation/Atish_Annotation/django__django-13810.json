@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-13810",
+  "root_cause": [
+    {
+      "file": "django/core/handlers/base.py",
+      "line": 54,
+      "statement": "handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)",
+      "note": "Statement spanning base lines 54-57 inside load_middleware's per-middleware try block. The fault is a premature commit of loop state: it rebinds the accumulated handler to a version adapted for THIS middleware's sync/async mode before line 58's middleware(handler) — the call that may raise MiddlewareNotUsed to declare the middleware skipped. On the skip path (continue at 65) the rebinding is never rolled back, while the paired bookkeeping handler_is_async is only updated for used middleware (line 89), so the chain state becomes inconsistent: handler has been mode-converted (e.g. async wrapped down to sync for a sync-only middleware) but handler_is_async still says otherwise. The next middleware's adapt_method_mode then trusts the stale flag and skips re-adaptation, wiring a sync callable where a coroutine function is required — under ASGI the response cycle ends in TypeError: object HttpResponse can't be used in 'await' expression. The raising statement at 58 is a faithful emitter (MiddlewareNotUsed is the documented skip mechanism; the fix merely renames its argument), the except/continue handling at 59-65 is faithful, and every adequate fix must defer or undo this handler commit on the not-used path — the gold patch assigns to a temporary and commits in the try's else clause."
+    }
+  ],
+  "reasoning": "load_middleware builds the handler chain inside-out, carrying two pieces of loop state: the current handler and handler_is_async, its mode flag. For each middleware it first adapts the current handler to the middleware's chosen mode (possibly wrapping an async handler as sync or vice versa, since adapt_method_mode trusts handler_is_async rather than inspecting the callable) and then instantiates the middleware, which may raise MiddlewareNotUsed to opt out. Because the adaptation result is assigned directly to handler before instantiation, an opted-out middleware still leaves the handler converted for its own mode while the continue skips the code that would update handler_is_async. From then on the two are out of sync: subsequent adaptations consult the stale flag, conclude no conversion is needed, and pass a sync-adapted callable up the chain as if it were async. In an ASGI application whose middleware list mixes async-capable middleware with a sync-only middleware that raises MiddlewareNotUsed, the assembled chain ultimately returns a plain HttpResponse where the async handler expects an awaitable, crashing with TypeError: object HttpResponse can't be used in 'await' expression.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/middleware_exceptions/tests.py",
+      "line": 190,
+      "statement": "response = await self.async_client.get('/middleware_exceptions/view/')",
+      "note": "In patch-added test_async_and_sync_middleware_chain_async_call: MIDDLEWARE stacks async-capable SyncAndAsyncMiddleware over MyMiddleware (a pre-existing test helper whose __init__ raises MiddlewareNotUsed, sync-only by default). Built for an async request, MyMiddleware is processed first (reversed order): the async handler is adapted to sync (first expected log record), the instantiation raises MiddlewareNotUsed (second record), and the poisoned handler is passed to SyncAndAsyncMiddleware. At base this await dies with TypeError: object HttpResponse can't be used in 'await' expression — the issue's exact symptom — before the content/status/log asserts at 191-199 are reached."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-12155",
+  "root_cause": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 37,
+      "statement": "indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())",
+      "note": "In trim_docstring: the common-indent computation includes lines[0], but per PEP 257 the first line of a docstring sits immediately after the opening quotes and therefore always has indentation 0 when text starts on the first line. For such docstrings min() returns 0, so the dedent at line 38 strips nothing from the continuation lines and the returned text keeps their source-level indentation. Downstream, parse_rst wraps the text in a '.. default-role:: cmsreference' directive template (utils.py 83-88); indented text directly under a directive is parsed by docutils as the directive's content, and default-role permits none, yielding the reported 'Error in \"default-role\" directive: no content permitted'. PEP 257's reference implementation (which line 38 otherwise follows) computes the indent over lines[1:] for exactly this reason. The gold patch deletes trim_docstring wholesale in favor of stdlib inspect.cleandoc (which skips the first line when computing the margin) — a refactor choice; the issue's minimal fix of changing 'lines' to 'lines[1:]' on this line is equally adequate. Lines 33-34, 36 and 38 are faithful given a correct indent; the parse_docstring early-return for empty docstrings added by gold is plumbing because cleandoc, unlike trim_docstring's line 33 guard, does not accept None."
+    }
+  ],
+  "reasoning": "admindocs renders view/model docstrings through docutils. Before rendering, trim_docstring normalizes indentation following the PEP 257 recipe: find the smallest indentation among non-blank lines and remove it from every line after the first. The implementation, however, includes the first line itself in the minimum. Django's own docstrings start with an empty first line so the first content line carries the block's indentation and the minimum comes out right; but for the common style where text begins immediately after the opening quotes, the first line's indentation is zero, the computed common indent is zero, and the continuation lines are returned still carrying their source indentation. When parse_rst then embeds this text beneath the '.. default-role:: cmsreference' directive it prepends, docutils treats the indented lines as content of that directive, and since default-role permits no content it emits a system-message error block instead of the rendered docstring — so admindoc pages error on any docstring whose first line is non-empty.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/admin_docs/test_utils.py",
+      "line": 101,
+      "statement": "self.assertEqual(parse_rst(body, ''), '<p>second line</p>\\n')",
+      "note": "In patch-added test_parse_rst_with_docstring_no_leading_line_feed (def at 97): parse_docstring('firstline\\n\\n    second line') at base computes indent 0 (min over the unindented first line), so body comes back as '    second line' with its four leading spaces intact; rendering it through parse_rst produces a docutils system-message div (the default-role 'no content permitted' error) instead of '<p>second line</p>', failing this assertion. The title assertion at 100 passes even at base (the first line is lstripped by trim_docstring line 38), and the stderr check at 102 pins that no docutils warning leaks. Verified in container fe9f875413f9: with the gold patch reverse-applied the test fails exactly here (AssertionError: '<div class=\"system-message\">...' != '<p>second line</p>\\n'); the other 6 tests in the module pass at base."
+    }
+  ],
+  "confidence": "high"
+}

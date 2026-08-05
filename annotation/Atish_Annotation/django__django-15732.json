@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-15732",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 565,
+      "statement": "constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)",
+      "note": "Statement spanning base lines 565-570 in _delete_composed_index; anchors an absence. The lookup correctly returns every matching constraint on the columns, but nothing afterwards narrows a multi-candidate result even though the method can compute exactly which constraint unique_together created — Django's default name (the IndexName '_uniq' construction used at creation time by _create_unique_sql). On backends that allow multiple unique constraints on the same columns, a field with its own unique=True carries two legitimate matches (e.g. pony_name_key from unique=True and pony_name_..._uniq from unique_together), so the strictness check at 571 fires ValueError('Found wrong number (2) of constraints ...') and the unique_together can never be dropped. The check-and-raise at 571-579 is a faithful guard against genuine ambiguity and survives in the fix; what the gold patch inserts here is the disambiguation step (prefer the default-named constraint when unique matching yields several), with the _unique_constraint_name helper factored out of _create_unique_sql as plumbing so deletion can recompute the same name creation used."
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 531,
+      "statement": "model, fields, {\"unique\": True}, self.sql_delete_unique",
+      "note": "The constraint_kwargs alter_unique_together passes for deletions (call spanning 530-532): matching on unique alone is under-constrained, because a primary-key constraint is also unique — so for unique_together on a PK field (the issue's literal (('id',),) case) the pkey constraint enters the candidate set alongside the _uniq constraint and the count check fails. The gold patch adds 'primary_key': False here; a PK constraint can never be the unique_together being dropped, so every adequate fix must exclude it from candidacy at this spec (the default-name disambiguation alone would also mask it, but the spec is where the wrong candidate is admitted). Not witnessed by the failing test on this container: on SQLite an AutoField primary key is the rowid and yields no separate introspectable unique constraint, so test_remove_unique_together_on_pk_field passes even at base — the fault manifests on backends like PostgreSQL where the pkey is a distinct constraint."
+    }
+  ],
+  "reasoning": "Dropping an entry from unique_together is implemented by locating the matching unique constraint on the involved columns and deleting it: _delete_composed_index asks introspection for all constraints on those columns satisfying the given predicate and insists on exactly one result. Two situations legitimately produce more than one unique constraint on the same column, and the code handles neither. If the column is the primary key, the predicate {'unique': True} also matches the primary-key constraint, since primary keys are unique. If the field declares unique=True in addition to appearing in unique_together, the field's own unique constraint and the unique_together constraint both match. In either case the exactly-one check raises ValueError('Found wrong number (2) of constraints ...'), aborting the migration, even though the constraint unique_together created is identifiable — it carries Django's deterministic default name with the _uniq suffix, the very name generated when the constraint was added. The migration is thus unable to remove a redundant unique_together from any column that is otherwise unique.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/migrations/test_operations.py",
+      "line": 2871,
+      "statement": "operation.database_forwards(app_label, editor, project_state, new_state)",
+      "note": "In patch-added test_remove_unique_together_on_unique_field (def at 2843): a Pony model with name unique=True plus unique_together {('name',)} — clearing unique_together via AlterUniqueTogether crashes at base with ValueError: Found wrong number (2) of constraints for test_rutouf_pony(name), raised from schema.py line 572. The companion test_remove_unique_together_on_pk_field (def at 2813, database_forwards at 2838) targets the primary-key variant; it passes at base on SQLite (rowid PKs expose no separate unique constraint) and fails only on backends like PostgreSQL, so it is absent from fail_to_pass."
+    }
+  ],
+  "confidence": "high"
+}

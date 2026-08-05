@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-13343",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": 282,
+      "statement": "kwargs['storage'] = self.storage",
+      "note": "In FileField.deconstruct. deconstruct's contract is to return the constructor arguments as declared, so the field can be recreated faithfully in migrations — for a field declared with storage=some_callable that means the callable itself (exactly how callable upload_to already deconstructs, via line 280). This line instead emits self.storage, which __init__ has replaced with the callable's evaluated result, inlining one environment's concrete Storage instance into the migration and freezing a decision the callable exists to defer to runtime. The guard at 281 is faithful; every adequate fix must make this emission (or its data source) yield the original callable."
+    },
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": 232,
+      "statement": "self.storage = self.storage()",
+      "note": "In FileField.__init__'s callable-storage branch. Evaluating the callable here is intended (the field needs a working Storage at runtime), but the assignment overwrites the only reference to the declared callable without recording it anywhere — mutation without record, the pytest-7571 shape — so by the time deconstruct runs, the information it is contractually required to reproduce no longer exists on the field. Jointly with line 282 this produces the fault; every adequate fix must retain the callable at this point (the gold patch stores it as _storage_callable just before this line) or stop overwriting it. The isinstance validation at 233-237 is faithful."
+    }
+  ],
+  "reasoning": "FileField accepts a callable for storage precisely so the storage backend can be chosen at runtime and differ between environments. At field construction the callable is called and its result assigned back onto self.storage, discarding the callable reference entirely. When makemigrations later deconstructs the field, deconstruct() copies self.storage into the kwargs — now the evaluated Storage instance — so the migration is written with whichever concrete storage the callable happened to return in the environment that generated it. The runtime-variability the callable was declared for is silently lost, and the deconstructed form no longer round-trips to the declared field. Callable upload_to on the same field shows the intended behavior: it is never evaluated on the field, so deconstruction returns the callable reference unchanged.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/file_storage/tests.py",
+      "line": 924,
+      "statement": "self.assertIs(storage, callable_storage)",
+      "note": "In patch-added FieldCallableFileStorageTests.test_deconstruction (def at 917; distinct from the pre-existing FileSystemStorage test of the same name at line 73): the Storage test model's storage_callable field is declared with storage=callable_storage, and deconstruct's kwargs must return that exact callable; at base kwargs['storage'] is the evaluated FileSystemStorage instance, so the identity assert fails."
+    }
+  ],
+  "confidence": "high"
+}

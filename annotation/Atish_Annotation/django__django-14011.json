@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-14011",
+  "root_cause": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 80,
+      "statement": "class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):",
+      "note": "Absence anchor, not a faulty statement: the class body (just a docstring and daemon_threads = True at base) adds ThreadingMixIn's thread-per-request dispatch without any database-connection lifecycle handling. Django connections are thread-local, so every request thread the mixin spawns creates its own connections, and when the thread exits nothing closes them — LiveServerThread.run's finally-close_all covers only the server thread itself. Leaked request-thread connections keep the test database open, so destroy_test_db races into OperationalError('database ... is being accessed by other users') on backends like PostgreSQL; the non-threaded WSGIServer never leaked because all requests ran inside the one thread whose run() cleans up. The gold patch fills the absence in this class: a close_request override calling connections.close_all() after each request (via the mockable _close_connections hook), plus a connections_override constructor kwarg and a process_request_thread override installing the parent's shared connections into each request thread so in-memory SQLite sharing keeps working under per-request cleanup. ThreadingMixIn itself is a faithful stdlib mixin; the companion edits in django/test/testcases.py (threading connections_override through _create_server, the _make_connections_override hook, relocated inc_thread_sharing) are fix plumbing — and notably ship in this instance's test_patch.diff rather than patch.diff."
+    }
+  ],
+  "reasoning": "LiveServerTestCase runs its HTTP server on ThreadedWSGIServer, whose ThreadingMixIn handles every request in a fresh thread. Django database connections are thread-local: each request thread that touches the ORM opens its own connection set. The live-server machinery only cleans up the connections of its own server thread (LiveServerThread.run closes them in a finally clause) and, at class teardown, of the main thread — the per-request threads' connections are simply abandoned when those threads finish. On backends with real client-server connections such as PostgreSQL, the abandoned connections linger until process exit, so when the test run ends and destroy_test_db drops the test database, it intermittently fails with OperationalError('database is being accessed by other users') — a race, reappearing only in runs where a leaked connection outlives the tests. Reverting the live server to the single-threaded WSGIServer masks the leak because every request then runs in the one thread whose cleanup does execute.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/servers/tests.py",
+      "line": 107,
+      "statement": "self.assertIsNone(conn.connection)",
+      "note": "In test-patch-added LiveServerTestCloseConnectionTest.test_closes_connections (def at 92): passes the default connection into the server with CONN_MAX_AGE=None, performs a request, waits on an event the instrumented server sets after _close_connections, and asserts the connection was closed. Direct-witness caveat: with the fix applied this test is skipped on in-memory SQLite (the patch's own django_test_skips entry — sqlite close() is a no-op there), so it is absent from fail_to_pass on this container. At base, this and every listed fail_to_pass servers test (the whole module, mostly docstring-named) error in setUpClass with TypeError: __init__() got an unexpected keyword argument 'connections_override' — the framework-side plumbing in django/test/testcases.py ships in test_patch.diff and requires the fixed server signature, so the base failures witness the missing constructor/cleanup surface rather than the leak itself."
+    }
+  ],
+  "confidence": "high"
+}

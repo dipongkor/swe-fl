@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-15916",
+  "root_cause": [
+    {
+      "file": "django/forms/models.py",
+      "line": 639,
+      "statement": "form_class_attrs = {\"Meta\": Meta, \"formfield_callback\": formfield_callback}",
+      "note": "In modelform_factory: the factory unconditionally injects formfield_callback as a class attribute of the form it builds — including when the caller passed none and the local holds the default None. Because ModelFormMetaclass reads the callback via attrs.pop (line 266), an explicitly-present None is authoritative and the pop's base-derived fallback is never consulted, so the base form's callback is silently discarded — the issue's exact complaint ('the formfield_callback is overwritten (with the default argument None) before the new class is constructed'). The unconditional injection is also redundant with the factory's own Meta handling directly above: the synthesized Meta already inherits the parent form's Meta (631-632) and receives an explicit callback via Meta.formfield_callback = staticmethod(...) at 633-634. Gold deletes the key from this dict, leaving Meta as the sole carrier."
+    },
+    {
+      "file": "django/forms/models.py",
+      "line": 266,
+      "statement": "formfield_callback = attrs.pop(\"formfield_callback\", base_formfield_callback)",
+      "note": "In ModelFormMetaclass.__new__, together with the base-scan loop at 260-264 it falls back to: the callback is resolved from the class-attribute channel first (pop), then from the first base's Meta — but never from the class's OWN Meta. So Meta.formfield_callback declared directly on a form (the issue's requested spelling, witnessed by test_custom_callback_in_meta) is ignored outright, and an explicit attrs value — even None, as the factory always supplies — shadows a base form's Meta callback. Gold deletes this line and the 260-264 scan entirely, replacing the channel: ModelFormOptions gains self.formfield_callback = getattr(options, 'formfield_callback', None) (inserted after base 255), making the callback a first-class Meta option that normal Meta inheritance propagates, and the fields_for_model argument at base 311 switches from this popped local to opts.formfield_callback (that argument line is the faithful consumer of whatever the resolution produced; it changes as a carrier of the channel switch)."
+    }
+  ],
+  "reasoning": "A ModelForm's fields are materialized by its metaclass, which threads an optional formfield_callback into fields_for_model. At base that callback travels through an ad-hoc channel: a class attribute popped off attrs, with a fallback that scans the bases' Meta classes — the form's own Meta is never consulted. modelform_factory interacts fatally with this: it always sets formfield_callback in the new class's attrs, even when its parameter is the default None, and dict.pop treats a present None as a definitive answer, so the fallback that would have found the base form's Meta.formfield_callback is bypassed. The net effect is the reported bug: modelform_factory(model, form=MyForm) builds a form whose fields ignore MyForm's callback (e.g. the all_required behavior vanishes in the factory-made form), and the Meta spelling of the callback does nothing anywhere. The fix promotes formfield_callback to a real ModelFormOptions/Meta option: ModelFormOptions reads it from Meta, the metaclass consumes opts.formfield_callback, and the factory stops injecting the class attribute — the Meta it synthesizes already inherits the parent form's Meta and stores any explicit factory callback, so both explicit and inherited callbacks flow through ordinary Meta inheritance.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_forms/tests.py",
+      "line": 3522,
+      "statement": "NewForm = modelform_factory(model=Person, form=BaseForm)",
+      "note": "In patch-added FormFieldCallbackTests.test_custom_callback_from_base_form_meta (def at 3512): BaseForm declares Meta.formfield_callback returning Textarea-widget fields; the factory-built NewForm loses it at base — assertion at 3528 fails with TextInput != Textarea (verified in container 69679a858f6a with the gold patch reverse-applied). Companion test_custom_callback_in_meta (def at 3499, assertion at 3510) fails identically without any factory involvement, witnessing that a form's own Meta.formfield_callback is never read at base. The pre-existing tests in the class (e.g. the explicit-callback factory call at 3488) pass at base, pinning that the explicit channel worked and only the None-overwrite/own-Meta paths were broken."
+    }
+  ],
+  "confidence": "high"
+}

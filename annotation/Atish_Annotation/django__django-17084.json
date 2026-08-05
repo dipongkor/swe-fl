@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-17084",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 449,
+      "statement": "if (isinstance(self.group_by, tuple) or self.is_sliced or has_existing_aggregation or refs_subquery or qualify or self.distinct or self.combinator):",
+      "note": "Statement spanning base lines 449-457 in get_aggregation: the decision of whether aggregate() must wrap the current query in a subquery (AggregateQuery) or may inline the aggregates into it directly. Django 4.2's aggregation-inlining optimization (#28477) made inlining the default, gated by this disjunct list — but the list omits the case where an aggregate references an annotation containing a window function. SQL forbids aggregate calls over window function calls in one SELECT (windows evaluate after grouping), so inlining produces e.g. SUM(AVG(...) OVER (...)) and the database rejects it — psycopg2 GroupingError 'aggregate function calls cannot contain window function calls' (SQLite: 'misuse of window function'); the only valid shape is computing the window in an inner subquery and aggregating over it outside, which pre-4.2 Django always did by unconditionally wrapping. The gold fix adds an 'or refs_window' disjunct here, feeding it with a refs_window detection loop inserted after base line 421 that mirrors the existing refs_subquery pattern at 418-421 (any referenced annotation with contains_over_clause); that detection insertion is the flag-computation plumbing for this decision. The neighboring disjuncts (refs_subquery, qualify, distinct, ...) are each correct guards for their own cases and are kept verbatim."
+    }
+  ],
+  "reasoning": "Before 4.2, QuerySet.aggregate() always pushed the existing query into a subquery and aggregated over it. Django 4.2 optimized this: get_aggregation now inlines the aggregate expressions into the current query unless a listed condition forces subquery wrapping (existing GROUP BY, slicing, existing aggregations, aggregates referencing subquery annotations, qualify, distinct, combinators). The list misses one SQL constraint: an aggregate cannot contain a window function call, because window functions are evaluated after aggregation/grouping. So when a queryset is annotated with a Window expression (e.g. a running total via Sum(...) over an ORDER BY window) and aggregate() then sums that annotation, the inlined form nests the OVER clause directly inside the outer aggregate — SUM(SUM(\"DJR\") OVER (ORDER BY ...)) — and the database raises (PostgreSQL GroupingError: aggregate function calls cannot contain window function calls). The valid formulation requires the window to be computed in an inner SELECT and aggregated in an outer one, i.e. exactly the subquery wrapping the decision declined to apply. The fix detects window-containing referenced annotations (refs_window, computed alongside the existing refs_subquery detection) and adds it as a wrapping condition.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/aggregation/tests.py",
+      "line": 2221,
+      "statement": "aggregate = total_books_qs.aggregate(sum_avg_publisher_pages=Sum(\"avg_publisher_pages\"), books_count=Count(\"id\"))",
+      "note": "In patch-added AggregateAnnotationPruningTests.test_referenced_window_requires_wrapping (def at 2213, call spanning 2221-2224): aggregating Sum over an annotation wrapping Window(Avg('pages'), partition_by='publisher') crashes at base — verified in container 12b26b8fa8ae with the gold patch reverse-applied: OperationalError: misuse of window function AVG() (SQLite's spelling of the issue's psycopg2 GroupingError). With the fix, the assertions at 2226 (sql.count('select') == 2, i.e. subquery wrapping happened within a single query) and 2227-2230 (correct values) pin the behavior. The other 6 tests in the class pass at base."
+    }
+  ],
+  "confidence": "high"
+}

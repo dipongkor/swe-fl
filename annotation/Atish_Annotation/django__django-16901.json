@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-16901",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/where.py",
+      "line": 138,
+      "statement": "rhs = Exact(1, rhs_sum)",
+      "note": "In WhereNode.as_sql's fallback for backends without a native XOR operator (guard at 128, faithful). rhs_sum (134-137, a faithful count: sum of CASE WHEN c THEN 1 ELSE 0 per child) is the number of true operands; comparing that count to exactly 1 encodes 'exactly one operand true', but chained XOR is left-associative parity — a ^ b ^ c is true when an ODD number of operands are true, which is also what native-XOR backends (MySQL) compute. For two operands 'exactly one' and 'odd' coincide, so the fallback was correct as introduced and only diverges from the third operand on: with three trues the count is 3, 3 == 1 fails, and the row is wrongly excluded (the issue's Q(id=37) three-fold chain returning 0 instead of 1). Every adequate fix must change the comparison basis from the raw count to its parity — the gold patch leaves this line textually intact but rebinds its input to Mod(rhs_sum, 2) when there are more than two children, changing exactly this comparison's role. The comment at 132 documents the wrong formula (cosmetic), and the OR-guard lhs at 133 is faithful (parity of zero trues is even, so the OR term is redundant-but-harmless with the corrected rhs)."
+    }
+  ],
+  "reasoning": "Q objects combined with ^ compile to an XOR connector in the WHERE tree. Backends with native XOR (MySQL) evaluate a chained a XOR b XOR c as left-associative pairwise XOR, which is true exactly when an odd number of operands are true. For backends without the operator (PostgreSQL, SQLite), WhereNode.as_sql substitutes an emulation: (a OR b OR c ...) AND (sum of one-per-true-operand CASE expressions) = 1. That right-hand side asserts the count of true operands is exactly one, which agrees with parity only for two operands. From three operands up the two semantics part ways — three true operands make the chain true (odd) but the emulated count test false — so the same ORM expression silently means 'exactly one' on PostgreSQL and 'odd number' on MySQL, and filters like Q(x) ^ Q(x) ^ Q(x) return no rows even when Q(x) matches.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/xor_lookups/tests.py",
+      "line": 30,
+      "statement": "self.assertCountEqual(",
+      "note": "In patch-added test_filter_multiple (def at 22): a five-fold XOR chain of num__gte thresholds over numbers 0-9; parity says numbers 1-2, 5-6, and 9 match (odd count of satisfied thresholds), while base's exactly-one emulation keeps only rows satisfying a single threshold — fails at base on SQLite (no native XOR) with 'Element counts were not equal'. The second assert at line 34 re-checks the same rows against a Python-computed parity oracle."
+    }
+  ],
+  "confidence": "high"
+}

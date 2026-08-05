@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-16502",
+  "root_cause": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 113,
+      "statement": "class ServerHandler(simple_server.ServerHandler):",
+      "note": "Absence anchor, not a faulty statement: Django's runserver handler subclasses wsgiref's ServerHandler and overrides __init__/cleanup_headers/close, but adds no HEAD-request handling anywhere — so response emission falls through to the inherited wsgiref finish_response, which iterates self.result and write()s every chunk regardless of REQUEST_METHOD. Ticket #26052 (Django 1.10) deliberately removed HEAD body-stripping from Django's handler layer on the premise that the HTTP server strips it (gunicorn/mod_wsgi do); for runserver, wsgiref IS the server and never has, so runserver has emitted RFC-violating HEAD bodies ever since (and 'Broken pipe' noise, since compliant clients hang up after headers). The gold fix fills the absence in this class: a finish_response override (inserted after close(), base 146-148) that for HEAD consumes the result iterator without writing (deque(self.result, maxlen=0)), sends headers if unsent, and closes — deliberately skipping finish_content(), which would default a missing Content-Length to '0' rather than omitting it as RFC 9110 9.3.2 permits — plus a cleanup_headers insertion (after the super() call at 132) deleting any Content-Length header on HEAD responses to match."
+    },
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 136,
+      "statement": "if \"Content-Length\" not in self.headers:",
+      "note": "In cleanup_headers: sends 'Connection: close' whenever Content-Length is absent, because a bodied HTTP/1.1 response of unknown length cannot be framed for connection reuse. That rationale does not apply to HEAD — no body follows the headers by definition, so a missing Content-Length costs nothing — but the condition never consults the method. Faulty jointly with the missing HEAD suppression rather than independently: at base every response carries a body so the guard is right for its inputs; once HEAD responses omit Content-Length (as the fix's RFC-9110 design and the fail_to_pass assertions require — the test checks both no Content-Length line and no 'Connection: close'), this guard would needlessly kill keep-alive for every HEAD request. Gold adds the conjunct self.environ['REQUEST_METHOD'] != 'HEAD'."
+    }
+  ],
+  "reasoning": "RFC-compliant servers must not send a message body in response to HEAD. Django 1.9 stripped HEAD bodies in its own handler; #26052 removed that in 1.10, delegating to the web server since production servers already comply. runserver, however, is built on wsgiref's simple_server, which performs no such stripping: its finish_response writes every chunk the WSGI app returns, method notwithstanding. Django's ServerHandler subclass customizes header cleanup and connection lifecycle but nothing about HEAD, so from 1.10 onward curl -iX HEAD against runserver receives the full HTML body after the headers (and compliant clients that hang up after headers produce 'Broken pipe' errors in the console). The fix teaches the runserver handler about HEAD end to end: finish_response drains the app's response iterator without writing it (still honoring close/cleanup semantics), headers are sent if the app never triggered a write, any Content-Length header is dropped (RFC 9110 permits HEAD responses to omit it, and after discarding the body the handler cannot honestly compute one), and the unknown-length 'Connection: close' fallback is scoped to non-HEAD requests since a bodiless response needs no length to be framed safely.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/servers/test_basehttp.py",
+      "line": 152,
+      "statement": "WSGIRequestHandler(request, \"192.168.0.2\", server)",
+      "note": "In patch-added WSGIRequestHandlerTestCase.test_no_body_returned_for_head_requests (def at 111): the second handler instantiation, fed 'HEAD / HTTP/1.0' (rfile built at 147) against a hello-world WSGI app — instantiation runs the request as a side effect. At base the captured wfile ends with the full HTML body: assertion at 158 fails with b'<!DOCTYPE html>...Hello World...' != b'\\r\\n' (verified in container fbd5bf03d94e with the gold patch reverse-applied; the other 4 tests in the module pass). Follow-up assertions pin the design: no Content-Length line (159-161) and no Connection: close (162) on HEAD, while the GET half of the test (first handler run at 137, assertions 142-145) guards that GET keeps body, correct Content-Length, and keep-alive. The test_patch also reworks fixtures to make the run reachable: Stub gains ThreadingMixIn (so cleanup_headers' threading check at base 139 doesn't force close) and UnclosableBytesIO moves to module scope — fixture plumbing, not behavior under test."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-14034",
+  "root_cause": [
+    {
+      "file": "django/forms/boundfield.py",
+      "line": 236,
+      "statement": "attrs['required'] = True",
+      "note": "Body of the required-attribute decision in BoundField.build_widget_attrs. The guard at 235 (widget wants the attribute, the field is required, the form allows it) is a faithful gate; the fault is the body's uniform application: it stamps one 'required' onto the widget's attrs, and for a MultiValueField's MultiWidget those attrs are propagated to every subwidget's rendered input. When require_all_fields=False, requiredness is per-subfield — an optional subfield (required=False) must not carry the HTML required attribute, or the browser refuses to submit the form with that input empty even though the server would accept it. Every adequate fix must make the application per-subwidget for such composite fields (the gold patch branches here, setting each subwidget's attrs from its own subfield.required, and keeps this line for the ordinary case)."
+    }
+  ],
+  "reasoning": "When rendering a bound field, build_widget_attrs decides whether to emit the HTML required attribute from the field-level required flag and writes it into the widget attrs once. A MultiValueField renders through a MultiWidget, which passes the parent attrs down to each of its subwidgets, so that single flag lands on every rendered input. With require_all_fields=False the field's subfields declare their own requiredness, and the composite field itself may be required merely because at least one subfield is; propagating the outer flag wholesale marks the optional subfields' inputs required in the HTML. Client-side, the browser then blocks submission whenever such an input is left empty — even though server-side validation accepts it — so the rendered form contradicts the field definition. The rendering is the only thing at fault on this path: the same form's server-side validation of the tested scenarios behaves correctly at base.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py",
+      "line": 194,
+      "statement": "self.assertInHTML('<input type=\"text\" name=\"f_1\" id=\"id_f_1\">', form.as_p())",
+      "note": "In patch-added test_render_required_attributes: PartiallyRequiredForm's field is required with require_all_fields=False over (CharField(required=True), CharField(required=False)); the optional subfield's input must render without the required attribute, but at base it carries one, so this assertInHTML finds no match. The other asserts pass at base: line 193 (the required subfield's input does carry required) and the is_valid checks at 192/196 — the gold patch changes rendering only, so the issue's literal validation complaint (an outer required=False field skipping a required subfield's check) is not exercised by the failing test."
+    }
+  ],
+  "confidence": "high"
+}

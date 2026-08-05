@@ -1,0 +1,45 @@
+{
+  "instance_id": "django__django-13195",
+  "root_cause": [
+    {
+      "file": "django/http/response.py",
+      "line": 217,
+      "statement": "self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')",
+      "note": "Statement spanning base lines 217-220 in HttpResponseBase.delete_cookie: the deletion Set-Cookie header is emitted with a fixed attribute set that omits samesite entirely (and the def at 213 offers callers no way to supply one — the signature gains samesite=None in gold as the API surface for this). Cookie deletion works by re-sending the cookie expired, and browsers apply the same acceptance rules to that header as to any other: Firefox/Chrome treat a missing SameSite as None and are moving to reject SameSite=None without Secure, so the expiring header for a cookie originally set with SameSite (e.g. the messages cookie's SameSite=Lax) is emitted bare — the reported Firefox warning, and prospectively an ignored deletion, i.e. an undeletable cookie. Gold threads the new parameter into this call (samesite=samesite)."
+    },
+    {
+      "file": "django/http/response.py",
+      "line": 216,
+      "statement": "secure = key.startswith(('__Secure-', '__Host-'))",
+      "note": "Under-inclusive companion heuristic, called out verbatim in the issue: Secure is forced only for __Secure-/__Host- prefixed names, but browsers also require Secure whenever SameSite=None — so a deletion carrying samesite='none' must set the flag regardless of prefix. Gold extends this line with 'or (samesite and samesite.lower() == \"none\")'; witnessed by patch-added test_delete_cookie_secure_samesite_none. At base the gap is unreachable (samesite cannot be passed at all), so this is faulty jointly with the omission at 213/217-220 rather than independently."
+    },
+    {
+      "file": "django/contrib/messages/storage/cookie.py",
+      "line": 95,
+      "statement": "response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)",
+      "note": "The messages CookieStorage deletion call in _update_cookie: the set branch directly above (base 88-93) sets the messages cookie with samesite=settings.SESSION_COOKIE_SAMESITE, but this delete branch drops it — the exact asymmetry the issue reports (POST sets SameSite=Lax, the follow-up GET expires the cookie without it). Blocked at base by the missing parameter, but every adequate fix must also change this call: delete_cookie is generic and cannot know the per-cookie samesite (defaulting it from SESSION_COOKIE_* settings inside delete_cookie, as the reporter's workaround did, would leak session settings onto all cookies), so the caller must pass it. Gold adds samesite=settings.SESSION_COOKIE_SAMESITE here."
+    },
+    {
+      "file": "django/contrib/sessions/middleware.py",
+      "line": 41,
+      "statement": "response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)",
+      "note": "Call spanning base 41-45 in SessionMiddleware.process_response, the session-emptied deletion path: passes path and domain from the SESSION_COOKIE_* settings but not SESSION_COOKIE_SAMESITE, so ending a session emits Set-Cookie: sessionid=\"\" without the SameSite attribute the session cookie was set with. Same joint dependency on the API gap as the messages caller; gold adds samesite=settings.SESSION_COOKIE_SAMESITE."
+    }
+  ],
+  "reasoning": "Deleting a cookie over HTTP means re-sending it via Set-Cookie with an expiry in the past, and browsers vet that expiring header exactly like any other Set-Cookie. Modern Firefox/Chrome treat an absent SameSite attribute as SameSite=None and reject (or warn about, pending rejection of) SameSite=None cookies not marked Secure. HttpResponseBase.delete_cookie builds the expiring header from a fixed attribute set — key, max_age=0, path, domain, expires, plus Secure only for __Secure-/__Host- prefixed names — with no way to carry the cookie's SameSite. So any cookie originally set with SameSite (the messages cookie and session cookie both use SESSION_COOKIE_SAMESITE, 'Lax' by default) gets expired by a header stripped of it, producing the reported Firefox warning and, once browsers enforce the policy, deletions that are silently ignored so the cookie never actually goes away. The fix adds a samesite parameter to delete_cookie, threads it into the emitted header, forces Secure when samesite='none', and updates the two in-tree deletion callers (messages storage, sessions middleware) to pass their configured SameSite.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/responses/test_cookie.py",
+      "line": 131,
+      "statement": "response.delete_cookie('c', samesite='lax')",
+      "note": "In patch-added test_delete_cookie_samesite (def at 129): errors at base with TypeError: delete_cookie() got an unexpected keyword argument 'samesite' — the missing API surface. test_delete_cookie_secure_samesite_none (def at 123, call at 126) errors identically and, once the parameter exists, pins the secure-for-samesite-none rule at line 216. Verified in container 4a9088055ca8 with the gold patch reverse-applied."
+    },
+    {
+      "file": "tests/sessions_tests/tests.py",
+      "line": 797,
+      "statement": "str(response.cookies[settings.SESSION_COOKIE_NAME])",
+      "note": "In test-patch-updated SessionMiddlewareTests.test_session_delete_on_end_with_custom_domain_and_path (def at 772): the emitted deletion header lacks the expected '; SameSite=Lax' suffix at base (AssertionError diff shows Set-Cookie: sessionid=\"\" ... Path=/example/ with no SameSite), witnessing the middleware caller at sessions/middleware.py 41-45 plus the response.py omission end-to-end. test_session_delete_on_end (def at 742) fails the same way for the default path, and messages_tests.test_cookie.CookieTests.test_cookie_setings fails at its patch-added assertion (test_cookie.py 89-92, AssertionError: '' != 'Strict') witnessing the messages caller at storage/cookie.py 95."
+    }
+  ],
+  "confidence": "high"
+}

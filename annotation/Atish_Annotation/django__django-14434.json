@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-14434",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 1244,
+      "statement": "table = Table(model._meta.db_table, self.quote_name)",
+      "note": "In _create_unique_sql: binds the local 'table' to a Table ddl-reference OBJECT, but the local feeds two consumers with different type contracts — Statement(table=...) at 1259, which genuinely wants the Table object, and _index_columns(table, ...) at 1254, whose Columns/TableColumns machinery stores the value as the table NAME and implements references_column via string equality (django/db/backends/ddl_references.py lines 67-68: self.table == table and column in self.columns). With a Table instance stored, that comparison against the queried table-name string is always False, so every Statement produced for a unique constraint reports references_column(...) == False regardless of its actual columns. Jointly faulty with line 1254; the gold fix rebinds this local to the plain db_table string and constructs Table(...) only inside the Statement call. IndexName (1246) and Expressions (1256) already received the correct string at base — the gold edits there are refactor-only — and TableColumns.references_column is a faithful comparator under its string contract."
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 1254,
+      "statement": "columns = self._index_columns(table, columns, col_suffixes=(), opclasses=opclasses)",
+      "note": "The other half of the interface fault: forwards the Table instance into _index_columns, which constructs Columns(table, ...) expecting the table name string (the issue's literal description). An alternative adequate fix leaves 1244 alone and passes model._meta.db_table here instead — one of the two lines must change, and neither is innocent in combination: the pair delivers a wrongly-typed value across a string-typed interface."
+    }
+  ],
+  "reasoning": "_create_unique_sql builds a Statement whose parts allow schema operations to ask what a deferred DDL statement references: the table part is a Table ddl-reference object, while the columns part is a Columns object that records the table by name and answers references_column(table, column) with a string comparison, self.table == table. The method binds one local to a Table object and passes that same local both to the Statement (correct) and into _index_columns, where it becomes Columns' stored table 'name' (wrong type). The equality test between the stored Table instance and the queried table-name string can never hold, so references_column is always False for every unique-constraint statement. Consumers that rely on those answers — e.g. schema editors scanning deferred statements to find ones touching a column being altered or renamed — silently treat unique constraints as unrelated to their columns.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/schema/tests.py",
+      "line": 2211,
+      "statement": "self.assertIs(sql.references_column(table, 'name'), True)",
+      "note": "In patch-added test_unique_constraint (def at 2201): builds UniqueConstraint(fields=['name'], name='name_uq') on Author, obtains its create_sql Statement, and checks the reference queries; at base this assert fails with False is not True (references_table at 2210 passes — the Statement's table part still matches by name)."
+    }
+  ],
+  "confidence": "high"
+}

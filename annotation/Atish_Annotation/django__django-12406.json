@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-12406",
+  "root_cause": [
+    {
+      "file": "django/forms/models.py",
+      "line": 1188,
+      "statement": "if required and (initial is not None):",
+      "note": "The empty_label decision in ModelChoiceField.__init__ (if/else spanning base 1188-1191): the empty '---------' choice is suppressed only when the field is required AND has an initial value; in every other case the else-branch at 1191 keeps it. That rule is calibrated for Select, where a blank option is idiomatic even on required fields (it is the widget's unfilled state). RadioSelect has an inherent unfilled state — no radio checked — so the surviving empty choice renders as a checked '---------' radio that looks like a valid selection even when the model field has blank=False. The decision is under-inclusive: it never consults the widget kind or the model's blank. Gold adds the disjunct '(isinstance(self.widget, RadioSelect) and not blank)' to force empty_label=None, and relocates the whole if/else after the Field.__init__ call at 1195-1198 — necessary mechanics, since Field.__init__ is what normalizes the widget kwarg (class to deepcopied instance) into self.widget so isinstance can be tested; the signature also gains blank=False as the parameter surface for the second fault."
+    },
+    {
+      "file": "django/db/models/fields/related.py",
+      "line": 978,
+      "statement": "return super().formfield(**{'form_class': forms.ModelChoiceField, 'queryset': ..., 'to_field_name': ..., **kwargs})",
+      "note": "Statement spanning base 978-983, ForeignKey.formfield: the kwargs dict forwarded to the form field omits the model field's blank flag, so the information 'blank is not a valid selection' (models.ForeignKey(..., blank=False), which is independent of form required — the issue's model has null=True with blank=False) never crosses the model-to-form boundary and no form-side rule could act on it. Gold adds 'blank': self.blank to this dict (after **kwargs, so it wins). Jointly with the decision at forms/models.py 1188-1191 this constitutes the fault: the decision doesn't ask about blank, and this call couldn't have told it."
+    }
+  ],
+  "reasoning": "ModelChoiceField prepends an empty '---------' choice unless empty_label is None, and its constructor nulls empty_label only in one narrow case: required fields that already have an initial value. For the Select widget this is the desired UX — the blank option doubles as the widget's unfilled state. For RadioSelect it is wrong: radios are naturally unfilled when nothing is checked, so the empty choice materializes as a first radio button labeled '---------' (checked by default on an unbound form), presenting blank as an apparently valid choice even when the model declares blank=False. Two gaps combine: the empty_label rule never considers the widget type, and ForeignKey.formfield never forwards the model's blank attribute to the form field, so the form layer has no way to know blank isn't allowed (blank is a validation concept distinct from required — the issue's field is null=True, blank=False). The fix threads blank across the boundary (formfield passes blank=self.blank, ModelChoiceField accepts blank=False) and widens the suppression rule: empty_label becomes None also when the widget is a RadioSelect and blank is False, with the check moved after Field.__init__ so the widget kwarg has been normalized to an instance.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_forms/tests.py",
+      "line": 289,
+      "statement": "list(form.fields['character'].choices)",
+      "note": "In patch-added ModelFormBaseTest.test_non_blank_foreign_key_with_radio (def at 276): an unbound ModelForm for Award.character (a blank=False FK) with a RadioSelect widget yields choices starting with ('', '---------') at base instead of just the one Character — verified in container addeaad87505 with the gold patch reverse-applied (AssertionError: Lists differ: [('', '---------'), ...] != [(1, 'user')]). Companion test_choices_radio_blank (test_modelchoicefield.py def at 142, constructor call at 152-156) errors at base in all 4 subtests with TypeError: __init__() got an unexpected keyword argument 'blank', witnessing the missing parameter surface directly. test_blank_foreign_key_with_radio (tests.py 261) passes even at base — it pins that blank=True FKs keep the empty option, guarding the fix against over-suppression."
+    }
+  ],
+  "confidence": "high"
+}

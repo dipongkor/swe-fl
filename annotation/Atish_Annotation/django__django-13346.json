@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-13346",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/json.py",
+      "line": 482,
+      "statement": "KeyTransform.register_lookup(KeyTransformExact)",
+      "note": "Absence anchor, not a faulty statement: the KeyTransform lookup registry (lines 482-496) registers backend-aware specializations for exact, iexact, isnull, the string lookups, and the comparisons — but no KeyTransformIn class exists or is registered, so value__key__in resolves through the fallback to the generic lookups.In of the JSONField output_field. That fallback is not correct here: on backends without a native JSON type (SQLite, MySQL/MariaDB, Oracle) the KeyTransform LHS compiles to JSON_EXTRACT-style SQL yielding decoded JSON values, while In's rhs parameters remain the JSON-encoded text that JSONField.get_db_prep_value produces ('14', '\"bar\"', ...), so the IN comparison is text-vs-value and never matches. KeyTransformExact (class at line 381) embodies exactly the rhs treatment 'in' needs — wrapping each parameter in JSON_EXTRACT(%s, '$') (with vendor variants) so both sides are in the same representation — and the gold patch adds KeyTransformIn with that same process_rhs and registers it immediately before this line. Registry-is-the-semantics: the wrong-fallback gap, not any modified base line, is the fault."
+    }
+  ],
+  "reasoning": "Filtering on a JSON key transform compiles the left-hand side to a JSON-extraction expression, which on backends without a native JSON field type (SQLite, MySQL/MariaDB, Oracle) produces decoded JSON values. KeyTransform registers specialized lookups that compensate on the right-hand side — KeyTransformExact wraps each parameter in JSON_EXTRACT(%s, '$') (or the vendor equivalent) so the comparison happens between like representations, which is why value__key: 0 matches. No such specialization exists for 'in': value__key__in falls through to the generic In lookup of the JSONField output field, whose parameters stay in their database-prep form — JSON-encoded strings. The resulting SQL compares the extracted value (integer 14, unquoted string bar, ...) against JSON text ('14', '\"bar\"'), so membership never holds and the __in filter silently returns no rows even when the equivalent exact filter matches hundreds.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_fields/test_jsonfield.py",
+      "line": 644,
+      "statement": "self.assertSequenceEqual(",
+      "note": "Per-case subTest assert in patch-added test_key_in (def at 630): all nine lookup/value combinations — integer, array-index, string, list, and dict members — return empty querysets at base on SQLite instead of the expected objects. The fail_to_pass list also names test_key_iregex, which passes at base in a direct run — a SWE-bench log-parsing artifact, not a fault witness."
+    }
+  ],
+  "confidence": "high"
+}

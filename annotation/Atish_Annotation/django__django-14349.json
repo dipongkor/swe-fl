@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-14349",
+  "root_cause": [
+    {
+      "file": "django/core/validators.py",
+      "line": 101,
+      "statement": "def __call__(self, value):",
+      "note": "Absence anchor, not a faulty statement: URLValidator.__call__ performs no rejection of LF/CR/tab on the input itself before handing it to split-based processing. The laundering path the omission leaves open: the initial regex validation at line 111 correctly rejects any value containing these characters (they can match no pattern class and \\Z anchors the end), but the IDN-retry branch then decomposes the ORIGINAL value with urlsplit (116), reassembles it with urlunsplit (123), and grants validity by revalidating the reconstruction (124). On Pythons carrying the bpo-43882 fix, urlsplit strips all LF/CR/tab before splitting per its updated spec — a faithful stdlib emitter — so the reconstruction is a sanitized different string, the retry regex passes, and the invalid input is accepted (CVE-2021-32052). Lines 111-124 are individually faithful (the retry is correct for its IDN purpose whenever splitting preserves the string, and the gold patch leaves them untouched); what every adequate fix must add is an input-level unsafe-character rejection in this method, which the gold patch inserts (unsafe_chars frozenset at class level, early raise after the isinstance check)."
+    }
+  ],
+  "reasoning": "URLValidator validates the raw value against its regex and, when that fails, retries once through an IDN-normalization path: it splits the original value with urlsplit, punycodes the netloc, reassembles with urlunsplit, and validates the reconstructed URL as a proxy for the input. That proxy argument silently assumes urlsplit/urlunsplit round-trip everything except the intended IDN encoding. Python's fix for bpo-43882 (in 3.9.5+ and backported security releases, including this environment's 3.8.20 — verified: urlsplit('http://x.com/\\nfoo').path == '/foo') broke the assumption: urlsplit now strips every linefeed, carriage return, and tab from the URL before splitting. A value like 'http://www.djangoproject.com/\\n' therefore fails the first regex check (as it should), enters the retry, is quietly sanitized by the split/unsplit round-trip, and the cleaned reconstruction passes — so the validator accepts input containing header-injection-capable control characters. On older unpatched Pythons the same code rejected these values because the retry preserved the characters and failed again; the bug materialized through the stdlib behavior change, and the validator lacks any rejection of the unsafe characters on the input itself.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/validators/tests.py",
+      "line": 334,
+      "statement": "validator(value)",
+      "note": "Inside test_validators' per-row subTest, under assertRaises(ValidationError) at line 333: all eight unsafe-character TEST_DATA rows fail at base with 'ValidationError not raised' — the two pre-existing trailing-\\n rows at 230-231 (which passed on older Pythons and regressed with bpo-43882) plus the patch-added \\r and \\t rows at 232-237 covering trailing, mid-host, and post-scheme positions."
+    }
+  ],
+  "confidence": "high"
+}

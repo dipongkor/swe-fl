@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-15128",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 576,
+      "statement": "change_map = {}",
+      "note": "Absence anchor in Query.combine: the rhs-to-lhs alias relabel map is built while both queries still share the same alias namespace (both use the default 'T' prefix), and nothing separates the namespaces first. The loop below walks rhs.alias_map and, for each rhs join, self.join(...) mints the next free lhs alias — which, when lhs's table_map already contains the rhs table names, can be exactly another alias that rhs also uses: e.g. rhs alias T4 maps to freshly created T5 while rhs alias T5 maps to T6, so change_map = {'T4': 'T5', 'T5': 'T6'} has intersecting keys and values. That violates the documented precondition of change_aliases, whose assert at line 849 (a faithful guard — sequential application of a non-disjoint map would rename T4 to T5 and then that T5 on to T6) crashes the whole OR/AND combination with a bare AssertionError. Every adequate fix must guarantee domain/codomain disjointness before relabelling; the gold patch inserts rhs.bump_prefix(self, exclude={initial_alias}) right at this point, renaming rhs's aliases to a fresh prefix except the shared base-table alias. The per-join calls in the loop are individually faithful (the collision is a composite effect); the get_initial_alias() call at 594 is merely relocated by the fix (its value captured for the exclude set); and bump_prefix (line 882) was correct at base for its subquery use — its new exclude parameter and outer_query-to-other_query rename are fix plumbing and cosmetics."
+    }
+  ],
+  "reasoning": "Combining two querysets with | or & merges the right-hand query's joins into the left-hand query: for each rhs alias, combine creates or reuses a join in lhs and records rhs-alias -> new-alias in change_map, which change_aliases then applies to relabel the rhs's where clause references. Both freshly-built queries number their aliases with the same 'T' prefix, so the map's domain (rhs aliases) and codomain (new lhs aliases) live in one namespace. When the left query already contains joins on the right query's tables, the newly minted aliases can step onto aliases the rhs itself still uses — producing a map like {'T4': 'T5', 'T5': 'T6'}. Applying such a map naively is ambiguous (T4 could end up as T6 depending on application order), which is precisely what change_aliases' first assertion guards against, so the combination crashes with an unexplained AssertionError instead of producing a query. Whether the collision arises depends on how many joins each side has, which is why qs2 | qs1 can work while qs1 | qs2 crashes — the operation's failure is asymmetric even though the combined results would be equivalent.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/queries/tests.py",
+      "line": 2150,
+      "statement": "self.assertCountEqual(qs2 | qs1, qs1 | qs2)",
+      "note": "In patch-added test_conflicting_aliases_during_combine (def at 2142), reproducing the issue's topology via the test-model additions (BaseUser.annotation FK and Task.note FK are fixture plumbing): qs1 is a related-manager queryset on annotation, qs2 ORs two lookups through Task, and evaluating qs1 | qs2 raises the bare AssertionError from query.py line 849 at base (qs2 | qs1 alone works — the asymmetry the issue reports). Line 2151 additionally pins the combined results once the crash is fixed; the sanity asserts at 2148-2149 pass at base."
+    }
+  ],
+  "confidence": "high"
+}

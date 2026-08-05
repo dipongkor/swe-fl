@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-16938",
+  "root_cause": [
+    {
+      "file": "django/core/serializers/python.py",
+      "line": 82,
+      "statement": "return getattr(obj, field.name).only(\"pk\").iterator()",
+      "note": "queryset_iterator in Serializer.handle_m2m_field (the no-natural-key fast path introduced as a performance optimization): it applies only('pk') to whatever queryset the related model's default manager provides. A manager may legitimately bake select_related(...) into get_queryset(), and Django forbids a field being simultaneously deferred and traversed — the compiler's select_related_descend validator (django/db/models/query_utils.py, a faithful guard) raises FieldError('... cannot be both deferred and traversed using select_related at the same time'). Since this iterator only ever reads pks, any manager-supplied select_related is useless here and the composition must neutralize it; the gold fix chains a bare .select_related() (which clears the setting) before only('pk'). The custom manager is legitimate user code, and the deferred+traversed validator is correct — the incompatible composition is created at this line."
+    },
+    {
+      "file": "django/core/serializers/xml_serializer.py",
+      "line": 158,
+      "statement": "return getattr(obj, field.name).only(\"pk\").iterator()",
+      "note": "Identical fault in the XML serializer's queryset_iterator (handle_m2m_field): same only('pk') composition over the related manager's queryset, same FieldError when that manager uses select_related. The python.py serializer backs json/jsonl/yaml, so the two lines jointly cover every built-in format."
+    }
+  ],
+  "reasoning": "When serializing a many-to-many field whose model defines no natural key, the serializers fetch the related objects through an optimized iterator that defers everything but the primary key: getattr(obj, field.name).only('pk'). That queryset starts from the related model's default manager, and a manager is allowed to shape its base queryset — including with select_related() to eagerly join a foreign key. Deferring a field and traversing it with select_related are mutually exclusive in the ORM: the SQL compiler's validation raises FieldError('Field X cannot be both deferred and traversed using select_related at the same time') when the pk-only mask meets the manager's select_related. So merely serializing any object whose m2m target uses such a manager crashes, even though the serializer never needs the joined data — only the pks. Managers without select_related are unaffected, which is why the reporter's workaround of restoring a plain default manager works.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/serializers/tests.py",
+      "line": 411,
+      "statement": "def test_serialize_only_pk(self):",
+      "note": "Shared SerializersTestBase test run per format (json/jsonl/yaml/xml): serializes Article.objects.all(), which now traverses the test-patch-added topics m2m to Topic — a model whose TopicManager.get_queryset() applies select_related('category') (tests/serializers/models/base.py lines 56-66). At base every run errors with FieldError: Field Topic.category cannot be both deferred and traversed using select_related at the same time (verified for the json and xml variants, covering both faulty lines). The large fail_to_pass list — including docstring-named entries like 'Basic serialization works.' — reflects that the new fixture model makes virtually every Article-serializing test crash at base, not a log-parsing artifact; the added topics_data_sql asserts (tests.py 424-425, 439-440) additionally pin that the fixed query must not join category_id."
+    }
+  ],
+  "confidence": "high"
+}

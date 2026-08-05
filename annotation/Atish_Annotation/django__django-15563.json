@@ -1,0 +1,33 @@
+{
+  "instance_id": "django__django-15563",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1839,
+      "statement": "query.add_fields([query.get_meta().pk.name])",
+      "note": "In SQLUpdateCompiler.pre_sql_setup: when an update touches inherited fields, the compiler pre-selects row identifiers to drive the per-ancestor UPDATE queries — but it selects only the child's meta.pk, i.e. the parent-link of the FIRST (primary-key-chain) parent. With multiple concrete parents, a child row is linked to the second parent by a separate ptr column whose values live in a different id space (Congressman's pk chain goes through Person; its Politician rows are addressed by politician_ptr_id, and in the issue's example Child(Base, OtherBase) pk values are base_ptr ids while otherbase_ptr ids differ). Selecting a single id column is insufficient to address rows of off-chain ancestors. Gold replaces this with a loop over self.query.related_updates: parents reachable via an all-primary-key path (meta.get_path_to_parent checks) reuse the pk at index 0, otherwise the parent's own pk is appended to the select list, with related_ids_index recording each parent's column position."
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1857,
+      "statement": "self.query.related_ids = idents",
+      "note": "Same method, the pre-select consumption (idents collected at 1853-1855 from column 0 only): one flat list of primary-chain ids is stored for ALL ancestor updates, baking in the false assumption that every parent's rows share the child's pk values. Gold changes the collection to fan rows out into a defaultdict(list) keyed by parent model via related_ids_index, and stores that dict here — the per-parent id channel the fix threads through to get_related_updates."
+    },
+    {
+      "file": "django/db/models/sql/subqueries.py",
+      "line": 137,
+      "statement": "query.add_filter(\"pk__in\", self.related_ids)",
+      "note": "In UpdateQuery.get_related_updates: each ancestor's UpdateQuery is filtered by pk__in against the single shared id list — the point where the mis-addressing becomes SQL. For an off-chain parent this executes UPDATE <parent> SET ... WHERE <parent-pk> IN (<primary-chain ids>): it misses the child's actual parent rows (the update silently does nothing to them) and, worse, matches whatever unrelated parent rows happen to carry those numeric ids — the issue's OtherBase rows 1 and 2 getting field_otherbase=55, i.e. cross-table data corruption from id-space collision. Gold indexes the dict: self.related_ids[model]."
+    }
+  ],
+  "reasoning": "QuerySet.update() on an MTI child splits the assignments per table: fields owned by ancestors are queued as related_updates, and to keep the target rows stable across the multiple UPDATE statements the compiler first runs a select for the affected rows' identifiers, then filters every per-table UPDATE with pk__in on those identifiers. The design assumed a single identifier space: it selects only the child's primary key (the parent-link of the first parent) and hands that one flat list to every ancestor update. Under multiple inheritance from two concrete models, only the first parent shares that id space; the link to the second parent is a distinct ptr column with independently assigned AutoField values. Consequently updating a second-parent field through the child issues UPDATE second_parent SET ... WHERE second_parent_pk IN (first-parent-chain ids): the child's actual rows in the second parent's table are missed (queryset update silently ineffective) and any unrelated second-parent rows whose pks numerically collide with the first-parent ids are overwritten — the issue's OtherBase rows 1,2 being set to 55. The fix makes the pre-select carry one id column per off-chain ancestor (parents connected by an all-primary-key path still reuse the child pk), stores the ids as a per-model mapping, and has get_related_updates filter each ancestor's UPDATE by its own id list.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_inheritance_regress/tests.py",
+      "line": 674,
+      "statement": "Congressman.objects.update(title=\"senator 1\")",
+      "note": "In patch-added test_mti_update_parent_through_child (def at 671): Congressman(Person, Politician) — pk chain through Person, title owned by off-chain parent Politician. A Politician row is created first so the id spaces diverge; at base the update addresses politician pks with person-chain ids, so the assertion at 675 fails with AssertionError: '' != 'senator 1' (the standalone Politician created at 672 is the row that actually got clobbered). test_mti_update_grand_parent_through_child (def at 677, update at 680, assertion at 681) fails identically through grandchild Senator, pinning that get_path_to_parent must consider the full multi-hop path. Verified in container f1a63d0554e2 with the gold patch reverse-applied."
+    }
+  ],
+  "confidence": "high"
+}

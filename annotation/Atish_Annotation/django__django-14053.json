@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-14053",
+  "root_cause": [
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "line": 232,
+      "statement": "yield name, hashed_name, processed",
+      "note": "First-pass yield in HashedFilesMixin.post_process. post_process's contract with collectstatic's collect() is one yield per post-processed original file, carrying its final hashed name (collect counts yields for its stats, and subclasses act on each yield). This yield is unconditional: for adjustable files — exactly the ones the multi-pass loop below will re-process — it emits a premature result with a first-pass (possibly intermediate) hashed name that a later pass supersedes. For non-adjustable files and for exceptions the emission is correct, which is why the gold fix keeps this yield behind a guard rather than deleting it. The _post_process generator itself is a faithful per-pass worker; the fault is emitting its per-pass results directly to the caller."
+    },
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "line": 239,
+      "statement": "yield name, hashed_name, processed",
+      "note": "Substitution-loop yield: emits every adjustable file once per pass of the max_post_process_passes loop, so a file settled after pass one is still re-yielded on each subsequent pass (the issue's dashboard.css triplicate) and files still changing are yielded under superseded intermediate hashes (base.31652d31b392.css before the final base.6b517d0d5813.css). Jointly with line 232 this produces the duplicate stream; every adequate fix must replace these per-pass emissions with a single final-result emission per adjustable file (the gold patch accumulates into a dict keyed by original name, overwriting per pass, and yields the values once after the loop). The substitutions bookkeeping at 240 and the loop control are faithful."
+    }
+  ],
+  "reasoning": "HashedFilesMixin.post_process hashes files in several passes so nested references settle: a first pass over everything, then up to max_post_process_passes repeat passes over the adjustable files (those whose content embeds references, e.g. CSS). Both the first pass and every repeat pass yield each processed file straight back to the caller. collectstatic's collect() treats each yield as one post-processed file, and subclasses handle files as the yields arrive. An adjustable file is therefore reported once for the first pass and once for every repeat pass it participates in: the counts in collectstatic's summary exceed the real number of files, consumers repeat expensive per-file work (re-compression, re-upload) for the same asset, and the earlier of the duplicate yields can carry an intermediate hashed name that is superseded by a later pass — so a consumer acting on the first report records a filename that no final artifact uses. Files whose content needs no adjustment on later passes are still re-yielded with the same name each pass, so the duplication occurs even without any substitution.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/staticfiles_tests/test_storage.py",
+      "line": 207,
+      "statement": "self.assertCountEqual(stats['post_processed'], set(stats['post_processed']))",
+      "note": "Patch-added no-duplicates check in TestHashedFiles.test_post_processing (run concretely as TestCollectionManifestStorage.test_post_processing — the fail_to_pass entry is listed by the test's docstring 'post_processing behaves correctly.'): collectstatic's stats collect one 'post_processed' entry per yield, and at base the adjustable cached/css files appear multiple times, so the multiset differs from its set. Fails at base with 'Element counts were not equal'."
+    }
+  ],
+  "confidence": "high"
+}

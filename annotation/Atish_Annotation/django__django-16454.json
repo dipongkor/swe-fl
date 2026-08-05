@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-16454",
+  "root_cause": [
+    {
+      "file": "django/core/management/base.py",
+      "line": 46,
+      "statement": "class CommandParser(ArgumentParser):",
+      "note": "Absence anchor, not a faulty statement: CommandParser customizes error handling through constructor state — __init__ (lines 53-58) stores called_from_command_line, and error() (68-72) prints a normal argparse usage message when it is set but raises CommandError otherwise — yet the class defines no add_subparsers override to propagate that state. argparse's stock add_subparsers defaults parser_class to type(self) and its add_parser passes only prog/aliases/help kwargs (a faithful stdlib emitter honoring its documented interface), so every subparser is a CommandParser with called_from_command_line=None. A parse error inside a subcommand therefore takes error()'s raise branch, and because run_from_argv invokes parser.parse_args outside its CommandError handling, the exception escapes to the CLI as a full traceback instead of the two-line usage message the top-level parser produces. error() itself is a faithful consumer of the state it is given; what every adequate fix must add is state propagation into subparser construction, which the gold patch inserts as an add_subparsers override wrapping parser_class in functools.partial(called_from_command_line=...), guarded by issubclass so an explicitly vanilla parser_class is left untouched (pinned by the companion test, which passes at base)."
+    }
+  ],
+  "reasoning": "Django management commands parse arguments with CommandParser, whose error() method has two modes: when the parser was created from the command line (called_from_command_line set by create_parser), argparse's normal error path prints usage plus a one-line error and exits; otherwise it raises CommandError for programmatic callers. That mode flag lives in constructor state. When a command defines subcommands via parser.add_subparsers().add_parser(), argparse instantiates the subparser class itself — by default the same CommandParser type — passing only its own kwargs, so the flag is never forwarded and defaults to None. The top-level parser thus reports missing arguments with a clean usage message, but any error raised while parsing a subcommand's arguments (a missing or invalid value) goes through the subparser's error(), which raises CommandError; run_from_argv performs parse_args outside its CommandError handling, so the user sees a Python traceback ending in 'django.core.management.base.CommandError: Error: ...' instead of 'manage.py <cmd> <subcmd>: error: ...'.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/user_commands/tests.py",
+      "line": 477,
+      "statement": "self.assertEqual(len(err_lines), 2)",
+      "note": "In patch-added test_subparser_error_formatting (def at 471): runs manage.py subparser foo twelve, where the pre-existing subparser test command declares bar as type=int under subcommand foo; the invalid value must produce the two-line usage+error output (content checked at 478-481). At base stderr is a 65-line traceback, failing here. The companion test_subparser_non_django_error_formatting (with the new subparser_vanilla command using parser_class=argparse.ArgumentParser) passes at base and is correctly absent from fail_to_pass — it pins the fix's issubclass guard against regressing vanilla subparsers."
+    }
+  ],
+  "confidence": "high"
+}

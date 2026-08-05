@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-16315",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1728,
+      "statement": "self.query.update_fields,",
+      "note": "Argument to connection.ops.on_conflict_suffix_sql in SQLInsertCompiler.as_sql. The suffix builder quotes what it receives directly into SQL identifier positions (SET \"...\" = EXCLUDED.\"...\"), so its contract requires database COLUMN names — but query.update_fields holds the user-supplied field NAMES (bulk_create passes the raw name strings through to the InsertQuery). Whenever db_column differs from the field name, the generated ON CONFLICT clause references nonexistent columns and the statement is rejected (EXCLUDED.name instead of EXCLUDED.oTheRNaMe on the test model; the issue's PostgreSQL 'column \"blacklistid\" does not exist'). The rest of the INSERT correctly uses field.column, so only the conflict suffix is wrong. on_conflict_suffix_sql itself is a faithful emitter quoting its inputs; the name-to-column translation must happen at or before this boundary, which is where the gold patch acts (passing (f.column for f in ...) after upstreaming the name-to-Field resolution into bulk_create)."
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1729,
+      "statement": "self.query.unique_fields,",
+      "note": "Same fault for the conflict target: field names handed to the identifier slot that becomes ON CONFLICT(\"...\"), producing ON CONFLICT(\"rank\") instead of ON CONFLICT(\"rAnK\"). Jointly with line 1728 this is the boundary where the name-vs-column distinction is dropped. The discarded conversions in _check_bulk_create_options (query.py base lines 723 and 735-737, which resolve names to Field objects purely for validation and throw the result away) show the canonical objects were available upstream — the gold patch hoists that resolution into bulk_create (fix plumbing, along with the pk-name mapping refactor at 788-790) so the query carries Field objects and the compiler can project their .column."
+    }
+  ],
+  "reasoning": "bulk_create with update_conflicts compiles one INSERT ... ON CONFLICT statement from two kinds of inputs: the model fields being inserted, and the user-supplied unique_fields/update_fields controlling the conflict clause. The insert column list is rendered from each field's column attribute, honoring db_column. The conflict suffix, however, is built by on_conflict_suffix_sql from query.update_fields and query.unique_fields, which still hold the raw field-name strings the user passed to bulk_create (the validation helper resolves them to Field objects only in its own local scope and discards the result). The suffix builder simply quotes the values it is given into identifier positions, so the generated clause names columns after the Python field names. For models where db_column differs from the field name, the statement mixes real column names in the INSERT part with nonexistent ones in the ON CONFLICT part, and the database rejects it — e.g. ON CONFLICT(\"blacklistid\") DO UPDATE SET \"sectorid\" = EXCLUDED.\"sectorid\" against columns actually named BlacklistID and SectorID.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/bulk_create/tests.py",
+      "line": 793,
+      "statement": "FieldsWithDbColumns.objects.bulk_create(",
+      "note": "In patch-added test_update_conflicts_unique_fields_update_fields_db_column (def at 780): the second bulk_create call (lines 793-798, with update_conflicts=True, unique_fields=['rank'], update_fields=['name']) on the new FieldsWithDbColumns model (db_columns rAnK/oTheRNaMe) crashes at base with OperationalError: no such column: EXCLUDED.name on SQLite (the issue's PostgreSQL equivalent is column 'blacklistid' does not exist). The assertCountEqual at 800-806 pins the upsert's effect once the SQL is valid."
+    }
+  ],
+  "confidence": "high"
+}

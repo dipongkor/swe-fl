@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-13158",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1779,
+      "statement": "self.where.add(NothingNode(), AND)",
+      "note": "Sole statement of Query.set_empty, whose contract is to make the query return no rows (QuerySet.none() clones the query and calls it). It plants the emptiness marker only in the outer WHERE — a location the combinator compilation path never reads: for a query with combined_queries, the SQL is assembled from the subqueries joined by UNION/INTERSECT/EXCEPT, and the outer where (whose NothingNode would normally raise EmptyResultSet during compilation) is never compiled. The marker is therefore dead for combined queries and none() returns the full union — every row, which is how empty ModelMultipleChoiceField submissions over a union queryset add all objects. Every adequate fix must make the emptiness reach what the combinator compiler reads (the gold patch recurses set_empty into combined_queries); the statement itself is kept — it remains correct and necessary for ordinary queries."
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 288,
+      "statement": "def clone(self):",
+      "note": "Absence anchor, not a faulty statement: clone() shallow-copies __dict__ (line 296) and then explicitly re-copies every attribute that cannot be shared (297-307: alias maps, where, annotations, ...), but combined_queries is missing from that list, so a clone shares the SAME mutable subquery objects with the original. That violates clone's independence contract, and it becomes load-bearing the moment emptiness is propagated into the subqueries: verified empirically by applying only the set_empty recursion to base — the test's first assert then passes but the second fails, because qs3.none() (operating on a clone) emptied the shared subqueries and the original qs3 returned [] instead of [0, 1, 8, 9]. The gold patch adds the deep copy of combined_queries here."
+    }
+  ],
+  "reasoning": "QuerySet.none() clones the underlying Query and calls set_empty(), which records emptiness by adding a NothingNode to the query's outer WHERE clause; compiling that where raises EmptyResultSet and yields no rows. A combined query (union/intersection/difference) is compiled differently: the SQL comes from its stored subqueries stitched together with the combinator, and the outer where clause is never part of that compilation. So the NothingNode lands somewhere with no effect, and the 'emptied' queryset still executes the full combinator SQL — none() on a union returns every row of the union. This is why a ModelMultipleChoiceField whose queryset is a union adds all matching objects when the form is submitted empty: the field computes its empty selection via qs.none(). A second, coupled defect sits in Query.clone(): it re-copies every mutable attribute except combined_queries, so clones share subquery objects with the original; once emptiness is propagated into the subqueries, none() acting on the clone would mutate the original queryset too, silently emptying it.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/queries/test_qs_combinators.py",
+      "line": 58,
+      "statement": "self.assertSequenceEqual(qs3.none(), [])",
+      "note": "In patch-added test_union_none (def at 54): qs3 is a union of num<=1 and num>=8; at base this assert fails with the full result set [0, 1, 8, 9] (the set_empty fault). The follow-up assert at line 59 (qs3 itself still yields [0, 1, 8, 9]) pins the clone fault: with only the set_empty recursion applied, line 58 passes and line 59 fails because the original's shared subqueries were emptied through the clone."
+    }
+  ],
+  "confidence": "high"
+}
