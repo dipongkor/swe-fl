@@ -1,0 +1,24 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13124",
+  "root_cause": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 623,
+      "statement": "rng = self.random_state",
+      "method": "_make_test_folds",
+      "class": "StratifiedKFold",
+      "note": "This leaves an integer seed unchanged and passes that same seed to every per-class KFold. Each KFold therefore starts an independent random generator from the identical state, so equally sized classes receive the same permutation instead of successive permutations from one shared generator."
+    }
+  ],
+  "reasoning": "StratifiedKFold constructs one shuffled KFold for each class. When random_state is an integer, _make_test_folds copies that integer directly into rng and supplies it to every class-specific KFold. Each KFold reinitializes from the same seed, giving the two five-sample classes the same relative fold assignment. Sorting the resulting test pairs then removes the only ordering difference, so random_state=0 and random_state=1 both produce [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)]. Line 623 is the minimal root cause because it determines whether the class-specific splitters share evolving random state or repeatedly restart from an integer seed.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/model_selection/tests/test_split.py",
+      "line": 505,
+      "statement": "assert test_set1 != test_set2",
+      "note": "This assertion compares the complete stratified test-fold assignments produced with two different seeds and exposes that both seeds collapse to the same class-paired splits."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

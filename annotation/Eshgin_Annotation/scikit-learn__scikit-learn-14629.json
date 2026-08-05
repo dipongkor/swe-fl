@@ -1,0 +1,24 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14629",
+  "root_cause": [
+    {
+      "file": "sklearn/multioutput.py",
+      "line": 167,
+      "statement": "self.estimators_ = Parallel(n_jobs=self.n_jobs)(",
+      "method": "fit",
+      "class": "MultiOutputEstimator",
+      "note": "The inherited fitting path stores the fitted classifier for each output but exposes no aggregate class-label metadata on the wrapper. MultiOutputClassifier consequently finishes fitting with estimators_ only, although classifier consumers expect its classes_ attribute to describe the classes for every output."
+    }
+  ],
+  "reasoning": "MultiOutputClassifier inherits MultiOutputEstimator.fit. That method validates the multi-output targets and fits one cloned classifier per target column, assigning the fitted models to estimators_. It then returns without publishing their class arrays through the wrapper. Accessing MultiOutputClassifier.classes_ therefore raises AttributeError, and cross-validation probability handling cannot obtain the per-output class ordering it needs. The estimators_ assignment is the minimal faulty base-code decision because this is where fitting state is consolidated on the multi-output wrapper but the corresponding classifier metadata is omitted.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/tests/test_multioutput.py",
+      "line": 542,
+      "statement": "assert isinstance(estimator.classes_, list)",
+      "note": "For the MultiOutputClassifier parameter, this first post-fit assertion accesses the missing aggregate class metadata and raises AttributeError."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

@@ -1,0 +1,24 @@
+{
+  "instance_id": "pydata__xarray-7229",
+  "root_cause": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1863,
+      "statement": "keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})",
+      "method": "where",
+      "class": "N/A",
+      "note": "The same callback is used while apply_ufunc merges both the result object and its coordinates, but it always returns the top-level attributes of x. Coordinate-specific attributes are consequently replaced by x's DataArray or Dataset attributes."
+    }
+  ],
+  "reasoning": "xr.where delegates its three inputs to apply_ufunc. With keep_attrs=True, line 1863 converts the option into a callback that ignores the attrs and context supplied for the object currently being merged and always returns x.attrs. The callback is also invoked for coordinate variables, so coordinate a receives {'attr': 'x_da'} rather than its own {'attr': 'x_coord'}. This line is the minimal root cause because the computed values and coordinates are correct; only the context-insensitive attribute policy overwrites metadata at every output level.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_computation.py",
+      "line": 1939,
+      "statement": "assert_identical(expected, actual)",
+      "note": "This comparison finds identical data but reports that coordinate a has the DataArray attribute x_da instead of the coordinate attribute x_coord."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}
