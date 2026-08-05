@@ -1,0 +1,38 @@
+{
+  "instance_id": "sphinx-doc__sphinx-7462",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 121,
+      "statement": "result.pop()",
+      "method": "unparse",
+      "class": "N/A",
+      "note": "The tuple formatter unconditionally removes a trailing separator. An empty tuple contributes no elements or separators, so result is empty and pop raises IndexError while parsing Tuple[()]."
+    },
+    {
+      "file": "sphinx/pycode/ast.py",
+      "line": 117,
+      "statement": "return \", \".join(unparse(e) for e in node.elts)",
+      "method": "unparse",
+      "class": "N/A",
+      "note": "Joining an empty tuple's element list returns an empty string, losing the parentheses that distinguish the empty tuple expression."
+    }
+  ],
+  "reasoning": "Both AST unparsers assume a tuple contains at least one element. The Python-domain formatter builds element nodes and then unconditionally pops the final comma, so Tuple[()] reaches line 121 with an empty result and raises IndexError. The source-code unparser joins the same empty element sequence and silently returns '', causing its round-trip assertion to fail against '()'. These lines are independently faulty tuple-formatting decisions and are the minimal causes of the two regression failures.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_domain_py.py",
+      "line": 258,
+      "statement": "doctree = _parse_annotation(\"Tuple[()]\")",
+      "note": "Parsing the annotation reaches the empty ast.Tuple branch and raises IndexError before the following structural assertion can run."
+    },
+    {
+      "file": "tests/test_pycode_ast.py",
+      "line": 61,
+      "statement": "assert ast.unparse(module.body[0].value) == expected",
+      "note": "For the empty-tuple parameter row, the unparser returns an empty string while expected is '()'."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

@@ -1,0 +1,30 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13142",
+  "root_cause": [
+    {
+      "file": "sklearn/mixture/base.py",
+      "line": 263,
+      "statement": "_, log_resp = self._e_step(X)",
+      "method": "fit_predict",
+      "class": "BaseMixture",
+      "note": "The returned responsibilities are computed while the estimator still contains the parameters from the last initialization, before the best initialization's saved parameters are restored."
+    }
+  ],
+  "reasoning": "fit_predict runs n_init optimization trials and records best_params whenever a trial improves the lower bound. After the loop, line 263 computes log_resp using whichever parameters remain from the final trial. Only afterward does line 272 install best_params. The labels returned by fit_predict therefore describe the last initialization, while a subsequent predict uses the selected best initialization. With multiple trials these parameter sets commonly differ, producing 878 mismatches for BayesianGaussianMixture and 815 for GaussianMixture in the regression inputs. Line 263 is the minimal root cause because the E-step itself is correct; its position makes it observe the wrong estimator state.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/mixture/tests/test_bayesian_mixture.py",
+      "line": 460,
+      "statement": "assert_array_equal(y_pred1, y_pred2)",
+      "note": "fit_predict labels reflect the final initialization while predict labels reflect the selected parameters, yielding 878 mismatched samples."
+    },
+    {
+      "file": "sklearn/mixture/tests/test_gaussian_mixture.py",
+      "line": 607,
+      "statement": "assert_array_equal(y_pred1, y_pred2)",
+      "note": "The same state-ordering error affects GaussianMixture and yields 815 mismatched samples."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

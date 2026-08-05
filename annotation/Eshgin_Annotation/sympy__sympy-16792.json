@@ -1,0 +1,24 @@
+{
+  "instance_id": "sympy__sympy-16792",
+  "root_cause": [
+    {
+      "file": "sympy/utilities/codegen.py",
+      "line": 742,
+      "statement": "new_args.append(InputArgument(symbol))",
+      "method": "routine",
+      "class": "CodeGen",
+      "note": "An argument requested through argument_sequence but absent from the expression is reconstructed without array dimensions. A MatrixSymbol therefore becomes a scalar InputArgument even though its shape requires an array parameter."
+    }
+  ],
+  "reasoning": "CodeGen initially derives argument metadata from symbols used by the generated expression. When argument_sequence additionally requests x but the constant expression does not reference x, the name lookup fails and line 742 creates a dimensionless InputArgument. The C generator consequently emits double x instead of double *x. Cython then attempts to pass the caller's array to a scalar C parameter and raises TypeError. This line is the minimal root cause because the used-array path already carries dimensions; only the redundant-argument path discards the MatrixSymbol's shape.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/utilities/tests/test_codegen.py",
+      "line": 602,
+      "statement": "assert source == expected",
+      "note": "The generated source contains 'double test(double x)' while the expected signature contains 'double test(double *x)'."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

@@ -1,0 +1,24 @@
+{
+  "instance_id": "sphinx-doc__sphinx-7910",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/napoleon/__init__.py",
+      "line": 441,
+      "statement": "cls = obj.__globals__[cls_path]",
+      "method": "_skip_member",
+      "class": "N/A",
+      "note": "Ownership detection reads the decorated callable's globals directly. A wrapper can preserve the original method's documentation and qualified name while having a different globals dictionary that does not contain the owning class."
+    }
+  ],
+  "reasoning": "Napoleon includes documented special methods only after confirming that the method belongs to the class being documented. A decorator preserving __doc__ and __qualname__ still presents its wrapper function to _skip_member. Line 441 resolves the class through that wrapper's __globals__; when the wrapper was defined outside the class's module, the class name is absent, the exception path leaves cls_is_owner false, and _skip_member returns None rather than explicitly retaining the documented special member. This lookup is the minimal root cause because the preceding metadata correctly identifies the class path and the failure occurs only when resolving it through the wrapper object.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_ext_napoleon.py",
+      "line": "180-182",
+      "statement": "self.assertSkip('class', '__decorated_func__',\n                SampleClass.__decorated_func__, False,\n                'napoleon_include_special_with_doc')",
+      "note": "The helper expects False for the documented decorated special method, but _skip_member returns None after ownership resolution fails."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

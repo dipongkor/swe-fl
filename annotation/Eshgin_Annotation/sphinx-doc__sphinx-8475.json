@@ -1,0 +1,24 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8475",
+  "root_cause": [
+    {
+      "file": "sphinx/builders/linkcheck.py",
+      "line": 175,
+      "statement": "except HTTPError:",
+      "method": "check_uri",
+      "class": "CheckExternalLinksBuilder",
+      "note": "The HEAD-to-GET fallback is restricted to HTTPError. requests raises TooManyRedirects separately when a server loops only for HEAD, so execution bypasses the GET probe even though that probe would succeed."
+    }
+  ],
+  "reasoning": "check_uri probes an ordinary URL with HEAD before using GET. The test server redirects every HEAD request back to itself but returns 200 for GET. requests exhausts its redirect limit and raises TooManyRedirects at the HEAD call. Line 175 catches only HTTPError, so the exception escapes the fallback block and the outer link-check handling records the URL as broken with 'Exceeded 30 redirects.' The exception filter is the minimal root cause because it alone decides whether this HEAD-specific failure reaches the already existing GET path.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_build_linkcheck.py",
+      "line": "405-412",
+      "statement": "assert content == {\n    \"code\": 0,\n    \"status\": \"working\",\n    \"filename\": \"index.rst\",\n    \"lineno\": 1,\n    \"uri\": \"http://localhost:7777/\",\n    \"info\": \"\",\n}",
+      "note": "The generated record has status 'broken' and info 'Exceeded 30 redirects.' instead of the expected working result from the server's successful GET response."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

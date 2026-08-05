@@ -1,0 +1,24 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8120",
+  "root_cause": [
+    {
+      "file": "sphinx/application.py",
+      "line": 296,
+      "statement": "locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)",
+      "method": "_init_i18n",
+      "class": "Sphinx",
+      "note": "The built-in Sphinx catalog is placed before project locale directories. Translation loading preserves the earlier translation for duplicate message IDs, so a project's sphinx catalog cannot override a built-in translation."
+    }
+  ],
+  "reasoning": "_init_i18n compiles project catalogs and then passes an ordered directory list to locale.init. Line 296 places the packaged locale before repo.locale_dirs. For German, the packaged catalog supplies 'Schnellsuche' for 'Quick search' before the project catalog supplying 'QUICK SEARCH' is combined, so the project value is ignored even though its .mo file exists. The directory-order statement is the minimal root cause because compilation succeeds and the incorrect result is determined solely by catalog precedence during translator construction.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/test_intl.py",
+      "line": 1314,
+      "statement": "assert app.translator.gettext('Quick search') == 'QUICK SEARCH'",
+      "note": "The translator returns the packaged German value 'Schnellsuche', demonstrating that the project catalog did not take precedence."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}
