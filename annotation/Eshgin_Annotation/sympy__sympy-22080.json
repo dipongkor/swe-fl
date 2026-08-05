@@ -1,0 +1,44 @@
+{
+  "instance_id": "sympy__sympy-22080",
+  "root_cause": [
+    {
+      "file": "sympy/printing/codeprinter.py",
+      "line": 490,
+      "statement": "a_str = [self.parenthesize(x, prec) for x in a]",
+      "method": "_print_Mul",
+      "class": "CodePrinter",
+      "note": "The negative-product path removes the minus sign and parenthesizes the remaining factor at ordinary multiplication precedence. For a sole Mod factor this emits -x % y, whose Python meaning is (-x) % y rather than -(x % y)."
+    },
+    {
+      "file": "sympy/printing/precedence.py",
+      "line": 134,
+      "statement": "return PRECEDENCE_VALUES[n]",
+      "method": "precedence",
+      "class": "N/A",
+      "note": "Mod has no direct precedence entry, so the MRO lookup reaches Function and assigns function-call precedence to an expression printed with the infix % operator. Its operands are consequently not grouped according to multiplicative precedence."
+    }
+  ],
+  "reasoning": "With modules=[], lambdify uses the Python code printer. The expression -Mod(x, y) enters CodePrinter._print_Mul as a negative product with Mod as its only positive factor. Line 490 treats that factor as an ordinary multiplication operand, producing -x % y; Python evaluates this as (-x) % y and returns 4 for (3, 7), while the symbolic expression is -(3 % 7), or -3. Independently, precedence() classifies Mod through its Function base even though the printer renders it as %, so Mod(-x, y) also loses the grouping around its negative first operand. The two lines are the minimal decisions governing the outer unary sign and the inner infix operator.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_pycode.py",
+      "line": 33,
+      "statement": "assert prntr.doprint(-Mod(x, y)) == '-(x % y)'",
+      "note": "This assertion receives '-x % y', exposing the incorrect grouping of a negated Mod expression."
+    },
+    {
+      "file": "sympy/printing/tests/test_pycode.py",
+      "line": 34,
+      "statement": "assert prntr.doprint(Mod(-x, y)) == '(-x) % y'",
+      "note": "This assertion exercises Mod's inherited precedence and observes an ungrouped negative operand."
+    },
+    {
+      "file": "sympy/utilities/tests/test_lambdify.py",
+      "line": 274,
+      "statement": "assert no_modules(3, 7) == empty_modules(3, 7)",
+      "note": "The empty-module function executes the generated '-x % y' expression and returns 4, whereas the normal function returns -3."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

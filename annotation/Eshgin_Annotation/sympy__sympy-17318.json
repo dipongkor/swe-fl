@@ -1,0 +1,24 @@
+{
+  "instance_id": "sympy__sympy-17318",
+  "root_cause": [
+    {
+      "file": "sympy/simplify/sqrtdenest.py",
+      "line": 159,
+      "statement": "if all((x**2).is_Rational for x in pargs):",
+      "method": "_sqrt_match",
+      "class": "N/A",
+      "note": "The condition admits additive terms whose squares are rational but not positive. For 4 + I, I squares to -1, so the expression is sent to a surd splitter whose gcd logic assumes positive rational squares and has no surds to process."
+    }
+  ],
+  "reasoning": "sqrtdenest recursively calls _sqrt_match for additive radicands. For 4 + I, both term squares are rational, so line 159 accepts the expression even though the imaginary term is outside the positive-surd domain expected by split_surds. The splitter constructs an empty surd collection and _split_gcd accesses its first element, raising IndexError instead of allowing the undenestable expression to remain unchanged. The condition is the minimal root cause because it is the decision that routes an unsupported radicand into the failing algorithm.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/simplify/tests/test_sqrtdenest.py",
+      "line": 187,
+      "statement": "assert _sqrt_match(4 + I) == []",
+      "note": "This direct call passes an imaginary additive radicand through the overbroad condition and raises IndexError in split_surds."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

@@ -1,0 +1,24 @@
+{
+  "instance_id": "sympy__sympy-21930",
+  "root_cause": [
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 481,
+      "statement": "return \"b^\\\\dagger_{%s}\" % self.state.name",
+      "method": "_latex",
+      "class": "CreateBoson",
+      "note": "The creation operator is emitted as an ungrouped LaTeX fragment containing its own superscript. When an outer power is printed, LaTeX sees both the dagger and exponent superscripts attached to b and cannot render the expression correctly."
+    }
+  ],
+  "reasoning": "Printing Bd(0)**2 first obtains the CreateBoson LaTeX fragment from line 481 and then appends the outer exponent. Because the fragment b^\\dagger_{0} has no group boundary, the result contains b^\\dagger_{0}^{2}, which assigns two superscripts to the same base. The commutator assertion exposes this as an incorrectly structured operand. Line 481 is the minimal root cause for the reported bosonic expression because it defines the fragment that becomes the base of the outer power.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/physics/tests/test_secondquant.py",
+      "line": "1260-1261",
+      "statement": "assert latex(Commutator(Bd(a)**2, B(a))\n             ) == '- \\\\left[b_{0},{b^\\\\dagger_{0}}^{2}\\\\right]'",
+      "note": "The assertion prints a squared creation operator inside a commutator and receives an ungrouped double-superscript fragment instead of a grouped creation operator raised to the second power."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

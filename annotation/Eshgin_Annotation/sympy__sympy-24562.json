@@ -1,0 +1,30 @@
+{
+  "instance_id": "sympy__sympy-24562",
+  "root_cause": [
+    {
+      "file": "sympy/core/numbers.py",
+      "line": 1630,
+      "statement": "q *= p.q",
+      "method": "__new__",
+      "class": "Rational",
+      "note": "While normalizing a non-integer numerator, this multiplies the original denominator object by the numerator's denominator. When the supplied denominator is a string, Python repeats the string rather than performing numeric multiplication, so '1.5' becomes '1.51.5' and '100' becomes '100100'."
+    }
+  ],
+  "reasoning": "Rational(p, q) first converts a non-integer numerator into a Rational. It then uses q itself to accumulate the numerator's denominator. That assumes q already has numeric multiplication semantics, but q may still be a supported string input. For Rational('1.5', '1.5'), line 1630 turns q into the invalid string '1.51.5', which raises TypeError when q is subsequently parsed. For Rational('0.5', '100'), it produces the valid but incorrect string '100100', yielding 1/100100 rather than 1/200. Line 1630 is the minimal root cause because it is the operation that corrupts the unparsed denominator before the later conversion.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/core/tests/test_numbers.py",
+      "line": 375,
+      "statement": "assert Rational(p, q).as_numer_denom() == Rational('%s/%s'%(p,q)).as_numer_denom()",
+      "note": "The first string/string combination reaches line 1630 and raises TypeError while parsing the repeated string '1.51.5'."
+    },
+    {
+      "file": "sympy/core/tests/test_numbers.py",
+      "line": 377,
+      "statement": "assert Rational('0.5', '100') == Rational(1, 200)",
+      "note": "This directly exposes the silent form of the same corruption: the denominator string becomes '100100', so the left side evaluates to 1/100100."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}
