@@ -1,0 +1,24 @@
+{
+  "instance_id": "matplotlib__matplotlib-22719",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/category.py",
+      "line": 61,
+      "statement": "if is_numlike:",
+      "method": "convert",
+      "class": "StrCategoryConverter",
+      "note": "all() classifies an empty value array as numeric, so this condition enters the numeric-through-category warning path even though there are no values to classify."
+    }
+  ],
+  "reasoning": "An axis with categorical units sends the empty plot data to StrCategoryConverter.convert. The numeric test uses all() over the empty array and is therefore true. Line 61 treats that vacuous result as evidence of numeric input and emits a deprecation warning; when warnings are errors, unit conversion is wrapped as ConversionError. The condition is the minimal root cause because no element actually violates the categorical contract.",
+  "fault_triggering_call_site": [
+    {
+      "file": "lib/matplotlib/tests/test_category.py",
+      "line": 316,
+      "statement": "ax.plot([], [])",
+      "note": "Plotting empty data on the categorical x-axis reaches the vacuously true numeric test and emits the unexpected warning."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

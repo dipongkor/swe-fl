@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-14170",
+  "root_cause": [
+    {
+      "file": "django/db/models/lookups.py",
+      "line": 544,
+      "statement": "bounds = connection.ops.year_lookup_bounds_for_datetime_field(year)",
+      "method": "year_lookup_bounds",
+      "class": "YearLookup",
+      "note": "The optimized datetime lookup requests ordinary calendar-year bounds even when its left side is ExtractIsoYear, excluding dates that belong to a neighboring calendar year's ISO week-year."
+    },
+    {
+      "file": "django/db/models/lookups.py",
+      "line": 546,
+      "statement": "bounds = connection.ops.year_lookup_bounds_for_date_field(year)",
+      "method": "year_lookup_bounds",
+      "class": "YearLookup",
+      "note": "The DateField branch makes the same calendar-year assumption for an ISO-year lookup."
+    }
+  ],
+  "reasoning": "The __iso_year lookup is handled by YearLookup's BETWEEN optimization. Both branches derive January 1 through December 31 bounds solely from the requested integer, without considering that ISO years begin and end on ISO-week boundaries. Filtering for ISO year 2015 therefore misses December 31, 2014 even though ExtractIsoYear reports 2015. Lines 544 and 546 are the independently reachable datetime and date decisions that select the wrong bound semantics.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/db_functions/datetime/test_extract_trunc.py",
+      "line": 377,
+      "statement": "self.assertSequenceEqual(qs, [obj_1_iso_2015, obj_2_iso_2015])",
+      "note": "The queryset contains only the calendar-2015 object and omits the December 31, 2014 object belonging to ISO year 2015."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

@@ -1,0 +1,40 @@
+{
+  "instance_id": "django__django-11400",
+  "root_cause": [
+    {
+      "file": "django/contrib/admin/filters.py",
+      "line": 422,
+      "statement": "return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})",
+      "method": "field_choices",
+      "class": "RelatedOnlyFieldListFilter",
+      "note": "The related-only filter omits the related ModelAdmin ordering when requesting its limited choices, so the filter list follows an unrelated database order."
+    },
+    {
+      "file": "django/db/models/fields/__init__.py",
+      "line": 830,
+      "statement": "for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)",
+      "method": "get_choices",
+      "class": "Field",
+      "note": "Calling order_by() with an empty tuple clears the related model's Meta.ordering instead of allowing the default manager ordering to apply."
+    },
+    {
+      "file": "django/db/models/fields/reverse_related.py",
+      "line": 126,
+      "statement": "(x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)",
+      "method": "get_choices",
+      "class": "ForeignObjectRel",
+      "note": "Reverse-related choices likewise clear default model ordering whenever no explicit ordering is supplied."
+    }
+  ],
+  "reasoning": "Admin related filters obtain their labels through field.get_choices. RelatedOnlyFieldListFilter never forwards ordering from the registered related ModelAdmin, producing Jack before Albert despite ordering=('name',). For ordinary and reverse fields, an empty explicit ordering is passed to QuerySet.order_by, which clears Meta.ordering rather than falling back to it. The three statements are the minimal independently reachable choices governing related-only admin ordering and default ordering for forward and reverse relations.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/admin_filters/tests.py",
+      "line": 769,
+      "statement": "self.assertEqual(filterspec.lookup_choices, expected)",
+      "note": "The choices are [(Jack), (Albert)] instead of the ModelAdmin name order [(Albert), (Jack)]."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}

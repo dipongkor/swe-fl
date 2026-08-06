@@ -1,0 +1,38 @@
+{
+  "instance_id": "sympy__sympy-13031",
+  "root_cause": [
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": 988,
+      "statement": "if not self:",
+      "method": "col_join",
+      "class": "SparseMatrix",
+      "note": "Truth testing conflates every zero-element matrix with a dimensionless null matrix. For an n-by-0 matrix, col_join discards its row dimension and returns only the next operand."
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": 1194,
+      "statement": "if not self:",
+      "method": "row_join",
+      "class": "SparseMatrix",
+      "note": "The horizontal path similarly treats every 0-by-n matrix as replaceable, discarding accumulated column widths during hstack."
+    }
+  ],
+  "reasoning": "SparseMatrix.hstack and vstack reduce their inputs through row_join and col_join. A matrix with zero elements is false regardless of whether its zero-sized shape still carries a nonzero opposite dimension. Each join therefore replaces the accumulated 0-by-n or n-by-0 matrix with the next operand, so stacking widths or heights 0, 1, 2, and 3 ends with 3 rather than their sum 6. The two truth checks are the minimal independent root causes for horizontal and vertical stacking.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/matrices/tests/test_sparse.py",
+      "line": 31,
+      "statement": "assert SparseMatrix.hstack(*sparse_matrices) == Matrix(0, 6, [])",
+      "note": "Horizontal stacking returns shape (0, 3), having discarded earlier zero-row widths."
+    },
+    {
+      "file": "sympy/matrices/tests/test_sparse.py",
+      "line": 33,
+      "statement": "assert SparseMatrix.vstack(*sparse_matrices) == Matrix(6, 0, [])",
+      "note": "Vertical stacking returns shape (3, 0), having discarded earlier zero-column heights."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

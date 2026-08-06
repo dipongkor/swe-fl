@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-16631",
+  "root_cause": [
+    {
+      "file": "django/contrib/auth/__init__.py",
+      "line": "202-204",
+      "statement": "session_hash_verified = session_hash and constant_time_compare(\n    session_hash, user.get_session_auth_hash()\n)",
+      "method": "get_user",
+      "class": "N/A",
+      "note": "Session verification compares the stored authentication hash only with a hash derived from the current SECRET_KEY. A session signed before key rotation is rejected even when its secret is configured in SECRET_KEY_FALLBACKS."
+    }
+  ],
+  "reasoning": "get_user loads the authenticated user and validates the password-derived session hash. Lines 202-204 calculate only the current-secret hash. After SECRET_KEY rotation, the stored hash differs, so the following failure branch flushes the session and returns AnonymousUser without consulting configured fallback secrets. The comparison is the minimal pre-existing decision because it defines the complete accepted hash set for an otherwise valid session.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/auth_tests/test_basic.py",
+      "line": 156,
+      "statement": "self.assertIsInstance(user, User)",
+      "note": "With the original secret listed as a fallback, get_user nevertheless flushes the session and returns AnonymousUser."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

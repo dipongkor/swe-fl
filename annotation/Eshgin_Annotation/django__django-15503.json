@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-15503",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/json.py",
+      "line": "196-202",
+      "statement": "rhs_params.append(\n    \"%s%s\"\n    % (\n        lhs_json_path,\n        compile_json_path(rhs_key_transforms, include_root=False),\n    )\n)",
+      "method": "as_sql",
+      "class": "HasKeyLookup",
+      "note": "The entire right-hand path, including its final key, is compiled with the generic JSON path routine. That routine interprets numeric strings as array indexes, although has_key's final component denotes an object key."
+    }
+  ],
+  "reasoning": "HasKeyLookup builds a backend JSON path for each requested key. The multiline append sends every component through compile_json_path, whose integer coercion is correct for intermediate array traversal but wrong for the terminal has_key operand. Numeric object keys such as '123', '456', and '789' are emitted as array indexes, so SQLite queries the wrong location and returns empty or unrelated rows. Lines 196-202 are the minimal root cause because they erase the semantic distinction between traversal components and the key being tested.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_fields/test_jsonfield.py",
+      "line": "601-604",
+      "statement": "self.assertSequenceEqual(\n    NullableJSONModel.objects.filter(condition),\n    [obj],\n)",
+      "note": "For numeric-key has_key, has_keys, and has_any_keys conditions, the queryset does not contain the object whose JSON dictionaries have those keys."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

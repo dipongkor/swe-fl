@@ -1,0 +1,24 @@
+{
+  "instance_id": "sympy__sympy-18698",
+  "root_cause": [
+    {
+      "file": "sympy/polys/polytools.py",
+      "line": "5908-5910",
+      "statement": "if arg.is_Mul:\n    args.extend(arg.args)\n    continue",
+      "method": "_symbolic_factor_list",
+      "class": "N/A",
+      "note": "The symbolic square-free path flattens a product into independent arguments before factoring them, so factors with the same multiplicity are emitted separately instead of being combined into one square-free factor."
+    }
+  ],
+  "reasoning": "sqf_list passes the multiplicative expression into _symbolic_factor_list. Lines 5908-5910 expand its top-level Mul into separate arguments, and each powered component is processed independently. The two distinct cubic factors x-2 and x-3 consequently remain separate entries with multiplicity 3 rather than forming the single square-free polynomial x²-5x+6 for that multiplicity. The flattening branch is the minimal root cause because it discards the grouping needed by square-free factor-list semantics.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/polys/tests/test_polytools.py",
+      "line": 3340,
+      "statement": "assert sqf_list(p) == result",
+      "note": "sqf_list returns separate cubic entries for x-2 and x-3 instead of the expected combined cubic factor."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

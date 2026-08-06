@@ -1,0 +1,24 @@
+{
+  "instance_id": "pytest-dev__pytest-10051",
+  "root_cause": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": 443,
+      "statement": "self.handler.reset()",
+      "method": "clear",
+      "class": "LogCaptureFixture",
+      "note": "reset() replaces the handler's records list, while the per-stage stash still references the original list. Clearing therefore disconnects get_records('call') from subsequent capture."
+    }
+  ],
+  "reasoning": "At the start of the call stage, the stash and handler.records refer to the same list. LogCaptureFixture.clear invokes reset(), which assigns a new list to handler.records rather than emptying the shared list. The stashed call-stage list retains the old record and never receives later records, so get_records('call') remains stale. Line 443 is the minimal root cause because it selects the identity-breaking reset operation.",
+  "fault_triggering_call_site": [
+    {
+      "file": "testing/logging/test_fixture.py",
+      "line": 183,
+      "statement": "assert caplog.get_records(\"call\") == []",
+      "note": "After caplog.clear(), the stashed call-stage list still contains a_call_log, so this assertion fails."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

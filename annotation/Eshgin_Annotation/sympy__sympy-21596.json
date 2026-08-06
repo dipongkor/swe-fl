@@ -1,0 +1,24 @@
+{
+  "instance_id": "sympy__sympy-21596",
+  "root_cause": [
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": 309,
+      "statement": "base_set -= FiniteSet(xis)",
+      "method": "intersection_sets",
+      "class": "N/A",
+      "note": "xis contains the input values that make the ImageSet expression's imaginary part zero. Subtracting those solutions retains the nonreal images and removes the real ones, reversing the required intersection constraint."
+    }
+  ],
+  "reasoning": "Intersecting an ImageSet with Reals solves the imaginary component for the ImageSet parameter. For n + (n - 1)(n + 1)I, solve_linear obtains n=-1 and n=1. Line 309 removes those values from the base set rather than restricting the base set to them. The resulting ImageSet can claim unrelated real values such as 2 and does not reduce to {-1, 1}. This set subtraction is the minimal root cause because the solver identifies the correct real-producing parameters before their meaning is inverted.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/sets/tests/test_fancysets.py",
+      "line": 661,
+      "statement": "assert imageset(Lambda(n, n + (n - 1)*(n + 1)*I), S.Integers).intersect(S.Reals) == FiniteSet(-1, 1)",
+      "note": "The computed intersection retains the wrong parameter subset instead of producing the two real images -1 and 1."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

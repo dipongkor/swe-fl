@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-14315",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/client.py",
+      "line": 24,
+      "statement": "if env:",
+      "method": "runshell",
+      "class": "BaseDatabaseClient",
+      "note": "An empty environment mapping is false, so it bypasses both merging with os.environ and conversion to None. subprocess.run receives {}, which suppresses inheritance of the process environment."
+    }
+  ],
+  "reasoning": "runshell receives either environment overrides or no custom environment from the backend. Line 24 distinguishes only truthy mappings. An empty dictionary consequently remains {}, and subprocess.run interprets it as an explicitly empty environment rather than inheriting os.environ as it does for None. This condition is the minimal root cause because the subprocess call faithfully uses the incorrectly normalized value.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/backends/base/test_client.py",
+      "line": 30,
+      "statement": "run.assert_called_once_with([], env=None, check=True)",
+      "note": "For the env={} subtest, the actual subprocess call contains env={} instead of env=None."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}
