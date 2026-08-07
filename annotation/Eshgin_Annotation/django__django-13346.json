@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-13346",
+  "root_cause": [
+    {
+      "file": "django/db/models/query_utils.py",
+      "line": 183,
+      "statement": "return self.output_field.get_lookup(lookup_name)",
+      "method": "get_lookup",
+      "class": "RegisterLookupMixin",
+      "note": "A JSON key transform without its own in lookup falls back to the output field's generic lookup. That lookup does not prepare each right-hand JSON value in the representation required by backends without native JSON support."
+    }
+  ],
+  "reasoning": "Resolving value__key__in reaches the key transform first. Because the transform has no specialized lookup for in, this fallback selects the generic field implementation, which compares extracted JSON text against improperly prepared right-hand values on non-native JSON backends. Valid scalar, list, and object values then fail to match their rows. The fallback return is the minimal existing dispatch decision responsible for routing these lookups through incompatible preparation.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_fields/test_jsonfield.py",
+      "line": "644-647",
+      "statement": "self.assertSequenceEqual(\n    NullableJSONModel.objects.filter(**{lookup: value}),\n    expected,\n)",
+      "note": "The parameterized assertion evaluates key-transform membership for several JSON value types and exposes missing matches."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

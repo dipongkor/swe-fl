@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-13158",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 296,
+      "statement": "obj.__dict__ = self.__dict__.copy()",
+      "method": "clone",
+      "class": "Query",
+      "note": "A combined query clone retains the same component Query objects, so later empty-state changes cannot be isolated and applied as part of the cloned combined expression."
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1779,
+      "statement": "self.where.add(NothingNode(), AND)",
+      "method": "set_empty",
+      "class": "Query",
+      "note": "Empty state is recorded only on the wrapper query. SQL for a union is generated from its component queries, so the wrapper's NothingNode does not make the combined result empty."
+    }
+  ],
+  "reasoning": "Calling none() clones the union query and marks the clone empty. The clone shares its combined components, while set_empty only changes the wrapper's where tree. Union compilation continues to use the unchanged component queries and returns their rows instead of no rows. The clone and empty-state statements are the minimal jointly faulty decisions: one defines ownership of the combined structure and the other fails to propagate the semantic state into that structure.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/queries/test_qs_combinators.py",
+      "line": 58,
+      "statement": "self.assertSequenceEqual(qs3.none(), [])",
+      "note": "Evaluation of none() on a union exposes that the combined branches still return their rows."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-13810",
+  "root_cause": [
+    {
+      "file": "django/core/handlers/base.py",
+      "line": "54-57",
+      "statement": "handler = self.adapt_method_mode(\n    middleware_is_async, handler, handler_is_async,\n    debug=settings.DEBUG, name='middleware %s' % middleware_path,\n)",
+      "method": "load_middleware",
+      "class": "BaseHandler",
+      "note": "The handler variable is replaced before middleware construction succeeds. If construction raises MiddlewareNotUsed, the adapted wrapper remains and is passed to the next middleware even though the middleware that required the adaptation was discarded."
+    }
+  ],
+  "reasoning": "Middleware loading adapts the current handler and immediately stores the wrapper, then constructs the middleware inside the same try block. MyMiddleware declines activation by raising MiddlewareNotUsed, but its adaptation remains in the chain. The following sync-and-async middleware is built around stale mode state, producing an extra asynchronous adaptation log. The assignment is the minimal cause because failure to construct should not mutate the handler chain.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/middleware_exceptions/tests.py",
+      "line": "193-197",
+      "statement": "self.assertEqual(\n    cm.records[0].getMessage(),\n    'Asynchronous middleware middleware_exceptions.tests.MyMiddleware '\n    'adapted.',\n)",
+      "note": "The logged adaptation sequence reveals that a wrapper belonging to unused middleware remained active."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

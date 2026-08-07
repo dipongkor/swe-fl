@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-11265",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1668,
+      "statement": "query = Query(self.model)",
+      "method": "split_exclude",
+      "class": "Query",
+      "note": "The inner query is created without the outer query's filtered-relation definitions, so the annotated alias cannot be resolved with its filtering condition while building exclude()."
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 2145,
+      "statement": "if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:",
+      "method": "trim_start",
+      "class": "Query",
+      "note": "Join trimming considers only join type and can trim a filtered-relation join, discarding the condition that gives the annotated relation its meaning."
+    }
+  ],
+  "reasoning": "exclude() moves the filtered lookup into an inner query. That query lacks the registered FilteredRelation alias, and its trimming step treats the resulting inner join as an ordinary removable join. The title predicate associated with book_alice is therefore lost or resolved incorrectly, so the exclusion does not return only the author without the matching book. These two decisions cover the inner-query context and the condition-destroying trim, the jointly necessary points where filtered-relation semantics disappear.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/filtered_relation/tests.py",
+      "line": "102-107",
+      "statement": "self.assertSequenceEqual(\n    Author.objects.annotate(\n        book_alice=FilteredRelation('book', condition=Q(book__title__iexact='poem by alice')),\n    ).exclude(book_alice__isnull=False),\n    [self.author2],\n)",
+      "note": "This assertion exercises exclude() through an annotated filtered join and checks that only the nonmatching author remains."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}

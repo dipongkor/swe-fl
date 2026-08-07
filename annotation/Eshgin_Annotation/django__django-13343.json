@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-13343",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": 282,
+      "statement": "kwargs['storage'] = self.storage",
+      "method": "deconstruct",
+      "class": "FileField",
+      "note": "Deconstruction serializes the evaluated storage object. When storage was supplied as a callable, this loses the original callable and freezes its current result into migration state."
+    }
+  ],
+  "reasoning": "Field initialization evaluates callable storage for runtime use, leaving self.storage as the resulting backend. deconstruct() reads that evaluated attribute and emits it as the field argument, so migration serialization no longer represents the callable originally supplied by the model. This assignment is the single point where the wrong identity enters the deconstruction result.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/file_storage/tests.py",
+      "line": 924,
+      "statement": "self.assertIs(storage, callable_storage)",
+      "note": "The identity assertion shows that deconstruction returned the evaluated backend rather than the model field's callable argument."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}
