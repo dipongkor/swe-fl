@@ -1,5 +1,5 @@
 model,total,evaluated,resolved,rate
-swebench-fl-claude-opus,133,133,97,72.93%
-swebench-fl-gemini-3.1-flash-lite,133,97,40,30.08%
-swebench-fl-gpt-5-3-codex-v3,133,132,37,27.82%
-swebench-fl-minimax-m3,133,121,65,48.87%
+swebench-fl-claude-opus,130,130,95,73.08%
+swebench-fl-gemini-3.1-flash-lite,130,95,40,30.77%
+swebench-fl-gpt-5-3-codex-v3,130,129,35,26.92%
+swebench-fl-minimax-m3,130,119,64,49.23%

@@ -85,7 +85,6 @@ scikit-learn-13142,True,missing,True,True
 scikit-learn-14496,True,True,True,True
 scikit-learn-14629,True,False,False,False
 scikit-learn-14983,True,False,False,False
-scikit-learn-25232,True,True,True,True
 scikit-learn-25747,False,False,False,False
 scikit-learn-25931,True,True,True,True
 scikit-learn-25973,True,True,False,True
@@ -93,10 +92,8 @@ scikit-learn-26194,True,False,True,True
 scikit-learn-9288,True,missing,True,True
 seaborn-3187,False,False,False,missing
 sphinx-10449,True,False,False,True
-sphinx-10673,True,False,True,missing
 sphinx-11510,True,False,False,missing
 sphinx-7462,False,False,False,False
-sphinx-7590,False,False,False,False
 sphinx-7910,True,missing,False,True
 sphinx-8056,True,True,False,False
 sphinx-8120,True,True,True,True
@@ -109,7 +106,6 @@ sphinx-9658,True,False,False,missing
 sphinx-9711,False,False,False,False
 sympy-13031,True,missing,False,missing
 sympy-13877,True,False,True,True
-sympy-13878,True,missing,False,True
 sympy-14248,True,False,False,missing
 sympy-15345,True,True,True,True
 sympy-15976,True,missing,False,True
@@ -127,6 +123,7 @@ sympy-22080,True,False,False,missing
 sympy-24562,True,True,False,True
 xarray-3095,True,True,True,True
 xarray-3305,True,missing,True,True
+xarray-3993,True,True,False,True
 xarray-4687,True,missing,False,True
 xarray-6599,True,False,False,True
 xarray-6938,True,missing,False,False

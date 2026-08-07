@@ -13,30 +13,32 @@ MODEL_DIRS = [
 ]
 
 
-def load_excluded():
-    """Read excluded-instances.txt (rank<TAB>full_id) and return short dir names."""
-    path = os.path.join(BASE_DIR, "excluded-instances.txt")
-    excluded = set()
+def load_instances():
+    """Read verified-buggy-instances.txt (one full_id per line) as short dir names."""
+    path = os.path.join(BASE_DIR, "verified-buggy-instances.txt")
+    instances = []
     with open(path) as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             full_id = line.split()[-1]
-            excluded.add(full_id.split("__")[-1])
-    return excluded
+            instances.append(full_id.split("__")[-1])
+    return sorted(set(instances))
 
 
-def collect_results(model_dir, excluded):
+def collect_results(model_dir, instances):
     """Return {instance: resolved_bool_or_None} for one model directory.
 
-    None means no report.json was found (evaluation missing/failed).
+    None means no report.json was found (evaluation missing/failed, or the
+    instance directory itself is absent).
     """
     results = {}
     root = os.path.join(BASE_DIR, model_dir)
-    for instance in sorted(os.listdir(root)):
+    for instance in instances:
         instance_dir = os.path.join(root, instance)
-        if not os.path.isdir(instance_dir) or instance in excluded:
+        if not os.path.isdir(instance_dir):
+            results[instance] = None
             continue
         reports = glob.glob(
             os.path.join(instance_dir, "logs", "run_evaluation", "**", "report.json"),
@@ -55,6 +57,8 @@ def collect_results(model_dir, excluded):
 
 def get_exit_status(model_dir, instance):
     """Read the agent's exit status from the instance's .traj.json, if present."""
+    if not os.path.isdir(os.path.join(BASE_DIR, model_dir, instance)):
+        return "no_instance_dir"
     trajs = glob.glob(
         os.path.join(BASE_DIR, model_dir, instance, "**", "*.traj.json"),
         recursive=True,
@@ -70,10 +74,9 @@ def get_exit_status(model_dir, instance):
 
 
 def main():
-    excluded = load_excluded()
-    all_results = {model: collect_results(model, excluded) for model in MODEL_DIRS}
-    print(f"Excluded {len(excluded)} instances listed in excluded-instances.txt\n")
-    instances = sorted({i for r in all_results.values() for i in r})
+    instances = load_instances()
+    all_results = {model: collect_results(model, instances) for model in MODEL_DIRS}
+    print(f"Processing {len(instances)} instances from verified-buggy-instances.txt\n")
 
     # per-instance matrix
     matrix_path = os.path.join(BASE_DIR, "result-summary.csv")
