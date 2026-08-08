@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-14053",
+  "root_cause": [
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "line": 232,
+      "statement": "yield name, hashed_name, processed",
+      "method": "post_process",
+      "class": "HashedFilesMixin",
+      "note": "Adjustable files are exposed to the caller during the initial pass even though they may be processed again."
+    },
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "line": 239,
+      "statement": "yield name, hashed_name, processed",
+      "method": "post_process",
+      "class": "HashedFilesMixin",
+      "note": "Each repeated substitution pass exposes the same adjustable filename again, so one logical output can appear several times in post_processed."
+    }
+  ],
+  "reasoning": "Hashed static files requiring substitutions participate in the initial processing pass and one or more subsequent passes. Both loops yield their intermediate result publicly, causing duplicate names in the collected post_processed sequence. Each yield is independently necessary to explain duplication across the initial and repeated phases, and no surrounding hashing logic is required to produce it.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/staticfiles_tests/test_storage.py",
+      "line": 207,
+      "statement": "self.assertCountEqual(stats['post_processed'], set(stats['post_processed']))",
+      "note": "Comparing the sequence with its set directly exposes filenames yielded more than once."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

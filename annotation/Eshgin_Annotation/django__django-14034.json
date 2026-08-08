@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-14034",
+  "root_cause": [
+    {
+      "file": "django/forms/boundfield.py",
+      "line": 236,
+      "statement": "attrs['required'] = True",
+      "method": "build_widget_attrs",
+      "class": "BoundField",
+      "note": "The compound field's required state is applied to the entire MultiWidget. With require_all_fields=False, this marks optional component widgets required even though their corresponding subfields are optional."
+    }
+  ],
+  "reasoning": "Rendering the partially required MultiValueField calls build_widget_attrs once for its MultiWidget. Because the outer field is required, this assignment supplies a blanket required attribute that the widget propagates to both text inputs. The second input is consequently rendered as required despite belonging to a non-required CharField. This is the minimal root cause because the incorrect attribute enters the rendering path at this assignment.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py",
+      "line": 194,
+      "statement": "self.assertInHTML('<input type=\"text\" name=\"f_1\" id=\"id_f_1\">', form.as_p())",
+      "note": "The expected HTML omits required from the optional second component, while the rendered input contains it."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

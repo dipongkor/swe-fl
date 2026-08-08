@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-16938",
+  "root_cause": [
+    {
+      "file": "django/core/serializers/python.py",
+      "line": 82,
+      "statement": "return getattr(obj, field.name).only(\"pk\").iterator()",
+      "method": "queryset_iterator",
+      "class": "Serializer",
+      "note": "Restricting a related manager queryset to pk conflicts with manager-level select_related paths that require additional linking columns, and can also cause those columns to be fetched unnecessarily."
+    },
+    {
+      "file": "django/core/serializers/xml_serializer.py",
+      "line": 158,
+      "statement": "return getattr(obj, field.name).only(\"pk\").iterator()",
+      "method": "queryset_iterator",
+      "class": "Serializer",
+      "note": "The XML serializer applies the same pk-only restriction to a possibly customized related manager, producing the same deferred-field and select_related conflict."
+    }
+  ],
+  "reasoning": "Serializing a many-to-many field obtains its queryset from the related manager, whose default manager may already specify select_related. Calling only('pk') on that queryset defers the foreign-key column required by the selected relation, leading to incompatible query construction or extra selected data. Python-derived serializers and the XML serializer have independent iterator implementations, so both statements are root causes for their respective formats.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/serializers/tests.py",
+      "line": "413-417",
+      "statement": "serializers.serialize(\n    self.serializer_name,\n    Article.objects.all(),\n    use_natural_foreign_keys=False,\n)",
+      "note": "Serializing the article's many-to-many targets evaluates the pk-only queryset from a manager using select_related and raises FieldError before the later query assertions are reached."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

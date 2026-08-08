@@ -1,0 +1,24 @@
+{
+  "instance_id": "sympy__sympy-21379",
+  "root_cause": [
+    {
+      "file": "sympy/core/mod.py",
+      "line": 169,
+      "statement": "G = gcd(p, q)",
+      "method": "eval",
+      "class": "Mod",
+      "note": "Mod unconditionally sends its operands through polynomial gcd extraction, although expressions containing Piecewise and transcendental functions need not be valid polynomial inputs. PolynomialError escapes from ordinary construction and substitution."
+    }
+  ],
+  "reasoning": "Substitution rebuilds expressions containing Mod, eventually reaching Mod.eval with a Piecewise-based numerator or denominator. The unconditional gcd calculation attempts polynomial conversion for that general symbolic expression and raises PolynomialError instead of leaving the modulus unevaluated. This call is the smallest root cause because the exception originates at this unsupported simplification attempt.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/core/tests/test_arit.py",
+      "line": 1921,
+      "statement": "(Piecewise((x_r, y_r > x_r), (y_r, True)) / z) % 1",
+      "note": "This direct modulus construction reaches Mod.eval with a Piecewise operand and raises PolynomialError at the gcd simplification."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

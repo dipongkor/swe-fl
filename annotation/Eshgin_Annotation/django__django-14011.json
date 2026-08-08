@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-14011",
+  "root_cause": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 80,
+      "statement": "class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):",
+      "method": "N/A",
+      "class": "ThreadedWSGIServer",
+      "note": "The server delegates each request to a worker thread but provides no request-completion handling that closes database connections owned by that thread. Persistent connections can therefore survive after the worker finishes."
+    }
+  ],
+  "reasoning": "The development server handles a request in a separate thread, and that thread opens or receives a database connection while serving the view. ThreadingMixIn completes the request without invoking Django's connection cleanup for that worker, leaving the connection object open after the response. The threaded-server dispatch declaration is the smallest existing design point responsible for starting request threads without a matching lifecycle hook.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/servers/tests.py",
+      "line": 107,
+      "statement": "self.assertIsNone(conn.connection)",
+      "note": "After the request thread completes, this assertion exposes that its database connection remains open."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "medium"
+}

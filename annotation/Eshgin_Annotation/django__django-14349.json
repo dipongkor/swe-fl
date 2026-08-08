@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-14349",
+  "root_cause": [
+    {
+      "file": "django/core/validators.py",
+      "line": 101,
+      "statement": "def __call__(self, value):",
+      "method": "__call__",
+      "class": "URLValidator",
+      "note": "The validation entry point has no input-level rejection for line feeds, carriage returns, or tabs. Its IDN retry can therefore validate a reconstructed value from which URL splitting has removed those characters, accepting a different string from the one supplied."
+    }
+  ],
+  "reasoning": "The raw URL first fails the regular expression because it contains a control character. URLValidator then enters its IDN retry, passes the original value through urlsplit and urlunsplit, and validates the reconstruction. Python URL splitting removes line feeds, carriage returns, and tabs, so the reconstructed URL is clean and passes even though the original input is unsafe. The method entry is the minimal absence anchor because the validation path never rejects those characters on the original value before a lossy normalization step.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/validators/tests.py",
+      "line": 334,
+      "statement": "validator(value)",
+      "note": "This call is inside assertRaises(ValidationError); unsafe URL rows return normally after the sanitized retry instead of raising."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "medium"
+}

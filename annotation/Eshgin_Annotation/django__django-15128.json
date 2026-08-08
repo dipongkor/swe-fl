@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-15128",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 615,
+      "statement": "change_map[alias] = new_alias",
+      "method": "combine",
+      "class": "Query",
+      "note": "Alias remapping is accumulated without ensuring that source and destination alias sets are disjoint. A later source alias can equal an earlier destination, making relabeling ambiguous and violating Query.change_aliases() invariants."
+    }
+  ],
+  "reasoning": "Combining the two querysets imports several right-hand joins into a left-hand query that already occupies overlapping alias names. As each imported join is assigned a new alias, the mapping can form a chain in which one alias appears both as a key and as a value. Relabeling the next join with that map raises the alias-change assertion instead of producing the combined queryset. This mapping assignment is the minimal root cause because it creates the conflicting bookkeeping state.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/queries/tests.py",
+      "line": 2150,
+      "statement": "self.assertCountEqual(qs2 | qs1, qs1 | qs2)",
+      "note": "Combining the querysets in both operand orders reaches alias import and exposes the conflicting relabel map."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

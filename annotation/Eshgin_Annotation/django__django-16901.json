@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-16901",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/where.py",
+      "line": 138,
+      "statement": "rhs = Exact(1, rhs_sum)",
+      "method": "as_sql",
+      "class": "WhereNode",
+      "note": "The fallback SQL requires exactly one child predicate to be true. XOR across multiple operands is true for any odd number of true predicates, not only one."
+    }
+  ],
+  "reasoning": "On a database without native logical XOR, the query converts its children to an OR plus a count of true conditions. Comparing that count to one models one-hot selection, so rows satisfying three or five predicates are incorrectly excluded. The equality construction is the minimal root cause because the OR portion is valid and the wrong parity semantics arise entirely from this comparison.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/xor_lookups/tests.py",
+      "line": "30-33",
+      "statement": "self.assertCountEqual(\n    qs,\n    self.numbers[1:3] + self.numbers[5:7] + self.numbers[9:],\n)",
+      "note": "The expected rows include cases where an odd number greater than one of the five predicates is true."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

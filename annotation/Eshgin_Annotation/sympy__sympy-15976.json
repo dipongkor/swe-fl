@@ -1,0 +1,40 @@
+{
+  "instance_id": "sympy__sympy-15976",
+  "root_cause": [
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 789,
+      "statement": "x.appendChild(msub)",
+      "method": "_print_Symbol",
+      "class": "MathMLPresentationPrinter",
+      "note": "The subscript layout is nested beneath an outer identifier token, producing invalid MathML instead of returning msub as the symbol structure."
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 795,
+      "statement": "x.appendChild(msup)",
+      "method": "_print_Symbol",
+      "class": "MathMLPresentationPrinter",
+      "note": "The superscript branch independently nests msup inside an mi token, so superscripted symbols have the same invalid top-level structure."
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 801,
+      "statement": "x.appendChild(msubsup)",
+      "method": "_print_Symbol",
+      "class": "MathMLPresentationPrinter",
+      "note": "The combined-script branch independently nests msubsup inside an mi token, invalidating symbols with both subscripts and superscripts."
+    }
+  ],
+  "reasoning": "The presentation printer builds valid msub, msup, or msubsup layout elements for scripted symbol names, then places each one inside an outer mi. An mi is a token element intended to contain character data, not layout markup, so the resulting MathML is invalid and affected renderers can display the symbol as empty. Plain symbols avoid the problem because their mi contains only text. The three append statements are independently faulty branch endpoints covering subscript-only, superscript-only, and combined-script symbols.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sympy/printing/tests/test_mathml.py",
+      "line": 738,
+      "statement": "assert mml.nodeName == 'msup'",
+      "note": "This is the first regression assertion showing that a scripted symbol is returned with mi rather than its layout element as the root."
+    }
+  ],
+  "time_minutes": 20,
+  "confidence": "high"
+}

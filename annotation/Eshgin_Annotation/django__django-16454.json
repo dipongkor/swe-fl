@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-16454",
+  "root_cause": [
+    {
+      "file": "django/core/management/base.py",
+      "line": 46,
+      "statement": "class CommandParser(ArgumentParser):",
+      "method": "N/A",
+      "class": "CommandParser",
+      "note": "The custom parser stores command-line invocation state and uses it to choose error behavior, but it inherits subparser creation without propagating that state to child CommandParser instances."
+    }
+  ],
+  "reasoning": "The top-level management parser is marked as command-line driven, so its errors produce normal usage output. argparse creates a CommandParser child for a selected subcommand but does not pass Django's called_from_command_line state, leaving the child in programmatic mode. An invalid subcommand argument then raises CommandError, which escapes as a traceback rather than two lines of usage and error text. The class declaration is the minimal absence anchor because the customized parser lacks the subparser behavior required to preserve its own error-mode state.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/user_commands/tests.py",
+      "line": 477,
+      "statement": "self.assertEqual(len(err_lines), 2)",
+      "note": "The traceback emitted for the subparser error produces many stderr lines, so this is the first assertion that exposes the incorrect error path."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "medium"
+}

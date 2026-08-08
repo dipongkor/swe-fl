@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-14434",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 1244,
+      "statement": "table = Table(model._meta.db_table, self.quote_name)",
+      "method": "_unique_sql",
+      "class": "BaseDatabaseSchemaEditor",
+      "note": "The table name is converted to a Table SQL fragment before column fragments are created. Columns then retain that object instead of the plain table identifier expected by references_column(), so reference detection compares incompatible values."
+    }
+  ],
+  "reasoning": "Creating SQL for a field-based UniqueConstraint constructs a Table object and passes it into _index_columns. The resulting Statement can render valid SQL and recognize its table fragment, but its Columns fragment stores the object where reference introspection expects the model's table-name string. references_column(table_name, 'name') therefore returns false for a column the statement uses. This early conversion is the minimal source of the mismatched table identity.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/schema/tests.py",
+      "line": 2211,
+      "statement": "self.assertIs(sql.references_column(table, 'name'), True)",
+      "note": "The assertion directly checks column-reference introspection on the generated unique-constraint statement."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}
