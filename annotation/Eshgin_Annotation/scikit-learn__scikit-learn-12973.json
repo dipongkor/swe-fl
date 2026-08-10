@@ -1,0 +1,24 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-12973",
+  "root_cause": [
+    {
+      "file": "sklearn/linear_model/least_angle.py",
+      "line": "1503-1504",
+      "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(\n    X, y, self.fit_intercept, self.normalize, self.copy_X)",
+      "method": "fit",
+      "class": "LassoLarsIC",
+      "note": "Preprocessing always uses the estimator's construction-time copy_X attribute and ignores the copy_X argument supplied to fit(). An explicit fit-time False therefore still copies X."
+    }
+  ],
+  "reasoning": "LassoLarsIC.fit receives copy_X=False, validates the arrays, and then preprocesses them using self.copy_X, whose default is True. Preprocessing copies the input, so the caller's X remains equal to its saved copy even though the fit argument requested in-place behavior. The preprocessing call is the minimal root cause because the later lars_path receives the fit argument, but the decisive initial copy has already occurred.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/linear_model/tests/test_least_angle.py",
+      "line": 719,
+      "statement": "assert copy_X == np.array_equal(X, X_copy)",
+      "note": "For copy_X=False, the assertion observes that X was nevertheless preserved because preprocessing used the estimator default."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

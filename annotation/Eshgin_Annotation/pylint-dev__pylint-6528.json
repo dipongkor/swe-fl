@@ -1,0 +1,24 @@
+{
+  "instance_id": "pylint-dev__pylint-6528",
+  "root_cause": [
+    {
+      "file": "pylint/lint/pylinter.py",
+      "line": "567-568",
+      "statement": "@staticmethod\ndef _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
+      "method": "_discover_files",
+      "class": "PyLinter",
+      "note": "Recursive discovery is a static operation with no access to the linter's configured ignore names, patterns, or paths. It consequently descends into and yields ignored directories before later module expansion can exclude them."
+    }
+  ],
+  "reasoning": "With recursive mode enabled, PyLinter._discover_files walks every directory and yields Python files or package roots. Since discovery has no linter instance or ignore configuration, ignored_subdirectory is traversed and failing.py enters the lint target list despite matching --ignore or --ignore-patterns. Pylint then reports messages from that file and returns status 20. The static discovery boundary is the minimal root cause because it prevents ignore rules from participating while the recursive tree is formed.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/lint/unittest_lint.py",
+      "line": 898,
+      "statement": "assert ignored_file not in linted_file_paths",
+      "note": "The discovered path list contains failing.py inside the ignored directory, directly contradicting the configured exclusion."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

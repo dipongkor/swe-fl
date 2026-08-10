@@ -1,0 +1,40 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14496",
+  "root_cause": [
+    {
+      "file": "sklearn/cluster/optics_.py",
+      "line": 440,
+      "statement": "min_samples = max(2, min_samples * n_samples)",
+      "method": "compute_optics_graph",
+      "class": "N/A",
+      "note": "A fractional min_samples value is scaled but left as a float, then passed to NearestNeighbors as n_neighbors even though that parameter must be integral."
+    },
+    {
+      "file": "sklearn/cluster/optics_.py",
+      "line": 622,
+      "statement": "min_samples = max(2, min_samples * n_samples)",
+      "method": "cluster_optics_xi",
+      "class": "N/A",
+      "note": "The xi extraction path independently retains a float after converting fractional min_samples, although subsequent steep-region indexing and counts require an integer."
+    },
+    {
+      "file": "sklearn/cluster/optics_.py",
+      "line": 627,
+      "statement": "min_cluster_size = max(2, min_cluster_size * n_samples)",
+      "method": "cluster_optics_xi",
+      "class": "N/A",
+      "note": "Fractional min_cluster_size is likewise retained as a float and passed into cluster boundary calculations that require a sample count."
+    }
+  ],
+  "reasoning": "OPTICS documents fractional min_samples and min_cluster_size as proportions of the dataset. Each conversion multiplies the fraction by n_samples but does not convert the result into a discrete count. During graph construction, 0.1 over 31 samples becomes 3.1 and NearestNeighbors raises TypeError because n_neighbors is not integral. The two xi-stage conversions repeat the same faulty decision for extraction parameters. All three statements independently govern the graph, xi min-samples, and cluster-size paths exercised by a fractional configuration.",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/cluster/tests/test_optics.py",
+      "line": 108,
+      "statement": "assert_array_equal(clust.labels_, expected_labels)",
+      "note": "The assertion requires fractional parameters to produce the same clustering as their integer sample counts; base fitting raises TypeError before labels are available."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

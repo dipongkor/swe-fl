@@ -1,0 +1,24 @@
+{
+  "instance_id": "pydata__xarray-3993",
+  "root_cause": [
+    {
+      "file": "xarray/core/dataarray.py",
+      "line": "3483-3485",
+      "statement": "def integrate(\n    self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n) -> \"DataArray\":",
+      "method": "integrate",
+      "class": "DataArray",
+      "note": "DataArray exposes the integration coordinate under the name dim, while the corresponding Dataset operation and other coordinate-based DataArray methods use coord. The method provides no compatibility warning that the inconsistent keyword is being retired."
+    }
+  ],
+  "reasoning": "Calling DataArray.integrate(dim='x') enters a public API whose parameter is still named dim and executes normally. This differs from Dataset.integrate and DataArray.differentiate, both of which identify the integration axis as a coordinate, leaving equivalent operations with incompatible keyword names. Because the method has no compatibility path, callers receive no FutureWarning about the transition. The signature is the minimal root cause because it defines and silently accepts the inconsistent keyword.",
+  "fault_triggering_call_site": [
+    {
+      "file": "xarray/tests/test_dataset.py",
+      "line": "6606-6607",
+      "statement": "with pytest.warns(FutureWarning):\n    da.integrate(dim=\"x\")",
+      "note": "The assertion context requires use of the legacy dim keyword to emit FutureWarning, but the call completes without any warning."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "medium"
+}
