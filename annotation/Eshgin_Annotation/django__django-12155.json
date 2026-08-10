@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-12155",
+  "root_cause": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 37,
+      "statement": "indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())",
+      "method": "trim_docstring",
+      "class": "N/A",
+      "note": "The minimum indentation includes the unindented summary line. For a docstring beginning immediately with text, this forces indent to zero and leaves indentation on every subsequent body line."
+    }
+  ],
+  "reasoning": "parse_docstring first normalizes the input through trim_docstring. With 'firstline' followed by an indented body, the first line contributes zero to the minimum, so the body remains four spaces deep. Passing that body to the RST parser makes it a block quote without preceding content and produces a system-message warning instead of a normal paragraph. The minimum calculation is the smallest faulty decision because the later slicing follows its incorrect zero indent.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/admin_docs/test_utils.py",
+      "line": 101,
+      "statement": "self.assertEqual(parse_rst(body, ''), '<p>second line</p>\\n')",
+      "note": "The body retains indentation and renders as an RST system message rather than the expected paragraph."
+    }
+  ],
+  "time_minutes": 25,
+  "confidence": "high"
+}

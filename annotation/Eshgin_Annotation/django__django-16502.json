@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-16502",
+  "root_cause": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 113,
+      "statement": "class ServerHandler(simple_server.ServerHandler):",
+      "method": "N/A",
+      "class": "ServerHandler",
+      "note": "The Django server handler inherits wsgiref's response finalization unchanged, so it iterates and writes the application body even when the request method is HEAD."
+    },
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 136,
+      "statement": "if \"Content-Length\" not in self.headers:",
+      "method": "cleanup_headers",
+      "class": "ServerHandler",
+      "note": "Header cleanup treats a HEAD response with no Content-Length like an unknown-length ordinary response and adds Connection: close, contrary to the permitted persistent HEAD response behavior."
+    }
+  ],
+  "reasoning": "WSGIRequestHandler delegates response emission to ServerHandler. For HEAD, the inherited finalization consumes and writes the application's iterable just like GET, so the response includes the HTML body. Header cleanup also applies its generic missing-length rule and closes the connection. The inherited finalization boundary and unconditional header condition independently explain the body and connection-header failures checked by the regression.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/servers/test_basehttp.py",
+      "line": 158,
+      "statement": "self.assertEqual(body, b\"\\r\\n\")",
+      "note": "The captured HEAD response ends with the application's HTML body instead of the blank line terminating its headers."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

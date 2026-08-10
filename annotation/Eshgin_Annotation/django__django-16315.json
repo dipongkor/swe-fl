@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-16315",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1728,
+      "statement": "self.query.update_fields,",
+      "method": "as_sql",
+      "class": "SQLInsertCompiler",
+      "note": "The conflict-update SQL generator receives model field names instead of database column names. A field with db_column is therefore referenced through an identifier that does not exist in the table or EXCLUDED row."
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1729,
+      "statement": "self.query.unique_fields,",
+      "method": "as_sql",
+      "class": "SQLInsertCompiler",
+      "note": "The conflict target is also passed as model field names, so a unique field whose database column has a different name produces an incorrect ON CONFLICT target."
+    }
+  ],
+  "reasoning": "bulk_create() retains update_fields and unique_fields as model-level names and the insert compiler forwards them directly to the backend's conflict-clause generator. For FieldsWithDbColumns, name and rank map to oTheRNaMe and rAnK in the database, but the generated SQL refers to the Python names. SQLite consequently reports that EXCLUDED.name does not exist before the conflicting rows can be updated. The two arguments independently determine the assignment columns and conflict target, so both are root causes.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/bulk_create/tests.py",
+      "line": "800-806",
+      "statement": "self.assertCountEqual(\n    FieldsWithDbColumns.objects.values(\"rank\", \"name\"),\n    [\n        {\"rank\": 1, \"name\": \"c\"},\n        {\"rank\": 2, \"name\": \"d\"},\n    ],\n)",
+      "note": "The assertion requires the conflict rows to be updated through their database-column mappings; base execution raises OperationalError before producing these values."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

@@ -1,0 +1,74 @@
+{
+  "instance_id": "django__django-13195",
+  "root_cause": [
+    {
+      "file": "django/http/response.py",
+      "line": 213,
+      "statement": "def delete_cookie(self, key, path='/', domain=None):",
+      "method": "delete_cookie",
+      "class": "HttpResponseBase",
+      "note": "The deletion API accepts no SameSite value, so callers cannot reproduce that attribute on the expiring Set-Cookie header."
+    },
+    {
+      "file": "django/http/response.py",
+      "line": 216,
+      "statement": "secure = key.startswith(('__Secure-', '__Host-'))",
+      "method": "delete_cookie",
+      "class": "HttpResponseBase",
+      "note": "Secure is inferred only from reserved cookie-name prefixes. A deletion cookie using SameSite=None also requires Secure regardless of its name, otherwise browsers may reject the expiration header."
+    },
+    {
+      "file": "django/http/response.py",
+      "line": "217-220",
+      "statement": "self.set_cookie(\n    key, max_age=0, path=path, domain=domain, secure=secure,\n    expires='Thu, 01 Jan 1970 00:00:00 GMT',\n)",
+      "method": "delete_cookie",
+      "class": "HttpResponseBase",
+      "note": "The expired replacement cookie is emitted without SameSite and only derives Secure from its name, so SameSite=None deletion may also be ignored by browsers that require Secure."
+    },
+    {
+      "file": "django/contrib/messages/storage/cookie.py",
+      "line": 95,
+      "statement": "response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)",
+      "method": "_update_cookie",
+      "class": "CookieStorage",
+      "note": "Message-cookie removal omits the configured SESSION_COOKIE_SAMESITE attribute that was used when the cookie was created."
+    },
+    {
+      "file": "django/contrib/sessions/middleware.py",
+      "line": "41-45",
+      "statement": "response.delete_cookie(\n    settings.SESSION_COOKIE_NAME,\n    path=settings.SESSION_COOKIE_PATH,\n    domain=settings.SESSION_COOKIE_DOMAIN,\n)",
+      "method": "process_response",
+      "class": "SessionMiddleware",
+      "note": "Session-cookie removal likewise omits SESSION_COOKIE_SAMESITE, causing the deletion header to differ from the original cookie's scope."
+    }
+  ],
+  "reasoning": "Cookie deletion works by replacing a cookie with an expired value under matching attributes. HttpResponseBase.delete_cookie cannot accept or emit SameSite, and its Secure heuristic does not cover SameSite=None. The message and session integrations also discard their configured SameSite value when requesting deletion. Direct calls raise TypeError when samesite is supplied, while middleware-generated deletion headers omit the attribute. These locations independently cover the API surface, browser acceptance rule, and both settings-driven consumers.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/responses/test_cookie.py",
+      "line": 127,
+      "statement": "self.assertIs(response.cookies['c']['secure'], True)",
+      "note": "The assertion requires a SameSite=None deletion cookie to be Secure; base execution rejects the SameSite argument before reaching it."
+    },
+    {
+      "file": "tests/responses/test_cookie.py",
+      "line": 132,
+      "statement": "self.assertEqual(response.cookies['c']['samesite'], 'lax')",
+      "note": "The assertion requires delete_cookie() to retain the requested SameSite attribute; base execution raises TypeError before reaching it."
+    },
+    {
+      "file": "tests/messages_tests/test_cookie.py",
+      "line": "89-92",
+      "statement": "self.assertEqual(\n    response.cookies['messages']['samesite'],\n    settings.SESSION_COOKIE_SAMESITE,\n)",
+      "note": "This assertion exposes that message-cookie deletion discarded the configured SameSite value."
+    },
+    {
+      "file": "tests/sessions_tests/tests.py",
+      "line": "759-766",
+      "statement": "self.assertEqual(\n    'Set-Cookie: {}=\"\"; expires=Thu, 01 Jan 1970 00:00:00 GMT; '\n    'Max-Age=0; Path=/; SameSite={}'.format(\n        settings.SESSION_COOKIE_NAME,\n        settings.SESSION_COOKIE_SAMESITE,\n    ),\n    str(response.cookies[settings.SESSION_COOKIE_NAME])\n)",
+      "note": "The expected session-deletion header includes the configured SameSite attribute, which is absent at base."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}

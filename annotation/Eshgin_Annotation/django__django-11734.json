@@ -1,0 +1,38 @@
+{
+  "instance_id": "django__django-11734",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/related_lookups.py",
+      "line": 104,
+      "statement": "if not isinstance(self.lhs, MultiColSource) and self.rhs_is_direct_value():",
+      "method": "get_prep_lookup",
+      "class": "RelatedLookupMixin",
+      "note": "An unresolved OuterRef can be classified as a direct value because it has not yet acquired SQL rendering methods. The relation lookup then sends the expression through ordinary field-value normalization instead of preserving it for expression resolution."
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "1705-1706",
+      "statement": "if isinstance(filter_rhs, F):\n    filter_expr = (filter_lhs, OuterRef(filter_rhs.name))",
+      "method": "split_exclude",
+      "class": "Query",
+      "note": "OuterRef is an F subclass, so an already outer-scoped reference is handled as a local F name. In a nested exclude subquery this loses one level of correlation and resolves job against Responsibility rather than the enclosing JobResponsibilities query."
+    }
+  ],
+  "reasoning": "The Exists query contains exclude(jobs=OuterRef('job')), which split_exclude moves into another subquery. The generic F branch reconstructs the existing OuterRef from only its name, making it refer to the immediate Responsibility query instead of the next outer JobResponsibilities query. Related lookup preparation also mistakes the unresolved expression for a literal and normalizes it through the target field. Resolution then searches Responsibility for a field named job and raises FieldError. Both expression classification and correlation depth are needed to explain the nested relation failure.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/queries/tests.py",
+      "line": 2817,
+      "statement": "self.assertTrue(qs.exists())",
+      "note": "Evaluating the nested exclude resolves the correlated reference against Responsibility and raises FieldError instead of confirming the existing match."
+    },
+    {
+      "file": "tests/queries/tests.py",
+      "line": 2819,
+      "statement": "self.assertFalse(qs.exists())",
+      "note": "After the matching responsibility is deleted, this assertion requires the correlated lookup to become false and independently exposes incorrect expression preparation."
+    }
+  ],
+  "time_minutes": 50,
+  "confidence": "high"
+}

@@ -1,0 +1,24 @@
+{
+  "instance_id": "django__django-17084",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "449-457",
+      "statement": "if (\n    isinstance(self.group_by, tuple)\n    or self.is_sliced\n    or has_existing_aggregation\n    or refs_subquery\n    or qualify\n    or self.distinct\n    or self.combinator\n):",
+      "method": "get_aggregation",
+      "class": "Query",
+      "note": "The decision to wrap an aggregate query in a subquery does not account for aggregates that reference a window annotation. The outer aggregate is consequently emitted in the same SELECT level as the window expression."
+    }
+  ],
+  "reasoning": "Sum('avg_publisher_pages') resolves against an annotation containing Window(Avg(...)). None of the existing wrapping conditions recognizes that reference, so get_aggregation places SUM around the window expression in one query level. SQLite rejects the resulting nested window usage with 'misuse of window function AVG()'. The wrapping condition is the minimal root cause because separating query levels is already used for other expression categories but omits referenced windows.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/aggregation/tests.py",
+      "line": 2226,
+      "statement": "self.assertEqual(sql.count(\"select\"), 2, \"Subquery wrapping required\")",
+      "note": "The assertion requires the referenced window and its aggregate to occupy two SELECT levels; base execution emits one invalid level and raises OperationalError before reaching it."
+    }
+  ],
+  "time_minutes": 35,
+  "confidence": "high"
+}

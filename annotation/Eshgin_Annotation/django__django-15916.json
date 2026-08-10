@@ -1,0 +1,38 @@
+{
+  "instance_id": "django__django-15916",
+  "root_cause": [
+    {
+      "file": "django/forms/models.py",
+      "line": 266,
+      "statement": "formfield_callback = attrs.pop(\"formfield_callback\", base_formfield_callback)",
+      "method": "__new__",
+      "class": "ModelFormMetaclass",
+      "note": "Callback lookup reads a class attribute or a base form's Meta but not formfield_callback declared in the new form's own Meta. Such a declaration is therefore ignored while model fields are generated."
+    },
+    {
+      "file": "django/forms/models.py",
+      "line": 639,
+      "statement": "form_class_attrs = {\"Meta\": Meta, \"formfield_callback\": formfield_callback}",
+      "method": "modelform_factory",
+      "class": "N/A",
+      "note": "The factory always creates a formfield_callback class attribute, including None. That explicit None takes precedence over the metaclass's base-Meta fallback and discards a callback inherited from the supplied base form."
+    }
+  ],
+  "reasoning": "ModelFormMetaclass selects callbacks through an ad hoc class-attribute channel and never reads the current form's own Meta option. In addition, modelform_factory always inserts a class attribute whose default None masks the callback available through the supplied form's Meta. fields_for_model consequently constructs ordinary TextInput fields instead of the requested Textarea fields for both direct Meta declarations and factory-derived forms. The lookup and factory injection independently explain the two regression scenarios.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_forms/tests.py",
+      "line": 3510,
+      "statement": "self.assertEqual(type(field.widget), forms.Textarea)",
+      "note": "Each field created for a form whose own Meta declares the callback has the default TextInput, exposing that the callback was ignored."
+    },
+    {
+      "file": "tests/model_forms/tests.py",
+      "line": 3528,
+      "statement": "self.assertEqual(type(field.widget), forms.Textarea)",
+      "note": "The factory-created form has TextInput fields because its explicit None callback masked the callback inherited from BaseForm.Meta."
+    }
+  ],
+  "time_minutes": 30,
+  "confidence": "high"
+}

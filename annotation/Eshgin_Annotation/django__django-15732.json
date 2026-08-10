@@ -1,0 +1,32 @@
+{
+  "instance_id": "django__django-15732",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "530-532",
+      "statement": "self._delete_composed_index(\n    model, fields, {\"unique\": True}, self.sql_delete_unique\n)",
+      "method": "alter_unique_together",
+      "class": "BaseDatabaseSchemaEditor",
+      "note": "The deletion specification requires uniqueness but does not exclude primary-key constraints. On backends that expose a primary key as a unique constraint, a unique_together entry on that field admits both constraints as candidates."
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "565-570",
+      "statement": "constraint_names = self._constraint_names(\n    model,\n    columns,\n    exclude=meta_constraint_names | meta_index_names,\n    **constraint_kwargs,\n)",
+      "method": "_delete_composed_index",
+      "class": "BaseDatabaseSchemaEditor",
+      "note": "Constraint lookup identifies a unique_together constraint only by columns and uniqueness. When the same column also has field-level unique=True, both database constraints satisfy those attributes and the intended composed constraint cannot be selected."
+    }
+  ],
+  "reasoning": "AlterUniqueTogether removes the generated constraint by searching for a unique constraint on the affected columns. The search also admits primary keys, and a field-level unique constraint on the same column has identical column and uniqueness metadata. Either case can return two names, causing ValueError instead of removing only the unique_together constraint. The deletion predicate and generic lookup are independently incomplete for the two ambiguity cases.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/migrations/test_operations.py",
+      "line": 2873,
+      "statement": "self.assertConstraintNotExists(table_name, unique_together_constraint_name)",
+      "note": "The assertion requires only the generated unique_together constraint to be removed; base execution raises on the ambiguous candidates before reaching it."
+    }
+  ],
+  "time_minutes": 40,
+  "confidence": "high"
+}

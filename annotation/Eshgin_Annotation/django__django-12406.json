@@ -1,0 +1,38 @@
+{
+  "instance_id": "django__django-12406",
+  "root_cause": [
+    {
+      "file": "django/forms/models.py",
+      "line": "1188-1191",
+      "statement": "if required and (initial is not None):\n    self.empty_label = None\nelse:\n    self.empty_label = empty_label",
+      "method": "__init__",
+      "class": "ModelChoiceField",
+      "note": "Empty-choice selection considers only required and initial. A required RadioSelect for a nonblank relation incorrectly retains the blank choice."
+    },
+    {
+      "file": "django/db/models/fields/related.py",
+      "line": "978-983",
+      "statement": "return super().formfield(**{\n    'form_class': forms.ModelChoiceField,\n    'queryset': self.remote_field.model._default_manager.using(using),\n    'to_field_name': self.remote_field.field_name,\n    **kwargs,\n})",
+      "method": "formfield",
+      "class": "ForeignKey",
+      "note": "ForeignKey form construction does not pass the model field's blank setting to ModelChoiceField, so a radio widget cannot distinguish optional and nonblank relations."
+    }
+  ],
+  "reasoning": "ModelChoiceField's empty-label decision considers only required and initial, so it cannot distinguish a RadioSelect whose unselected state already represents an empty value. ForeignKey form conversion also omits the model's blank setting, leaving the choice field unable to tell whether an empty radio option is valid. Direct blank arguments fall through to Field and error, while a generated form for blank=False retains the unwanted empty choice. The condition and model-to-form boundary are the minimal behavioral decisions covering both paths.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_forms/test_modelchoicefield.py",
+      "line": "157-160",
+      "statement": "self.assertEqual(\n    list(f.choices),\n    [('', '---------')] + choices if blank else choices,\n)",
+      "note": "The assertion requires RadioSelect choices to include an empty option only when blank=True; base construction rejects blank before reaching it."
+    },
+    {
+      "file": "tests/model_forms/tests.py",
+      "line": "288-291",
+      "statement": "self.assertEqual(\n    list(form.fields['character'].choices),\n    [(character.pk, 'user')],\n)",
+      "note": "The generated form for a nonblank ForeignKey incorrectly contains an initial empty radio choice."
+    }
+  ],
+  "time_minutes": 45,
+  "confidence": "high"
+}

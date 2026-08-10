@@ -1,0 +1,46 @@
+{
+  "instance_id": "django__django-15563",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1839,
+      "statement": "query.add_fields([query.get_meta().pk.name])",
+      "method": "pre_sql_setup",
+      "class": "SQLUpdateCompiler",
+      "note": "The update preselection retrieves only the child model's primary key. In multi-table inheritance, an ancestor reached through a non-primary-key parent link can require a different identifier."
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1857,
+      "statement": "self.query.related_ids = idents",
+      "method": "pre_sql_setup",
+      "class": "SQLUpdateCompiler",
+      "note": "One flat list of child identifiers is assigned to all related ancestor updates, even when different ancestor tables require identifiers from different parent-link columns."
+    },
+    {
+      "file": "django/db/models/sql/subqueries.py",
+      "line": 137,
+      "statement": "query.add_filter(\"pk__in\", self.related_ids)",
+      "method": "get_related_updates",
+      "class": "UpdateQuery",
+      "note": "Every ancestor update filters its primary key with the same child-id list, so rows whose ancestor key differs from the child key are missed."
+    }
+  ],
+  "reasoning": "Updating an inherited field through Congressman or Senator is split into an update for the ancestor table. The compiler preselects only the concrete child's pk and stores those values as a single shared list. Each ancestor query then applies that list to its own pk, although a non-primary-key parent link may point to a different value. The update matches no intended Politician row and the title remains empty. These statements jointly define the insufficient selection, shared storage, and incorrect ancestor filter.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/model_inheritance_regress/tests.py",
+      "line": 675,
+      "statement": "self.assertEqual(Congressman.objects.get().title, \"senator 1\")",
+      "note": "The parent-field update used the child's identifier and left the retrieved Congressman's inherited title unchanged."
+    },
+    {
+      "file": "tests/model_inheritance_regress/tests.py",
+      "line": 681,
+      "statement": "self.assertEqual(Senator.objects.get().title, \"senator 1\")",
+      "note": "The same identifier reuse also loses a grandparent-field update through the deeper inheritance chain."
+    }
+  ],
+  "time_minutes": 50,
+  "confidence": "high"
+}
