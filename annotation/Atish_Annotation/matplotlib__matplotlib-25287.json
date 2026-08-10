@@ -3,13 +3,13 @@
   "root_cause": [
     {
       "file": "lib/matplotlib/axis.py",
-      "line": 2262,
+      "line": 2258,
       "statement": "color=mpl.rcParams['xtick.color'],",
       "note": "In XAxis._init, styling self.offsetText (the offset/exponent label such as '1e9'). The offset text is a tick label, and matplotlib's convention is that label text is colored by xtick.labelcolor, falling back to xtick.color only when labelcolor is 'inherit' (the default), exactly as Tick.__init__ does for regular tick labels at lines 122-127. This line reads xtick.color unconditionally, so a user-set xtick.labelcolor never applies to the offset text. Reached by test_xaxis_offsetText_color."
     },
     {
       "file": "lib/matplotlib/axis.py",
-      "line": 2522,
+      "line": 2518,
       "statement": "color=mpl.rcParams['ytick.color'],",
       "note": "Same fault in YAxis._init for the y-axis offset text: ytick.color is used unconditionally instead of honoring ytick.labelcolor with the 'inherit' fallback. Reached by test_yaxis_offsetText_color."
     }

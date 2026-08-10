@@ -10,7 +10,7 @@
     {
       "file": "src/_pytest/reports.py",
       "line": 253,
-      "statement": "exception_info = ReprExceptionInfo(\n    reprtraceback=ReprTraceback(**reprtraceback),\n    reprcrash=ReprFileLocation(**reprcrash),\n)",
+      "statement": "exception_info = ReprExceptionInfo(reprtraceback=ReprTraceback(**reprtraceback), reprcrash=ReprFileLocation(**reprcrash))",
       "note": "The _from_json deserialization always reconstructs a ReprExceptionInfo object regardless of whether the original longrepr was an ExceptionChainRepr. Since the serialized dict has no 'chain' key (it was never written by disassembled_report), the deserialized object is always a single-exception ReprExceptionInfo, losing all chained exception information."
     }
   ],

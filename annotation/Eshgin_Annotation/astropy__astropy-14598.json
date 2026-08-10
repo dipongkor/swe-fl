@@ -10,7 +10,7 @@
     {
       "file": "astropy/io/fits/card.py",
       "line": 69,
-      "statement": "_strg_comment_RE = re.compile(f\"({_strg})? *{_comm_field}?$\")",
+      "statement": "_strg_comment_RE = re.compile(f\"({_strg})? *{_comm_field}?\")",
       "note": "The end-of-string anchor is required so that parsing a CONTINUE-card value/comment field consumes the entire string. If the anchor is removed, re.match() may succeed on only a prefix of the value/comment field. In Card._split(), that partial match is then treated as a valid parsed long-string fragment, so trailing content can be ignored or mis-associated with the comment. This affects long FITS string roundtripping, especially when the value ends with escaped/doubled single quotes."
     }
   ],

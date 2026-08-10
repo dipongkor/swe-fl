@@ -3,25 +3,25 @@
   "root_cause": [
     {
       "file": "lib/matplotlib/figure.py",
-      "line": 2272,
+      "line": 2279,
       "statement": "dx = wr[self._subplotspec.colspan].sum() / wr.sum()",
       "note": "Part of the four-line placement computation (lines 2272-2275) in SubFigure._redo_transform_rel_fig (def at line 2254), which derives a subfigure's relative bbox purely from the gridspec's width/height ratios; the gridspec's wspace/hspace never enter the arithmetic, so spacing passed to Figure.subfigures is stored in the GridSpec but ignored at placement time. This line computes the panel's width fraction: for the failing test's 2x3 grid with wspace=1/6 it yields 1/3 where the spacing-aware value is 0.3 (cells must shrink to leave gaps). The method's bbox parameter with its early-return (lines 2264-2267) exists at this revision but subfigures() never supplies it; the subfigures() call that forwards wspace/hspace into the GridSpec is itself innocent - the values are recorded, just never read back. Note the fix does not edit these lines: it compensates in subfigures() by computing spacing-aware cell boxes (gs.get_grid_positions) and passing them through the existing bbox parameter."
     },
     {
       "file": "lib/matplotlib/figure.py",
-      "line": 2273,
+      "line": 2280,
       "statement": "dy = hr[self._subplotspec.rowspan].sum() / hr.sum()",
       "note": "Same computation block: the panel's height fraction from row ratios only. For the failing test's 2 rows with hspace=0.5 it yields 1/2 where the spacing-aware value is 0.4."
     },
     {
       "file": "lib/matplotlib/figure.py",
-      "line": 2274,
+      "line": 2281,
       "statement": "x0 = wr[:self._subplotspec.colspan.start].sum() / wr.sum()",
       "note": "Same computation block: the panel's left edge as the ratio-sum of preceding columns, with no gap offsets. For the failing test, column 1 starts at 1/3 where the spacing-aware value is 0.35."
     },
     {
       "file": "lib/matplotlib/figure.py",
-      "line": 2275,
+      "line": 2282,
       "statement": "y0 = 1 - hr[:self._subplotspec.rowspan.stop].sum() / hr.sum()",
       "note": "Same computation block: the panel's bottom edge from row ratio sums, with no gap offsets. This is the value the failing assertion observes directly: for the top row it yields 0.5 (bbox.min y = 240 on a 480-high figure) where the spacing-aware value is 0.6 (288)."
     }

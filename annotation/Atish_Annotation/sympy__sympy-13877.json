@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "sympy/matrices/matrices.py",
-      "line": 179,
+      "line": 180,
       "statement": "if val:",
       "note": "Inside the _find_pivot helper (lines 177-181, a documented workaround for issue #12362) nested in _eval_det_bareiss, called from bareiss() at line 194. The pivot candidate is tested with plain truthiness, which only rejects entries that are structurally zero. A symbolic entry that is mathematically zero but not auto-simplified (e.g. 2*a*(a+2) + 2*a*(2*a+1) - 3*a*(2*a+2), produced during elimination of the rank-2 matrix [[i + a*j]]) passes this test and is selected as pivot. Bareiss fraction-free elimination divides each next-step entry by the previous pivot and is only exact when pivots are genuinely nonzero; a zero-equivalent pivot yields 0/0 terms, so det evaluates to nan (5x5 case) or raises TypeError 'Invalid NaN comparison' when cancel/factor_terms compares nan coefficients (6x6 case). The fix deletes _find_pivot and replaces the line-194 call with _find_reasonable_pivot(mat[:, 0], iszerofunc=_is_zero_after_expand_mul), where the new predicate expand_mul(x) == 0 correctly detects zero-equivalent polynomial entries."
     }

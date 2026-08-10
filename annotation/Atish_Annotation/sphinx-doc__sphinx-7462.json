@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "sphinx/domains/python.py",
-      "line": 112,
+      "line": 121,
       "statement": "result.pop()",
       "note": "Tail of the ast.Tuple branch of _parse_annotation's inner unparse (lines 107-113). Its contract is to remove the trailing ', ' separator the loop appended after each element, but it pops unconditionally, assuming the tuple was non-empty. For the empty tuple in Tuple[()] the loop at 109-111 iterates zero times, result is still [], and pop() raises IndexError from an empty list. The failure is deeper than a missing guard: the branch's join-then-trim algorithm can only render non-empty tuples and has no way to produce the '(' ')' tokens an empty tuple requires, so any adequate fix must change this statement or confine it to the non-empty case. Lines 108-111 are faithful for their zero-iteration run (they build nothing wrong) and are not themselves faulty."
     },

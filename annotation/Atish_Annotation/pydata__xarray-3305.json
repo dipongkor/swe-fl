@@ -4,12 +4,12 @@
     {
       "file": "xarray/core/dataset.py",
       "line": 4771,
-      "statement": "variables[name] = var.quantile(q, dim=reduce_dims, interpolation=interpolation)",
+      "statement": "q, dim=reduce_dims, interpolation=interpolation",
       "note": "Dataset.quantile() calls Variable.quantile() without passing keep_attrs, so attrs are never forwarded to the per-variable result regardless of what the caller requested."
     },
     {
       "file": "xarray/core/variable.py",
-      "line": 1662,
+      "line": 1661,
       "statement": "return Variable(new_dims, qs)",
       "note": "Variable.quantile() has no keep_attrs parameter and always constructs the result without attrs, so even if dataset.py passed keep_attrs there was no mechanism to preserve them."
     }

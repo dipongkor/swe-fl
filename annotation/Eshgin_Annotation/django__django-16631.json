@@ -3,8 +3,8 @@
   "root_cause": [
     {
       "file": "django/contrib/auth/__init__.py",
-      "line": "202-204",
-      "statement": "session_hash_verified = session_hash and constant_time_compare(\n    session_hash, user.get_session_auth_hash()\n)",
+      "line": 202,
+      "statement": "session_hash_verified = session_hash and constant_time_compare(session_hash, user.get_session_auth_hash())",
       "method": "get_user",
       "class": "N/A",
       "note": "Session verification compares the stored authentication hash only with a hash derived from the current SECRET_KEY. A session signed before key rotation is rejected even when its secret is configured in SECRET_KEY_FALLBACKS."

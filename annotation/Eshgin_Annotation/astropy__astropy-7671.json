@@ -3,7 +3,7 @@
     "root_cause": [
         {
             "file": "astropy/utils/introspection.py",
-            "line": 146,
+            "line": 143,
             "statement": "return LooseVersion(have_version) >= LooseVersion(version)",
             "note": "minversion passed version strings containing suffixes such as 'dev' and 'rc1' directly to LooseVersion. LooseVersion can produce mixed integer/string component lists for those versions, and comparing them to installed versions such as '0.12.2' can raise TypeError."
         }

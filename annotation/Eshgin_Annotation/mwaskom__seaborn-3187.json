@@ -3,13 +3,13 @@
   "root_cause": [
     {
       "file": "seaborn/_core/scales.py",
-      "line": 382,
+      "line": 381,
       "statement": "labels = axis.major.formatter.format_ticks(locs)",
       "note": "The objects interface generated legend labels with Matplotlib's ScalarFormatter while leaving offset/scientific notation enabled. The legend did not display the formatter's offset text, so large values were shown as small offset-relative labels."
     },
     {
       "file": "seaborn/utils.py",
-      "line": 703,
+      "line": 701,
       "statement": "formatter = mpl.ticker.ScalarFormatter()",
       "note": "The relational plotting utility path used the same kind of ScalarFormatter for legend tick labels without disabling offsets or scientific notation, producing incorrect labels for large numeric hue/size ranges."
     }

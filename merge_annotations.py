@@ -2,10 +2,9 @@
 """Merge two annotators' fault-localization annotations and report conflicts.
 
 Conflicts are decided purely from the ``root_cause`` list: the (file, line,
-statement) triple of each entry.  Instances that already have a ground-truth
-annotation are skipped.  Everything else (reasoning, confidence, hunk flags,
-fault_triggering_call_site) is reported as informational only and never blocks
-a merge.
+statement) triple of each entry.  Everything else (reasoning, confidence, hunk
+flags, fault_triggering_call_site) is reported as informational only and never
+blocks a merge.
 
 Usage:
     python merge_annotations.py                       # report only
@@ -26,7 +25,6 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 
 DEFAULT_A = os.path.join(REPO, "annotation", "Atish_Annotation")
 DEFAULT_B = os.path.join(REPO, "annotation", "Eshgin_Annotation")
-DEFAULT_GT = os.path.join(REPO, "ground-truth-fl")
 DEFAULT_OUT = os.path.join(REPO, "annotation", "merged")
 DEFAULT_REPORT = os.path.join(REPO, "annotation", "merge_report")
 
@@ -246,12 +244,14 @@ def compare_metadata(doc_a: dict, doc_b: dict, name_a: str, name_b: str) -> list
                     name_b: doc_b.get("confidence")})
 
     def ftcs(doc):
-        return sorted(
+        triples = (
             (norm_file(e.get("file")), norm_line(e.get("line")),
              norm_stmt(e.get("statement")))
             for e in (doc.get("fault_triggering_call_site") or [])
             if isinstance(e, dict)
         )
+        # line may be None, so sort with a key that never compares int to None
+        return sorted(triples, key=lambda t: (t[0], t[1] is None, t[1] or 0, t[2]))
 
     fa, fb = ftcs(doc_a), ftcs(doc_b)
     if fa != fb:
@@ -270,10 +270,108 @@ def compare_metadata(doc_a: dict, doc_b: dict, name_a: str, name_b: str) -> list
 
 
 # --------------------------------------------------------------------------- #
+# per-location agreement metrics
+# --------------------------------------------------------------------------- #
+
+# root-cause locations are set-valued, so instance-level agree/conflict throws
+# away partial overlap.  These metrics score agreement per location instead, at
+# four granularities from coarsest to finest.  Statement level is shift-
+# invariant (ignores line numbers) and is the recommended headline number.
+GRANULARITIES = ("file", "statement", "line", "full")
+
+
+def loc_sets(locs: list[Loc]) -> dict[str, set]:
+    """Map each granularity to the set of elements one annotator selected."""
+    return {
+        "file": {l.file for l in locs},
+        "statement": {(l.file, l.statement) for l in locs},
+        "line": {(l.file, l.line) for l in locs},
+        "full": {(l.file, l.line, l.statement) for l in locs},
+    }
+
+
+def masi_distance(a: set, b: set) -> float:
+    """MASI distance (Passonneau 2006): 0 = identical, 1 = disjoint.
+
+    distance = 1 - Jaccard * M, where the monotonicity term M is 1 for equal
+    sets, 2/3 when one contains the other, 1/3 for other overlap, 0 when
+    disjoint.  Used as the distance function for Krippendorff's alpha.
+    """
+    if not a and not b:
+        return 0.0
+    inter = len(a & b)
+    union = len(a | b)
+    j = inter / union if union else 0.0
+    if a == b:
+        m = 1.0
+    elif a <= b or b <= a:
+        m = 2 / 3
+    elif inter:
+        m = 1 / 3
+    else:
+        m = 0.0
+    return 1.0 - j * m
+
+
+def agreement_metrics(pairs: list[tuple[dict, dict]]) -> dict:
+    """Per-granularity agreement over (loc_sets_a, loc_sets_b) instance pairs.
+
+    For each granularity reports:
+      - jaccard_micro : pooled |A&B| / |A|B| across all instances (weights by
+                        number of locations)
+      - jaccard_macro : mean of per-instance Jaccard (weights each instance
+                        equally; instances where neither side has locations are
+                        skipped)
+      - dice_micro    : pooled 2|A&B| / (|A|+|B|)  (a.k.a. F1)
+      - alpha_masi    : Krippendorff's alpha with MASI distance, chance-corrected
+    """
+    out = {}
+    for g in GRANULARITIES:
+        inter_sum = union_sum = a_sum = b_sum = 0
+        per_instance = []
+        pool = []
+        for sa, sb in pairs:
+            A, B = sa[g], sb[g]
+            inter, union = len(A & B), len(A | B)
+            inter_sum += inter
+            union_sum += union
+            a_sum += len(A)
+            b_sum += len(B)
+            if union:
+                per_instance.append(inter / union)
+            pool.append(A)
+            pool.append(B)
+
+        # Krippendorff alpha = 1 - Do/De.  With exactly two coders per unit,
+        # observed disagreement Do is the mean MASI distance between the two
+        # annotators' sets; expected disagreement De is the mean MASI distance
+        # over all cross pairs in the pool of 2N sets.
+        do = (sum(masi_distance(sa[g], sb[g]) for sa, sb in pairs) / len(pairs)
+              if pairs else 0.0)
+        n = len(pool)
+        if n > 1:
+            de = (sum(masi_distance(pool[i], pool[j])
+                      for i in range(n) for j in range(n) if i != j)
+                  / (n * (n - 1)))
+        else:
+            de = 0.0
+        alpha = 1.0 - do / de if de else 1.0
+
+        out[g] = {
+            "jaccard_micro": inter_sum / union_sum if union_sum else 1.0,
+            "jaccard_macro": (sum(per_instance) / len(per_instance)
+                              if per_instance else 1.0),
+            "dice_micro": (2 * inter_sum) / (a_sum + b_sum) if (a_sum + b_sum) else 1.0,
+            "alpha_masi": alpha,
+        }
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # merging
 # --------------------------------------------------------------------------- #
 
-def merge_docs(doc_a: dict | None, doc_b: dict | None, name_a: str, name_b: str,
+def merge_docs(doc_a: dict, doc_b: dict, name_a: str, name_b: str,
                cmp: Comparison | None, primary: str) -> dict:
     """Build the merged document.
 
@@ -281,17 +379,6 @@ def merge_docs(doc_a: dict | None, doc_b: dict | None, name_a: str, name_b: str,
     is unchanged; provenance and the other annotator's reasoning/notes are
     recorded under ``merge_metadata``.
     """
-    if doc_a is None or doc_b is None:
-        src = doc_a if doc_b is None else doc_b
-        who = name_a if doc_b is None else name_b
-        merged = json.loads(json.dumps(src))
-        merged["merge_metadata"] = {
-            "status": "single_annotator",
-            "annotators": [who],
-            "primary": who,
-        }
-        return merged
-
     base, other = (doc_a, doc_b) if primary == name_a else (doc_b, doc_a)
     base_name, other_name = ((name_a, name_b) if primary == name_a
                              else (name_b, name_a))
@@ -321,19 +408,43 @@ def merge_docs(doc_a: dict | None, doc_b: dict | None, name_a: str, name_b: str,
 # --------------------------------------------------------------------------- #
 
 def render_markdown(results: list[dict], name_a: str, name_b: str,
-                    skipped: list[str]) -> str:
+                    metrics: dict, conflict_types: dict[str, int]) -> str:
     lines = ["# Annotation merge report", ""]
     counts: dict[str, int] = {}
     for r in results:
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     lines.append(f"- Annotators: **{name_a}** vs **{name_b}**")
-    lines.append(f"- Instances considered: **{len(results)}** "
-                 f"(skipped {len(skipped)} with ground truth)")
-    for k in ("agree", "minor_conflict", "conflict", "single_annotator",
+    lines.append(f"- Instances considered: **{len(results)}**")
+    for k in ("agree", "minor_conflict", "conflict",
               "resolved", "skipped_by_resolution"):
         if k in counts:
             lines.append(f"- {k}: **{counts[k]}**")
     lines.append("")
+
+    lines.append("## Per-location agreement")
+    lines.append("")
+    lines.append("Root-cause locations are set-valued, so instance-level "
+                 "agree/conflict discards partial overlap. These score "
+                 "agreement per location; statement level is line-shift "
+                 "invariant and is the recommended headline number.")
+    lines.append("")
+    lines.append("| Granularity | Jaccard (macro) | Jaccard (micro) | "
+                 "Dice / F1 (micro) | Krippendorff α (MASI) |")
+    lines.append("|---|---|---|---|---|")
+    for g in GRANULARITIES:
+        m = metrics[g]
+        lines.append(f"| {g} | {m['jaccard_macro']:.3f} | "
+                     f"{m['jaccard_micro']:.3f} | {m['dice_micro']:.3f} | "
+                     f"{m['alpha_masi']:.3f} |")
+    lines.append("")
+    if conflict_types:
+        total = sum(conflict_types.values())
+        lines.append(f"Disagreement composition ({total} conflicting "
+                     "locations): "
+                     + ", ".join(f"**{t}** {n} ({n / total:.0%})"
+                                 for t, n in sorted(conflict_types.items(),
+                                                    key=lambda kv: -kv[1])))
+        lines.append("")
 
     def section(title, statuses):
         rows = [r for r in results if r["status"] in statuses]
@@ -343,11 +454,6 @@ def render_markdown(results: list[dict], name_a: str, name_b: str,
         lines.append("")
         for r in rows:
             lines.append(f"### {r['instance_id']}")
-            if r["status"] == "single_annotator":
-                lines.append(f"- annotated only by **{r['annotators'][0]}** "
-                             f"— merged as-is")
-                lines.append("")
-                continue
             lines.append(f"- root causes: {name_a}={r['n_a']}, "
                          f"{name_b}={r['n_b']}, agreed={len(r['agreed'])}")
             for c in r["conflicts"]:
@@ -363,19 +469,12 @@ def render_markdown(results: list[dict], name_a: str, name_b: str,
 
     section("Blocking conflicts — need manual resolution", {"conflict"})
     section("Minor conflicts — likely same location", {"minor_conflict"})
-    section("Single-annotator instances", {"single_annotator"})
     section("Full agreement on root cause", {"agree"})
 
-    if skipped:
-        lines.append("## Skipped (ground truth already exists)")
-        lines.append("")
-        lines.extend(f"- {s}" for s in skipped)
-        lines.append("")
     return "\n".join(lines)
 
 
-def write_id_lists(prefix: str, results: list[dict],
-                   skipped_gt: list[str]) -> list[str]:
+def write_id_lists(prefix: str, results: list[dict]) -> list[str]:
     """Write one plain-text file per bucket, instance ids newline-separated.
 
     The four core buckets are always written (empty if nothing landed in them)
@@ -391,8 +490,6 @@ def write_id_lists(prefix: str, results: list[dict],
         # separately so this file never overstates inter-annotator agreement
         "agreed": ids("agree"),
         "conflicts": ids("conflict", "minor_conflict"),
-        "single_annotator": ids("single_annotator"),
-        "skipped": sorted(skipped_gt),
         # everything that ended up in the merged output directory
         "merged": [r["instance_id"] for r in results if r.get("mergeable")],
     }
@@ -439,8 +536,6 @@ def main(argv=None) -> int:
     p.add_argument("--dir-b", default=DEFAULT_B)
     p.add_argument("--name-a", default=None, help="defaults to dir-a basename")
     p.add_argument("--name-b", default=None, help="defaults to dir-b basename")
-    p.add_argument("--ground-truth", default=DEFAULT_GT,
-                   help="instances present here are ignored entirely")
     p.add_argument("--out", default=DEFAULT_OUT, help="merged output directory")
     p.add_argument("--report", default=DEFAULT_REPORT,
                    help="report path prefix (.json and .md are written)")
@@ -470,61 +565,49 @@ def main(argv=None) -> int:
             resolutions[k] = {"A": name_a, "B": name_b}.get(v.upper(), v)
 
     ids_a, ids_b = instance_ids(args.dir_a), instance_ids(args.dir_b)
-    gt = instance_ids(args.ground_truth)
-    skipped = sorted((ids_a | ids_b) & gt)
-    todo = sorted((ids_a | ids_b) - gt)
+    # only instances annotated by both annotators
+    todo = sorted(ids_a & ids_b)
 
     results, written = [], 0
+    loc_pairs = []
     for iid in todo:
-        pa = os.path.join(args.dir_a, iid + ".json")
-        pb = os.path.join(args.dir_b, iid + ".json")
-        doc_a = read_json(pa) if os.path.exists(pa) else None
-        doc_b = read_json(pb) if os.path.exists(pb) else None
+        doc_a = read_json(os.path.join(args.dir_a, iid + ".json"))
+        doc_b = read_json(os.path.join(args.dir_b, iid + ".json"))
 
-        if doc_a is None or doc_b is None:
-            rec = {
-                "instance_id": iid,
-                "status": "single_annotator",
-                "annotators": [name_a if doc_a is not None else name_b],
-                "n_a": len(doc_a.get("root_cause") or []) if doc_a else 0,
-                "n_b": len(doc_b.get("root_cause") or []) if doc_b else 0,
-                "agreed": [], "conflicts": [], "informational": [],
-            }
-            merged = merge_docs(doc_a, doc_b, name_a, name_b, None, primary)
+        locs_a, locs_b = load_locs(doc_a), load_locs(doc_b)
+        loc_pairs.append((loc_sets(locs_a), loc_sets(locs_b)))
+        cmp = compare_root_causes(iid, locs_a, locs_b, name_a, name_b)
+        cmp.informational = compare_metadata(doc_a, doc_b, name_a, name_b)
+        rec = {
+            "instance_id": iid,
+            "status": cmp.status,
+            "annotators": [name_a, name_b],
+            "n_a": len(doc_a.get("root_cause") or []),
+            "n_b": len(doc_b.get("root_cause") or []),
+            "agreed": cmp.agreed,
+            "conflicts": cmp.conflicts,
+            "informational": cmp.informational,
+        }
+        winner = resolutions.get(iid)
+        if winner == "skip":
+            rec["resolution"] = "skip"
+            rec["conflict_status_before_skip"] = rec["status"]
+            rec["status"] = "skipped_by_resolution"
+            merged = None
+        elif winner in (name_a, name_b):
+            rec["resolution"] = winner
+            rec["status"] = "resolved"
+            merged = merge_docs(doc_a, doc_b, name_a, name_b, cmp, winner)
+            merged["merge_metadata"]["status"] = "resolved"
+            merged["merge_metadata"]["resolved_in_favour_of"] = winner
+            merged["merge_metadata"].pop("unresolved_conflicts", None)
+            merged["merge_metadata"]["resolved_conflicts"] = cmp.conflicts
         else:
-            cmp = compare_root_causes(iid, load_locs(doc_a), load_locs(doc_b),
-                                      name_a, name_b)
-            cmp.informational = compare_metadata(doc_a, doc_b, name_a, name_b)
-            rec = {
-                "instance_id": iid,
-                "status": cmp.status,
-                "annotators": [name_a, name_b],
-                "n_a": len(doc_a.get("root_cause") or []),
-                "n_b": len(doc_b.get("root_cause") or []),
-                "agreed": cmp.agreed,
-                "conflicts": cmp.conflicts,
-                "informational": cmp.informational,
-            }
-            winner = resolutions.get(iid)
-            if winner == "skip":
-                rec["resolution"] = "skip"
-                rec["conflict_status_before_skip"] = rec["status"]
-                rec["status"] = "skipped_by_resolution"
-                merged = None
-            elif winner in (name_a, name_b):
-                rec["resolution"] = winner
-                rec["status"] = "resolved"
-                merged = merge_docs(doc_a, doc_b, name_a, name_b, cmp, winner)
-                merged["merge_metadata"]["status"] = "resolved"
-                merged["merge_metadata"]["resolved_in_favour_of"] = winner
-                merged["merge_metadata"].pop("unresolved_conflicts", None)
-                merged["merge_metadata"]["resolved_conflicts"] = cmp.conflicts
-            else:
-                merged = merge_docs(doc_a, doc_b, name_a, name_b, cmp, primary)
+            merged = merge_docs(doc_a, doc_b, name_a, name_b, cmp, primary)
 
         results.append(rec)
 
-        auto_ok = rec["status"] in ("agree", "single_annotator", "resolved") or (
+        auto_ok = rec["status"] in ("agree", "resolved") or (
             args.include_minor and rec["status"] == "minor_conflict")
         rec["mergeable"] = bool(auto_ok and merged is not None)
         if args.write and merged is not None and auto_ok:
@@ -535,6 +618,12 @@ def main(argv=None) -> int:
                 fh.write("\n")
             written += 1
 
+    metrics = agreement_metrics(loc_pairs)
+    conflict_types: dict[str, int] = {}
+    for r in results:
+        for c in r["conflicts"]:
+            conflict_types[c["type"]] = conflict_types.get(c["type"], 0) + 1
+
     report = {
         "annotator_a": name_a,
         "annotator_b": name_b,
@@ -544,7 +633,8 @@ def main(argv=None) -> int:
             s: sum(1 for r in results if r["status"] == s)
             for s in sorted({r["status"] for r in results})
         },
-        "skipped_ground_truth": skipped,
+        "agreement_metrics": metrics,
+        "conflict_types": conflict_types,
         "instances": results,
     }
     os.makedirs(os.path.dirname(os.path.abspath(args.report)), exist_ok=True)
@@ -552,15 +642,25 @@ def main(argv=None) -> int:
         json.dump(report, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
     with open(args.report + ".md", "w", encoding="utf-8") as fh:
-        fh.write(render_markdown(results, name_a, name_b, skipped))
+        fh.write(render_markdown(results, name_a, name_b, metrics, conflict_types))
         fh.write("\n")
 
-    id_files = write_id_lists(args.report, results, skipped)
+    id_files = write_id_lists(args.report, results)
 
-    print(f"considered {len(results)} instances "
-          f"(skipped {len(skipped)} with ground truth)")
+    print(f"considered {len(results)} instances")
     for status, n in report["counts"].items():
         print(f"  {status}: {n}")
+    print("per-location agreement (Jaccard macro / micro, Dice, alpha-MASI):")
+    for g in GRANULARITIES:
+        m = metrics[g]
+        print(f"  {g:<9} J={m['jaccard_macro']:.3f}/{m['jaccard_micro']:.3f}  "
+              f"Dice={m['dice_micro']:.3f}  alpha={m['alpha_masi']:.3f}")
+    if conflict_types:
+        total = sum(conflict_types.values())
+        parts = ", ".join(f"{t}={n} ({n / total:.0%})"
+                          for t, n in sorted(conflict_types.items(),
+                                             key=lambda kv: -kv[1]))
+        print(f"conflict types: {parts}")
     for r in results:
         if r["status"] in ("conflict", "minor_conflict"):
             kinds = ", ".join(sorted({c["type"] for c in r["conflicts"]}))
