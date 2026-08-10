@@ -4,37 +4,37 @@
   "primary": "Atish_Annotation",
   "line_shift_tolerance": 10,
   "counts": {
-    "agree": 85,
-    "conflict": 41
+    "agree": 87,
+    "conflict": 43
   },
   "agreement_metrics": {
     "file": {
-      "jaccard_micro": 0.9316770186335404,
-      "jaccard_macro": 0.9629629629629629,
-      "dice_micro": 0.9646302250803859,
-      "alpha_masi": 0.9555649972560059
+      "jaccard_micro": 0.9333333333333333,
+      "jaccard_macro": 0.9641025641025641,
+      "dice_micro": 0.9655172413793104,
+      "alpha_masi": 0.9569474226632757
     },
     "statement": {
-      "jaccard_micro": 0.6477272727272727,
-      "jaccard_macro": 0.7644368858654573,
-      "dice_micro": 0.7862068965517242,
-      "alpha_masi": 0.7285385044944537
+      "jaccard_micro": 0.6444444444444445,
+      "jaccard_macro": 0.7601465201465202,
+      "dice_micro": 0.7837837837837838,
+      "alpha_masi": 0.7240629297316432
     },
     "line": {
-      "jaccard_micro": 0.6507352941176471,
-      "jaccard_macro": 0.7653628117913832,
-      "dice_micro": 0.7884187082405345,
-      "alpha_masi": 0.729156919280493
+      "jaccard_micro": 0.6451612903225806,
+      "jaccard_macro": 0.7597619047619047,
+      "dice_micro": 0.7843137254901961,
+      "alpha_masi": 0.7238060740734649
     },
     "full": {
-      "jaccard_micro": 0.6483516483516484,
-      "jaccard_macro": 0.7653628117913832,
-      "dice_micro": 0.7866666666666666,
-      "alpha_masi": 0.729156919280493
+      "jaccard_micro": 0.6428571428571429,
+      "jaccard_macro": 0.7597619047619047,
+      "dice_micro": 0.782608695652174,
+      "alpha_masi": 0.7238060740734649
     }
   },
   "conflict_types": {
-    "extra_location": 96
+    "extra_location": 100
   },
   "instances": [
     {
@@ -2549,6 +2549,51 @@
       "mergeable": false
     },
     {
+      "instance_id": "pydata__xarray-3993",
+      "status": "conflict",
+      "annotators": [
+        "Atish_Annotation",
+        "Eshgin_Annotation"
+      ],
+      "n_a": 1,
+      "n_b": 1,
+      "agreed": [],
+      "conflicts": [
+        {
+          "type": "extra_location",
+          "severity": "blocking",
+          "only_in": "Atish_Annotation",
+          "file": "xarray/core/dataarray.py",
+          "line": 3484,
+          "statement": "self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None",
+          "note": "Signature of DataArray.integrate (def on line 3483). The integration parameter is named 'dim', while the sibling APIs Dataset.integrate, Dataset.differentiate and DataArray.differentiate all name it 'coord'. The name is the entire defect: calling da.integrate(coord='x') raises TypeError (unexpected keyword), da.integrate(dim='x') is accepted silently as the ordinary parameter, and no deprecation path exists. The computation itself is correct; the internal forwarding on line 3531 (self._to_temp_dataset().integrate(dim, datetime_unit)) passes the value positionally and is unaffected by the name. This is a nominal/API-consistency fault, not a behavioral one.",
+          "same_file_as_other_side": true
+        },
+        {
+          "type": "extra_location",
+          "severity": "blocking",
+          "only_in": "Eshgin_Annotation",
+          "file": "xarray/core/dataarray.py",
+          "line": null,
+          "statement": "def integrate( self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None ) -> \"DataArray\":",
+          "note": "DataArray exposes the integration coordinate under the name dim, while the corresponding Dataset operation and other coordinate-based DataArray methods use coord. The method provides no compatibility warning that the inconsistent keyword is being retired.",
+          "same_file_as_other_side": true
+        }
+      ],
+      "informational": [
+        {
+          "type": "ftcs_differs",
+          "Atish_Annotation": [
+            "xarray/tests/test_dataset.py:6607  da.integrate(dim=\"x\")"
+          ],
+          "Eshgin_Annotation": [
+            "xarray/tests/test_dataset.py:None  with pytest.warns(FutureWarning): da.integrate(dim=\"x\")"
+          ]
+        }
+      ],
+      "mergeable": false
+    },
+    {
       "instance_id": "pydata__xarray-4687",
       "status": "conflict",
       "annotators": [
@@ -2783,6 +2828,36 @@
         }
       ],
       "mergeable": false
+    },
+    {
+      "instance_id": "pylint-dev__pylint-6528",
+      "status": "agree",
+      "annotators": [
+        "Atish_Annotation",
+        "Eshgin_Annotation"
+      ],
+      "n_a": 1,
+      "n_b": 1,
+      "agreed": [
+        {
+          "file": "pylint/lint/pylinter.py",
+          "line": null,
+          "statement": "@staticmethod def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:"
+        }
+      ],
+      "conflicts": [],
+      "informational": [
+        {
+          "type": "ftcs_differs",
+          "Atish_Annotation": [
+            "tests/lint/unittest_lint.py:879  run = Run(['--recursive', 'y', ignore_parameter, ignore_parameter_value, join(REGRTEST_DATA_DIR, 'directory')], exit=False)"
+          ],
+          "Eshgin_Annotation": [
+            "tests/lint/unittest_lint.py:898  assert ignored_file not in linted_file_paths"
+          ]
+        }
+      ],
+      "mergeable": true
     },
     {
       "instance_id": "pylint-dev__pylint-8898",
@@ -3205,6 +3280,36 @@
       "mergeable": true
     },
     {
+      "instance_id": "scikit-learn__scikit-learn-12973",
+      "status": "agree",
+      "annotators": [
+        "Atish_Annotation",
+        "Eshgin_Annotation"
+      ],
+      "n_a": 1,
+      "n_b": 1,
+      "agreed": [
+        {
+          "file": "sklearn/linear_model/least_angle.py",
+          "line": 1503,
+          "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(X, y, self.fit_intercept, self.normalize, self.copy_X)"
+        }
+      ],
+      "conflicts": [],
+      "informational": [
+        {
+          "type": "ftcs_differs",
+          "Atish_Annotation": [
+            "sklearn/linear_model/tests/test_least_angle.py:718  lasso_lars.fit(X, y, copy_X=copy_X)"
+          ],
+          "Eshgin_Annotation": [
+            "sklearn/linear_model/tests/test_least_angle.py:719  assert copy_X == np.array_equal(X, X_copy)"
+          ]
+        }
+      ],
+      "mergeable": true
+    },
+    {
       "instance_id": "scikit-learn__scikit-learn-13124",
       "status": "agree",
       "annotators": [
@@ -3243,6 +3348,57 @@
       "conflicts": [],
       "informational": [],
       "mergeable": true
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14496",
+      "status": "conflict",
+      "annotators": [
+        "Atish_Annotation",
+        "Eshgin_Annotation"
+      ],
+      "n_a": 1,
+      "n_b": 3,
+      "agreed": [
+        {
+          "file": "sklearn/cluster/optics_.py",
+          "line": 440,
+          "statement": "min_samples = max(2, min_samples * n_samples)"
+        }
+      ],
+      "conflicts": [
+        {
+          "type": "extra_location",
+          "severity": "blocking",
+          "only_in": "Eshgin_Annotation",
+          "file": "sklearn/cluster/optics_.py",
+          "line": 622,
+          "statement": "min_samples = max(2, min_samples * n_samples)",
+          "note": "The xi extraction path independently retains a float after converting fractional min_samples, although subsequent steep-region indexing and counts require an integer.",
+          "same_file_as_other_side": true
+        },
+        {
+          "type": "extra_location",
+          "severity": "blocking",
+          "only_in": "Eshgin_Annotation",
+          "file": "sklearn/cluster/optics_.py",
+          "line": 627,
+          "statement": "min_cluster_size = max(2, min_cluster_size * n_samples)",
+          "note": "Fractional min_cluster_size is likewise retained as a float and passed into cluster boundary calculations that require a sample count.",
+          "same_file_as_other_side": true
+        }
+      ],
+      "informational": [
+        {
+          "type": "ftcs_differs",
+          "Atish_Annotation": [
+            "sklearn/cluster/tests/test_optics.py:107  clust = OPTICS(min_samples=0.1, min_cluster_size=0.08, max_eps=20, cluster_method='xi', xi=0.4).fit(X)"
+          ],
+          "Eshgin_Annotation": [
+            "sklearn/cluster/tests/test_optics.py:108  assert_array_equal(clust.labels_, expected_labels)"
+          ]
+        }
+      ],
+      "mergeable": false
     },
     {
       "instance_id": "scikit-learn__scikit-learn-14629",

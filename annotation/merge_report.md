@@ -1,9 +1,9 @@
 # Annotation merge report
 
 - Annotators: **Atish_Annotation** vs **Eshgin_Annotation**
-- Instances considered: **126**
-- agree: **85**
-- conflict: **41**
+- Instances considered: **130**
+- agree: **87**
+- conflict: **43**
 
 ## Per-location agreement
 
@@ -11,14 +11,14 @@ Root-cause locations are set-valued, so instance-level agree/conflict discards p
 
 | Granularity | Jaccard (macro) | Jaccard (micro) | Dice / F1 (micro) | Krippendorff α (MASI) |
 |---|---|---|---|---|
-| file | 0.963 | 0.932 | 0.965 | 0.956 |
-| statement | 0.764 | 0.648 | 0.786 | 0.729 |
-| line | 0.765 | 0.651 | 0.788 | 0.729 |
-| full | 0.765 | 0.648 | 0.787 | 0.729 |
+| file | 0.964 | 0.933 | 0.966 | 0.957 |
+| statement | 0.760 | 0.644 | 0.784 | 0.724 |
+| line | 0.760 | 0.645 | 0.784 | 0.724 |
+| full | 0.760 | 0.643 | 0.783 | 0.724 |
 
-Disagreement composition (96 conflicting locations): **extra_location** 96 (100%)
+Disagreement composition (100 conflicting locations): **extra_location** 100 (100%)
 
-## Blocking conflicts — need manual resolution (41)
+## Blocking conflicts — need manual resolution (43)
 
 ### django__django-11728
 - root causes: Atish_Annotation=4, Eshgin_Annotation=2, agreed=2
@@ -488,6 +488,24 @@ Disagreement composition (96 conflicting locations): **extra_location** 96 (100%
     - same_file_as_other_side: True
 - _info_ ftcs_differs: {'Atish_Annotation': ['xarray/tests/test_dataarray.py:2306  actual = DataArray(self.va).quantile(q, dim=dim, keep_attrs=True)'], 'Eshgin_Annotation': ['xarray/tests/test_dataarray.py:2306  actual = DataArray(self.va).quantile(q, dim=dim, keep_attrs=True)', 'xarray/tests/test_dataarray.py:2311  assert actual.attrs == self.attrs']}
 
+### pydata__xarray-3993
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=0
+- **extra_location** (blocking)
+    - only_in: Atish_Annotation
+    - file: xarray/core/dataarray.py
+    - line: 3484
+    - statement: self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None
+    - note: Signature of DataArray.integrate (def on line 3483). The integration parameter is named 'dim', while the sibling APIs Dataset.integrate, Dataset.differentiate and DataArray.differentiate all name it 'coord'. The name is the entire defect: calling da.integrate(coord='x') raises TypeError (unexpected keyword), da.integrate(dim='x') is accepted silently as the ordinary parameter, and no deprecation path exists. The computation itself is correct; the internal forwarding on line 3531 (self._to_temp_dataset().integrate(dim, datetime_unit)) passes the value positionally and is unaffected by the name. This is a nominal/API-consistency fault, not a behavioral one.
+    - same_file_as_other_side: True
+- **extra_location** (blocking)
+    - only_in: Eshgin_Annotation
+    - file: xarray/core/dataarray.py
+    - line: None
+    - statement: def integrate( self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None ) -> "DataArray":
+    - note: DataArray exposes the integration coordinate under the name dim, while the corresponding Dataset operation and other coordinate-based DataArray methods use coord. The method provides no compatibility warning that the inconsistent keyword is being retired.
+    - same_file_as_other_side: True
+- _info_ ftcs_differs: {'Atish_Annotation': ['xarray/tests/test_dataset.py:6607  da.integrate(dim="x")'], 'Eshgin_Annotation': ['xarray/tests/test_dataset.py:None  with pytest.warns(FutureWarning): da.integrate(dim="x")']}
+
 ### pydata__xarray-4687
 - root causes: Atish_Annotation=1, Eshgin_Annotation=2, agreed=1
 - **extra_location** (blocking)
@@ -626,6 +644,24 @@ Disagreement composition (96 conflicting locations): **extra_location** 96 (100%
     - statement: name=f"xunit_setup_method_fixture_{self.obj.__qualname__}",
     - note: Same fault for the fixture wrapping xunit-style setup_method/teardown_method. Not reached by the failing test.
     - same_file_as_other_side: False
+
+### scikit-learn__scikit-learn-14496
+- root causes: Atish_Annotation=1, Eshgin_Annotation=3, agreed=1
+- **extra_location** (blocking)
+    - only_in: Eshgin_Annotation
+    - file: sklearn/cluster/optics_.py
+    - line: 622
+    - statement: min_samples = max(2, min_samples * n_samples)
+    - note: The xi extraction path independently retains a float after converting fractional min_samples, although subsequent steep-region indexing and counts require an integer.
+    - same_file_as_other_side: True
+- **extra_location** (blocking)
+    - only_in: Eshgin_Annotation
+    - file: sklearn/cluster/optics_.py
+    - line: 627
+    - statement: min_cluster_size = max(2, min_cluster_size * n_samples)
+    - note: Fractional min_cluster_size is likewise retained as a float and passed into cluster boundary calculations that require a sample count.
+    - same_file_as_other_side: True
+- _info_ ftcs_differs: {'Atish_Annotation': ["sklearn/cluster/tests/test_optics.py:107  clust = OPTICS(min_samples=0.1, min_cluster_size=0.08, max_eps=20, cluster_method='xi', xi=0.4).fit(X)"], 'Eshgin_Annotation': ['sklearn/cluster/tests/test_optics.py:108  assert_array_equal(clust.labels_, expected_labels)']}
 
 ### scikit-learn__scikit-learn-14629
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=0
@@ -850,7 +886,7 @@ Disagreement composition (96 conflicting locations): **extra_location** 96 (100%
     - same_file_as_other_side: True
 - _info_ ftcs_differs: {'Atish_Annotation': ["sympy/codegen/tests/test_rewriting.py:269  assert cc(-x**4) == '-(x*x*x*x)'", "sympy/printing/tests/test_pycode.py:33  assert prntr.doprint(-Mod(x, y)) == '-(x % y)'", 'sympy/utilities/tests/test_lambdify.py:275  assert no_modules(3, 7) == -3'], 'Eshgin_Annotation': ["sympy/printing/tests/test_pycode.py:33  assert prntr.doprint(-Mod(x, y)) == '-(x % y)'", "sympy/printing/tests/test_pycode.py:34  assert prntr.doprint(Mod(-x, y)) == '(-x) % y'", 'sympy/utilities/tests/test_lambdify.py:274  assert no_modules(3, 7) == empty_modules(3, 7)']}
 
-## Full agreement on root cause (85)
+## Full agreement on root cause (87)
 
 ### astropy__astropy-13579
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
@@ -1029,6 +1065,10 @@ Disagreement composition (96 conflicting locations): **extra_location** 96 (100%
 ### pylint-dev__pylint-4604
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
 
+### pylint-dev__pylint-6528
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- _info_ ftcs_differs: {'Atish_Annotation': ["tests/lint/unittest_lint.py:879  run = Run(['--recursive', 'y', ignore_parameter, ignore_parameter_value, join(REGRTEST_DATA_DIR, 'directory')], exit=False)"], 'Eshgin_Annotation': ['tests/lint/unittest_lint.py:898  assert ignored_file not in linted_file_paths']}
+
 ### pylint-dev__pylint-8898
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
 - _info_ ftcs_differs: {'Atish_Annotation': ["tests/config/test_config.py:165  Run([str(EMPTY_MODULE), r'--bad-names-rgx=(foo{1,}, foo{1,3}})'], exit=False)"], 'Eshgin_Annotation': ['tests/config/test_config.py:135  r = Run([str(EMPTY_MODULE), rf"--bad-names-rgx={in_string}"], exit=False)', 'tests/config/test_config.py:167  Run([str(EMPTY_MODULE), r"--bad-names-rgx=(foo{1,}, foo{1,3}})"], exit=False)']}
@@ -1052,6 +1092,10 @@ Disagreement composition (96 conflicting locations): **extra_location** 96 (100%
 
 ### scikit-learn__scikit-learn-10297
 - root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
+
+### scikit-learn__scikit-learn-12973
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- _info_ ftcs_differs: {'Atish_Annotation': ['sklearn/linear_model/tests/test_least_angle.py:718  lasso_lars.fit(X, y, copy_X=copy_X)'], 'Eshgin_Annotation': ['sklearn/linear_model/tests/test_least_angle.py:719  assert copy_X == np.array_equal(X, X_copy)']}
 
 ### scikit-learn__scikit-learn-13124
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1

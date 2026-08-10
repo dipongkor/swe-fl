@@ -48,6 +48,7 @@ pydata__xarray-6599
 pydata__xarray-6938
 pydata__xarray-7229
 pylint-dev__pylint-4604
+pylint-dev__pylint-6528
 pylint-dev__pylint-8898
 pytest-dev__pytest-10051
 pytest-dev__pytest-6197
@@ -55,6 +56,7 @@ pytest-dev__pytest-7205
 pytest-dev__pytest-7236
 pytest-dev__pytest-7324
 scikit-learn__scikit-learn-10297
+scikit-learn__scikit-learn-12973
 scikit-learn__scikit-learn-13124
 scikit-learn__scikit-learn-13142
 scikit-learn__scikit-learn-25931
