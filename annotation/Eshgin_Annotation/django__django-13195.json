@@ -19,7 +19,7 @@
     },
     {
       "file": "django/http/response.py",
-      "line": "217-220",
+      "line": 217,
       "statement": "self.set_cookie(\n    key, max_age=0, path=path, domain=domain, secure=secure,\n    expires='Thu, 01 Jan 1970 00:00:00 GMT',\n)",
       "method": "delete_cookie",
       "class": "HttpResponseBase",
@@ -35,7 +35,7 @@
     },
     {
       "file": "django/contrib/sessions/middleware.py",
-      "line": "41-45",
+      "line": 41,
       "statement": "response.delete_cookie(\n    settings.SESSION_COOKIE_NAME,\n    path=settings.SESSION_COOKIE_PATH,\n    domain=settings.SESSION_COOKIE_DOMAIN,\n)",
       "method": "process_response",
       "class": "SessionMiddleware",
@@ -58,13 +58,13 @@
     },
     {
       "file": "tests/messages_tests/test_cookie.py",
-      "line": "89-92",
+      "line": 89,
       "statement": "self.assertEqual(\n    response.cookies['messages']['samesite'],\n    settings.SESSION_COOKIE_SAMESITE,\n)",
       "note": "This assertion exposes that message-cookie deletion discarded the configured SameSite value."
     },
     {
       "file": "tests/sessions_tests/tests.py",
-      "line": "759-766",
+      "line": 759,
       "statement": "self.assertEqual(\n    'Set-Cookie: {}=\"\"; expires=Thu, 01 Jan 1970 00:00:00 GMT; '\n    'Max-Age=0; Path=/; SameSite={}'.format(\n        settings.SESSION_COOKIE_NAME,\n        settings.SESSION_COOKIE_SAMESITE,\n    ),\n    str(response.cookies[settings.SESSION_COOKIE_NAME])\n)",
       "note": "The expected session-deletion header includes the configured SameSite attribute, which is absent at base."
     }
