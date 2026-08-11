@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "django/forms/models.py",
-      "line": "1188-1191",
+      "line": 1188,
       "statement": "if required and (initial is not None):\n    self.empty_label = None\nelse:\n    self.empty_label = empty_label",
       "method": "__init__",
       "class": "ModelChoiceField",
@@ -11,7 +11,7 @@
     },
     {
       "file": "django/db/models/fields/related.py",
-      "line": "978-983",
+      "line": 978,
       "statement": "return super().formfield(**{\n    'form_class': forms.ModelChoiceField,\n    'queryset': self.remote_field.model._default_manager.using(using),\n    'to_field_name': self.remote_field.field_name,\n    **kwargs,\n})",
       "method": "formfield",
       "class": "ForeignKey",
@@ -22,13 +22,13 @@
   "fault_triggering_call_site": [
     {
       "file": "tests/model_forms/test_modelchoicefield.py",
-      "line": "157-160",
+      "line": 157,
       "statement": "self.assertEqual(\n    list(f.choices),\n    [('', '---------')] + choices if blank else choices,\n)",
       "note": "The assertion requires RadioSelect choices to include an empty option only when blank=True; base construction rejects blank before reaching it."
     },
     {
       "file": "tests/model_forms/tests.py",
-      "line": "288-291",
+      "line": 288,
       "statement": "self.assertEqual(\n    list(form.fields['character'].choices),\n    [(character.pk, 'user')],\n)",
       "note": "The generated form for a nonblank ForeignKey incorrectly contains an initial empty radio choice."
     }

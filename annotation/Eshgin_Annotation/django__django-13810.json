@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "django/core/handlers/base.py",
-      "line": "54-57",
+      "line": 54,
       "statement": "handler = self.adapt_method_mode(\n    middleware_is_async, handler, handler_is_async,\n    debug=settings.DEBUG, name='middleware %s' % middleware_path,\n)",
       "method": "load_middleware",
       "class": "BaseHandler",
@@ -14,7 +14,7 @@
   "fault_triggering_call_site": [
     {
       "file": "tests/middleware_exceptions/tests.py",
-      "line": "193-197",
+      "line": 193,
       "statement": "self.assertEqual(\n    cm.records[0].getMessage(),\n    'Asynchronous middleware middleware_exceptions.tests.MyMiddleware '\n    'adapted.',\n)",
       "note": "The logged adaptation sequence reveals that a wrapper belonging to unused middleware remained active."
     }

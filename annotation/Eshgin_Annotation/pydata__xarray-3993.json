@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "xarray/core/dataarray.py",
-      "line": "3483-3485",
+      "line": 3484,
       "statement": "def integrate(\n    self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n) -> \"DataArray\":",
       "method": "integrate",
       "class": "DataArray",
@@ -14,7 +14,7 @@
   "fault_triggering_call_site": [
     {
       "file": "xarray/tests/test_dataset.py",
-      "line": "6606-6607",
+      "line": 6606,
       "statement": "with pytest.warns(FutureWarning):\n    da.integrate(dim=\"x\")",
       "note": "The assertion context requires use of the legacy dim keyword to emit FutureWarning, but the call completes without any warning."
     }

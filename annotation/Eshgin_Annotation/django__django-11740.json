@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "django/db/migrations/autodetector.py",
-      "line": "966-974",
+      "line": 966,
       "statement": "self.add_operation(\n    app_label,\n    operations.AlterField(\n        model_name=model_name,\n        name=field_name,\n        field=field,\n        preserve_default=preserve_default,\n    )\n)",
       "method": "generate_altered_fields",
       "class": "MigrationAutodetector",

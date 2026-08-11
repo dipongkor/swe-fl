@@ -11,7 +11,7 @@
     },
     {
       "file": "django/db/models/sql/query.py",
-      "line": "1705-1706",
+      "line": 1705,
       "statement": "if isinstance(filter_rhs, F):\n    filter_expr = (filter_lhs, OuterRef(filter_rhs.name))",
       "method": "split_exclude",
       "class": "Query",

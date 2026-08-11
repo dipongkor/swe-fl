@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "django/db/backends/base/schema.py",
-      "line": "530-532",
+      "line": 531,
       "statement": "self._delete_composed_index(\n    model, fields, {\"unique\": True}, self.sql_delete_unique\n)",
       "method": "alter_unique_together",
       "class": "BaseDatabaseSchemaEditor",
@@ -11,7 +11,7 @@
     },
     {
       "file": "django/db/backends/base/schema.py",
-      "line": "565-570",
+      "line": 565,
       "statement": "constraint_names = self._constraint_names(\n    model,\n    columns,\n    exclude=meta_constraint_names | meta_index_names,\n    **constraint_kwargs,\n)",
       "method": "_delete_composed_index",
       "class": "BaseDatabaseSchemaEditor",
