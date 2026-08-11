@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "sympy/polys/polytools.py",
-      "line": "5908-5910",
+      "line": 5908,
       "statement": "if arg.is_Mul:\n    args.extend(arg.args)\n    continue",
       "method": "_symbolic_factor_list",
       "class": "N/A",

@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "sphinx/ext/autodoc/importer.py",
-      "line": "310-316",
+      "line": 310,
       "statement": "if analyzer:\n    namespace = '.'.join(objpath)\n    for (ns, name), docstring in analyzer.attr_docs.items():\n        if namespace == ns and name not in members:\n            members[name] = ClassAttribute(subject, name, INSTANCEATTR, '\\n'.join(docstring))",
       "note": "The original get_class_members accepts a single 'analyzer' argument representing only the current class's module analyzer. The 'if analyzer:' block matches attribute docs only against the current class namespace ('.'.join(objpath)), so instance attributes documented in parent classes (e.g. Foo.attr1 inherited by Bar) are never discovered."
     },
@@ -18,7 +18,7 @@
   "fault_triggering_call_site": [
     {
       "file": "tests/test_ext_autodoc_autoclass.py",
-      "line": "82-83",
+      "line": 82,
       "statement": "actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)",
       "note": "Triggers the inherited-members path. With options={'members': True, 'inherited-members': True}, autodoc calls get_class_members for Bar. The original code queries only Bar's analyzer, missing attr1 which is an instance attribute documented in the parent class Foo. The assertion expects attr1, attr2, attr3; the original code returns only attr2 and attr3."
     }
