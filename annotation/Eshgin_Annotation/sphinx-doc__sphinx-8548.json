@@ -4,7 +4,7 @@
     {
       "file": "sphinx/ext/autodoc/importer.py",
       "line": 310,
-      "statement": "if analyzer:\n    namespace = '.'.join(objpath)\n    for (ns, name), docstring in analyzer.attr_docs.items():\n        if namespace == ns and name not in members:\n            members[name] = ClassAttribute(subject, name, INSTANCEATTR, '\\n'.join(docstring))",
+      "statement": "if analyzer:",
       "note": "The original get_class_members accepts a single 'analyzer' argument representing only the current class's module analyzer. The 'if analyzer:' block matches attribute docs only against the current class namespace ('.'.join(objpath)), so instance attributes documented in parent classes (e.g. Foo.attr1 inherited by Bar) are never discovered."
     },
     {

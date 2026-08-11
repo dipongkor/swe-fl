@@ -12,7 +12,7 @@
     {
       "file": "django/db/models/sql/query.py",
       "line": 1705,
-      "statement": "if isinstance(filter_rhs, F):\n    filter_expr = (filter_lhs, OuterRef(filter_rhs.name))",
+      "statement": "if isinstance(filter_rhs, F):",
       "method": "split_exclude",
       "class": "Query",
       "note": "OuterRef is an F subclass, so an already outer-scoped reference is handled as a local F name. In a nested exclude subquery this loses one level of correlation and resolves job against Responsibility rather than the enclosing JobResponsibilities query."

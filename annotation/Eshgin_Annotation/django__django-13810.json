@@ -4,7 +4,7 @@
     {
       "file": "django/core/handlers/base.py",
       "line": 54,
-      "statement": "handler = self.adapt_method_mode(\n    middleware_is_async, handler, handler_is_async,\n    debug=settings.DEBUG, name='middleware %s' % middleware_path,\n)",
+      "statement": "handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)",
       "method": "load_middleware",
       "class": "BaseHandler",
       "note": "The handler variable is replaced before middleware construction succeeds. If construction raises MiddlewareNotUsed, the adapted wrapper remains and is passed to the next middleware even though the middleware that required the adaptation was discarded."

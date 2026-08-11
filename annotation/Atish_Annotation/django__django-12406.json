@@ -10,7 +10,7 @@
     {
       "file": "django/db/models/fields/related.py",
       "line": 978,
-      "statement": "return super().formfield(**{'form_class': forms.ModelChoiceField, 'queryset': ..., 'to_field_name': ..., **kwargs})",
+      "statement": "return super().formfield(**{\n    'form_class': forms.ModelChoiceField,\n    'queryset': self.remote_field.model._default_manager.using(using),\n    'to_field_name': self.remote_field.field_name,\n    **kwargs,\n})",
       "note": "Statement spanning base 978-983, ForeignKey.formfield: the kwargs dict forwarded to the form field omits the model field's blank flag, so the information 'blank is not a valid selection' (models.ForeignKey(..., blank=False), which is independent of form required — the issue's model has null=True with blank=False) never crosses the model-to-form boundary and no form-side rule could act on it. Gold adds 'blank': self.blank to this dict (after **kwargs, so it wins). Jointly with the decision at forms/models.py 1188-1191 this constitutes the fault: the decision doesn't ask about blank, and this call couldn't have told it."
     }
   ],

@@ -4,7 +4,7 @@
     {
       "file": "django/db/migrations/autodetector.py",
       "line": 966,
-      "statement": "self.add_operation(\n    app_label,\n    operations.AlterField(\n        model_name=model_name,\n        name=field_name,\n        field=field,\n        preserve_default=preserve_default,\n    )\n)",
+      "statement": "self.add_operation(app_label, operations.AlterField(model_name=model_name, name=field_name, field=field, preserve_default=preserve_default))",
       "method": "generate_altered_fields",
       "class": "MigrationAutodetector",
       "note": "AlterField operations are registered without dependencies derived from a newly introduced relation. Changing an ordinary field into a ForeignKey to another app can therefore run before the target model exists."

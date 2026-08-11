@@ -4,7 +4,7 @@
     {
       "file": "django/forms/models.py",
       "line": 1188,
-      "statement": "if required and (initial is not None):\n    self.empty_label = None\nelse:\n    self.empty_label = empty_label",
+      "statement": "if required and (initial is not None):",
       "method": "__init__",
       "class": "ModelChoiceField",
       "note": "Empty-choice selection considers only required and initial. A required RadioSelect for a nonblank relation incorrectly retains the blank choice."

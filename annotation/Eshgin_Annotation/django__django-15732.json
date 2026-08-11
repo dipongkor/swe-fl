@@ -4,7 +4,7 @@
     {
       "file": "django/db/backends/base/schema.py",
       "line": 531,
-      "statement": "self._delete_composed_index(\n    model, fields, {\"unique\": True}, self.sql_delete_unique\n)",
+      "statement": "model, fields, {\"unique\": True}, self.sql_delete_unique",
       "method": "alter_unique_together",
       "class": "BaseDatabaseSchemaEditor",
       "note": "The deletion specification requires uniqueness but does not exclude primary-key constraints. On backends that expose a primary key as a unique constraint, a unique_together entry on that field admits both constraints as candidates."
@@ -12,7 +12,7 @@
     {
       "file": "django/db/backends/base/schema.py",
       "line": 565,
-      "statement": "constraint_names = self._constraint_names(\n    model,\n    columns,\n    exclude=meta_constraint_names | meta_index_names,\n    **constraint_kwargs,\n)",
+      "statement": "constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)",
       "method": "_delete_composed_index",
       "class": "BaseDatabaseSchemaEditor",
       "note": "Constraint lookup identifies a unique_together constraint only by columns and uniqueness. When the same column also has field-level unique=True, both database constraints satisfy those attributes and the intended composed constraint cannot be selected."

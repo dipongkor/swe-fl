@@ -2,8 +2,8 @@
 
 - Annotators: **Atish_Annotation** vs **Eshgin_Annotation**
 - Instances considered: **130**
-- agree: **87**
-- conflict: **43**
+- agree: **94**
+- conflict: **36**
 
 ## Per-location agreement
 
@@ -12,13 +12,13 @@ Root-cause locations are set-valued, so instance-level agree/conflict discards p
 | Granularity | Jaccard (macro) | Jaccard (micro) | Dice / F1 (micro) | Krippendorff α (MASI) |
 |---|---|---|---|---|
 | file | 0.964 | 0.933 | 0.966 | 0.957 |
-| statement | 0.760 | 0.644 | 0.784 | 0.724 |
-| line | 0.760 | 0.645 | 0.784 | 0.724 |
-| full | 0.760 | 0.643 | 0.783 | 0.724 |
+| statement | 0.817 | 0.721 | 0.838 | 0.781 |
+| line | 0.817 | 0.716 | 0.835 | 0.781 |
+| full | 0.817 | 0.716 | 0.835 | 0.781 |
 
-Disagreement composition (100 conflicting locations): **extra_location** 100 (100%)
+Disagreement composition (76 conflicting locations): **extra_location** 76 (100%)
 
-## Blocking conflicts — need manual resolution (43)
+## Blocking conflicts — need manual resolution (36)
 
 ### django__django-11728
 - root causes: Atish_Annotation=4, Eshgin_Annotation=2, agreed=2
@@ -36,74 +36,6 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - statement: group_indices.append((start, start + 1 + idx))
     - note: Joint partner of line 204, exactly as 173 is of 172: the start + 1 + idx end index presumes the late check (gold uses start + 2 + idx after moving the check below the decrement).
     - same_file_as_other_side: True
-
-### django__django-11734
-- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=1
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/db/models/sql/query.py
-    - line: 1705
-    - statement: if isinstance(filter_rhs, F):
-    - note: In Query.split_exclude (with the rewrite at 1706): excluding across a multi-valued relation re-hosts the condition into a freshly built inner query one subquery level deeper, so a plain F rhs is correctly converted to OuterRef(name) pointing at the split-off query — but an rhs that is ALREADY an OuterRef needs its resolution deferred one extra level (OuterRef wrapping an OuterRef unwraps once per resolve), and because OuterRef subclasses F it silently falls into this branch and is rebuilt at the same depth as OuterRef(filter_rhs.name). The reference then binds to the inner query's immediate outer — the excluding queryset's own model — instead of the query the user's OuterRef targeted: at base the fail_to_pass test dies with FieldError: Cannot resolve keyword 'job' into field. Choices are: description, id, jobresponsibilities, jobs (resolved against Responsibility — the issue title's 'uses wrong model'; the issue's annotate variants surface instead as ValueError 'This queryset contains a reference to an outer query...'). Gold prepends an isinstance(filter_rhs, OuterRef) branch producing OuterRef(filter_rhs), the double wrap.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/db/models/sql/query.py
-    - line: None
-    - statement: if isinstance(filter_rhs, F): filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
-    - note: OuterRef is an F subclass, so an already outer-scoped reference is handled as a local F name. In a nested exclude subquery this loses one level of correlation and resolves job against Responsibility rather than the enclosing JobResponsibilities query.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ['tests/queries/tests.py:2817  self.assertTrue(qs.exists())'], 'Eshgin_Annotation': ['tests/queries/tests.py:2817  self.assertTrue(qs.exists())', 'tests/queries/tests.py:2819  self.assertFalse(qs.exists())']}
-
-### django__django-11740
-- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/db/migrations/autodetector.py
-    - line: 966
-    - statement: self.add_operation(app_label, operations.AlterField(model_name=model_name, name=field_name, field=field, preserve_default=preserve_default))
-    - note: Statement spanning base 966-974 in MigrationAutodetector.generate_altered_fields: the AlterField operation is registered with no dependencies argument, so when a field alteration introduces a relation — the issue's UUIDField changed to ForeignKey(App2) — the emitted migration carries no dependency on the target model's app. Every other operation-generation path that can introduce a foreign key threads _get_dependencies_for_foreign_key through add_operation (added fields at 852-857, created models at 591, and 489/1105), giving the dependency resolver the (app_label, object_name) edges it needs to order and, for cross-app relations, record migration dependencies; the altered-field path alone drops that information, so the AlterField migration in the FK-target's absence fails at load time with ValueError: Related model 'testapp2.App2' cannot be resolved. Gold passes dependencies=dependencies here, fed by two plumbing insertions upstream in the same method: dependencies = [] after base 914 and dependencies.extend(self._get_dependencies_for_foreign_key(new_field)) at the end of the remote-field branch (after base 941). The surrounding logic (rename reconciliation at 917-948, deconstruct comparison at 949-951, m2m guard at 952-954) is faithful and untouched.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/db/migrations/autodetector.py
-    - line: None
-    - statement: self.add_operation( app_label, operations.AlterField( model_name=model_name, name=field_name, field=field, preserve_default=preserve_default, ) )
-    - note: AlterField operations are registered without dependencies derived from a newly introduced relation. Changing an ordinary field into a ForeignKey to another app can therefore run before the target model exists.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ['tests/migrations/test_autodetector.py:2260  changes = self.get_changes([self.author_empty, self.book_with_no_author_fk], [self.author_empty, self.book])'], 'Eshgin_Annotation': ["tests/migrations/test_autodetector.py:2266  self.assertMigrationDependencies(changes, 'otherapp', 0, [('testapp', '__first__')])"]}
-
-### django__django-12406
-- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/forms/models.py
-    - line: 1188
-    - statement: if required and (initial is not None):
-    - note: The empty_label decision in ModelChoiceField.__init__ (if/else spanning base 1188-1191): the empty '---------' choice is suppressed only when the field is required AND has an initial value; in every other case the else-branch at 1191 keeps it. That rule is calibrated for Select, where a blank option is idiomatic even on required fields (it is the widget's unfilled state). RadioSelect has an inherent unfilled state — no radio checked — so the surviving empty choice renders as a checked '---------' radio that looks like a valid selection even when the model field has blank=False. The decision is under-inclusive: it never consults the widget kind or the model's blank. Gold adds the disjunct '(isinstance(self.widget, RadioSelect) and not blank)' to force empty_label=None, and relocates the whole if/else after the Field.__init__ call at 1195-1198 — necessary mechanics, since Field.__init__ is what normalizes the widget kwarg (class to deepcopied instance) into self.widget so isinstance can be tested; the signature also gains blank=False as the parameter surface for the second fault.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/db/models/fields/related.py
-    - line: 978
-    - statement: return super().formfield(**{'form_class': forms.ModelChoiceField, 'queryset': ..., 'to_field_name': ..., **kwargs})
-    - note: Statement spanning base 978-983, ForeignKey.formfield: the kwargs dict forwarded to the form field omits the model field's blank flag, so the information 'blank is not a valid selection' (models.ForeignKey(..., blank=False), which is independent of form required — the issue's model has null=True with blank=False) never crosses the model-to-form boundary and no form-side rule could act on it. Gold adds 'blank': self.blank to this dict (after **kwargs, so it wins). Jointly with the decision at forms/models.py 1188-1191 this constitutes the fault: the decision doesn't ask about blank, and this call couldn't have told it.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/forms/models.py
-    - line: None
-    - statement: if required and (initial is not None): self.empty_label = None else: self.empty_label = empty_label
-    - note: Empty-choice selection considers only required and initial. A required RadioSelect for a nonblank relation incorrectly retains the blank choice.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/db/models/fields/related.py
-    - line: None
-    - statement: return super().formfield(**{ 'form_class': forms.ModelChoiceField, 'queryset': self.remote_field.model._default_manager.using(using), 'to_field_name': self.remote_field.field_name, **kwargs, })
-    - note: ForeignKey form construction does not pass the model field's blank setting to ModelChoiceField, so a radio widget cannot distinguish optional and nonblank relations.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ["tests/model_forms/tests.py:289  list(form.fields['character'].choices)"], 'Eshgin_Annotation': ["tests/model_forms/test_modelchoicefield.py:None  self.assertEqual( list(f.choices), [('', '---------')] + choices if blank else choices, )", "tests/model_forms/tests.py:None  self.assertEqual( list(form.fields['character'].choices), [(character.pk, 'user')], )"]}
 
 ### django__django-13121
 - root causes: Atish_Annotation=1, Eshgin_Annotation=3, agreed=1
@@ -143,21 +75,7 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - same_file_as_other_side: True
 
 ### django__django-13195
-- root causes: Atish_Annotation=4, Eshgin_Annotation=5, agreed=2
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/http/response.py
-    - line: 217
-    - statement: self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')
-    - note: Statement spanning base lines 217-220 in HttpResponseBase.delete_cookie: the deletion Set-Cookie header is emitted with a fixed attribute set that omits samesite entirely (and the def at 213 offers callers no way to supply one — the signature gains samesite=None in gold as the API surface for this). Cookie deletion works by re-sending the cookie expired, and browsers apply the same acceptance rules to that header as to any other: Firefox/Chrome treat a missing SameSite as None and are moving to reject SameSite=None without Secure, so the expiring header for a cookie originally set with SameSite (e.g. the messages cookie's SameSite=Lax) is emitted bare — the reported Firefox warning, and prospectively an ignored deletion, i.e. an undeletable cookie. Gold threads the new parameter into this call (samesite=samesite).
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/contrib/sessions/middleware.py
-    - line: 41
-    - statement: response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)
-    - note: Call spanning base 41-45 in SessionMiddleware.process_response, the session-emptied deletion path: passes path and domain from the SESSION_COOKIE_* settings but not SESSION_COOKIE_SAMESITE, so ending a session emits Set-Cookie: sessionid="" without the SameSite attribute the session cookie was set with. Same joint dependency on the API gap as the messages caller; gold adds samesite=settings.SESSION_COOKIE_SAMESITE.
-    - same_file_as_other_side: True
+- root causes: Atish_Annotation=4, Eshgin_Annotation=5, agreed=4
 - **extra_location** (blocking)
     - only_in: Eshgin_Annotation
     - file: django/http/response.py
@@ -165,21 +83,7 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - statement: def delete_cookie(self, key, path='/', domain=None):
     - note: The deletion API accepts no SameSite value, so callers cannot reproduce that attribute on the expiring Set-Cookie header.
     - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/http/response.py
-    - line: None
-    - statement: self.set_cookie( key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT', )
-    - note: The expired replacement cookie is emitted without SameSite and only derives Secure from its name, so SameSite=None deletion may also be ignored by browsers that require Secure.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/contrib/sessions/middleware.py
-    - line: None
-    - statement: response.delete_cookie( settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN, )
-    - note: Session-cookie removal likewise omits SESSION_COOKIE_SAMESITE, causing the deletion header to differ from the original cookie's scope.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ["tests/responses/test_cookie.py:131  response.delete_cookie('c', samesite='lax')", 'tests/sessions_tests/tests.py:797  str(response.cookies[settings.SESSION_COOKIE_NAME])'], 'Eshgin_Annotation': ["tests/messages_tests/test_cookie.py:None  self.assertEqual( response.cookies['messages']['samesite'], settings.SESSION_COOKIE_SAMESITE, )", "tests/responses/test_cookie.py:127  self.assertIs(response.cookies['c']['secure'], True)", "tests/responses/test_cookie.py:132  self.assertEqual(response.cookies['c']['samesite'], 'lax')", 'tests/sessions_tests/tests.py:None  self.assertEqual( \'Set-Cookie: {}=""; expires=Thu, 01 Jan 1970 00:00:00 GMT; \' \'Max-Age=0; Path=/; SameSite={}\'.format( settings.SESSION_COOKIE_NAME, settings.SESSION_COOKIE_SAMESITE, ), str(response.cookies[settings.SESSION_COOKIE_NAME]) )']}
+- _info_ ftcs_differs: {'Atish_Annotation': ["tests/responses/test_cookie.py:131  response.delete_cookie('c', samesite='lax')", 'tests/sessions_tests/tests.py:797  str(response.cookies[settings.SESSION_COOKIE_NAME])'], 'Eshgin_Annotation': ["tests/messages_tests/test_cookie.py:89  self.assertEqual( response.cookies['messages']['samesite'], settings.SESSION_COOKIE_SAMESITE, )", "tests/responses/test_cookie.py:127  self.assertIs(response.cookies['c']['secure'], True)", "tests/responses/test_cookie.py:132  self.assertEqual(response.cookies['c']['samesite'], 'lax')", 'tests/sessions_tests/tests.py:759  self.assertEqual( \'Set-Cookie: {}=""; expires=Thu, 01 Jan 1970 00:00:00 GMT; \' \'Max-Age=0; Path=/; SameSite={}\'.format( settings.SESSION_COOKIE_NAME, settings.SESSION_COOKIE_SAMESITE, ), str(response.cookies[settings.SESSION_COOKIE_NAME]) )']}
 
 ### django__django-13343
 - root causes: Atish_Annotation=2, Eshgin_Annotation=1, agreed=1
@@ -219,24 +123,6 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - note: Window lacked a SQLite-specific rendering path for DecimalField output.
     - same_file_as_other_side: True
 - _info_ ftcs_differs: {'Atish_Annotation': ['tests/expressions_window/tests.py:219  self.assertQuerysetEqual(qs, [...])'], 'Eshgin_Annotation': ["tests/expressions_window/tests.py:214  qs = Employee.objects.annotate(lag=Window(expression=Lag(expression='bonus', offset=1), partition_by=F('department'), order_by=[F('bonus').asc(), F('name').asc()]))", 'tests/expressions_window/tests.py:219  self.assertQuerysetEqual(qs, [...], transform=lambda row: (row.name, row.bonus, row.department, row.lag))']}
-
-### django__django-13810
-- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/core/handlers/base.py
-    - line: 54
-    - statement: handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)
-    - note: Statement spanning base lines 54-57 inside load_middleware's per-middleware try block. The fault is a premature commit of loop state: it rebinds the accumulated handler to a version adapted for THIS middleware's sync/async mode before line 58's middleware(handler) — the call that may raise MiddlewareNotUsed to declare the middleware skipped. On the skip path (continue at 65) the rebinding is never rolled back, while the paired bookkeeping handler_is_async is only updated for used middleware (line 89), so the chain state becomes inconsistent: handler has been mode-converted (e.g. async wrapped down to sync for a sync-only middleware) but handler_is_async still says otherwise. The next middleware's adapt_method_mode then trusts the stale flag and skips re-adaptation, wiring a sync callable where a coroutine function is required — under ASGI the response cycle ends in TypeError: object HttpResponse can't be used in 'await' expression. The raising statement at 58 is a faithful emitter (MiddlewareNotUsed is the documented skip mechanism; the fix merely renames its argument), the except/continue handling at 59-65 is faithful, and every adequate fix must defer or undo this handler commit on the not-used path — the gold patch assigns to a temporary and commits in the try's else clause.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/core/handlers/base.py
-    - line: None
-    - statement: handler = self.adapt_method_mode( middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path, )
-    - note: The handler variable is replaced before middleware construction succeeds. If construction raises MiddlewareNotUsed, the adapted wrapper remains and is passed to the next middleware even though the middleware that required the adaptation was discarded.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ["tests/middleware_exceptions/tests.py:190  response = await self.async_client.get('/middleware_exceptions/view/')"], 'Eshgin_Annotation': ["tests/middleware_exceptions/tests.py:None  self.assertEqual( cm.records[0].getMessage(), 'Asynchronous middleware middleware_exceptions.tests.MyMiddleware ' 'adapted.', )"]}
 
 ### django__django-14007
 - root causes: Atish_Annotation=1, Eshgin_Annotation=3, agreed=1
@@ -293,56 +179,6 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - statement: change_map[alias] = new_alias
     - note: Alias remapping is accumulated without ensuring that source and destination alias sets are disjoint. A later source alias can equal an earlier destination, making relabeling ambiguous and violating Query.change_aliases() invariants.
     - same_file_as_other_side: True
-
-### django__django-15503
-- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/db/models/fields/json.py
-    - line: 196
-    - statement: rhs_params.append("%s%s" % (lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False)))
-    - note: Statement spanning base lines 196-202 in HasKeyLookup.as_sql, building the JSON path parameter for each right-hand-side key on the path-based backends (SQLite/MySQL/Oracle templates). The faulty part is the compile_json_path call at line 200 applied to ALL rhs_key_transforms: compile_json_path (lines 129-139) treats any int()-able element as an array index ('[1111]'), a heuristic that is correct for KeyTransform chains (value__array__0) — and thus correct for the intermediate rhs transforms — but wrong for the final element, which under has_key/has_keys/has_any_keys semantics is always an object key name and must compile as '."1111"'. A numeric key therefore yields a path like $[1111] instead of $."1111" and matches nothing. compile_json_path itself is a faithful helper honoring its documented heuristic (the fix keeps it, exempting only the final key). The patch's HasKey→HasKeyOrArrayIndex swaps at lines 390, 404, and 469 (KeyTransformIsNull.as_oracle/as_sqlite, KeyTransformExact.as_oracle) are fix plumbing: those internal callers pass a KeyTransform-chain key that legitimately may be an array index, and they only need the new subclass to preserve their base behavior once HasKey's final-key compilation changes.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/db/models/fields/json.py
-    - line: None
-    - statement: rhs_params.append( "%s%s" % ( lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False), ) )
-    - note: The entire right-hand path, including its final key, is compiled with the generic JSON path routine. That routine interprets numeric strings as array indexes, although has_key's final component denotes an object key.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ['tests/model_fields/test_jsonfield.py:601  self.assertSequenceEqual('], 'Eshgin_Annotation': ['tests/model_fields/test_jsonfield.py:None  self.assertSequenceEqual( NullableJSONModel.objects.filter(condition), [obj], )']}
-
-### django__django-15732
-- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/db/backends/base/schema.py
-    - line: 565
-    - statement: constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)
-    - note: Statement spanning base lines 565-570 in _delete_composed_index; anchors an absence. The lookup correctly returns every matching constraint on the columns, but nothing afterwards narrows a multi-candidate result even though the method can compute exactly which constraint unique_together created — Django's default name (the IndexName '_uniq' construction used at creation time by _create_unique_sql). On backends that allow multiple unique constraints on the same columns, a field with its own unique=True carries two legitimate matches (e.g. pony_name_key from unique=True and pony_name_..._uniq from unique_together), so the strictness check at 571 fires ValueError('Found wrong number (2) of constraints ...') and the unique_together can never be dropped. The check-and-raise at 571-579 is a faithful guard against genuine ambiguity and survives in the fix; what the gold patch inserts here is the disambiguation step (prefer the default-named constraint when unique matching yields several), with the _unique_constraint_name helper factored out of _create_unique_sql as plumbing so deletion can recompute the same name creation used.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: django/db/backends/base/schema.py
-    - line: 531
-    - statement: model, fields, {"unique": True}, self.sql_delete_unique
-    - note: The constraint_kwargs alter_unique_together passes for deletions (call spanning 530-532): matching on unique alone is under-constrained, because a primary-key constraint is also unique — so for unique_together on a PK field (the issue's literal (('id',),) case) the pkey constraint enters the candidate set alongside the _uniq constraint and the count check fails. The gold patch adds 'primary_key': False here; a PK constraint can never be the unique_together being dropped, so every adequate fix must exclude it from candidacy at this spec (the default-name disambiguation alone would also mask it, but the spec is where the wrong candidate is admitted). Not witnessed by the failing test on this container: on SQLite an AutoField primary key is the rowid and yields no separate introspectable unique constraint, so test_remove_unique_together_on_pk_field passes even at base — the fault manifests on backends like PostgreSQL where the pkey is a distinct constraint.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/db/backends/base/schema.py
-    - line: None
-    - statement: self._delete_composed_index( model, fields, {"unique": True}, self.sql_delete_unique )
-    - note: The deletion specification requires uniqueness but does not exclude primary-key constraints. On backends that expose a primary key as a unique constraint, a unique_together entry on that field admits both constraints as candidates.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: django/db/backends/base/schema.py
-    - line: None
-    - statement: constraint_names = self._constraint_names( model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs, )
-    - note: Constraint lookup identifies a unique_together constraint only by columns and uniqueness. When the same column also has field-level unique=True, both database constraints satisfy those attributes and the intended composed constraint cannot be selected.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ['tests/migrations/test_operations.py:2871  operation.database_forwards(app_label, editor, project_state, new_state)'], 'Eshgin_Annotation': ['tests/migrations/test_operations.py:2873  self.assertConstraintNotExists(table_name, unique_together_constraint_name)']}
 
 ### django__django-16256
 - root causes: Atish_Annotation=9, Eshgin_Annotation=1, agreed=0
@@ -487,24 +323,6 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - note: Variable.quantile had no keep_attrs parameter, so callers could not request attribute preservation at the variable reduction layer.
     - same_file_as_other_side: True
 - _info_ ftcs_differs: {'Atish_Annotation': ['xarray/tests/test_dataarray.py:2306  actual = DataArray(self.va).quantile(q, dim=dim, keep_attrs=True)'], 'Eshgin_Annotation': ['xarray/tests/test_dataarray.py:2306  actual = DataArray(self.va).quantile(q, dim=dim, keep_attrs=True)', 'xarray/tests/test_dataarray.py:2311  assert actual.attrs == self.attrs']}
-
-### pydata__xarray-3993
-- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: xarray/core/dataarray.py
-    - line: 3484
-    - statement: self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None
-    - note: Signature of DataArray.integrate (def on line 3483). The integration parameter is named 'dim', while the sibling APIs Dataset.integrate, Dataset.differentiate and DataArray.differentiate all name it 'coord'. The name is the entire defect: calling da.integrate(coord='x') raises TypeError (unexpected keyword), da.integrate(dim='x') is accepted silently as the ordinary parameter, and no deprecation path exists. The computation itself is correct; the internal forwarding on line 3531 (self._to_temp_dataset().integrate(dim, datetime_unit)) passes the value positionally and is unaffected by the name. This is a nominal/API-consistency fault, not a behavioral one.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
-    - file: xarray/core/dataarray.py
-    - line: None
-    - statement: def integrate( self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None ) -> "DataArray":
-    - note: DataArray exposes the integration coordinate under the name dim, while the corresponding Dataset operation and other coordinate-based DataArray methods use coord. The method provides no compatibility warning that the inconsistent keyword is being retired.
-    - same_file_as_other_side: True
-- _info_ ftcs_differs: {'Atish_Annotation': ['xarray/tests/test_dataset.py:6607  da.integrate(dim="x")'], 'Eshgin_Annotation': ['xarray/tests/test_dataset.py:None  with pytest.warns(FutureWarning): da.integrate(dim="x")']}
 
 ### pydata__xarray-4687
 - root causes: Atish_Annotation=1, Eshgin_Annotation=2, agreed=1
@@ -708,14 +526,7 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - same_file_as_other_side: True
 
 ### sphinx-doc__sphinx-8548
-- root causes: Atish_Annotation=4, Eshgin_Annotation=2, agreed=0
-- **extra_location** (blocking)
-    - only_in: Atish_Annotation
-    - file: sphinx/ext/autodoc/importer.py
-    - line: 310
-    - statement: if analyzer:
-    - note: The entire analyzer block is outside the MRO loop — instance attribute lookup never iterates superclasses.
-    - same_file_as_other_side: True
+- root causes: Atish_Annotation=4, Eshgin_Annotation=2, agreed=1
 - **extra_location** (blocking)
     - only_in: Atish_Annotation
     - file: sphinx/ext/autodoc/importer.py
@@ -739,20 +550,13 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - same_file_as_other_side: True
 - **extra_location** (blocking)
     - only_in: Eshgin_Annotation
-    - file: sphinx/ext/autodoc/importer.py
-    - line: None
-    - statement: if analyzer: namespace = '.'.join(objpath) for (ns, name), docstring in analyzer.attr_docs.items(): if namespace == ns and name not in members: members[name] = ClassAttribute(subject, name, INSTANCEATTR, '\n'.join(docstring))
-    - note: The original get_class_members accepts a single 'analyzer' argument representing only the current class's module analyzer. The 'if analyzer:' block matches attribute docs only against the current class namespace ('.'.join(objpath)), so instance attributes documented in parent classes (e.g. Foo.attr1 inherited by Bar) are never discovered.
-    - same_file_as_other_side: True
-- **extra_location** (blocking)
-    - only_in: Eshgin_Annotation
     - file: sphinx/ext/autodoc/__init__.py
     - line: 1587
     - statement: members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)
     - note: The call site passes self.analyzer, which is the analyzer for the subject class only. This is the externally-scoped single-analyzer that the buggy 'if analyzer:' block in importer.py depends on, reinforcing the MRO-blindness.
     - same_file_as_other_side: False
 - _info_ confidence_differs: {'Atish_Annotation': 'medium', 'Eshgin_Annotation': 'high'}
-- _info_ ftcs_differs: {'Atish_Annotation': ['sphinx/ext/autodoc/__init__.py:1587  members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)', 'tests/test_ext_autodoc_autoclass.py:83  assert list(actual) == [...]'], 'Eshgin_Annotation': ["tests/test_ext_autodoc_autoclass.py:None  actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)"]}
+- _info_ ftcs_differs: {'Atish_Annotation': ['sphinx/ext/autodoc/__init__.py:1587  members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)', 'tests/test_ext_autodoc_autoclass.py:83  assert list(actual) == [...]'], 'Eshgin_Annotation': ["tests/test_ext_autodoc_autoclass.py:82  actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)"]}
 
 ### sphinx-doc__sphinx-9602
 - root causes: Atish_Annotation=4, Eshgin_Annotation=3, agreed=3
@@ -795,7 +599,7 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
 - **extra_location** (blocking)
     - only_in: Eshgin_Annotation
     - file: sympy/polys/polytools.py
-    - line: None
+    - line: 5908
     - statement: if arg.is_Mul: args.extend(arg.args) continue
     - note: The symbolic square-free path flattens a product into independent arguments before factoring them, so factors with the same multiplicity are emitted separately instead of being combined into one square-free factor.
     - same_file_as_other_side: True
@@ -886,7 +690,7 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
     - same_file_as_other_side: True
 - _info_ ftcs_differs: {'Atish_Annotation': ["sympy/codegen/tests/test_rewriting.py:269  assert cc(-x**4) == '-(x*x*x*x)'", "sympy/printing/tests/test_pycode.py:33  assert prntr.doprint(-Mod(x, y)) == '-(x % y)'", 'sympy/utilities/tests/test_lambdify.py:275  assert no_modules(3, 7) == -3'], 'Eshgin_Annotation': ["sympy/printing/tests/test_pycode.py:33  assert prntr.doprint(-Mod(x, y)) == '-(x % y)'", "sympy/printing/tests/test_pycode.py:34  assert prntr.doprint(Mod(-x, y)) == '(-x) % y'", 'sympy/utilities/tests/test_lambdify.py:274  assert no_modules(3, 7) == empty_modules(3, 7)']}
 
-## Full agreement on root cause (87)
+## Full agreement on root cause (94)
 
 ### astropy__astropy-13579
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
@@ -934,8 +738,20 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
 - _info_ ftcs_differs: {'Atish_Annotation': ["tests/mail/tests.py:374  self.assertIn('@xn--p8s937b>', email.message()['Message-ID'])", 'tests/mail/tests.py:860  num_sent = mail.get_connection().send_messages([email])'], 'Eshgin_Annotation': ["tests/mail/tests.py:374  self.assertIn('@xn--p8s937b>', email.message()['Message-ID'])"]}
 
+### django__django-11734
+- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
+- _info_ ftcs_differs: {'Atish_Annotation': ['tests/queries/tests.py:2817  self.assertTrue(qs.exists())'], 'Eshgin_Annotation': ['tests/queries/tests.py:2817  self.assertTrue(qs.exists())', 'tests/queries/tests.py:2819  self.assertFalse(qs.exists())']}
+
+### django__django-11740
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- _info_ ftcs_differs: {'Atish_Annotation': ['tests/migrations/test_autodetector.py:2260  changes = self.get_changes([self.author_empty, self.book_with_no_author_fk], [self.author_empty, self.book])'], 'Eshgin_Annotation': ["tests/migrations/test_autodetector.py:2266  self.assertMigrationDependencies(changes, 'otherapp', 0, [('testapp', '__first__')])"]}
+
 ### django__django-12155
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+
+### django__django-12406
+- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
+- _info_ ftcs_differs: {'Atish_Annotation': ["tests/model_forms/tests.py:289  list(form.fields['character'].choices)"], 'Eshgin_Annotation': ["tests/model_forms/test_modelchoicefield.py:157  self.assertEqual( list(f.choices), [('', '---------')] + choices if blank else choices, )", "tests/model_forms/tests.py:288  self.assertEqual( list(form.fields['character'].choices), [(character.pk, 'user')], )"]}
 
 ### django__django-13297
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
@@ -946,6 +762,10 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
 ### django__django-13512
 - root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
 - _info_ ftcs_differs: {'Atish_Annotation': ['tests/admin_utils/tests.py:196  self.assertEqual(display_for_field(value, models.JSONField(), self.empty_value), display_value)', 'tests/forms_tests/field_tests/test_jsonfield.py:32  self.assertEqual(field.prepare_value(\'你好，世界\'), \'"你好，世界"\')'], 'Eshgin_Annotation': ['tests/admin_utils/tests.py:194  self.assertEqual(', 'tests/forms_tests/field_tests/test_jsonfield.py:32  self.assertEqual(field.prepare_value(\'你好，世界\'), \'"你好，世界"\')']}
+
+### django__django-13810
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- _info_ ftcs_differs: {'Atish_Annotation': ["tests/middleware_exceptions/tests.py:190  response = await self.async_client.get('/middleware_exceptions/view/')"], 'Eshgin_Annotation': ["tests/middleware_exceptions/tests.py:193  self.assertEqual( cm.records[0].getMessage(), 'Asynchronous middleware middleware_exceptions.tests.MyMiddleware ' 'adapted.', )"]}
 
 ### django__django-14011
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
@@ -964,6 +784,10 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
 - _info_ confidence_differs: {'Atish_Annotation': 'high', 'Eshgin_Annotation': 'medium'}
 
+### django__django-15503
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- _info_ ftcs_differs: {'Atish_Annotation': ['tests/model_fields/test_jsonfield.py:601  self.assertSequenceEqual('], 'Eshgin_Annotation': ['tests/model_fields/test_jsonfield.py:601  self.assertSequenceEqual( NullableJSONModel.objects.filter(condition), [obj], )']}
+
 ### django__django-15554
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
 
@@ -976,6 +800,10 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
 
 ### django__django-15629
 - root causes: Atish_Annotation=4, Eshgin_Annotation=4, agreed=4
+
+### django__django-15732
+- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
+- _info_ ftcs_differs: {'Atish_Annotation': ['tests/migrations/test_operations.py:2871  operation.database_forwards(app_label, editor, project_state, new_state)'], 'Eshgin_Annotation': ['tests/migrations/test_operations.py:2873  self.assertConstraintNotExists(table_name, unique_together_constraint_name)']}
 
 ### django__django-15916
 - root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
@@ -1051,6 +879,10 @@ Disagreement composition (100 conflicting locations): **extra_location** 100 (10
 
 ### pydata__xarray-3095
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+
+### pydata__xarray-3993
+- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- _info_ ftcs_differs: {'Atish_Annotation': ['xarray/tests/test_dataset.py:6607  da.integrate(dim="x")'], 'Eshgin_Annotation': ['xarray/tests/test_dataset.py:6606  with pytest.warns(FutureWarning): da.integrate(dim="x")']}
 
 ### pydata__xarray-6599
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1

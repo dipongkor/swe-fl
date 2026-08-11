@@ -4,8 +4,8 @@
   "primary": "Atish_Annotation",
   "line_shift_tolerance": 10,
   "counts": {
-    "agree": 87,
-    "conflict": 43
+    "agree": 94,
+    "conflict": 36
   },
   "agreement_metrics": {
     "file": {
@@ -15,26 +15,26 @@
       "alpha_masi": 0.9569474226632757
     },
     "statement": {
-      "jaccard_micro": 0.6444444444444445,
-      "jaccard_macro": 0.7601465201465202,
-      "dice_micro": 0.7837837837837838,
-      "alpha_masi": 0.7240629297316432
+      "jaccard_micro": 0.7209302325581395,
+      "jaccard_macro": 0.816923076923077,
+      "dice_micro": 0.8378378378378378,
+      "alpha_masi": 0.7810485662101303
     },
     "line": {
-      "jaccard_micro": 0.6451612903225806,
-      "jaccard_macro": 0.7597619047619047,
-      "dice_micro": 0.7843137254901961,
-      "alpha_masi": 0.7238060740734649
+      "jaccard_micro": 0.7164179104477612,
+      "jaccard_macro": 0.8165384615384615,
+      "dice_micro": 0.8347826086956521,
+      "alpha_masi": 0.7807915973913305
     },
     "full": {
-      "jaccard_micro": 0.6428571428571429,
-      "jaccard_macro": 0.7597619047619047,
-      "dice_micro": 0.782608695652174,
-      "alpha_masi": 0.7238060740734649
+      "jaccard_micro": 0.7164179104477612,
+      "jaccard_macro": 0.8165384615384615,
+      "dice_micro": 0.8347826086956521,
+      "alpha_masi": 0.7807915973913305
     }
   },
   "conflict_types": {
-    "extra_location": 100
+    "extra_location": 76
   },
   "instances": [
     {
@@ -504,7 +504,7 @@
     },
     {
       "instance_id": "django__django-11734",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
@@ -513,33 +513,17 @@
       "n_b": 2,
       "agreed": [
         {
+          "file": "django/db/models/sql/query.py",
+          "line": 1705,
+          "statement": "if isinstance(filter_rhs, F):"
+        },
+        {
           "file": "django/db/models/fields/related_lookups.py",
           "line": 104,
           "statement": "if not isinstance(self.lhs, MultiColSource) and self.rhs_is_direct_value():"
         }
       ],
-      "conflicts": [
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
-          "file": "django/db/models/sql/query.py",
-          "line": 1705,
-          "statement": "if isinstance(filter_rhs, F):",
-          "note": "In Query.split_exclude (with the rewrite at 1706): excluding across a multi-valued relation re-hosts the condition into a freshly built inner query one subquery level deeper, so a plain F rhs is correctly converted to OuterRef(name) pointing at the split-off query — but an rhs that is ALREADY an OuterRef needs its resolution deferred one extra level (OuterRef wrapping an OuterRef unwraps once per resolve), and because OuterRef subclasses F it silently falls into this branch and is rebuilt at the same depth as OuterRef(filter_rhs.name). The reference then binds to the inner query's immediate outer — the excluding queryset's own model — instead of the query the user's OuterRef targeted: at base the fail_to_pass test dies with FieldError: Cannot resolve keyword 'job' into field. Choices are: description, id, jobresponsibilities, jobs (resolved against Responsibility — the issue title's 'uses wrong model'; the issue's annotate variants surface instead as ValueError 'This queryset contains a reference to an outer query...'). Gold prepends an isinstance(filter_rhs, OuterRef) branch producing OuterRef(filter_rhs), the double wrap.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/db/models/sql/query.py",
-          "line": null,
-          "statement": "if isinstance(filter_rhs, F): filter_expr = (filter_lhs, OuterRef(filter_rhs.name))",
-          "note": "OuterRef is an F subclass, so an already outer-scoped reference is handled as a local F name. In a nested exclude subquery this loses one level of correlation and resolves job against Responsibility rather than the enclosing JobResponsibilities query.",
-          "same_file_as_other_side": true
-        }
-      ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -552,40 +536,25 @@
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "django__django-11740",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
       ],
       "n_a": 1,
       "n_b": 1,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/db/migrations/autodetector.py",
           "line": 966,
-          "statement": "self.add_operation(app_label, operations.AlterField(model_name=model_name, name=field_name, field=field, preserve_default=preserve_default))",
-          "note": "Statement spanning base 966-974 in MigrationAutodetector.generate_altered_fields: the AlterField operation is registered with no dependencies argument, so when a field alteration introduces a relation — the issue's UUIDField changed to ForeignKey(App2) — the emitted migration carries no dependency on the target model's app. Every other operation-generation path that can introduce a foreign key threads _get_dependencies_for_foreign_key through add_operation (added fields at 852-857, created models at 591, and 489/1105), giving the dependency resolver the (app_label, object_name) edges it needs to order and, for cross-app relations, record migration dependencies; the altered-field path alone drops that information, so the AlterField migration in the FK-target's absence fails at load time with ValueError: Related model 'testapp2.App2' cannot be resolved. Gold passes dependencies=dependencies here, fed by two plumbing insertions upstream in the same method: dependencies = [] after base 914 and dependencies.extend(self._get_dependencies_for_foreign_key(new_field)) at the end of the remote-field branch (after base 941). The surrounding logic (rename reconciliation at 917-948, deconstruct comparison at 949-951, m2m guard at 952-954) is faithful and untouched.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/db/migrations/autodetector.py",
-          "line": null,
-          "statement": "self.add_operation( app_label, operations.AlterField( model_name=model_name, name=field_name, field=field, preserve_default=preserve_default, ) )",
-          "note": "AlterField operations are registered without dependencies derived from a newly introduced relation. Changing an ordinary field into a ForeignKey to another app can therefore run before the target model exists.",
-          "same_file_as_other_side": true
+          "statement": "self.add_operation(app_label, operations.AlterField(model_name=model_name, name=field_name, field=field, preserve_default=preserve_default))"
         }
       ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -597,7 +566,7 @@
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "django__django-12155",
@@ -621,56 +590,26 @@
     },
     {
       "instance_id": "django__django-12406",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
       ],
       "n_a": 2,
       "n_b": 2,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/forms/models.py",
           "line": 1188,
-          "statement": "if required and (initial is not None):",
-          "note": "The empty_label decision in ModelChoiceField.__init__ (if/else spanning base 1188-1191): the empty '---------' choice is suppressed only when the field is required AND has an initial value; in every other case the else-branch at 1191 keeps it. That rule is calibrated for Select, where a blank option is idiomatic even on required fields (it is the widget's unfilled state). RadioSelect has an inherent unfilled state — no radio checked — so the surviving empty choice renders as a checked '---------' radio that looks like a valid selection even when the model field has blank=False. The decision is under-inclusive: it never consults the widget kind or the model's blank. Gold adds the disjunct '(isinstance(self.widget, RadioSelect) and not blank)' to force empty_label=None, and relocates the whole if/else after the Field.__init__ call at 1195-1198 — necessary mechanics, since Field.__init__ is what normalizes the widget kwarg (class to deepcopied instance) into self.widget so isinstance can be tested; the signature also gains blank=False as the parameter surface for the second fault.",
-          "same_file_as_other_side": true
+          "statement": "if required and (initial is not None):"
         },
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/db/models/fields/related.py",
           "line": 978,
-          "statement": "return super().formfield(**{'form_class': forms.ModelChoiceField, 'queryset': ..., 'to_field_name': ..., **kwargs})",
-          "note": "Statement spanning base 978-983, ForeignKey.formfield: the kwargs dict forwarded to the form field omits the model field's blank flag, so the information 'blank is not a valid selection' (models.ForeignKey(..., blank=False), which is independent of form required — the issue's model has null=True with blank=False) never crosses the model-to-form boundary and no form-side rule could act on it. Gold adds 'blank': self.blank to this dict (after **kwargs, so it wins). Jointly with the decision at forms/models.py 1188-1191 this constitutes the fault: the decision doesn't ask about blank, and this call couldn't have told it.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/forms/models.py",
-          "line": null,
-          "statement": "if required and (initial is not None): self.empty_label = None else: self.empty_label = empty_label",
-          "note": "Empty-choice selection considers only required and initial. A required RadioSelect for a nonblank relation incorrectly retains the blank choice.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/db/models/fields/related.py",
-          "line": null,
-          "statement": "return super().formfield(**{ 'form_class': forms.ModelChoiceField, 'queryset': self.remote_field.model._default_manager.using(using), 'to_field_name': self.remote_field.field_name, **kwargs, })",
-          "note": "ForeignKey form construction does not pass the model field's blank setting to ModelChoiceField, so a radio widget cannot distinguish optional and nonblank relations.",
-          "same_file_as_other_side": true
+          "statement": "return super().formfield(**{ 'form_class': forms.ModelChoiceField, 'queryset': self.remote_field.model._default_manager.using(using), 'to_field_name': self.remote_field.field_name, **kwargs, })"
         }
       ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -678,12 +617,12 @@
             "tests/model_forms/tests.py:289  list(form.fields['character'].choices)"
           ],
           "Eshgin_Annotation": [
-            "tests/model_forms/test_modelchoicefield.py:None  self.assertEqual( list(f.choices), [('', '---------')] + choices if blank else choices, )",
-            "tests/model_forms/tests.py:None  self.assertEqual( list(form.fields['character'].choices), [(character.pk, 'user')], )"
+            "tests/model_forms/test_modelchoicefield.py:157  self.assertEqual( list(f.choices), [('', '---------')] + choices if blank else choices, )",
+            "tests/model_forms/tests.py:288  self.assertEqual( list(form.fields['character'].choices), [(character.pk, 'user')], )"
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "django__django-13121",
@@ -801,6 +740,11 @@
       "agreed": [
         {
           "file": "django/http/response.py",
+          "line": 217,
+          "statement": "self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')"
+        },
+        {
+          "file": "django/http/response.py",
           "line": 216,
           "statement": "secure = key.startswith(('__Secure-', '__Host-'))"
         },
@@ -808,29 +752,14 @@
           "file": "django/contrib/messages/storage/cookie.py",
           "line": 95,
           "statement": "response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)"
+        },
+        {
+          "file": "django/contrib/sessions/middleware.py",
+          "line": 41,
+          "statement": "response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)"
         }
       ],
       "conflicts": [
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
-          "file": "django/http/response.py",
-          "line": 217,
-          "statement": "self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')",
-          "note": "Statement spanning base lines 217-220 in HttpResponseBase.delete_cookie: the deletion Set-Cookie header is emitted with a fixed attribute set that omits samesite entirely (and the def at 213 offers callers no way to supply one — the signature gains samesite=None in gold as the API surface for this). Cookie deletion works by re-sending the cookie expired, and browsers apply the same acceptance rules to that header as to any other: Firefox/Chrome treat a missing SameSite as None and are moving to reject SameSite=None without Secure, so the expiring header for a cookie originally set with SameSite (e.g. the messages cookie's SameSite=Lax) is emitted bare — the reported Firefox warning, and prospectively an ignored deletion, i.e. an undeletable cookie. Gold threads the new parameter into this call (samesite=samesite).",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
-          "file": "django/contrib/sessions/middleware.py",
-          "line": 41,
-          "statement": "response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)",
-          "note": "Call spanning base 41-45 in SessionMiddleware.process_response, the session-emptied deletion path: passes path and domain from the SESSION_COOKIE_* settings but not SESSION_COOKIE_SAMESITE, so ending a session emits Set-Cookie: sessionid=\"\" without the SameSite attribute the session cookie was set with. Same joint dependency on the API gap as the messages caller; gold adds samesite=settings.SESSION_COOKIE_SAMESITE.",
-          "same_file_as_other_side": true
-        },
         {
           "type": "extra_location",
           "severity": "blocking",
@@ -839,26 +768,6 @@
           "line": 213,
           "statement": "def delete_cookie(self, key, path='/', domain=None):",
           "note": "The deletion API accepts no SameSite value, so callers cannot reproduce that attribute on the expiring Set-Cookie header.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/http/response.py",
-          "line": null,
-          "statement": "self.set_cookie( key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT', )",
-          "note": "The expired replacement cookie is emitted without SameSite and only derives Secure from its name, so SameSite=None deletion may also be ignored by browsers that require Secure.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/contrib/sessions/middleware.py",
-          "line": null,
-          "statement": "response.delete_cookie( settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN, )",
-          "note": "Session-cookie removal likewise omits SESSION_COOKIE_SAMESITE, causing the deletion header to differ from the original cookie's scope.",
           "same_file_as_other_side": true
         }
       ],
@@ -870,10 +779,10 @@
             "tests/sessions_tests/tests.py:797  str(response.cookies[settings.SESSION_COOKIE_NAME])"
           ],
           "Eshgin_Annotation": [
-            "tests/messages_tests/test_cookie.py:None  self.assertEqual( response.cookies['messages']['samesite'], settings.SESSION_COOKIE_SAMESITE, )",
+            "tests/messages_tests/test_cookie.py:89  self.assertEqual( response.cookies['messages']['samesite'], settings.SESSION_COOKIE_SAMESITE, )",
             "tests/responses/test_cookie.py:127  self.assertIs(response.cookies['c']['secure'], True)",
             "tests/responses/test_cookie.py:132  self.assertEqual(response.cookies['c']['samesite'], 'lax')",
-            "tests/sessions_tests/tests.py:None  self.assertEqual( 'Set-Cookie: {}=\"\"; expires=Thu, 01 Jan 1970 00:00:00 GMT; ' 'Max-Age=0; Path=/; SameSite={}'.format( settings.SESSION_COOKIE_NAME, settings.SESSION_COOKIE_SAMESITE, ), str(response.cookies[settings.SESSION_COOKIE_NAME]) )"
+            "tests/sessions_tests/tests.py:759  self.assertEqual( 'Set-Cookie: {}=\"\"; expires=Thu, 01 Jan 1970 00:00:00 GMT; ' 'Max-Age=0; Path=/; SameSite={}'.format( settings.SESSION_COOKIE_NAME, settings.SESSION_COOKIE_SAMESITE, ), str(response.cookies[settings.SESSION_COOKIE_NAME]) )"
           ]
         }
       ],
@@ -1091,36 +1000,21 @@
     },
     {
       "instance_id": "django__django-13810",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
       ],
       "n_a": 1,
       "n_b": 1,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/core/handlers/base.py",
           "line": 54,
-          "statement": "handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)",
-          "note": "Statement spanning base lines 54-57 inside load_middleware's per-middleware try block. The fault is a premature commit of loop state: it rebinds the accumulated handler to a version adapted for THIS middleware's sync/async mode before line 58's middleware(handler) — the call that may raise MiddlewareNotUsed to declare the middleware skipped. On the skip path (continue at 65) the rebinding is never rolled back, while the paired bookkeeping handler_is_async is only updated for used middleware (line 89), so the chain state becomes inconsistent: handler has been mode-converted (e.g. async wrapped down to sync for a sync-only middleware) but handler_is_async still says otherwise. The next middleware's adapt_method_mode then trusts the stale flag and skips re-adaptation, wiring a sync callable where a coroutine function is required — under ASGI the response cycle ends in TypeError: object HttpResponse can't be used in 'await' expression. The raising statement at 58 is a faithful emitter (MiddlewareNotUsed is the documented skip mechanism; the fix merely renames its argument), the except/continue handling at 59-65 is faithful, and every adequate fix must defer or undo this handler commit on the not-used path — the gold patch assigns to a temporary and commits in the try's else clause.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/core/handlers/base.py",
-          "line": null,
-          "statement": "handler = self.adapt_method_mode( middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path, )",
-          "note": "The handler variable is replaced before middleware construction succeeds. If construction raises MiddlewareNotUsed, the adapted wrapper remains and is passed to the next middleware even though the middleware that required the adaptation was discarded.",
-          "same_file_as_other_side": true
+          "statement": "handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)"
         }
       ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -1128,11 +1022,11 @@
             "tests/middleware_exceptions/tests.py:190  response = await self.async_client.get('/middleware_exceptions/view/')"
           ],
           "Eshgin_Annotation": [
-            "tests/middleware_exceptions/tests.py:None  self.assertEqual( cm.records[0].getMessage(), 'Asynchronous middleware middleware_exceptions.tests.MyMiddleware ' 'adapted.', )"
+            "tests/middleware_exceptions/tests.py:193  self.assertEqual( cm.records[0].getMessage(), 'Asynchronous middleware middleware_exceptions.tests.MyMiddleware ' 'adapted.', )"
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "django__django-14007",
@@ -1418,36 +1312,21 @@
     },
     {
       "instance_id": "django__django-15503",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
       ],
       "n_a": 1,
       "n_b": 1,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/db/models/fields/json.py",
           "line": 196,
-          "statement": "rhs_params.append(\"%s%s\" % (lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False)))",
-          "note": "Statement spanning base lines 196-202 in HasKeyLookup.as_sql, building the JSON path parameter for each right-hand-side key on the path-based backends (SQLite/MySQL/Oracle templates). The faulty part is the compile_json_path call at line 200 applied to ALL rhs_key_transforms: compile_json_path (lines 129-139) treats any int()-able element as an array index ('[1111]'), a heuristic that is correct for KeyTransform chains (value__array__0) — and thus correct for the intermediate rhs transforms — but wrong for the final element, which under has_key/has_keys/has_any_keys semantics is always an object key name and must compile as '.\"1111\"'. A numeric key therefore yields a path like $[1111] instead of $.\"1111\" and matches nothing. compile_json_path itself is a faithful helper honoring its documented heuristic (the fix keeps it, exempting only the final key). The patch's HasKey→HasKeyOrArrayIndex swaps at lines 390, 404, and 469 (KeyTransformIsNull.as_oracle/as_sqlite, KeyTransformExact.as_oracle) are fix plumbing: those internal callers pass a KeyTransform-chain key that legitimately may be an array index, and they only need the new subclass to preserve their base behavior once HasKey's final-key compilation changes.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/db/models/fields/json.py",
-          "line": null,
-          "statement": "rhs_params.append( \"%s%s\" % ( lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False), ) )",
-          "note": "The entire right-hand path, including its final key, is compiled with the generic JSON path routine. That routine interprets numeric strings as array indexes, although has_key's final component denotes an object key.",
-          "same_file_as_other_side": true
+          "statement": "rhs_params.append(\"%s%s\" % (lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False)))"
         }
       ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -1455,11 +1334,11 @@
             "tests/model_fields/test_jsonfield.py:601  self.assertSequenceEqual("
           ],
           "Eshgin_Annotation": [
-            "tests/model_fields/test_jsonfield.py:None  self.assertSequenceEqual( NullableJSONModel.objects.filter(condition), [obj], )"
+            "tests/model_fields/test_jsonfield.py:601  self.assertSequenceEqual( NullableJSONModel.objects.filter(condition), [obj], )"
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "django__django-15554",
@@ -1584,56 +1463,26 @@
     },
     {
       "instance_id": "django__django-15732",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
       ],
       "n_a": 2,
       "n_b": 2,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/db/backends/base/schema.py",
           "line": 565,
-          "statement": "constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)",
-          "note": "Statement spanning base lines 565-570 in _delete_composed_index; anchors an absence. The lookup correctly returns every matching constraint on the columns, but nothing afterwards narrows a multi-candidate result even though the method can compute exactly which constraint unique_together created — Django's default name (the IndexName '_uniq' construction used at creation time by _create_unique_sql). On backends that allow multiple unique constraints on the same columns, a field with its own unique=True carries two legitimate matches (e.g. pony_name_key from unique=True and pony_name_..._uniq from unique_together), so the strictness check at 571 fires ValueError('Found wrong number (2) of constraints ...') and the unique_together can never be dropped. The check-and-raise at 571-579 is a faithful guard against genuine ambiguity and survives in the fix; what the gold patch inserts here is the disambiguation step (prefer the default-named constraint when unique matching yields several), with the _unique_constraint_name helper factored out of _create_unique_sql as plumbing so deletion can recompute the same name creation used.",
-          "same_file_as_other_side": true
+          "statement": "constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)"
         },
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "django/db/backends/base/schema.py",
           "line": 531,
-          "statement": "model, fields, {\"unique\": True}, self.sql_delete_unique",
-          "note": "The constraint_kwargs alter_unique_together passes for deletions (call spanning 530-532): matching on unique alone is under-constrained, because a primary-key constraint is also unique — so for unique_together on a PK field (the issue's literal (('id',),) case) the pkey constraint enters the candidate set alongside the _uniq constraint and the count check fails. The gold patch adds 'primary_key': False here; a PK constraint can never be the unique_together being dropped, so every adequate fix must exclude it from candidacy at this spec (the default-name disambiguation alone would also mask it, but the spec is where the wrong candidate is admitted). Not witnessed by the failing test on this container: on SQLite an AutoField primary key is the rowid and yields no separate introspectable unique constraint, so test_remove_unique_together_on_pk_field passes even at base — the fault manifests on backends like PostgreSQL where the pkey is a distinct constraint.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/db/backends/base/schema.py",
-          "line": null,
-          "statement": "self._delete_composed_index( model, fields, {\"unique\": True}, self.sql_delete_unique )",
-          "note": "The deletion specification requires uniqueness but does not exclude primary-key constraints. On backends that expose a primary key as a unique constraint, a unique_together entry on that field admits both constraints as candidates.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "django/db/backends/base/schema.py",
-          "line": null,
-          "statement": "constraint_names = self._constraint_names( model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs, )",
-          "note": "Constraint lookup identifies a unique_together constraint only by columns and uniqueness. When the same column also has field-level unique=True, both database constraints satisfy those attributes and the intended composed constraint cannot be selected.",
-          "same_file_as_other_side": true
+          "statement": "model, fields, {\"unique\": True}, self.sql_delete_unique"
         }
       ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -1645,7 +1494,7 @@
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "django__django-15916",
@@ -2550,36 +2399,21 @@
     },
     {
       "instance_id": "pydata__xarray-3993",
-      "status": "conflict",
+      "status": "agree",
       "annotators": [
         "Atish_Annotation",
         "Eshgin_Annotation"
       ],
       "n_a": 1,
       "n_b": 1,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "xarray/core/dataarray.py",
           "line": 3484,
-          "statement": "self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None",
-          "note": "Signature of DataArray.integrate (def on line 3483). The integration parameter is named 'dim', while the sibling APIs Dataset.integrate, Dataset.differentiate and DataArray.differentiate all name it 'coord'. The name is the entire defect: calling da.integrate(coord='x') raises TypeError (unexpected keyword), da.integrate(dim='x') is accepted silently as the ordinary parameter, and no deprecation path exists. The computation itself is correct; the internal forwarding on line 3531 (self._to_temp_dataset().integrate(dim, datetime_unit)) passes the value positionally and is unaffected by the name. This is a nominal/API-consistency fault, not a behavioral one.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
-          "file": "xarray/core/dataarray.py",
-          "line": null,
-          "statement": "def integrate( self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None ) -> \"DataArray\":",
-          "note": "DataArray exposes the integration coordinate under the name dim, while the corresponding Dataset operation and other coordinate-based DataArray methods use coord. The method provides no compatibility warning that the inconsistent keyword is being retired.",
-          "same_file_as_other_side": true
+          "statement": "self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None"
         }
       ],
+      "conflicts": [],
       "informational": [
         {
           "type": "ftcs_differs",
@@ -2587,11 +2421,11 @@
             "xarray/tests/test_dataset.py:6607  da.integrate(dim=\"x\")"
           ],
           "Eshgin_Annotation": [
-            "xarray/tests/test_dataset.py:None  with pytest.warns(FutureWarning): da.integrate(dim=\"x\")"
+            "xarray/tests/test_dataset.py:6606  with pytest.warns(FutureWarning): da.integrate(dim=\"x\")"
           ]
         }
       ],
-      "mergeable": false
+      "mergeable": true
     },
     {
       "instance_id": "pydata__xarray-4687",
@@ -3824,18 +3658,14 @@
       ],
       "n_a": 4,
       "n_b": 2,
-      "agreed": [],
-      "conflicts": [
+      "agreed": [
         {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Atish_Annotation",
           "file": "sphinx/ext/autodoc/importer.py",
           "line": 310,
-          "statement": "if analyzer:",
-          "note": "The entire analyzer block is outside the MRO loop — instance attribute lookup never iterates superclasses.",
-          "same_file_as_other_side": true
-        },
+          "statement": "if analyzer:"
+        }
+      ],
+      "conflicts": [
         {
           "type": "extra_location",
           "severity": "blocking",
@@ -3870,16 +3700,6 @@
           "type": "extra_location",
           "severity": "blocking",
           "only_in": "Eshgin_Annotation",
-          "file": "sphinx/ext/autodoc/importer.py",
-          "line": null,
-          "statement": "if analyzer: namespace = '.'.join(objpath) for (ns, name), docstring in analyzer.attr_docs.items(): if namespace == ns and name not in members: members[name] = ClassAttribute(subject, name, INSTANCEATTR, '\\n'.join(docstring))",
-          "note": "The original get_class_members accepts a single 'analyzer' argument representing only the current class's module analyzer. The 'if analyzer:' block matches attribute docs only against the current class namespace ('.'.join(objpath)), so instance attributes documented in parent classes (e.g. Foo.attr1 inherited by Bar) are never discovered.",
-          "same_file_as_other_side": true
-        },
-        {
-          "type": "extra_location",
-          "severity": "blocking",
-          "only_in": "Eshgin_Annotation",
           "file": "sphinx/ext/autodoc/__init__.py",
           "line": 1587,
           "statement": "members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)",
@@ -3900,7 +3720,7 @@
             "tests/test_ext_autodoc_autoclass.py:83  assert list(actual) == [...]"
           ],
           "Eshgin_Annotation": [
-            "tests/test_ext_autodoc_autoclass.py:None  actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)"
+            "tests/test_ext_autodoc_autoclass.py:82  actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)"
           ]
         }
       ],
@@ -4357,7 +4177,7 @@
           "severity": "blocking",
           "only_in": "Eshgin_Annotation",
           "file": "sympy/polys/polytools.py",
-          "line": null,
+          "line": 5908,
           "statement": "if arg.is_Mul: args.extend(arg.args) continue",
           "note": "The symbolic square-free path flattens a product into independent arguments before factoring them, so factors with the same multiplicity are emitted separately instead of being combined into one square-free factor.",
           "same_file_as_other_side": true

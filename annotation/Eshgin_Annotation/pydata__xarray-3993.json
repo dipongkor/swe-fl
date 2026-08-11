@@ -4,7 +4,7 @@
     {
       "file": "xarray/core/dataarray.py",
       "line": 3484,
-      "statement": "def integrate(\n    self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n) -> \"DataArray\":",
+      "statement": "self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None",
       "method": "integrate",
       "class": "DataArray",
       "note": "DataArray exposes the integration coordinate under the name dim, while the corresponding Dataset operation and other coordinate-based DataArray methods use coord. The method provides no compatibility warning that the inconsistent keyword is being retired."

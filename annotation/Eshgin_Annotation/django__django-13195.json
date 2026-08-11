@@ -20,7 +20,7 @@
     {
       "file": "django/http/response.py",
       "line": 217,
-      "statement": "self.set_cookie(\n    key, max_age=0, path=path, domain=domain, secure=secure,\n    expires='Thu, 01 Jan 1970 00:00:00 GMT',\n)",
+      "statement": "self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')",
       "method": "delete_cookie",
       "class": "HttpResponseBase",
       "note": "The expired replacement cookie is emitted without SameSite and only derives Secure from its name, so SameSite=None deletion may also be ignored by browsers that require Secure."
@@ -36,7 +36,7 @@
     {
       "file": "django/contrib/sessions/middleware.py",
       "line": 41,
-      "statement": "response.delete_cookie(\n    settings.SESSION_COOKIE_NAME,\n    path=settings.SESSION_COOKIE_PATH,\n    domain=settings.SESSION_COOKIE_DOMAIN,\n)",
+      "statement": "response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)",
       "method": "process_response",
       "class": "SessionMiddleware",
       "note": "Session-cookie removal likewise omits SESSION_COOKIE_SAMESITE, causing the deletion header to differ from the original cookie's scope."
