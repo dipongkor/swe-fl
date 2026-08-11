@@ -3,7 +3,7 @@
   "root_cause": [
     {
       "file": "django/db/models/fields/json.py",
-      "line": "196-202",
+      "line": 196,
       "statement": "rhs_params.append(\n    \"%s%s\"\n    % (\n        lhs_json_path,\n        compile_json_path(rhs_key_transforms, include_root=False),\n    )\n)",
       "method": "as_sql",
       "class": "HasKeyLookup",
@@ -14,7 +14,7 @@
   "fault_triggering_call_site": [
     {
       "file": "tests/model_fields/test_jsonfield.py",
-      "line": "601-604",
+      "line": 601,
       "statement": "self.assertSequenceEqual(\n    NullableJSONModel.objects.filter(condition),\n    [obj],\n)",
       "note": "For numeric-key has_key, has_keys, and has_any_keys conditions, the queryset does not contain the object whose JSON dictionaries have those keys."
     }
