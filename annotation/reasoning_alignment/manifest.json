@@ -1,0 +1,3386 @@
+{
+  "c0": {
+    "instance_id": "astropy__astropy-13579",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c1": {
+    "instance_id": "astropy__astropy-13579",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c2": {
+    "instance_id": "astropy__astropy-13579",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c3": {
+    "instance_id": "astropy__astropy-13579",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c4": {
+    "instance_id": "astropy__astropy-13579",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c5": {
+    "instance_id": "astropy__astropy-13579",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c6": {
+    "instance_id": "astropy__astropy-14365",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c7": {
+    "instance_id": "astropy__astropy-14365",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c8": {
+    "instance_id": "astropy__astropy-14365",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c9": {
+    "instance_id": "astropy__astropy-14365",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c10": {
+    "instance_id": "astropy__astropy-14365",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c11": {
+    "instance_id": "astropy__astropy-14365",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c12": {
+    "instance_id": "astropy__astropy-14598",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c13": {
+    "instance_id": "astropy__astropy-14598",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c14": {
+    "instance_id": "astropy__astropy-14598",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c15": {
+    "instance_id": "astropy__astropy-14598",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c16": {
+    "instance_id": "astropy__astropy-14598",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c17": {
+    "instance_id": "astropy__astropy-14598",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c18": {
+    "instance_id": "astropy__astropy-7606",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c19": {
+    "instance_id": "astropy__astropy-7606",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c20": {
+    "instance_id": "astropy__astropy-7606",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c21": {
+    "instance_id": "astropy__astropy-7606",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c22": {
+    "instance_id": "astropy__astropy-7606",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c23": {
+    "instance_id": "astropy__astropy-7606",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c24": {
+    "instance_id": "astropy__astropy-7671",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c25": {
+    "instance_id": "astropy__astropy-7671",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c26": {
+    "instance_id": "astropy__astropy-7671",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c27": {
+    "instance_id": "astropy__astropy-7671",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c28": {
+    "instance_id": "astropy__astropy-7671",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c29": {
+    "instance_id": "astropy__astropy-7671",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c30": {
+    "instance_id": "astropy__astropy-8707",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c31": {
+    "instance_id": "astropy__astropy-8707",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c32": {
+    "instance_id": "astropy__astropy-8707",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c33": {
+    "instance_id": "astropy__astropy-8707",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c34": {
+    "instance_id": "astropy__astropy-8707",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c35": {
+    "instance_id": "astropy__astropy-8707",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c36": {
+    "instance_id": "astropy__astropy-8872",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c37": {
+    "instance_id": "astropy__astropy-8872",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c38": {
+    "instance_id": "astropy__astropy-8872",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c39": {
+    "instance_id": "astropy__astropy-8872",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c40": {
+    "instance_id": "astropy__astropy-8872",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c41": {
+    "instance_id": "astropy__astropy-8872",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c42": {
+    "instance_id": "django__django-10554",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c43": {
+    "instance_id": "django__django-10554",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c44": {
+    "instance_id": "django__django-10554",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c45": {
+    "instance_id": "django__django-10554",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c46": {
+    "instance_id": "django__django-10554",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c47": {
+    "instance_id": "django__django-10554",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c48": {
+    "instance_id": "django__django-11138",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c49": {
+    "instance_id": "django__django-11138",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c50": {
+    "instance_id": "django__django-11138",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c51": {
+    "instance_id": "django__django-11138",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c52": {
+    "instance_id": "django__django-11138",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c53": {
+    "instance_id": "django__django-11138",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c54": {
+    "instance_id": "django__django-11265",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c55": {
+    "instance_id": "django__django-11265",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c56": {
+    "instance_id": "django__django-11265",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c57": {
+    "instance_id": "django__django-11265",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c58": {
+    "instance_id": "django__django-11265",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c59": {
+    "instance_id": "django__django-11265",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c60": {
+    "instance_id": "django__django-11400",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c61": {
+    "instance_id": "django__django-11400",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c62": {
+    "instance_id": "django__django-11400",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c63": {
+    "instance_id": "django__django-11400",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c64": {
+    "instance_id": "django__django-11400",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c65": {
+    "instance_id": "django__django-11400",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c66": {
+    "instance_id": "django__django-11532",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c67": {
+    "instance_id": "django__django-11532",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c68": {
+    "instance_id": "django__django-11532",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c69": {
+    "instance_id": "django__django-11532",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c70": {
+    "instance_id": "django__django-11532",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c71": {
+    "instance_id": "django__django-11532",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c72": {
+    "instance_id": "django__django-11734",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c73": {
+    "instance_id": "django__django-11734",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c74": {
+    "instance_id": "django__django-11734",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c75": {
+    "instance_id": "django__django-11734",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c76": {
+    "instance_id": "django__django-11734",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c77": {
+    "instance_id": "django__django-11734",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c78": {
+    "instance_id": "django__django-11740",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c79": {
+    "instance_id": "django__django-11740",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c80": {
+    "instance_id": "django__django-11740",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c81": {
+    "instance_id": "django__django-11740",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c82": {
+    "instance_id": "django__django-11740",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c83": {
+    "instance_id": "django__django-11740",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c84": {
+    "instance_id": "django__django-12155",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c85": {
+    "instance_id": "django__django-12155",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c86": {
+    "instance_id": "django__django-12155",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c87": {
+    "instance_id": "django__django-12155",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c88": {
+    "instance_id": "django__django-12155",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c89": {
+    "instance_id": "django__django-12155",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c90": {
+    "instance_id": "django__django-12406",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c91": {
+    "instance_id": "django__django-12406",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c92": {
+    "instance_id": "django__django-12406",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c93": {
+    "instance_id": "django__django-12406",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c94": {
+    "instance_id": "django__django-12406",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c95": {
+    "instance_id": "django__django-12406",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c96": {
+    "instance_id": "django__django-13297",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c97": {
+    "instance_id": "django__django-13297",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c98": {
+    "instance_id": "django__django-13297",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c99": {
+    "instance_id": "django__django-13297",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c100": {
+    "instance_id": "django__django-13297",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c101": {
+    "instance_id": "django__django-13297",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c102": {
+    "instance_id": "django__django-13344",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c103": {
+    "instance_id": "django__django-13344",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c104": {
+    "instance_id": "django__django-13344",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c105": {
+    "instance_id": "django__django-13344",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c106": {
+    "instance_id": "django__django-13344",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c107": {
+    "instance_id": "django__django-13344",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c108": {
+    "instance_id": "django__django-13512",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c109": {
+    "instance_id": "django__django-13512",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c110": {
+    "instance_id": "django__django-13512",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c111": {
+    "instance_id": "django__django-13512",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c112": {
+    "instance_id": "django__django-13512",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c113": {
+    "instance_id": "django__django-13512",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c114": {
+    "instance_id": "django__django-13810",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c115": {
+    "instance_id": "django__django-13810",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c116": {
+    "instance_id": "django__django-13810",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c117": {
+    "instance_id": "django__django-13810",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c118": {
+    "instance_id": "django__django-13810",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c119": {
+    "instance_id": "django__django-13810",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c120": {
+    "instance_id": "django__django-14011",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c121": {
+    "instance_id": "django__django-14011",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c122": {
+    "instance_id": "django__django-14011",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c123": {
+    "instance_id": "django__django-14011",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c124": {
+    "instance_id": "django__django-14011",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c125": {
+    "instance_id": "django__django-14011",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c126": {
+    "instance_id": "django__django-14034",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c127": {
+    "instance_id": "django__django-14034",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c128": {
+    "instance_id": "django__django-14034",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c129": {
+    "instance_id": "django__django-14034",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c130": {
+    "instance_id": "django__django-14034",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c131": {
+    "instance_id": "django__django-14034",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c132": {
+    "instance_id": "django__django-14053",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c133": {
+    "instance_id": "django__django-14053",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c134": {
+    "instance_id": "django__django-14053",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c135": {
+    "instance_id": "django__django-14053",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c136": {
+    "instance_id": "django__django-14053",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c137": {
+    "instance_id": "django__django-14053",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c138": {
+    "instance_id": "django__django-14170",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c139": {
+    "instance_id": "django__django-14170",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c140": {
+    "instance_id": "django__django-14170",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c141": {
+    "instance_id": "django__django-14170",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c142": {
+    "instance_id": "django__django-14170",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c143": {
+    "instance_id": "django__django-14170",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c144": {
+    "instance_id": "django__django-14349",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c145": {
+    "instance_id": "django__django-14349",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c146": {
+    "instance_id": "django__django-14349",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c147": {
+    "instance_id": "django__django-14349",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c148": {
+    "instance_id": "django__django-14349",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c149": {
+    "instance_id": "django__django-14349",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c150": {
+    "instance_id": "django__django-15503",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c151": {
+    "instance_id": "django__django-15503",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c152": {
+    "instance_id": "django__django-15503",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c153": {
+    "instance_id": "django__django-15503",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c154": {
+    "instance_id": "django__django-15503",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c155": {
+    "instance_id": "django__django-15503",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c156": {
+    "instance_id": "django__django-15554",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c157": {
+    "instance_id": "django__django-15554",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c158": {
+    "instance_id": "django__django-15554",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c159": {
+    "instance_id": "django__django-15554",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c160": {
+    "instance_id": "django__django-15554",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c161": {
+    "instance_id": "django__django-15554",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c162": {
+    "instance_id": "django__django-15563",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c163": {
+    "instance_id": "django__django-15563",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c164": {
+    "instance_id": "django__django-15563",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c165": {
+    "instance_id": "django__django-15563",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c166": {
+    "instance_id": "django__django-15563",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c167": {
+    "instance_id": "django__django-15563",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c168": {
+    "instance_id": "django__django-15572",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c169": {
+    "instance_id": "django__django-15572",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c170": {
+    "instance_id": "django__django-15572",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c171": {
+    "instance_id": "django__django-15572",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c172": {
+    "instance_id": "django__django-15572",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c173": {
+    "instance_id": "django__django-15572",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c174": {
+    "instance_id": "django__django-15629",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c175": {
+    "instance_id": "django__django-15629",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c176": {
+    "instance_id": "django__django-15629",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c177": {
+    "instance_id": "django__django-15629",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c178": {
+    "instance_id": "django__django-15629",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c179": {
+    "instance_id": "django__django-15629",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c180": {
+    "instance_id": "django__django-15732",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c181": {
+    "instance_id": "django__django-15732",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c182": {
+    "instance_id": "django__django-15732",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c183": {
+    "instance_id": "django__django-15732",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c184": {
+    "instance_id": "django__django-15732",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c185": {
+    "instance_id": "django__django-15732",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c186": {
+    "instance_id": "django__django-15916",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c187": {
+    "instance_id": "django__django-15916",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c188": {
+    "instance_id": "django__django-15916",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c189": {
+    "instance_id": "django__django-15916",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c190": {
+    "instance_id": "django__django-15916",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c191": {
+    "instance_id": "django__django-15916",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c192": {
+    "instance_id": "django__django-16145",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c193": {
+    "instance_id": "django__django-16145",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c194": {
+    "instance_id": "django__django-16145",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c195": {
+    "instance_id": "django__django-16145",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c196": {
+    "instance_id": "django__django-16145",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c197": {
+    "instance_id": "django__django-16145",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c198": {
+    "instance_id": "django__django-16315",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c199": {
+    "instance_id": "django__django-16315",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c200": {
+    "instance_id": "django__django-16315",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c201": {
+    "instance_id": "django__django-16315",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c202": {
+    "instance_id": "django__django-16315",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c203": {
+    "instance_id": "django__django-16315",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c204": {
+    "instance_id": "django__django-16454",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c205": {
+    "instance_id": "django__django-16454",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c206": {
+    "instance_id": "django__django-16454",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c207": {
+    "instance_id": "django__django-16454",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c208": {
+    "instance_id": "django__django-16454",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c209": {
+    "instance_id": "django__django-16454",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c210": {
+    "instance_id": "django__django-16502",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c211": {
+    "instance_id": "django__django-16502",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c212": {
+    "instance_id": "django__django-16502",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c213": {
+    "instance_id": "django__django-16502",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c214": {
+    "instance_id": "django__django-16502",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c215": {
+    "instance_id": "django__django-16502",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c216": {
+    "instance_id": "django__django-16631",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c217": {
+    "instance_id": "django__django-16631",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c218": {
+    "instance_id": "django__django-16631",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c219": {
+    "instance_id": "django__django-16631",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c220": {
+    "instance_id": "django__django-16631",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c221": {
+    "instance_id": "django__django-16631",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c222": {
+    "instance_id": "django__django-16901",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c223": {
+    "instance_id": "django__django-16901",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c224": {
+    "instance_id": "django__django-16901",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c225": {
+    "instance_id": "django__django-16901",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c226": {
+    "instance_id": "django__django-16901",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c227": {
+    "instance_id": "django__django-16901",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c228": {
+    "instance_id": "django__django-16938",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c229": {
+    "instance_id": "django__django-16938",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c230": {
+    "instance_id": "django__django-16938",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c231": {
+    "instance_id": "django__django-16938",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c232": {
+    "instance_id": "django__django-16938",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c233": {
+    "instance_id": "django__django-16938",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c234": {
+    "instance_id": "django__django-17084",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c235": {
+    "instance_id": "django__django-17084",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c236": {
+    "instance_id": "django__django-17084",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c237": {
+    "instance_id": "django__django-17084",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c238": {
+    "instance_id": "django__django-17084",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c239": {
+    "instance_id": "django__django-17084",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c240": {
+    "instance_id": "matplotlib__matplotlib-20859",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c241": {
+    "instance_id": "matplotlib__matplotlib-20859",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c242": {
+    "instance_id": "matplotlib__matplotlib-20859",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c243": {
+    "instance_id": "matplotlib__matplotlib-20859",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c244": {
+    "instance_id": "matplotlib__matplotlib-20859",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c245": {
+    "instance_id": "matplotlib__matplotlib-20859",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c246": {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c247": {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c248": {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c249": {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c250": {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c251": {
+    "instance_id": "matplotlib__matplotlib-23299",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c252": {
+    "instance_id": "matplotlib__matplotlib-24026",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c253": {
+    "instance_id": "matplotlib__matplotlib-24026",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c254": {
+    "instance_id": "matplotlib__matplotlib-24026",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c255": {
+    "instance_id": "matplotlib__matplotlib-24026",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c256": {
+    "instance_id": "matplotlib__matplotlib-24026",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c257": {
+    "instance_id": "matplotlib__matplotlib-24026",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c258": {
+    "instance_id": "matplotlib__matplotlib-25287",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c259": {
+    "instance_id": "matplotlib__matplotlib-25287",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c260": {
+    "instance_id": "matplotlib__matplotlib-25287",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c261": {
+    "instance_id": "matplotlib__matplotlib-25287",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c262": {
+    "instance_id": "matplotlib__matplotlib-25287",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c263": {
+    "instance_id": "matplotlib__matplotlib-25287",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c264": {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c265": {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c266": {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c267": {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c268": {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c269": {
+    "instance_id": "matplotlib__matplotlib-25311",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c270": {
+    "instance_id": "matplotlib__matplotlib-25479",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c271": {
+    "instance_id": "matplotlib__matplotlib-25479",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c272": {
+    "instance_id": "matplotlib__matplotlib-25479",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c273": {
+    "instance_id": "matplotlib__matplotlib-25479",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c274": {
+    "instance_id": "matplotlib__matplotlib-25479",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c275": {
+    "instance_id": "matplotlib__matplotlib-25479",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c276": {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c277": {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c278": {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c279": {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c280": {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c281": {
+    "instance_id": "matplotlib__matplotlib-25960",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c282": {
+    "instance_id": "matplotlib__matplotlib-26466",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c283": {
+    "instance_id": "matplotlib__matplotlib-26466",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c284": {
+    "instance_id": "matplotlib__matplotlib-26466",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c285": {
+    "instance_id": "matplotlib__matplotlib-26466",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c286": {
+    "instance_id": "matplotlib__matplotlib-26466",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c287": {
+    "instance_id": "matplotlib__matplotlib-26466",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c288": {
+    "instance_id": "mwaskom__seaborn-3187",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c289": {
+    "instance_id": "mwaskom__seaborn-3187",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c290": {
+    "instance_id": "mwaskom__seaborn-3187",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c291": {
+    "instance_id": "mwaskom__seaborn-3187",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c292": {
+    "instance_id": "mwaskom__seaborn-3187",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c293": {
+    "instance_id": "mwaskom__seaborn-3187",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c294": {
+    "instance_id": "psf__requests-2317",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c295": {
+    "instance_id": "psf__requests-2317",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c296": {
+    "instance_id": "psf__requests-2317",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c297": {
+    "instance_id": "psf__requests-2317",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c298": {
+    "instance_id": "psf__requests-2317",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c299": {
+    "instance_id": "psf__requests-2317",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c300": {
+    "instance_id": "psf__requests-2931",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c301": {
+    "instance_id": "psf__requests-2931",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c302": {
+    "instance_id": "psf__requests-2931",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c303": {
+    "instance_id": "psf__requests-2931",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c304": {
+    "instance_id": "psf__requests-2931",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c305": {
+    "instance_id": "psf__requests-2931",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c306": {
+    "instance_id": "pydata__xarray-3095",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c307": {
+    "instance_id": "pydata__xarray-3095",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c308": {
+    "instance_id": "pydata__xarray-3095",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c309": {
+    "instance_id": "pydata__xarray-3095",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c310": {
+    "instance_id": "pydata__xarray-3095",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c311": {
+    "instance_id": "pydata__xarray-3095",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c312": {
+    "instance_id": "pydata__xarray-3993",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c313": {
+    "instance_id": "pydata__xarray-3993",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c314": {
+    "instance_id": "pydata__xarray-3993",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c315": {
+    "instance_id": "pydata__xarray-3993",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c316": {
+    "instance_id": "pydata__xarray-3993",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c317": {
+    "instance_id": "pydata__xarray-3993",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c318": {
+    "instance_id": "pydata__xarray-6599",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c319": {
+    "instance_id": "pydata__xarray-6599",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c320": {
+    "instance_id": "pydata__xarray-6599",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c321": {
+    "instance_id": "pydata__xarray-6599",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c322": {
+    "instance_id": "pydata__xarray-6599",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c323": {
+    "instance_id": "pydata__xarray-6599",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c324": {
+    "instance_id": "pydata__xarray-6938",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c325": {
+    "instance_id": "pydata__xarray-6938",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c326": {
+    "instance_id": "pydata__xarray-6938",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c327": {
+    "instance_id": "pydata__xarray-6938",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c328": {
+    "instance_id": "pydata__xarray-6938",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c329": {
+    "instance_id": "pydata__xarray-6938",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c330": {
+    "instance_id": "pydata__xarray-7229",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c331": {
+    "instance_id": "pydata__xarray-7229",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c332": {
+    "instance_id": "pydata__xarray-7229",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c333": {
+    "instance_id": "pydata__xarray-7229",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c334": {
+    "instance_id": "pydata__xarray-7229",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c335": {
+    "instance_id": "pydata__xarray-7229",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c336": {
+    "instance_id": "pylint-dev__pylint-4604",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c337": {
+    "instance_id": "pylint-dev__pylint-4604",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c338": {
+    "instance_id": "pylint-dev__pylint-4604",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c339": {
+    "instance_id": "pylint-dev__pylint-4604",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c340": {
+    "instance_id": "pylint-dev__pylint-4604",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c341": {
+    "instance_id": "pylint-dev__pylint-4604",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c342": {
+    "instance_id": "pylint-dev__pylint-6528",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c343": {
+    "instance_id": "pylint-dev__pylint-6528",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c344": {
+    "instance_id": "pylint-dev__pylint-6528",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c345": {
+    "instance_id": "pylint-dev__pylint-6528",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c346": {
+    "instance_id": "pylint-dev__pylint-6528",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c347": {
+    "instance_id": "pylint-dev__pylint-6528",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c348": {
+    "instance_id": "pylint-dev__pylint-8898",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c349": {
+    "instance_id": "pylint-dev__pylint-8898",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c350": {
+    "instance_id": "pylint-dev__pylint-8898",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c351": {
+    "instance_id": "pylint-dev__pylint-8898",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c352": {
+    "instance_id": "pylint-dev__pylint-8898",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c353": {
+    "instance_id": "pylint-dev__pylint-8898",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c354": {
+    "instance_id": "pytest-dev__pytest-10051",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c355": {
+    "instance_id": "pytest-dev__pytest-10051",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c356": {
+    "instance_id": "pytest-dev__pytest-10051",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c357": {
+    "instance_id": "pytest-dev__pytest-10051",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c358": {
+    "instance_id": "pytest-dev__pytest-10051",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c359": {
+    "instance_id": "pytest-dev__pytest-10051",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c360": {
+    "instance_id": "pytest-dev__pytest-6197",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c361": {
+    "instance_id": "pytest-dev__pytest-6197",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c362": {
+    "instance_id": "pytest-dev__pytest-6197",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c363": {
+    "instance_id": "pytest-dev__pytest-6197",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c364": {
+    "instance_id": "pytest-dev__pytest-6197",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c365": {
+    "instance_id": "pytest-dev__pytest-6197",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c366": {
+    "instance_id": "pytest-dev__pytest-7205",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c367": {
+    "instance_id": "pytest-dev__pytest-7205",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c368": {
+    "instance_id": "pytest-dev__pytest-7205",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c369": {
+    "instance_id": "pytest-dev__pytest-7205",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c370": {
+    "instance_id": "pytest-dev__pytest-7205",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c371": {
+    "instance_id": "pytest-dev__pytest-7205",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c372": {
+    "instance_id": "pytest-dev__pytest-7236",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c373": {
+    "instance_id": "pytest-dev__pytest-7236",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c374": {
+    "instance_id": "pytest-dev__pytest-7236",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c375": {
+    "instance_id": "pytest-dev__pytest-7236",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c376": {
+    "instance_id": "pytest-dev__pytest-7236",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c377": {
+    "instance_id": "pytest-dev__pytest-7236",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c378": {
+    "instance_id": "pytest-dev__pytest-7324",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c379": {
+    "instance_id": "pytest-dev__pytest-7324",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c380": {
+    "instance_id": "pytest-dev__pytest-7324",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c381": {
+    "instance_id": "pytest-dev__pytest-7324",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c382": {
+    "instance_id": "pytest-dev__pytest-7324",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c383": {
+    "instance_id": "pytest-dev__pytest-7324",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c384": {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c385": {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c386": {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c387": {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c388": {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c389": {
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c390": {
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c391": {
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c392": {
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c393": {
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c394": {
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c395": {
+    "instance_id": "scikit-learn__scikit-learn-12973",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c396": {
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c397": {
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c398": {
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c399": {
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c400": {
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c401": {
+    "instance_id": "scikit-learn__scikit-learn-13124",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c402": {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c403": {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c404": {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c405": {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c406": {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c407": {
+    "instance_id": "scikit-learn__scikit-learn-13142",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c408": {
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c409": {
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c410": {
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c411": {
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c412": {
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c413": {
+    "instance_id": "scikit-learn__scikit-learn-25931",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c414": {
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c415": {
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c416": {
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c417": {
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c418": {
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c419": {
+    "instance_id": "scikit-learn__scikit-learn-25973",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c420": {
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c421": {
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c422": {
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c423": {
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c424": {
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c425": {
+    "instance_id": "scikit-learn__scikit-learn-26194",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c426": {
+    "instance_id": "scikit-learn__scikit-learn-9288",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c427": {
+    "instance_id": "scikit-learn__scikit-learn-9288",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c428": {
+    "instance_id": "scikit-learn__scikit-learn-9288",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c429": {
+    "instance_id": "scikit-learn__scikit-learn-9288",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c430": {
+    "instance_id": "scikit-learn__scikit-learn-9288",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c431": {
+    "instance_id": "scikit-learn__scikit-learn-9288",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c432": {
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c433": {
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c434": {
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c435": {
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c436": {
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c437": {
+    "instance_id": "sphinx-doc__sphinx-10449",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c438": {
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c439": {
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c440": {
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c441": {
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c442": {
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c443": {
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c444": {
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c445": {
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c446": {
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c447": {
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c448": {
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c449": {
+    "instance_id": "sphinx-doc__sphinx-7462",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c450": {
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c451": {
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c452": {
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c453": {
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c454": {
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c455": {
+    "instance_id": "sphinx-doc__sphinx-7910",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c456": {
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c457": {
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c458": {
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c459": {
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c460": {
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c461": {
+    "instance_id": "sphinx-doc__sphinx-8056",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c462": {
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c463": {
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c464": {
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c465": {
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c466": {
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c467": {
+    "instance_id": "sphinx-doc__sphinx-8120",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c468": {
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c469": {
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c470": {
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c471": {
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c472": {
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c473": {
+    "instance_id": "sphinx-doc__sphinx-8475",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c474": {
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c475": {
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c476": {
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c477": {
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c478": {
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c479": {
+    "instance_id": "sphinx-doc__sphinx-8551",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c480": {
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c481": {
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c482": {
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c483": {
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c484": {
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c485": {
+    "instance_id": "sphinx-doc__sphinx-9320",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c486": {
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c487": {
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c488": {
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c489": {
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c490": {
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c491": {
+    "instance_id": "sphinx-doc__sphinx-9658",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c492": {
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c493": {
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c494": {
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c495": {
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c496": {
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c497": {
+    "instance_id": "sphinx-doc__sphinx-9711",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c498": {
+    "instance_id": "sympy__sympy-13877",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c499": {
+    "instance_id": "sympy__sympy-13877",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c500": {
+    "instance_id": "sympy__sympy-13877",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c501": {
+    "instance_id": "sympy__sympy-13877",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c502": {
+    "instance_id": "sympy__sympy-13877",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c503": {
+    "instance_id": "sympy__sympy-13877",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c504": {
+    "instance_id": "sympy__sympy-14248",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c505": {
+    "instance_id": "sympy__sympy-14248",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c506": {
+    "instance_id": "sympy__sympy-14248",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c507": {
+    "instance_id": "sympy__sympy-14248",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c508": {
+    "instance_id": "sympy__sympy-14248",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c509": {
+    "instance_id": "sympy__sympy-14248",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c510": {
+    "instance_id": "sympy__sympy-15345",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c511": {
+    "instance_id": "sympy__sympy-15345",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c512": {
+    "instance_id": "sympy__sympy-15345",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c513": {
+    "instance_id": "sympy__sympy-15345",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c514": {
+    "instance_id": "sympy__sympy-15345",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c515": {
+    "instance_id": "sympy__sympy-15345",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c516": {
+    "instance_id": "sympy__sympy-15976",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c517": {
+    "instance_id": "sympy__sympy-15976",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c518": {
+    "instance_id": "sympy__sympy-15976",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c519": {
+    "instance_id": "sympy__sympy-15976",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c520": {
+    "instance_id": "sympy__sympy-15976",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c521": {
+    "instance_id": "sympy__sympy-15976",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c522": {
+    "instance_id": "sympy__sympy-16597",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c523": {
+    "instance_id": "sympy__sympy-16597",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c524": {
+    "instance_id": "sympy__sympy-16597",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c525": {
+    "instance_id": "sympy__sympy-16597",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c526": {
+    "instance_id": "sympy__sympy-16597",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c527": {
+    "instance_id": "sympy__sympy-16597",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c528": {
+    "instance_id": "sympy__sympy-16792",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c529": {
+    "instance_id": "sympy__sympy-16792",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c530": {
+    "instance_id": "sympy__sympy-16792",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c531": {
+    "instance_id": "sympy__sympy-16792",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c532": {
+    "instance_id": "sympy__sympy-16792",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c533": {
+    "instance_id": "sympy__sympy-16792",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c534": {
+    "instance_id": "sympy__sympy-17318",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c535": {
+    "instance_id": "sympy__sympy-17318",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c536": {
+    "instance_id": "sympy__sympy-17318",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c537": {
+    "instance_id": "sympy__sympy-17318",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c538": {
+    "instance_id": "sympy__sympy-17318",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c539": {
+    "instance_id": "sympy__sympy-17318",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c540": {
+    "instance_id": "sympy__sympy-19495",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c541": {
+    "instance_id": "sympy__sympy-19495",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c542": {
+    "instance_id": "sympy__sympy-19495",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c543": {
+    "instance_id": "sympy__sympy-19495",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c544": {
+    "instance_id": "sympy__sympy-19495",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c545": {
+    "instance_id": "sympy__sympy-19495",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c546": {
+    "instance_id": "sympy__sympy-20438",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c547": {
+    "instance_id": "sympy__sympy-20438",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c548": {
+    "instance_id": "sympy__sympy-20438",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c549": {
+    "instance_id": "sympy__sympy-20438",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c550": {
+    "instance_id": "sympy__sympy-20438",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c551": {
+    "instance_id": "sympy__sympy-20438",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c552": {
+    "instance_id": "sympy__sympy-21379",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c553": {
+    "instance_id": "sympy__sympy-21379",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c554": {
+    "instance_id": "sympy__sympy-21379",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c555": {
+    "instance_id": "sympy__sympy-21379",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c556": {
+    "instance_id": "sympy__sympy-21379",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c557": {
+    "instance_id": "sympy__sympy-21379",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c558": {
+    "instance_id": "sympy__sympy-24562",
+    "ordering": 0,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c559": {
+    "instance_id": "sympy__sympy-24562",
+    "ordering": 0,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c560": {
+    "instance_id": "sympy__sympy-24562",
+    "ordering": 0,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  },
+  "c561": {
+    "instance_id": "sympy__sympy-24562",
+    "ordering": 1,
+    "provider": "anthropic",
+    "model": "claude-opus-4-8"
+  },
+  "c562": {
+    "instance_id": "sympy__sympy-24562",
+    "ordering": 1,
+    "provider": "openai",
+    "model": "gpt-5.3-codex"
+  },
+  "c563": {
+    "instance_id": "sympy__sympy-24562",
+    "ordering": 1,
+    "provider": "google",
+    "model": "gemini-3.6-flash"
+  }
+}

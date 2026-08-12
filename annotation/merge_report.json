@@ -2028,9 +2028,9 @@
           "severity": "blocking",
           "only_in": "Atish_Annotation",
           "file": "lib/matplotlib/offsetbox.py",
-          "line": 1443,
+          "line": 1449,
           "statement": "def draw(self, renderer):",
-          "note": "Anchors an absence, not a faulty statement: AnnotationBbox.draw renders the artist entirely through its child artists (self.arrow_patch.draw, self.patch.draw, self.offsetbox.draw at lines 1453-1455) and at no point communicates the AnnotationBbox's own gid to the renderer. Composite artists propagate their gid by bracketing their child draws in renderer.open_group(..., gid=self.get_gid()) / renderer.close_group(...), which the SVG backend turns into a <g id=...> element; this method has no such bracketing, so a gid set via set_gid exists on the artist but never reaches the output. The child draw calls themselves are faithful, since each child correctly emits its own (unset) gid.",
+          "note": "Anchors an absence, not a faulty statement: AnnotationBbox.draw renders the artist entirely through its child artists (self.arrow_patch.draw, self.patch.draw, self.offsetbox.draw at base lines 1459-1461) and at no point communicates the AnnotationBbox's own gid to the renderer. Composite artists propagate their gid by bracketing their child draws in renderer.open_group(..., gid=self.get_gid()) / renderer.close_group(...), which the SVG backend turns into a <g id=...> element; this method has no such bracketing, so a gid set via set_gid exists on the artist but never reaches the output. The child draw calls themselves are faithful, since each child correctly emits its own (unset) gid.",
           "same_file_as_other_side": true
         },
         {
@@ -2044,7 +2044,17 @@
           "same_file_as_other_side": true
         }
       ],
-      "informational": [],
+      "informational": [
+        {
+          "type": "ftcs_differs",
+          "Atish_Annotation": [
+            "lib/matplotlib/tests/test_backend_svg.py:643  assert expected in buf"
+          ],
+          "Eshgin_Annotation": [
+            "lib/matplotlib/tests/test_backend_svg.py:622  assert expected in buf"
+          ]
+        }
+      ],
       "mergeable": false
     },
     {
