@@ -94,6 +94,18 @@ JURORS = [
 LABELS = ["aligned", "partial", "divergent", "contradictory"]
 LABEL_RANK = {lab: i for i, lab in enumerate(LABELS)}
 
+# one-line description per label (surfaced as a legend in the report)
+LABEL_DESC = {
+    "aligned": "Same causal mechanism; both describe the same faulty behavior "
+               "producing the same failure (may differ only in wording/detail).",
+    "partial": "Consistent but uneven; one annotator names a step, condition, or "
+               "cause the other omits, with no conflict between them.",
+    "divergent": "Different mechanisms that could both be true at once; two "
+                 "distinct causal stories that don't clash.",
+    "contradictory": "Incompatible mechanisms that can't both be true; the "
+                     "annotators make opposing claims about what the code does.",
+}
+
 # Forced JSON verdict [Gu2026, "Standardizing LLMs' output format", p.12].
 OUTPUT_SCHEMA = {
     "type": "object",
@@ -445,6 +457,9 @@ def write_reports(results: dict, jurors: list[dict]) -> None:
     for lab in LABELS + [None]:
         if dist.get(lab):
             lines.append(f"- {lab}: **{dist[lab]}**")
+    lines += ["", "## Label legend", ""]
+    for lab in LABELS:
+        lines.append(f"- **{lab}** — {LABEL_DESC[lab]}")
     lines += ["",
               "## Reliability signals", "",
               f"- Cross-model disagreements: **{model_split}** / {len(results)}",

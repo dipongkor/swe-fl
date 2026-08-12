@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annotation viewer — Atish vs Eshgin</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --border: #d9dde3; --text: #1c2530;
+    --muted: #6b7480; --accent: #2b6cb0; --code-bg: #f0f2f5;
+    --agree: #2f855a; --conflict: #c05621; --a-tint: #eef5fb; --b-tint: #f3f0fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171c; --panel: #1c2027; --border: #2c3138; --text: #e5e9ef;
+      --muted: #9aa4b0; --accent: #63b3ed; --code-bg: #12151a;
+      --agree: #68d391; --conflict: #f6ad55; --a-tint: #172230; --b-tint: #1e1a2c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text);
+  }
+  header {
+    position: sticky; top: 0; z-index: 10; background: var(--panel);
+    border-bottom: 1px solid var(--border); padding: 12px 20px;
+    display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  header .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  label { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  select {
+    font: inherit; padding: 5px 8px; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--panel); color: var(--text); min-width: 260px;
+  }
+  .status-badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+  .status-badge.agree { color: var(--agree); }
+  .status-badge.conflict { color: var(--conflict); }
+  main { padding: 20px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .col {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden;
+  }
+  .col.a .col-head { background: var(--a-tint); }
+  .col.b .col-head { background: var(--b-tint); }
+  .col-head {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    font-weight: 600; display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .col-head .n { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .section { padding: 14px 16px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section h3 {
+    margin: 0 0 10px; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600;
+  }
+  .loc { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .loc:last-child { margin-bottom: 0; }
+  .loc .where { font-size: 13px; color: var(--accent); font-weight: 600; word-break: break-all; }
+  .loc pre {
+    margin: 8px 0 0; padding: 8px 10px; background: var(--code-bg); border-radius: 6px;
+    font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-x: auto; white-space: pre;
+  }
+  .loc .note { margin: 8px 0 0; font-size: 13.5px; color: var(--text); }
+  .loc .note b { color: var(--muted); font-weight: 600; }
+  .reasoning { white-space: pre-wrap; font-size: 14px; }
+  .muted { color: var(--muted); font-style: italic; }
+  .hint { color: var(--muted); padding: 40px 20px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Annotation viewer</h1>
+  <div class="controls">
+    <label>Instance
+      <select id="instance"><option value="">— select —</option></select>
+    </label>
+    <label>Show
+      <select id="filter">
+        <option value="all">all</option>
+        <option value="agree">agree only</option>
+        <option value="conflict">conflict only</option>
+      </select>
+    </label>
+    <span id="status" class="status-badge" hidden></span>
+  </div>
+</header>
+
+<main>
+  <div id="empty" class="hint">Pick an instance to compare the two annotations.</div>
+  <div id="grid" class="grid" hidden>
+    <section class="col a">
+      <div class="col-head"><span id="name-a">Atish</span><span class="n" id="n-a"></span></div>
+      <div class="section"><h3>Root cause</h3><div id="rc-a"></div></div>
+      <div class="section"><h3>Reasoning</h3><div class="reasoning" id="reason-a"></div></div>
+    </section>
+    <section class="col b">
+      <div class="col-head"><span id="name-b">Eshgin</span><span class="n" id="n-b"></span></div>
+      <div class="section"><h3>Root cause</h3><div id="rc-b"></div></div>
+      <div class="section"><h3>Reasoning</h3><div class="reasoning" id="reason-b"></div></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const A_DIR = "annotation/Atish_Annotation";
+const B_DIR = "annotation/Eshgin_Annotation";
+const REPORT = "annotation/merge_report.json";
+
+const $ = (id) => document.getElementById(id);
+let instances = [];  // [{id, status}]
+
+async function init() {
+  try {
+    const rep = await (await fetch(REPORT)).json();
+    instances = rep.instances
+      .map((i) => ({ id: i.instance_id, status: i.status }))
+      .sort((a, b) => a.id.localeCompare(b.id));
+  } catch (e) {
+    $("empty").textContent =
+      "Could not load " + REPORT + " — run  python3 -m http.server  from the swe-fl/ folder.";
+    return;
+  }
+  populate();
+  $("filter").addEventListener("change", populate);
+  $("instance").addEventListener("change", () => show($("instance").value));
+}
+
+function populate() {
+  const f = $("filter").value;
+  const keep = instances.filter((i) => f === "all" || i.status === f);
+  const cur = $("instance").value;
+  const sel = $("instance");
+  sel.innerHTML = '<option value="">— select (' + keep.length + ") —</option>";
+  for (const i of keep) {
+    const o = document.createElement("option");
+    o.value = i.id;
+    o.textContent = i.id + "  [" + i.status + "]";
+    sel.appendChild(o);
+  }
+  if (keep.some((i) => i.id === cur)) sel.value = cur;
+}
+
+async function loadAnn(dir, id) {
+  const r = await fetch(dir + "/" + encodeURIComponent(id) + ".json");
+  return r.ok ? r.json() : null;
+}
+
+function renderRootCause(container, ann) {
+  container.innerHTML = "";
+  const locs = (ann && ann.root_cause) || [];
+  if (!locs.length) {
+    container.innerHTML = '<p class="muted">none</p>';
+    return;
+  }
+  for (const loc of locs) {
+    const card = document.createElement("div");
+    card.className = "loc";
+
+    const where = document.createElement("div");
+    where.className = "where";
+    where.textContent = (loc.file || "?") + ":" + (loc.line != null ? loc.line : "?");
+    card.appendChild(where);
+
+    if (loc.statement) {
+      const pre = document.createElement("pre");
+      pre.textContent = loc.statement;
+      card.appendChild(pre);
+    }
+    if (loc.note) {
+      const note = document.createElement("p");
+      note.className = "note";
+      const b = document.createElement("b");
+      b.textContent = "Note: ";
+      note.appendChild(b);
+      note.appendChild(document.createTextNode(loc.note));
+      card.appendChild(note);
+    }
+    container.appendChild(card);
+  }
+}
+
+function renderReasoning(el, ann) {
+  const r = ann && ann.reasoning;
+  el.textContent = r || "";
+  el.classList.toggle("muted", !r);
+  if (!r) el.textContent = "none";
+}
+
+async function show(id) {
+  if (!id) {
+    $("grid").hidden = true;
+    $("empty").hidden = false;
+    $("status").hidden = true;
+    return;
+  }
+  $("empty").hidden = true;
+  $("grid").hidden = false;
+
+  const meta = instances.find((i) => i.id === id);
+  const badge = $("status");
+  badge.hidden = false;
+  badge.textContent = meta ? meta.status : "";
+  badge.className = "status-badge " + (meta ? meta.status : "");
+
+  const [a, b] = await Promise.all([loadAnn(A_DIR, id), loadAnn(B_DIR, id)]);
+
+  $("n-a").textContent = a ? ((a.root_cause || []).length + " loc") : "missing";
+  $("n-b").textContent = b ? ((b.root_cause || []).length + " loc") : "missing";
+  renderRootCause($("rc-a"), a);
+  renderRootCause($("rc-b"), b);
+  renderReasoning($("reason-a"), a);
+  renderReasoning($("reason-b"), b);
+}
+
+init();
+</script>
+</body>
+</html>
