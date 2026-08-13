@@ -4,13 +4,13 @@
     {
       "file": "astropy/units/quantity.py",
       "line": 299,
-      "statement": "if not (np.can_cast(np.float32, value.dtype) or\n        value.dtype.fields):",
+      "statement": "if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):",
       "note": "np.can_cast(np.float32, float16) is False because float32 cannot safely cast to float16. So the condition evaluates to not(False or False)=True and dtype=float is set, silently upgrading float16 to float64. The intent was to only upgrade integer/bool types to float, but the np.can_cast check incorrectly includes float16."
     },
     {
       "file": "astropy/units/quantity.py",
       "line": 380,
-      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n                           or value.dtype.fields)\n                      or value.dtype.kind == 'O'):",
+      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):",
       "note": "Same np.can_cast condition on the main path. float16 arrays are converted to float64 here as well."
     }
   ],

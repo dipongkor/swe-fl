@@ -1,0 +1,91 @@
+instance_id,base_commit,file,line,start_line,end_line,n_lines,current_statement,extracted_statement,note
+astropy__astropy-13579,0df94ff7097961e92fd7812036a24b145bc13ca8,astropy/wcs/wcsapi/wrappers/sliced_wcs.py,254,254,254,1,world_arrays_new.append(1.),world_arrays_new.append(1.),
+astropy__astropy-14365,7269fa3e33e8d02485a647da91a5a2a60a06af61,astropy/io/ascii/qdp.py,71,71,71,1,_line_type_re = re.compile(_type_re),_line_type_re = re.compile(_type_re),
+astropy__astropy-14365,7269fa3e33e8d02485a647da91a5a2a60a06af61,astropy/io/ascii/qdp.py,309,309,309,1,"if v == ""NO"":","if v == ""NO"":",
+astropy__astropy-14598,80c3854a5f4f4a6ab86c03d9db7854767fcd83c1,astropy/io/fits/card.py,69,69,69,1,"_strg_comment_RE = re.compile(f""({_strg})? *{_comm_field}?"")","_strg_comment_RE = re.compile(f""({_strg})? *{_comm_field}?"")",
+astropy__astropy-14598,80c3854a5f4f4a6ab86c03d9db7854767fcd83c1,astropy/io/fits/card.py,862,862,862,1,"value = value.rstrip().replace(""''"", ""'"")","value = value.rstrip().replace(""''"", ""'"")",
+astropy__astropy-7671,a7141cd90019b62688d507ae056298507678c058,astropy/utils/introspection.py,143,143,143,1,return LooseVersion(have_version) >= LooseVersion(version),return LooseVersion(have_version) >= LooseVersion(version),
+astropy__astropy-8872,b750a0e6ee76fb6b8a099a4d16ec51977be46bf6,astropy/units/quantity.py,299,299,300,2,"if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):","if not (np.can_cast(np.float32, value.dtype) or
+        value.dtype.fields):",multiline
+astropy__astropy-8872,b750a0e6ee76fb6b8a099a4d16ec51977be46bf6,astropy/units/quantity.py,380,380,382,3,"if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):","if dtype is None and (not (np.can_cast(np.float32, value.dtype)
+                           or value.dtype.fields)
+                      or value.dtype.kind == 'O'):",multiline
+django__django-13121,ec5aa2161d8015a3fe57dcbbfe14200cd18f0a16,django/db/models/expressions.py,60,60,60,1,"other = DurationValue(other, output_field=fields.DurationField())","other = DurationValue(other, output_field=fields.DurationField())",
+django__django-13121,ec5aa2161d8015a3fe57dcbbfe14200cd18f0a16,django/db/models/expressions.py,452,452,454,3,if (not connection.features.has_native_duration_field and ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):,"if (not connection.features.has_native_duration_field and
+        ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or
+         (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):",multiline
+django__django-13121,ec5aa2161d8015a3fe57dcbbfe14200cd18f0a16,django/db/models/expressions.py,717,717,717,1,"return connection.ops.date_interval_sql(self.value), []","return connection.ops.date_interval_sql(self.value), []",
+django__django-13449,2a55431a5678af52f669ffe7dff3dd0bd21727f8,django/db/models/expressions.py,1256,1256,1256,1,class Window(Expression):,class Window(Expression):,
+django__django-14007,619f26d2895d121854b1bed1b535d42b722e2eba,django/db/models/sql/compiler.py,1415,1415,1415,1,return self.connection.ops.fetch_returned_insert_rows(cursor),return self.connection.ops.fetch_returned_insert_rows(cursor),
+django__django-14007,619f26d2895d121854b1bed1b535d42b722e2eba,django/db/models/sql/compiler.py,1418,1418,1418,1,"return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]","return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]",
+django__django-14007,619f26d2895d121854b1bed1b535d42b722e2eba,django/db/models/sql/compiler.py,1419,1419,1421,3,"return [(self.connection.ops.last_insert_id(cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column),)]","return [(self.connection.ops.last_insert_id(
+    cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
+),)]",multiline; current_not_contained
+django__django-16145,93d4c9ea1de24eb391cb2b3561b6703fd46374df,django/core/management/commands/runserver.py,154,140,154,15,"""addr"": ""[%s]"" % self.addr if self._raw_ipv6 else self.addr,","self.stdout.write(
+    (
+        ""Django version %(version)s, using settings %(settings)r\n""
+        ""Starting development server at %(protocol)s://%(addr)s:%(port)s/\n""
+        ""Quit the server with %(quit_command)s.""
+    )
+    % {
+        ""version"": self.get_version(),
+        ""settings"": settings.SETTINGS_MODULE,
+        ""protocol"": self.protocol,
+        ""addr"": ""[%s]"" % self.addr if self._raw_ipv6 else self.addr,
+        ""port"": self.port,
+        ""quit_command"": quit_command,
+    }
+)",multiline
+matplotlib__matplotlib-23299,3eadeacc06c9f2ddcdac6ae39819faa9fbee9e39,lib/matplotlib/__init__.py,1090,1090,1090,1,orig = rcParams.copy(),orig = rcParams.copy(),
+matplotlib__matplotlib-24026,14c96b510ebeba40f573e512299b1976f35b620e,lib/matplotlib/stackplot.py,73,73,73,1,axes.set_prop_cycle(color=colors),axes.set_prop_cycle(color=colors),
+matplotlib__matplotlib-26208,f0f133943d3e4f1e2e665291fe1c8f658a84cc09,lib/matplotlib/axes/_base.py,4444,4444,4444,1,return ax2,return ax2,
+matplotlib__matplotlib-26208,f0f133943d3e4f1e2e665291fe1c8f658a84cc09,lib/matplotlib/axes/_base.py,4473,4473,4473,1,return ax2,return ax2,
+mwaskom__seaborn-3187,22cdfb0c93f8ec78492d87edb810f10cb7f57a31,seaborn/_core/scales.py,381,381,381,1,labels = axis.major.formatter.format_ticks(locs),labels = axis.major.formatter.format_ticks(locs),
+mwaskom__seaborn-3187,22cdfb0c93f8ec78492d87edb810f10cb7f57a31,seaborn/utils.py,701,701,701,1,formatter = mpl.ticker.ScalarFormatter(),formatter = mpl.ticker.ScalarFormatter(),
+psf__requests-2317,091991be0da19de9108dbe5e3752917fea3d7fdc,requests/sessions.py,428,428,428,1,method = builtin_str(method),method = builtin_str(method),
+psf__requests-2931,5f7a3a74aab1625c2bb65f643197ee885e3da576,requests/models.py,84,84,84,1,return to_native_string(data),return to_native_string(data),
+pydata__xarray-3305,69c7e01e5167a3137c285cb50d1978252bb8bcbf,xarray/core/variable.py,1595,1595,1595,1,"def quantile(self, q, dim=None, interpolation=""linear""):","def quantile(self, q, dim=None, interpolation=""linear""):",
+pydata__xarray-3305,69c7e01e5167a3137c285cb50d1978252bb8bcbf,xarray/core/variable.py,1661,1661,1661,1,"return Variable(new_dims, qs)","return Variable(new_dims, qs)",
+pydata__xarray-3305,69c7e01e5167a3137c285cb50d1978252bb8bcbf,xarray/core/dataset.py,4771,4770,4772,3,"q, dim=reduce_dims, interpolation=interpolation","variables[name] = var.quantile(
+    q, dim=reduce_dims, interpolation=interpolation
+)",multiline
+pydata__xarray-4687,d3b6aa6d8b997df115a53c001d00222a0f92f63a,xarray/core/computation.py,1730,1730,1730,1,"def where(cond, x, y):","def where(cond, x, y):",
+pydata__xarray-4687,d3b6aa6d8b997df115a53c001d00222a0f92f63a,xarray/core/computation.py,1812,1812,1820,9,"apply_ufunc(..., dask=""allowed"") without keep_attrs=keep_attrs","return apply_ufunc(
+    duck_array_ops.where,
+    cond,
+    x,
+    y,
+    join=""exact"",
+    dataset_join=""exact"",
+    dask=""allowed"",
+)",multiline; current_not_contained
+pydata__xarray-6599,6bb2b855498b5c68d7cca8cceb710365d58e6048,xarray/core/computation.py,1936,1936,1936,1,"if x.dtype.kind in ""mM"":","if x.dtype.kind in ""mM"":",
+pylint-dev__pylint-6386,754b487f4d892e3d4872b6fc7468a71db4e31c13,pylint/config/utils.py,221,221,221,1,if not argument.startswith('--'):,"if not argument.startswith(""--""):",current_not_contained
+pylint-dev__pylint-6528,273a8b25620467c1e5686aa8d2a1dbb8c02c78d0,pylint/lint/pylinter.py,"[567, 568]",,,,"@staticmethod
+def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",,line_not_int (ignored)
+pylint-dev__pylint-8898,1f8c4d9eb185c16a2c1d881c054f015e1c2eb334,pylint/config/argument.py,117,117,117,1,for pattern in _csv_transformer(value):,for pattern in _csv_transformer(value):,
+pytest-dev__pytest-5787,955e54221008aba577ecbaefa15679f6777d3bf8,src/_pytest/reports.py,181,181,185,5,"return {'reprcrash': reprcrash, 'reprtraceback': reprtraceback, 'sections': rep.longrepr.sections}","return {
+    ""reprcrash"": reprcrash,
+    ""reprtraceback"": reprtraceback,
+    ""sections"": rep.longrepr.sections,
+}",multiline; current_not_contained
+pytest-dev__pytest-5787,955e54221008aba577ecbaefa15679f6777d3bf8,src/_pytest/reports.py,253,253,256,4,"exception_info = ReprExceptionInfo(reprtraceback=ReprTraceback(**reprtraceback), reprcrash=ReprFileLocation(**reprcrash))","exception_info = ReprExceptionInfo(
+    reprtraceback=ReprTraceback(**reprtraceback),
+    reprcrash=ReprFileLocation(**reprcrash),
+)",multiline; current_not_contained
+pytest-dev__pytest-5840,73c5b7f4b11a81e971f7d1bb18072e06a87060f4,src/_pytest/pathlib.py,346,346,346,1,return type(path)(normcase(str(path.realpath()))),return type(path)(normcase(str(path.realpath()))),
+pytest-dev__pytest-7205,5e7f1ab4bf58e473e5d7f878eb2b499d7deabd29,src/_pytest/setuponly.py,69,69,69,1,"tw.write(""[{}]"".format(fixturedef.cached_param))","tw.write(""[{}]"".format(fixturedef.cached_param))",
+scikit-learn__scikit-learn-12973,a7b8b9e9e16d4e15fabda5ae615086c2e1c47d8a,sklearn/linear_model/least_angle.py,1503,1503,1504,2,"X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(X, y, self.fit_intercept, self.normalize, self.copy_X)","X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(
+    X, y, self.fit_intercept, self.normalize, self.copy_X)",multiline; current_not_contained
+scikit-learn__scikit-learn-14496,d49a6f13af2f22228d430ac64ac2b518937800d0,sklearn/cluster/optics_.py,440,440,440,1,"min_samples = max(2, min_samples * n_samples)","min_samples = max(2, min_samples * n_samples)",
+scikit-learn__scikit-learn-26194,e886ce4e1444c61b865e7839c9cff5464ee20ace,sklearn/metrics/_ranking.py,1086,1086,1086,1,"thresholds = np.r_[thresholds[0] + 1, thresholds]","thresholds = np.r_[thresholds[0] + 1, thresholds]",
+sphinx-doc__sphinx-8548,dd1615c59dc6fff633e27dbb3861f2d27e1fb976,sphinx/ext/autodoc/importer.py,310,310,310,1,if analyzer:,if analyzer:,
+sphinx-doc__sphinx-8548,dd1615c59dc6fff633e27dbb3861f2d27e1fb976,sphinx/ext/autodoc/importer.py,312,312,312,1,namespace = '.'.join(objpath),namespace = '.'.join(objpath),
+sphinx-doc__sphinx-8548,dd1615c59dc6fff633e27dbb3861f2d27e1fb976,sphinx/ext/autodoc/importer.py,314,314,314,1,if namespace == ns and name not in members:,if namespace == ns and name not in members:,
+sphinx-doc__sphinx-8548,dd1615c59dc6fff633e27dbb3861f2d27e1fb976,sphinx/ext/autodoc/importer.py,315,315,316,2,"members[name] = ClassAttribute(subject, name, INSTANCEATTR,","members[name] = ClassAttribute(subject, name, INSTANCEATTR,
+                               '\n'.join(docstring))",multiline
+sphinx-doc__sphinx-9658,232dbe41c5250eb7d559d40438c4743483e95f15,sphinx/ext/autodoc/mock.py,43,43,43,1,self.__qualname__ = '',self.__qualname__ = '',
+sphinx-doc__sphinx-9658,232dbe41c5250eb7d559d40438c4743483e95f15,sphinx/ext/autodoc/mock.py,74,74,76,3,"attrs = {'__module__': module, '__display_name__': ...}","attrs = {'__module__': module,
+         '__display_name__': module + '.' + name,
+         '__sphinx_decorator_args__': decorator_args}",multiline; current_not_contained
+sphinx-doc__sphinx-9711,81a4fd973d4cfcb25d01a7b0be62cdb28f82406d,sphinx/extension.py,54,54,54,1,if extension.version == 'unknown version' or reqversion > extension.version:,if extension.version == 'unknown version' or reqversion > extension.version:,

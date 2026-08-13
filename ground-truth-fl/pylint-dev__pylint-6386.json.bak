@@ -4,7 +4,7 @@
     {
       "file": "pylint/config/utils.py",
       "line": 221,
-      "statement": "if not argument.startswith(\"--\"):",
+      "statement": "if not argument.startswith('--'):",
       "note": "Only '--' prefixed tokens are recognized as preprocessable options."
     }
   ],

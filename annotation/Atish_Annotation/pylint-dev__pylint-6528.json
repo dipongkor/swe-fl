@@ -3,9 +3,15 @@
   "root_cause": [
     {
       "file": "pylint/lint/pylinter.py",
-      "line": [567,568],
-      "statement": "@staticmethod\ndef _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
+      "line": 567,
+      "statement": "@staticmethod",
       "note": "Defined as a staticmethod with no access to self.config. The os.walk loop yields subdirectory roots without ever checking ignore/ignore_patterns/ignore_paths, so ignored subdirectories are passed downstream as valid module roots."
+    },
+    {
+      "file": "pylint/lint/pylinter.py",
+      "line": 568,
+      "statement": "def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
+      "note": "The os.walk loop yields subdirectory roots without ever checking ignore/ignore_patterns/ignore_paths, so ignored subdirectories are passed downstream as valid module roots."
     }
   ],
   "reasoning": "_discover_files walks the directory tree recursively and yields discovered paths, but never consults the ignore configuration. The ignore check in expand_modules only applies to the top-level inputs passed by the caller — it never sees subdirectories that _discover_files surfaces during the walk.",

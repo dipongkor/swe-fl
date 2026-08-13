@@ -10,7 +10,7 @@
     {
       "file": "sphinx/ext/autodoc/mock.py",
       "line": 74,
-      "statement": "attrs = {'__module__': module,\n         '__display_name__': module + '.' + name,\n         '__sphinx_decorator_args__': decorator_args}",
+      "statement": "attrs = {'__module__': module, '__display_name__': ...}",
       "note": "__name__ never set in subclass attrs, so __init__ has nothing correct to draw from"
     }
   ],

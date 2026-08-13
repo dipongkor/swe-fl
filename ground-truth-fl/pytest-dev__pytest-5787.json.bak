@@ -4,13 +4,13 @@
     {
       "file": "src/_pytest/reports.py",
       "line": 181,
-      "statement": "return {\n    \"reprcrash\": reprcrash,\n    \"reprtraceback\": reprtraceback,\n    \"sections\": rep.longrepr.sections,\n}",
+      "statement": "return {'reprcrash': reprcrash, 'reprtraceback': reprtraceback, 'sections': rep.longrepr.sections}",
       "note": "chain is never included in the serialized dict. For ExceptionChainRepr, this silently drops all chained exception entries."
     },
     {
       "file": "src/_pytest/reports.py",
       "line": 253,
-      "statement": "exception_info = ReprExceptionInfo(\n    reprtraceback=ReprTraceback(**reprtraceback),\n    reprcrash=ReprFileLocation(**reprcrash),\n)",
+      "statement": "exception_info = ReprExceptionInfo(reprtraceback=ReprTraceback(**reprtraceback), reprcrash=ReprFileLocation(**reprcrash))",
       "note": "Unconditionally reconstructs as ReprExceptionInfo regardless of whether the original was ExceptionChainRepr. No chain field is checked or restored."
     }
   ],

@@ -3,8 +3,16 @@
   "root_cause": [
     {
       "file": "pylint/lint/pylinter.py",
-      "line": "567-568",
-      "statement": "@staticmethod\ndef _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
+      "line": 567,
+      "statement": "@staticmethod",
+      "method": "_discover_files",
+      "class": "PyLinter",
+      "note": "Recursive discovery is a static operation with no access to the linter's configured ignore names, patterns, or paths. It consequently descends into and yields ignored directories before later module expansion can exclude them."
+    },
+    {
+      "file": "pylint/lint/pylinter.py",
+      "line": 568,
+      "statement": "def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
       "method": "_discover_files",
       "class": "PyLinter",
       "note": "Recursive discovery is a static operation with no access to the linter's configured ignore names, patterns, or paths. It consequently descends into and yields ignored directories before later module expansion can exclude them."

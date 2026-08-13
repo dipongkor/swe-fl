@@ -22,7 +22,7 @@
     {
       "file": "sphinx/ext/autodoc/importer.py",
       "line": 315,
-      "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,\n                               '\\n'.join(docstring))",
+      "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,",
       "note": ""
     }
   ],

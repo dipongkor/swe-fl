@@ -4,7 +4,7 @@
     {
       "file": "pylint/lint/pylinter.py",
       "line": 568,
-      "statement": "def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
+      "statement": "@staticmethod\ndef _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
       "note": "Defined as a staticmethod with no access to self.config. The os.walk loop yields subdirectory roots without ever checking ignore/ignore_patterns/ignore_paths, so ignored subdirectories are passed downstream as valid module roots."
     }
   ],

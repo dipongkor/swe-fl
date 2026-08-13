@@ -1,0 +1,382 @@
+{
+  "astropy__astropy-13579": [
+    {
+      "file": "astropy/wcs/wcsapi/wrappers/sliced_wcs.py",
+      "line": "254",
+      "start_line": 254,
+      "end_line": 254,
+      "statement": "world_arrays_new.append(1.)"
+    }
+  ],
+  "astropy__astropy-14365": [
+    {
+      "file": "astropy/io/ascii/qdp.py",
+      "line": "71",
+      "start_line": 71,
+      "end_line": 71,
+      "statement": "_line_type_re = re.compile(_type_re)"
+    },
+    {
+      "file": "astropy/io/ascii/qdp.py",
+      "line": "309",
+      "start_line": 309,
+      "end_line": 309,
+      "statement": "if v == \"NO\":"
+    }
+  ],
+  "astropy__astropy-14598": [
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": "69",
+      "start_line": 69,
+      "end_line": 69,
+      "statement": "_strg_comment_RE = re.compile(f\"({_strg})? *{_comm_field}?\")"
+    },
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": "862",
+      "start_line": 862,
+      "end_line": 862,
+      "statement": "value = value.rstrip().replace(\"''\", \"'\")"
+    }
+  ],
+  "astropy__astropy-7671": [
+    {
+      "file": "astropy/utils/introspection.py",
+      "line": "143",
+      "start_line": 143,
+      "end_line": 143,
+      "statement": "return LooseVersion(have_version) >= LooseVersion(version)"
+    }
+  ],
+  "astropy__astropy-8872": [
+    {
+      "file": "astropy/units/quantity.py",
+      "line": "299",
+      "start_line": 299,
+      "end_line": 300,
+      "statement": "if not (np.can_cast(np.float32, value.dtype) or\n        value.dtype.fields):"
+    },
+    {
+      "file": "astropy/units/quantity.py",
+      "line": "380",
+      "start_line": 380,
+      "end_line": 382,
+      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n                           or value.dtype.fields)\n                      or value.dtype.kind == 'O'):"
+    }
+  ],
+  "django__django-13121": [
+    {
+      "file": "django/db/models/expressions.py",
+      "line": "60",
+      "start_line": 60,
+      "end_line": 60,
+      "statement": "other = DurationValue(other, output_field=fields.DurationField())"
+    },
+    {
+      "file": "django/db/models/expressions.py",
+      "line": "452",
+      "start_line": 452,
+      "end_line": 454,
+      "statement": "if (not connection.features.has_native_duration_field and\n        ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or\n         (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):"
+    },
+    {
+      "file": "django/db/models/expressions.py",
+      "line": "717",
+      "start_line": 717,
+      "end_line": 717,
+      "statement": "return connection.ops.date_interval_sql(self.value), []"
+    }
+  ],
+  "django__django-13449": [
+    {
+      "file": "django/db/models/expressions.py",
+      "line": "1256",
+      "start_line": 1256,
+      "end_line": 1256,
+      "statement": "class Window(Expression):"
+    }
+  ],
+  "django__django-14007": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1415",
+      "start_line": 1415,
+      "end_line": 1415,
+      "statement": "return self.connection.ops.fetch_returned_insert_rows(cursor)"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1418",
+      "start_line": 1418,
+      "end_line": 1418,
+      "statement": "return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1419",
+      "start_line": 1419,
+      "end_line": 1421,
+      "statement": "return [(self.connection.ops.last_insert_id(\n    cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column\n),)]"
+    }
+  ],
+  "django__django-16145": [
+    {
+      "file": "django/core/management/commands/runserver.py",
+      "line": "154",
+      "start_line": 140,
+      "end_line": 154,
+      "statement": "self.stdout.write(\n    (\n        \"Django version %(version)s, using settings %(settings)r\\n\"\n        \"Starting development server at %(protocol)s://%(addr)s:%(port)s/\\n\"\n        \"Quit the server with %(quit_command)s.\"\n    )\n    % {\n        \"version\": self.get_version(),\n        \"settings\": settings.SETTINGS_MODULE,\n        \"protocol\": self.protocol,\n        \"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,\n        \"port\": self.port,\n        \"quit_command\": quit_command,\n    }\n)"
+    }
+  ],
+  "matplotlib__matplotlib-23299": [
+    {
+      "file": "lib/matplotlib/__init__.py",
+      "line": "1090",
+      "start_line": 1090,
+      "end_line": 1090,
+      "statement": "orig = rcParams.copy()"
+    }
+  ],
+  "matplotlib__matplotlib-24026": [
+    {
+      "file": "lib/matplotlib/stackplot.py",
+      "line": "73",
+      "start_line": 73,
+      "end_line": 73,
+      "statement": "axes.set_prop_cycle(color=colors)"
+    }
+  ],
+  "matplotlib__matplotlib-26208": [
+    {
+      "file": "lib/matplotlib/axes/_base.py",
+      "line": "4444",
+      "start_line": 4444,
+      "end_line": 4444,
+      "statement": "return ax2"
+    },
+    {
+      "file": "lib/matplotlib/axes/_base.py",
+      "line": "4473",
+      "start_line": 4473,
+      "end_line": 4473,
+      "statement": "return ax2"
+    }
+  ],
+  "mwaskom__seaborn-3187": [
+    {
+      "file": "seaborn/_core/scales.py",
+      "line": "381",
+      "start_line": 381,
+      "end_line": 381,
+      "statement": "labels = axis.major.formatter.format_ticks(locs)"
+    },
+    {
+      "file": "seaborn/utils.py",
+      "line": "701",
+      "start_line": 701,
+      "end_line": 701,
+      "statement": "formatter = mpl.ticker.ScalarFormatter()"
+    }
+  ],
+  "psf__requests-2317": [
+    {
+      "file": "requests/sessions.py",
+      "line": "428",
+      "start_line": 428,
+      "end_line": 428,
+      "statement": "method = builtin_str(method)"
+    }
+  ],
+  "psf__requests-2931": [
+    {
+      "file": "requests/models.py",
+      "line": "84",
+      "start_line": 84,
+      "end_line": 84,
+      "statement": "return to_native_string(data)"
+    }
+  ],
+  "pydata__xarray-3305": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": "1595",
+      "start_line": 1595,
+      "end_line": 1595,
+      "statement": "def quantile(self, q, dim=None, interpolation=\"linear\"):"
+    },
+    {
+      "file": "xarray/core/variable.py",
+      "line": "1661",
+      "start_line": 1661,
+      "end_line": 1661,
+      "statement": "return Variable(new_dims, qs)"
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": "4771",
+      "start_line": 4770,
+      "end_line": 4772,
+      "statement": "variables[name] = var.quantile(\n    q, dim=reduce_dims, interpolation=interpolation\n)"
+    }
+  ],
+  "pydata__xarray-4687": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": "1730",
+      "start_line": 1730,
+      "end_line": 1730,
+      "statement": "def where(cond, x, y):"
+    },
+    {
+      "file": "xarray/core/computation.py",
+      "line": "1812",
+      "start_line": 1812,
+      "end_line": 1820,
+      "statement": "return apply_ufunc(\n    duck_array_ops.where,\n    cond,\n    x,\n    y,\n    join=\"exact\",\n    dataset_join=\"exact\",\n    dask=\"allowed\",\n)"
+    }
+  ],
+  "pydata__xarray-6599": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": "1936",
+      "start_line": 1936,
+      "end_line": 1936,
+      "statement": "if x.dtype.kind in \"mM\":"
+    }
+  ],
+  "pylint-dev__pylint-6386": [
+    {
+      "file": "pylint/config/utils.py",
+      "line": "221",
+      "start_line": 221,
+      "end_line": 221,
+      "statement": "if not argument.startswith(\"--\"):"
+    }
+  ],
+  "pylint-dev__pylint-8898": [
+    {
+      "file": "pylint/config/argument.py",
+      "line": "117",
+      "start_line": 117,
+      "end_line": 117,
+      "statement": "for pattern in _csv_transformer(value):"
+    }
+  ],
+  "pytest-dev__pytest-5787": [
+    {
+      "file": "src/_pytest/reports.py",
+      "line": "181",
+      "start_line": 181,
+      "end_line": 185,
+      "statement": "return {\n    \"reprcrash\": reprcrash,\n    \"reprtraceback\": reprtraceback,\n    \"sections\": rep.longrepr.sections,\n}"
+    },
+    {
+      "file": "src/_pytest/reports.py",
+      "line": "253",
+      "start_line": 253,
+      "end_line": 256,
+      "statement": "exception_info = ReprExceptionInfo(\n    reprtraceback=ReprTraceback(**reprtraceback),\n    reprcrash=ReprFileLocation(**reprcrash),\n)"
+    }
+  ],
+  "pytest-dev__pytest-5840": [
+    {
+      "file": "src/_pytest/pathlib.py",
+      "line": "346",
+      "start_line": 346,
+      "end_line": 346,
+      "statement": "return type(path)(normcase(str(path.realpath())))"
+    }
+  ],
+  "pytest-dev__pytest-7205": [
+    {
+      "file": "src/_pytest/setuponly.py",
+      "line": "69",
+      "start_line": 69,
+      "end_line": 69,
+      "statement": "tw.write(\"[{}]\".format(fixturedef.cached_param))"
+    }
+  ],
+  "scikit-learn__scikit-learn-12973": [
+    {
+      "file": "sklearn/linear_model/least_angle.py",
+      "line": "1503",
+      "start_line": 1503,
+      "end_line": 1504,
+      "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(\n    X, y, self.fit_intercept, self.normalize, self.copy_X)"
+    }
+  ],
+  "scikit-learn__scikit-learn-14496": [
+    {
+      "file": "sklearn/cluster/optics_.py",
+      "line": "440",
+      "start_line": 440,
+      "end_line": 440,
+      "statement": "min_samples = max(2, min_samples * n_samples)"
+    }
+  ],
+  "scikit-learn__scikit-learn-26194": [
+    {
+      "file": "sklearn/metrics/_ranking.py",
+      "line": "1086",
+      "start_line": 1086,
+      "end_line": 1086,
+      "statement": "thresholds = np.r_[thresholds[0] + 1, thresholds]"
+    }
+  ],
+  "sphinx-doc__sphinx-8548": [
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": "310",
+      "start_line": 310,
+      "end_line": 310,
+      "statement": "if analyzer:"
+    },
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": "312",
+      "start_line": 312,
+      "end_line": 312,
+      "statement": "namespace = '.'.join(objpath)"
+    },
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": "314",
+      "start_line": 314,
+      "end_line": 314,
+      "statement": "if namespace == ns and name not in members:"
+    },
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": "315",
+      "start_line": 315,
+      "end_line": 316,
+      "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,\n                               '\\n'.join(docstring))"
+    }
+  ],
+  "sphinx-doc__sphinx-9658": [
+    {
+      "file": "sphinx/ext/autodoc/mock.py",
+      "line": "43",
+      "start_line": 43,
+      "end_line": 43,
+      "statement": "self.__qualname__ = ''"
+    },
+    {
+      "file": "sphinx/ext/autodoc/mock.py",
+      "line": "74",
+      "start_line": 74,
+      "end_line": 76,
+      "statement": "attrs = {'__module__': module,\n         '__display_name__': module + '.' + name,\n         '__sphinx_decorator_args__': decorator_args}"
+    }
+  ],
+  "sphinx-doc__sphinx-9711": [
+    {
+      "file": "sphinx/extension.py",
+      "line": "54",
+      "start_line": 54,
+      "end_line": 54,
+      "statement": "if extension.version == 'unknown version' or reqversion > extension.version:"
+    }
+  ]
+}

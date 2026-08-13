@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge annotations — ground truth builder</title>
+<style>
+  :root {
+    --bg:#f6f7f9; --panel:#fff; --border:#d9dde3; --text:#1c2530; --muted:#6b7480;
+    --accent:#2b6cb0; --code-bg:#f0f2f5; --agree:#2f855a; --conflict:#c05621;
+    --a-tint:#eef5fb; --b-tint:#f3f0fb; --ok:#2f855a; --err:#c53030;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#14171c; --panel:#1c2027; --border:#2c3138; --text:#e5e9ef; --muted:#9aa4b0;
+      --accent:#63b3ed; --code-bg:#12151a; --agree:#68d391; --conflict:#f6ad55;
+      --a-tint:#172230; --b-tint:#1e1a2c; --ok:#68d391; --err:#fc8181;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); }
+  header { position:sticky; top:0; z-index:10; background:var(--panel); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  label { font-size:13px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+  select, input[type=text], textarea { font:inherit; padding:5px 8px; border:1px solid var(--border); border-radius:6px; background:var(--panel); color:var(--text); }
+  select { min-width:250px; }
+  button { font:inherit; padding:6px 12px; border:1px solid var(--border); border-radius:6px; background:var(--panel); color:var(--text); cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .status-badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); }
+  .status-badge.agree { color:var(--agree); } .status-badge.conflict { color:var(--conflict); }
+  main { padding:20px; display:grid; gap:18px; grid-template-columns:1fr 1fr; }
+  @media (max-width:1000px){ main { grid-template-columns:1fr; } }
+  .col { background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .col.a .col-head { background:var(--a-tint); } .col.b .col-head { background:var(--b-tint); }
+  .col-head { padding:10px 16px; border-bottom:1px solid var(--border); font-weight:600; display:flex; justify-content:space-between; align-items:baseline; }
+  .col-head .n { font-size:12px; color:var(--muted); font-weight:400; }
+  .section { padding:12px 16px; } .section + .section { border-top:1px solid var(--border); }
+  .section h3 { margin:0 0 10px; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .loc { border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px; display:flex; gap:10px; }
+  .loc:last-child { margin-bottom:0; }
+  .loc input[type=checkbox]{ margin-top:3px; width:16px; height:16px; flex:0 0 auto; }
+  .loc .body { min-width:0; flex:1; }
+  .loc .where { font-size:13px; color:var(--accent); font-weight:600; word-break:break-all; }
+  .loc pre { margin:6px 0 0; padding:8px 10px; background:var(--code-bg); border-radius:6px; font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; overflow-x:auto; white-space:pre; }
+  .loc .note { margin:6px 0 0; font-size:12.5px; color:var(--muted); }
+  .reason { white-space:pre-wrap; font-size:13.5px; }
+  .reason-pick { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+  .reason-pick input { margin-top:3px; }
+  .muted { color:var(--muted); font-style:italic; }
+  /* merge panel spans full width */
+  .builder { grid-column:1 / -1; background:var(--panel); border:1px solid var(--border); border-radius:10px; }
+  .builder .col-head { background:transparent; }
+  .fields { display:flex; flex-wrap:wrap; gap:12px 20px; padding:12px 16px; align-items:center; }
+  .fields label { color:var(--text); font-size:13px; }
+  .fields input[type=text]{ min-width:220px; }
+  textarea#json { width:100%; min-height:320px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre; }
+  .saverow { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 16px; }
+  .msg { font-size:13px; } .msg.ok { color:var(--ok); } .msg.err { color:var(--err); }
+  .hint { color:var(--muted); font-size:12.5px; }
+  .empty { grid-column:1 / -1; color:var(--muted); text-align:center; padding:40px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Merge → ground truth</h1>
+  <label>Instance <select id="instance"><option value="">— select —</option></select></label>
+  <label>Show
+    <select id="filter"><option value="all">all</option><option value="agree">agree</option><option value="conflict">conflict</option></select>
+  </label>
+  <span id="status" class="status-badge" hidden></span>
+  <span style="flex:1"></span>
+  <button id="chooseDir">Choose output folder…</button>
+  <span id="dirName" class="hint">no folder chosen</span>
+</header>
+
+<main id="main">
+  <div id="empty" class="empty">Pick an instance to start merging.</div>
+
+  <section class="col a" id="colA" hidden>
+    <div class="col-head"><span>Atish</span><span class="n" id="nA"></span></div>
+    <div class="section"><h3>Root cause — tick to include</h3><div id="rcA"></div></div>
+    <div class="section"><h3>Reasoning</h3><div class="reason" id="reasonA"></div></div>
+  </section>
+
+  <section class="col b" id="colB" hidden>
+    <div class="col-head"><span>Eshgin</span><span class="n" id="nB"></span></div>
+    <div class="section"><h3>Root cause — tick to include</h3><div id="rcB"></div></div>
+    <div class="section"><h3>Reasoning</h3><div class="reason" id="reasonB"></div></div>
+  </section>
+
+  <section class="builder" id="builder" hidden>
+    <div class="col-head"><span>Ground truth</span><span class="n hint">edit the JSON below before saving; changing a tick/field regenerates it</span></div>
+    <div class="section"><h3>Reasoning — annotator1=Atish, annotator2=Eshgin (tick to fill; unticked → "")</h3><div id="reasonPick"></div></div>
+    <div class="fields">
+      <label>confidence <input type="text" id="confidence"></label>
+      <label style="flex:1">comments <input type="text" id="comments" style="flex:1"></label>
+    </div>
+    <div class="section"><textarea id="json" spellcheck="false"></textarea></div>
+    <div class="saverow">
+      <button class="primary" id="save">Save to merged-annotations</button>
+      <button id="regen">Regenerate from selections</button>
+      <span id="msg" class="msg"></span>
+    </div>
+  </section>
+</main>
+
+<script>
+const A_DIR="annotation/Atish_Annotation", B_DIR="annotation/Eshgin_Annotation";
+const REPORT="annotation/merge_report.json";
+const $=(id)=>document.getElementById(id);
+
+let instances=[];          // [{id,status}]
+let statusById={};
+let dirHandle=null;
+const S={ iid:"", A:null, B:null, locSel:{}, reasonSel:{A:false,B:false} };
+
+async function init(){
+  try {
+    const rep=await (await fetch(REPORT)).json();
+    instances=rep.instances.map(i=>({id:i.instance_id,status:i.status})).sort((a,b)=>a.id.localeCompare(b.id));
+    instances.forEach(i=>statusById[i.id]=i.status);
+  } catch(e){ $("empty").textContent="Could not load "+REPORT+" — run  python3 -m http.server  from swe-fl/."; return; }
+  populate();
+  $("filter").addEventListener("change",populate);
+  $("instance").addEventListener("change",()=>show($("instance").value));
+  $("confidence").addEventListener("input",rebuild);
+  $("comments").addEventListener("input",rebuild);
+  $("regen").addEventListener("click",rebuild);
+  $("save").addEventListener("click",save);
+  if (window.showDirectoryPicker){
+    $("chooseDir").addEventListener("click",chooseDir);
+  } else {
+    $("chooseDir").textContent="Save = download";
+    $("chooseDir").disabled=true;
+    $("dirName").textContent="File System Access API unavailable — Save downloads the file";
+  }
+}
+
+function populate(){
+  const f=$("filter").value;
+  const keep=instances.filter(i=>f==="all"||i.status===f);
+  const cur=$("instance").value, sel=$("instance");
+  sel.innerHTML='<option value="">— select ('+keep.length+') —</option>';
+  for(const i of keep){ const o=document.createElement("option"); o.value=i.id; o.textContent=i.id+"  ["+i.status+"]"; sel.appendChild(o); }
+  if(keep.some(i=>i.id===cur)) sel.value=cur;
+}
+
+async function loadAnn(dir,id){ const r=await fetch(dir+"/"+encodeURIComponent(id)+".json"); return r.ok?r.json():null; }
+
+async function show(id){
+  if(!id){ ["colA","colB","builder"].forEach(x=>$(x).hidden=true); $("empty").hidden=false; $("status").hidden=true; return; }
+  $("empty").hidden=true;
+  const status=statusById[id]||"";
+  const badge=$("status"); badge.hidden=false; badge.textContent=status; badge.className="status-badge "+status;
+
+  const [a,b]=await Promise.all([loadAnn(A_DIR,id),loadAnn(B_DIR,id)]);
+  S.iid=id; S.A=a; S.B=b; S.locSel={}; S.reasonSel={A:false,B:false};
+  const agree = status==="agree";
+
+  // defaults: agree -> preselect all of Atish's locations + Atish reasoning + comments
+  (a?.root_cause||[]).forEach((_,i)=>{ S.locSel["A:"+i]=agree; });
+  (b?.root_cause||[]).forEach((_,i)=>{ S.locSel["B:"+i]=false; });
+  S.reasonSel.A = agree && !!(a&&a.reasoning);
+  $("confidence").value = (a&&a.confidence!=null)?String(a.confidence):"";
+  $("comments").value = agree?"both agreed":"";
+
+  renderColumn("A",a,$("rcA"),$("nA"),$("reasonA"));
+  renderColumn("B",b,$("rcB"),$("nB"),$("reasonB"));
+  renderReasonPick();
+  ["colA","colB","builder"].forEach(x=>$(x).hidden=false);
+  $("msg").textContent="";
+  rebuild();
+}
+
+function renderColumn(side,ann,rcEl,nEl,reasonEl){
+  rcEl.innerHTML="";
+  const locs=(ann&&ann.root_cause)||[];
+  nEl.textContent = ann? (locs.length+" loc") : "missing";
+  if(!locs.length){ rcEl.innerHTML='<p class="muted">none</p>'; }
+  locs.forEach((loc,idx)=>{
+    const row=document.createElement("div"); row.className="loc";
+    const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!S.locSel[side+":"+idx];
+    cb.addEventListener("change",()=>{ S.locSel[side+":"+idx]=cb.checked; rebuild(); });
+    const body=document.createElement("div"); body.className="body";
+    const where=document.createElement("div"); where.className="where";
+    where.textContent=(loc.file||"?")+":"+(loc.line!=null?JSON.stringify(loc.line):"?");
+    body.appendChild(where);
+    if(loc.statement){ const pre=document.createElement("pre"); pre.textContent=loc.statement; body.appendChild(pre); }
+    if(loc.note){ const p=document.createElement("div"); p.className="note"; p.textContent="Note: "+loc.note; body.appendChild(p); }
+    row.appendChild(cb); row.appendChild(body); rcEl.appendChild(row);
+  });
+  reasonEl.textContent = (ann&&ann.reasoning) ? ann.reasoning : "none";
+  reasonEl.classList.toggle("muted",!(ann&&ann.reasoning));
+}
+
+function renderReasonPick(){
+  const el=$("reasonPick"); el.innerHTML="";
+  for(const side of ["A","B"]){
+    const ann=S[side], name=side==="A"?"Atish":"Eshgin";
+    const wrap=document.createElement("label"); wrap.className="reason-pick";
+    const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!S.reasonSel[side];
+    cb.disabled=!(ann&&ann.reasoning);
+    cb.addEventListener("change",()=>{ S.reasonSel[side]=cb.checked; rebuild(); });
+    const span=document.createElement("span");
+    const txt=(ann&&ann.reasoning)?ann.reasoning:"(no reasoning)";
+    span.innerHTML="<b>"+name+"</b> — ";
+    span.appendChild(document.createTextNode(txt));
+    wrap.appendChild(cb); wrap.appendChild(span); el.appendChild(wrap);
+  }
+}
+
+function assemble(){
+  const rc=[]; const seen=new Set();
+  for(const side of ["A","B"]){
+    const locs=(S[side]&&S[side].root_cause)||[];
+    locs.forEach((loc,idx)=>{
+      if(!S.locSel[side+":"+idx]) return;
+      const key=(loc.file||"")+"::"+JSON.stringify(loc.line);
+      if(seen.has(key)) return; seen.add(key);
+      rc.push({file:loc.file||"", line:loc.line, statement:loc.statement||""});
+    });
+  }
+  const reasoning={
+    annotator1: (S.reasonSel.A && S.A && S.A.reasoning) ? S.A.reasoning : "",
+    annotator2: (S.reasonSel.B && S.B && S.B.reasoning) ? S.B.reasoning : "",
+  };
+  return { instance_id:S.iid, root_cause:rc, confidence:$("confidence").value, comments:$("comments").value, reasoning };
+}
+
+function rebuild(){ $("json").value=JSON.stringify(assemble(),null,2); }
+
+async function chooseDir(){
+  try{ dirHandle=await window.showDirectoryPicker(); $("dirName").textContent="→ "+dirHandle.name; }
+  catch(e){ /* user cancelled */ }
+}
+
+function setMsg(text,ok){ const m=$("msg"); m.textContent=text; m.className="msg "+(ok?"ok":"err"); }
+
+async function save(){
+  let obj;
+  try{ obj=JSON.parse($("json").value); }
+  catch(e){ setMsg("Invalid JSON: "+e.message,false); return; }
+  const name=(obj.instance_id||S.iid||"ground_truth")+".json";
+  const text=JSON.stringify(obj,null,2)+"\n";
+  try{
+    if(dirHandle){
+      const perm=await dirHandle.requestPermission({mode:"readwrite"});
+      if(perm!=="granted"){ setMsg("Write permission denied for the folder.",false); return; }
+      const fh=await dirHandle.getFileHandle(name,{create:true});
+      const w=await fh.createWritable(); await w.write(text); await w.close();
+      setMsg("Saved "+name+" → "+dirHandle.name,true);
+    } else {
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(new Blob([text],{type:"application/json"}));
+      a.download=name; a.click(); URL.revokeObjectURL(a.href);
+      setMsg("Downloaded "+name+" (move it into merged-annotations/)",true);
+    }
+  }catch(e){ setMsg("Save failed: "+e.message,false); }
+}
+
+init();
+</script>
+</body>
+</html>
