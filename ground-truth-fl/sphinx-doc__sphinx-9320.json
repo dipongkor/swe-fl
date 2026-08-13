@@ -4,7 +4,7 @@
     {
       "file": "sphinx/cmd/quickstart.py",
       "line": 226,
-      "statement": "'', is_path)"
+      "statement": "d['path'] = do_prompt(__('Please enter a new root path (or just Enter to exit)'),\n                      '', is_path)"
     }
   ],
   "confidence": "high",

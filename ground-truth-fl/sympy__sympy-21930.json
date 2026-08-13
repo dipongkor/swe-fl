@@ -14,7 +14,7 @@
     {
       "file": "sympy/physics/secondquant.py",
       "line": 221,
-      "statement": "return \"%s^{%s}_{%s}\" % ("
+      "statement": "return \"%s^{%s}_{%s}\" % (\n    self.symbol,\n    \"\".join([ i.name for i in self.args[1]]),\n    \"\".join([ i.name for i in self.args[2]])\n)"
     }
   ],
   "confidence": "high",

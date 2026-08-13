@@ -1,0 +1,82 @@
+instance_id,base_commit,file,line,start_line,end_line,n_lines,current_statement,extracted_statement,reason
+astropy__astropy-8872,b750a0e6ee76fb6b8a099a4d16ec51977be46bf6,astropy/units/quantity.py,299,299,300,2,"if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):","if not (np.can_cast(np.float32, value.dtype) or
+        value.dtype.fields):",whitespace/quote only
+astropy__astropy-8872,b750a0e6ee76fb6b8a099a4d16ec51977be46bf6,astropy/units/quantity.py,380,380,382,3,"if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):","if dtype is None and (not (np.can_cast(np.float32, value.dtype)
+                           or value.dtype.fields)
+                      or value.dtype.kind == 'O'):",whitespace/quote only
+django__django-11740,003bb34b218adb23d1a7e67932a6ba9b3c4dcc81,django/db/migrations/autodetector.py,966,966,974,9,"self.add_operation(app_label, operations.AlterField(model_name=model_name, name=field_name, field=field, preserve_default=preserve_default))","self.add_operation(
+    app_label,
+    operations.AlterField(
+        model_name=model_name,
+        name=field_name,
+        field=field,
+        preserve_default=preserve_default,
+    )
+)",same statement reformatted (x1.04)
+django__django-13121,ec5aa2161d8015a3fe57dcbbfe14200cd18f0a16,django/db/models/expressions.py,452,452,454,3,if (not connection.features.has_native_duration_field and ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):,"if (not connection.features.has_native_duration_field and
+        ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or
+         (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):",whitespace/quote only
+django__django-13195,156a2138db20abc89933121e4ff2ee2ce56a173a,django/http/response.py,217,217,220,4,"self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')","self.set_cookie(
+    key, max_age=0, path=path, domain=domain, secure=secure,
+    expires='Thu, 01 Jan 1970 00:00:00 GMT',
+)",same statement reformatted (x1.03)
+django__django-13195,156a2138db20abc89933121e4ff2ee2ce56a173a,django/contrib/sessions/middleware.py,41,41,45,5,"response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)","response.delete_cookie(
+    settings.SESSION_COOKIE_NAME,
+    path=settings.SESSION_COOKIE_PATH,
+    domain=settings.SESSION_COOKIE_DOMAIN,
+)",same statement reformatted (x1.02)
+django__django-13810,429d089d0a8fbd400e0c010708df4f0d16218970,django/core/handlers/base.py,54,54,57,4,"handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)","handler = self.adapt_method_mode(
+    middleware_is_async, handler, handler_is_async,
+    debug=settings.DEBUG, name='middleware %s' % middleware_path,
+)",same statement reformatted (x1.02)
+django__django-14007,619f26d2895d121854b1bed1b535d42b722e2eba,django/db/models/sql/compiler.py,1419,1419,1421,3,"return [(self.connection.ops.last_insert_id(cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column),)]","return [(self.connection.ops.last_insert_id(
+    cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column
+),)]",whitespace/quote only
+django__django-15503,859a87d873ce7152af73ab851653b4e1c3ffea4c,django/db/models/fields/json.py,196,196,202,7,"rhs_params.append(""%s%s"" % (lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False)))","rhs_params.append(
+    ""%s%s""
+    % (
+        lhs_json_path,
+        compile_json_path(rhs_key_transforms, include_root=False),
+    )
+)",same statement reformatted (x1.05)
+django__django-15732,ce69e34bd646558bb44ea92cecfd98b345a0b3e0,django/db/backends/base/schema.py,565,565,570,6,"constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)","constraint_names = self._constraint_names(
+    model,
+    columns,
+    exclude=meta_constraint_names | meta_index_names,
+    **constraint_kwargs,
+)",same statement reformatted (x1.02)
+django__django-16631,9b224579875e30203d079cc2fee83b116d98eb78,django/contrib/auth/__init__.py,202,202,204,3,"session_hash_verified = session_hash and constant_time_compare(session_hash, user.get_session_auth_hash())","session_hash_verified = session_hash and constant_time_compare(
+    session_hash, user.get_session_auth_hash()
+)",whitespace/quote only
+django__django-17084,f8c43aca467b7b0c4bb0a7fa41362f90b610b8df,django/db/models/sql/query.py,449,449,457,9,"if (isinstance(self.group_by, tuple) or self.is_sliced or has_existing_aggregation or refs_subquery or qualify or self.distinct or self.combinator):","if (
+    isinstance(self.group_by, tuple)
+    or self.is_sliced
+    or has_existing_aggregation
+    or refs_subquery
+    or qualify
+    or self.distinct
+    or self.combinator
+):",whitespace/quote only
+pydata__xarray-3993,8cc34cb412ba89ebca12fc84f76a9e452628f1bc,xarray/core/dataarray.py,3484,3483,3485,3,"self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None","def integrate(
+    self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None
+) -> ""DataArray"":",same statement reformatted (x1.45)
+pytest-dev__pytest-5787,955e54221008aba577ecbaefa15679f6777d3bf8,src/_pytest/reports.py,181,181,185,5,"return {'reprcrash': reprcrash, 'reprtraceback': reprtraceback, 'sections': rep.longrepr.sections}","return {
+    ""reprcrash"": reprcrash,
+    ""reprtraceback"": reprtraceback,
+    ""sections"": rep.longrepr.sections,
+}",same statement reformatted (x1.03)
+pytest-dev__pytest-5787,955e54221008aba577ecbaefa15679f6777d3bf8,src/_pytest/reports.py,253,253,256,4,"exception_info = ReprExceptionInfo(reprtraceback=ReprTraceback(**reprtraceback), reprcrash=ReprFileLocation(**reprcrash))","exception_info = ReprExceptionInfo(
+    reprtraceback=ReprTraceback(**reprtraceback),
+    reprcrash=ReprFileLocation(**reprcrash),
+)",same statement reformatted (x1.02)
+scikit-learn__scikit-learn-12973,a7b8b9e9e16d4e15fabda5ae615086c2e1c47d8a,sklearn/linear_model/least_angle.py,1503,1503,1504,2,"X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(X, y, self.fit_intercept, self.normalize, self.copy_X)","X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(
+    X, y, self.fit_intercept, self.normalize, self.copy_X)",whitespace/quote only
+sphinx-doc__sphinx-8548,dd1615c59dc6fff633e27dbb3861f2d27e1fb976,sphinx/ext/autodoc/importer.py,315,315,316,2,"members[name] = ClassAttribute(subject, name, INSTANCEATTR,","members[name] = ClassAttribute(subject, name, INSTANCEATTR,
+                               '\n'.join(docstring))",same statement reformatted (x1.37)
+sphinx-doc__sphinx-9658,232dbe41c5250eb7d559d40438c4743483e95f15,sphinx/ext/autodoc/mock.py,74,74,76,3,"attrs = {'__module__': module, '__display_name__': module + '.' + name, '__sphinx_decorator_args__': decorator_args}","attrs = {'__module__': module,
+         '__display_name__': module + '.' + name,
+         '__sphinx_decorator_args__': decorator_args}",whitespace/quote only
+sympy__sympy-14248,9986b38181cdd556a3f3411e553864f11912244e,sympy/printing/str.py,307,307,308,2,"return '*'.join([self.parenthesize(arg, precedence(expr))","return '*'.join([self.parenthesize(arg, precedence(expr))
+    for arg in expr.args])",same statement reformatted (x1.40)
+sympy__sympy-14248,9986b38181cdd556a3f3411e553864f11912244e,sympy/printing/str.py,315,315,316,2,"return ' + '.join([self.parenthesize(arg, precedence(expr))","return ' + '.join([self.parenthesize(arg, precedence(expr))
+    for arg in expr.args])",same statement reformatted (x1.39)

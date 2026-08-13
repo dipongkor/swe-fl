@@ -1,0 +1,31 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8548",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": 310,
+      "statement": "if analyzer:"
+    },
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": 312,
+      "statement": "namespace = '.'.join(objpath)"
+    },
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": 314,
+      "statement": "if namespace == ns and name not in members:"
+    },
+    {
+      "file": "sphinx/ext/autodoc/importer.py",
+      "line": 315,
+      "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,"
+    }
+  ],
+  "confidence": "medium",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "get_class_members walks the MRO for annotation-only members but the analyzer block sits entirely outside that loop, making it a flat single-pass scan scoped only to the target subclass. Even if the block were moved inside the loop, the namespace is hardcoded to the subclass's objpath, so superclass entries in attr_docs would never satisfy the namespace == ns check. Together these two faults mean instance attributes defined on any superclass via self.attr = ... are always silently skipped, producing incomplete member output when inherited-members is enabled.",
+    "annotator2": ""
+  }
+}

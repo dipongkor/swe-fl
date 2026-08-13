@@ -4,7 +4,7 @@
     {
       "file": "django/db/models/sql/query.py",
       "line": 449,
-      "statement": "if (isinstance(self.group_by, tuple) or self.is_sliced or has_existing_aggregation or refs_subquery or qualify or self.distinct or self.combinator):"
+      "statement": "if (\n    isinstance(self.group_by, tuple)\n    or self.is_sliced\n    or has_existing_aggregation\n    or refs_subquery\n    or qualify\n    or self.distinct\n    or self.combinator\n):"
     }
   ],
   "confidence": "high",

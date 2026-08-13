@@ -4,12 +4,12 @@
     {
       "file": "src/_pytest/reports.py",
       "line": 181,
-      "statement": "return {'reprcrash': reprcrash, 'reprtraceback': reprtraceback, 'sections': rep.longrepr.sections}"
+      "statement": "return {\n    \"reprcrash\": reprcrash,\n    \"reprtraceback\": reprtraceback,\n    \"sections\": rep.longrepr.sections,\n}"
     },
     {
       "file": "src/_pytest/reports.py",
       "line": 253,
-      "statement": "exception_info = ReprExceptionInfo(reprtraceback=ReprTraceback(**reprtraceback), reprcrash=ReprFileLocation(**reprcrash))"
+      "statement": "exception_info = ReprExceptionInfo(\n    reprtraceback=ReprTraceback(**reprtraceback),\n    reprcrash=ReprFileLocation(**reprcrash),\n)"
     }
   ],
   "confidence": "medium",

@@ -1,0 +1,16 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14629",
+  "root_cause": [
+    {
+      "file": "sklearn/multioutput.py",
+      "line": 167,
+      "statement": "self.estimators_ = Parallel(n_jobs=self.n_jobs)("
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "MultiOutputClassifier inherits MultiOutputEstimator.fit. That method validates the multi-output targets and fits one cloned classifier per target column, assigning the fitted models to estimators_. It then returns without publishing their class arrays through the wrapper. Accessing MultiOutputClassifier.classes_ therefore raises AttributeError, and cross-validation probability handling cannot obtain the per-output class ordering it needs. The estimators_ assignment is the minimal faulty base-code decision because this is where fitting state is consolidated on the multi-output wrapper but the corresponding classifier metadata is omitted."
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "instance_id": "sympy__sympy-14248",
+  "root_cause": [
+    {
+      "file": "sympy/printing/str.py",
+      "line": 307,
+      "statement": "return '*'.join([self.parenthesize(arg, precedence(expr))"
+    },
+    {
+      "file": "sympy/printing/str.py",
+      "line": 315,
+      "statement": "return ' + '.join([self.parenthesize(arg, precedence(expr))"
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": 1481,
+      "statement": "tex = \" + \".join(map(self._print, terms))"
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": 1491,
+      "statement": "return ' '.join(map(parens, expr.args))"
+    },
+    {
+      "file": "sympy/printing/pretty/pretty.py",
+      "line": 822,
+      "statement": "return self._print_seq(expr.args, None, None, ' + ')"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "A matrix difference is represented as MatAdd with MatMul(-1, ...) terms, and printers are expected to render that as subtraction, as the scalar Add printers do by folding negative leading coefficients into '-' separators. The matrix printers never got that logic: the str and latex _print_MatMul print the -1 coefficient literally ('(-1)*B', '-1 B') and the str, latex and pretty _print_MatAdd join terms with unconditional ' + ', so A - A*B - B prints as '(-1)*B + (-1)*A*B + A', '-1 B + -1 A B + A' and '-B + -A*B + A' respectively. Because CodePrinter inherits StrPrinter's two methods, the same defect surfaces in ccode, fcode, jscode, julia, octave and rcode wherever a MatAdd parent is printed, e.g. matrix elements '((-1)*B + A)[0]'.",
+    "annotator2": "Matrix subtraction is represented internally as MatAdd containing MatMul(-1, ...) terms. Unlike the scalar printers, these five base paths do not normalize the leading coefficient and/or choose a sign-aware separator. The result exposes internal -1 factors and joins negative terms with plus signs. Each changed printer path is independently required for its corresponding output family."
+  }
+}

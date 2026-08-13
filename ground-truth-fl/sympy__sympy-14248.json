@@ -4,12 +4,12 @@
     {
       "file": "sympy/printing/str.py",
       "line": 307,
-      "statement": "return '*'.join([self.parenthesize(arg, precedence(expr))"
+      "statement": "return '*'.join([self.parenthesize(arg, precedence(expr))\n    for arg in expr.args])"
     },
     {
       "file": "sympy/printing/str.py",
       "line": 315,
-      "statement": "return ' + '.join([self.parenthesize(arg, precedence(expr))"
+      "statement": "return ' + '.join([self.parenthesize(arg, precedence(expr))\n    for arg in expr.args])"
     },
     {
       "file": "sympy/printing/latex.py",

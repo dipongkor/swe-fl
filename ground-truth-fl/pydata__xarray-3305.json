@@ -14,7 +14,7 @@
     {
       "file": "xarray/core/dataset.py",
       "line": 4771,
-      "statement": "q, dim=reduce_dims, interpolation=interpolation"
+      "statement": "variables[name] = var.quantile(\n    q, dim=reduce_dims, interpolation=interpolation\n)"
     }
   ],
   "confidence": "high",

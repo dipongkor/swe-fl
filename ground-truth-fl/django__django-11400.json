@@ -4,12 +4,12 @@
     {
       "file": "django/db/models/fields/__init__.py",
       "line": 830,
-      "statement": "for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)"
+      "statement": "return (blank_choice if include_blank else []) + [\n    (choice_func(x), str(x))\n    for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)\n]"
     },
     {
       "file": "django/db/models/fields/reverse_related.py",
       "line": 126,
-      "statement": "(x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)"
+      "statement": "return (blank_choice if include_blank else []) + [\n    (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)\n]"
     },
     {
       "file": "django/contrib/admin/filters.py",

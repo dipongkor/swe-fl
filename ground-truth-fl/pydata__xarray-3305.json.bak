@@ -1,0 +1,26 @@
+{
+  "instance_id": "pydata__xarray-3305",
+  "root_cause": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": 1595,
+      "statement": "def quantile(self, q, dim=None, interpolation=\"linear\"):"
+    },
+    {
+      "file": "xarray/core/variable.py",
+      "line": 1661,
+      "statement": "return Variable(new_dims, qs)"
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": 4771,
+      "statement": "q, dim=reduce_dims, interpolation=interpolation"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "The issue is an attribute propagation break in the quantile reduction path. The public DataArray/Dataset APIs expose keep_attrs, but the lower-level Variable.quantile implementation ignored that policy and returned a fresh Variable without attrs."
+  }
+}

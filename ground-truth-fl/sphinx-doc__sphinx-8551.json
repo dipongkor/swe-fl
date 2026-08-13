@@ -9,7 +9,7 @@
     {
       "file": "sphinx/util/docfields.py",
       "line": 293,
-      "statement": "xrefs = typed_field.make_xrefs("
+      "statement": "xrefs = typed_field.make_xrefs(\n    typed_field.typerolename,\n    self.directive.domain,\n    target,\n    contnode=content[0],\n)"
     }
   ],
   "confidence": "high",

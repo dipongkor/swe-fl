@@ -1,0 +1,21 @@
+{
+  "instance_id": "pydata__xarray-4687",
+  "root_cause": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1730,
+      "statement": "def where(cond, x, y):"
+    },
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1812,
+      "statement": "apply_ufunc(..., dask=\"allowed\") without keep_attrs=keep_attrs"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "The top-level xr.where signature rejects keep_attrs, so callers cannot request the attribute behavior exposed by DataArray.where and Dataset.where. Its apply_ufunc call also supplies no attribute policy and therefore drops the attributes of x. The regression first reaches the unsupported keyword error; without that keyword, the result still lacks the expected metadata."
+  }
+}

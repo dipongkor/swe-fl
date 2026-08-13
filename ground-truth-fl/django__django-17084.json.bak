@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-17084",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 449,
+      "statement": "if (isinstance(self.group_by, tuple) or self.is_sliced or has_existing_aggregation or refs_subquery or qualify or self.distinct or self.combinator):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Before 4.2, QuerySet.aggregate() always pushed the existing query into a subquery and aggregated over it. Django 4.2 optimized this: get_aggregation now inlines the aggregate expressions into the current query unless a listed condition forces subquery wrapping (existing GROUP BY, slicing, existing aggregations, aggregates referencing subquery annotations, qualify, distinct, combinators). The list misses one SQL constraint: an aggregate cannot contain a window function call, because window functions are evaluated after aggregation/grouping. So when a queryset is annotated with a Window expression (e.g. a running total via Sum(...) over an ORDER BY window) and aggregate() then sums that annotation, the inlined form nests the OVER clause directly inside the outer aggregate — SUM(SUM(\"DJR\") OVER (ORDER BY ...)) — and the database raises (PostgreSQL GroupingError: aggregate function calls cannot contain window function calls). The valid formulation requires the window to be computed in an inner SELECT and aggregated in an outer one, i.e. exactly the subquery wrapping the decision declined to apply. The fix detects window-containing referenced annotations (refs_window, computed alongside the existing refs_subquery detection) and adds it as a wrapping condition.",
+    "annotator2": "Sum('avg_publisher_pages') resolves against an annotation containing Window(Avg(...)). None of the existing wrapping conditions recognizes that reference, so get_aggregation places SUM around the window expression in one query level. SQLite rejects the resulting nested window usage with 'misuse of window function AVG()'. The wrapping condition is the minimal root cause because separating query levels is already used for other expression categories but omits referenced windows."
+  }
+}

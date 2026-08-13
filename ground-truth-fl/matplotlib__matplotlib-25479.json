@@ -9,7 +9,7 @@
     {
       "file": "lib/matplotlib/colors.py",
       "line": 777,
-      "statement": "if (not isinstance(other, Colormap) or self.name != other.name or"
+      "statement": "if (not isinstance(other, Colormap) or self.name != other.name or\n        self.colorbar_extend != other.colorbar_extend):"
     }
   ],
   "confidence": "high",

@@ -1,0 +1,21 @@
+{
+  "instance_id": "pytest-dev__pytest-5787",
+  "root_cause": [
+    {
+      "file": "src/_pytest/reports.py",
+      "line": 181,
+      "statement": "return {'reprcrash': reprcrash, 'reprtraceback': reprtraceback, 'sections': rep.longrepr.sections}"
+    },
+    {
+      "file": "src/_pytest/reports.py",
+      "line": 253,
+      "statement": "exception_info = ReprExceptionInfo(reprtraceback=ReprTraceback(**reprtraceback), reprcrash=ReprFileLocation(**reprcrash))"
+    }
+  ],
+  "confidence": "medium",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "disassembled_report serializes reprtraceback, reprcrash, and sections but never includes the chain attribute of ExceptionChainRepr, silently dropping all but the outermost exception. On deserialization, _from_json always constructs ReprExceptionInfo without checking for a chain field. Together these cause the round-trip to degrade a chained exception repr into a single-exception repr, causing isinstance(longrepr, ExceptionChainRepr) to fail after deserialization.",
+    "annotator2": ""
+  }
+}

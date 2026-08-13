@@ -1,0 +1,26 @@
+{
+  "instance_id": "django__django-14007",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1415,
+      "statement": "return self.connection.ops.fetch_returned_insert_rows(cursor)"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1418,
+      "statement": "return [self.connection.ops.fetch_returned_insert_columns(cursor, self.returning_params)]"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1419,
+      "statement": "return [(self.connection.ops.last_insert_id(cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column),)]"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "All insert-returning branches return raw database rows immediately. Unlike normal query result paths, they never apply the converters associated with returning_fields. A custom AutoField with from_db_value consequently leaves the inserted identifier as a plain database integer rather than the field's Python value."
+  }
+}

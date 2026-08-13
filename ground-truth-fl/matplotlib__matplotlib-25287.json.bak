@@ -1,0 +1,21 @@
+{
+  "instance_id": "matplotlib__matplotlib-25287",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/axis.py",
+      "line": 2258,
+      "statement": "color=mpl.rcParams['xtick.color'],"
+    },
+    {
+      "file": "lib/matplotlib/axis.py",
+      "line": 2518,
+      "statement": "color=mpl.rcParams['ytick.color'],"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The axis offset text, the exponent/offset annotation drawn next to the tick labels when a formatter factors out a common scale, is label text, and tick label color is governed by the xtick.labelcolor / ytick.labelcolor rcParams, which default to 'inherit' meaning fall back to xtick.color / ytick.color. Regular tick labels implement this in Tick.__init__ (resolve labelcolor, substituting the tick color when it is 'inherit'). XAxis._init and YAxis._init, however, initialize offsetText's color directly from xtick.color / ytick.color, never consulting the labelcolor params. Setting e.g. ytick.labelcolor='red' therefore recolors the tick labels but leaves the exponent label at the tick color, visually inconsistent with the labels it belongs to.",
+    "annotator2": "XAxis and YAxis create their offsetText artists during axis initialization. Although these artists display the scale offset or exponent alongside tick labels, each _init method sources their color directly from xtick.color or ytick.color. With labelcolor set to blue or green and the tick color left at its default, the artists remain 'k'. The two color assignments are independently necessary root causes because the x-axis and y-axis instantiate separate artists through separate initialization methods, and each regression assertion reaches its corresponding assignment."
+  }
+}

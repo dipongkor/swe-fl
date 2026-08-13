@@ -4,7 +4,7 @@
     {
       "file": "django/db/models/sql/query.py",
       "line": 1030,
-      "statement": "if (reuse is None or a in reuse) and j.equals(join)"
+      "statement": "reuse_aliases = [\n    a\n    for a, j in self.alias_map.items()\n    if (reuse is None or a in reuse) and j.equals(join)\n]"
     }
   ],
   "confidence": "high",

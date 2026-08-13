@@ -1,0 +1,10 @@
+instance_id,base_commit,file,line,start_line,end_line,n_lines,current_statement,extracted_statement,note
+pydata__xarray-4687,d3b6aa6d8b997df115a53c001d00222a0f92f63a,xarray/core/computation.py,1812,1812,1820,9,"apply_ufunc(..., dask=""allowed"") without keep_attrs=keep_attrs","return apply_ufunc(
+    duck_array_ops.where,
+    cond,
+    x,
+    y,
+    join=""exact"",
+    dataset_join=""exact"",
+    dask=""allowed"",
+)",multiline; current_not_contained

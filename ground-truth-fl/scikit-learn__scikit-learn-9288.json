@@ -4,7 +4,7 @@
     {
       "file": "sklearn/cluster/k_means_.py",
       "line": 372,
-      "statement": "random_state=random_state)"
+      "statement": "labels, inertia, centers, n_iter_ = kmeans_single(\n    X, sample_weight, n_clusters, max_iter=max_iter, init=init,\n    verbose=verbose, precompute_distances=precompute_distances,\n    tol=tol, x_squared_norms=x_squared_norms,\n    random_state=random_state)"
     }
   ],
   "confidence": "high",

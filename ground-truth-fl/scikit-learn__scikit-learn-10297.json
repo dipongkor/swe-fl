@@ -4,12 +4,12 @@
     {
       "file": "sklearn/linear_model/ridge.py",
       "line": 1336,
-      "statement": "normalize=False, scoring=None, cv=None, class_weight=None):"
+      "statement": "def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\n             normalize=False, scoring=None, cv=None, class_weight=None):"
     },
     {
       "file": "sklearn/linear_model/ridge.py",
       "line": 1339,
-      "statement": "scoring=scoring, cv=cv)"
+      "statement": "super(RidgeClassifierCV, self).__init__(\n    alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n    scoring=scoring, cv=cv)"
     }
   ],
   "confidence": "high",

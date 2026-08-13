@@ -4,7 +4,7 @@
     {
       "file": "sklearn/multioutput.py",
       "line": 167,
-      "statement": "self.estimators_ = Parallel(n_jobs=self.n_jobs)("
+      "statement": "self.estimators_ = Parallel(n_jobs=self.n_jobs)(\n    delayed(_fit_estimator)(\n        self.estimator, X, y[:, i], sample_weight)\n    for i in range(y.shape[1]))"
     }
   ],
   "confidence": "high",

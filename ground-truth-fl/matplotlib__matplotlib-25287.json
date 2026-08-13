@@ -4,12 +4,12 @@
     {
       "file": "lib/matplotlib/axis.py",
       "line": 2258,
-      "statement": "color=mpl.rcParams['xtick.color'],"
+      "statement": "self.offsetText.set(\n    x=1, y=0,\n    verticalalignment='top', horizontalalignment='right',\n    transform=mtransforms.blended_transform_factory(\n        self.axes.transAxes, mtransforms.IdentityTransform()),\n    fontsize=mpl.rcParams['xtick.labelsize'],\n    color=mpl.rcParams['xtick.color'],\n)"
     },
     {
       "file": "lib/matplotlib/axis.py",
       "line": 2518,
-      "statement": "color=mpl.rcParams['ytick.color'],"
+      "statement": "self.offsetText.set(\n    x=0, y=0.5,\n    verticalalignment='baseline', horizontalalignment='left',\n    transform=mtransforms.blended_transform_factory(\n        self.axes.transAxes, mtransforms.IdentityTransform()),\n    fontsize=mpl.rcParams['ytick.labelsize'],\n    color=mpl.rcParams['ytick.color'],\n)"
     }
   ],
   "confidence": "high",

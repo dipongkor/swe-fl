@@ -4,12 +4,12 @@
     {
       "file": "astropy/units/quantity.py",
       "line": 299,
-      "statement": "if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):"
+      "statement": "if not (np.can_cast(np.float32, value.dtype) or\n        value.dtype.fields):"
     },
     {
       "file": "astropy/units/quantity.py",
       "line": 380,
-      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):"
+      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n                           or value.dtype.fields)\n                      or value.dtype.kind == 'O'):"
     }
   ],
   "confidence": "high",

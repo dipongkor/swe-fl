@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-8399",
+  "root_cause": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": 147,
+      "statement": "name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\","
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Collection of a unittest.TestCase with setUpClass registers an autouse class-scoped fixture through _make_xunit_fixture. Its generated name begins with 'unittest_' rather than the private-name prefix used by fixture listing to suppress internal fixtures at normal verbosity. Consequently --fixtures prints unittest_setUpClass_fixture_MyTestCase and its 'no docstring available' entry even though it is framework-generated. Line 147 is the minimal root cause for the reported unittest behavior because it alone determines whether this generated fixture is classified as private by the listing command."
+  }
+}

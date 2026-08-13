@@ -4,7 +4,7 @@
     {
       "file": "src/_pytest/unittest.py",
       "line": 147,
-      "statement": "name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\","
+      "statement": "@pytest.fixture(\n    scope=scope,\n    autouse=True,\n    # Use a unique name to speed up lookup.\n    name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\",\n)"
     }
   ],
   "confidence": "high",

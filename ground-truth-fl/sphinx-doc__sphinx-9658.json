@@ -9,7 +9,7 @@
     {
       "file": "sphinx/ext/autodoc/mock.py",
       "line": 74,
-      "statement": "attrs = {'__module__': module, '__display_name__': module + '.' + name, '__sphinx_decorator_args__': decorator_args}"
+      "statement": "attrs = {'__module__': module,\n         '__display_name__': module + '.' + name,\n         '__sphinx_decorator_args__': decorator_args}"
     }
   ],
   "confidence": "high",

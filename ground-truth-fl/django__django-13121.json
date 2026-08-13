@@ -9,7 +9,7 @@
     {
       "file": "django/db/models/expressions.py",
       "line": 452,
-      "statement": "if (not connection.features.has_native_duration_field and ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):"
+      "statement": "if (not connection.features.has_native_duration_field and\n        ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or\n         (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):"
     },
     {
       "file": "django/db/models/expressions.py",

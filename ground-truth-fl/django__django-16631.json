@@ -4,7 +4,7 @@
     {
       "file": "django/contrib/auth/__init__.py",
       "line": 202,
-      "statement": "session_hash_verified = session_hash and constant_time_compare(session_hash, user.get_session_auth_hash())"
+      "statement": "session_hash_verified = session_hash and constant_time_compare(\n    session_hash, user.get_session_auth_hash()\n)"
     }
   ],
   "confidence": "high",

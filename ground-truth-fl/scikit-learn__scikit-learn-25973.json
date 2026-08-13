@@ -4,7 +4,7 @@
     {
       "file": "sklearn/feature_selection/_sequential.py",
       "line": 312,
-      "statement": "cv=self.cv,"
+      "statement": "scores[feature_idx] = cross_val_score(\n    estimator,\n    X_new,\n    y,\n    cv=self.cv,\n    scoring=self.scoring,\n    n_jobs=self.n_jobs,\n).mean()"
     }
   ],
   "confidence": "high",

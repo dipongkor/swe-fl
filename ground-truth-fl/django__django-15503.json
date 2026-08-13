@@ -4,7 +4,7 @@
     {
       "file": "django/db/models/fields/json.py",
       "line": 196,
-      "statement": "rhs_params.append(\"%s%s\" % (lhs_json_path, compile_json_path(rhs_key_transforms, include_root=False)))"
+      "statement": "rhs_params.append(\n    \"%s%s\"\n    % (\n        lhs_json_path,\n        compile_json_path(rhs_key_transforms, include_root=False),\n    )\n)"
     }
   ],
   "confidence": "high",

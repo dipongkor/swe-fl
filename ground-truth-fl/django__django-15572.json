@@ -9,7 +9,7 @@
     {
       "file": "django/template/autoreload.py",
       "line": 28,
-      "statement": "if not is_django_path(directory)"
+      "statement": "items.update(\n    cwd / to_path(directory)\n    for directory in loader.get_dirs()\n    if not is_django_path(directory)\n)"
     }
   ],
   "confidence": "high",

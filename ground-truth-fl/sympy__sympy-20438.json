@@ -24,7 +24,7 @@
     {
       "file": "sympy/core/relational.py",
       "line": 569,
-      "statement": "m, b = linear_coeffs("
+      "statement": "m, b = linear_coeffs(\n    e.rewrite(Add, evaluate=False), x)"
     }
   ],
   "confidence": "high",

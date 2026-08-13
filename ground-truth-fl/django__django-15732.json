@@ -4,12 +4,12 @@
     {
       "file": "django/db/backends/base/schema.py",
       "line": 565,
-      "statement": "constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)"
+      "statement": "constraint_names = self._constraint_names(\n    model,\n    columns,\n    exclude=meta_constraint_names | meta_index_names,\n    **constraint_kwargs,\n)"
     },
     {
       "file": "django/db/backends/base/schema.py",
       "line": 531,
-      "statement": "model, fields, {\"unique\": True}, self.sql_delete_unique"
+      "statement": "self._delete_composed_index(\n    model, fields, {\"unique\": True}, self.sql_delete_unique\n)"
     }
   ],
   "confidence": "high",

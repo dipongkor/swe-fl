@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-15732",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 565,
+      "statement": "constraint_names = self._constraint_names(model, columns, exclude=meta_constraint_names | meta_index_names, **constraint_kwargs)"
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 531,
+      "statement": "model, fields, {\"unique\": True}, self.sql_delete_unique"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Dropping an entry from unique_together is implemented by locating the matching unique constraint on the involved columns and deleting it: _delete_composed_index asks introspection for all constraints on those columns satisfying the given predicate and insists on exactly one result. Two situations legitimately produce more than one unique constraint on the same column, and the code handles neither. If the column is the primary key, the predicate {'unique': True} also matches the primary-key constraint, since primary keys are unique. If the field declares unique=True in addition to appearing in unique_together, the field's own unique constraint and the unique_together constraint both match. In either case the exactly-one check raises ValueError('Found wrong number (2) of constraints ...'), aborting the migration, even though the constraint unique_together created is identifiable — it carries Django's deterministic default name with the _uniq suffix, the very name generated when the constraint was added. The migration is thus unable to remove a redundant unique_together from any column that is otherwise unique.",
+    "annotator2": "AlterUniqueTogether removes the generated constraint by searching for a unique constraint on the affected columns. The search also admits primary keys, and a field-level unique constraint on the same column has identical column and uniqueness metadata. Either case can return two names, causing ValueError instead of removing only the unique_together constraint. The deletion predicate and generic lookup are independently incomplete for the two ambiguity cases."
+  }
+}

@@ -4,7 +4,7 @@
     {
       "file": "xarray/core/dataarray.py",
       "line": 3484,
-      "statement": "self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None"
+      "statement": "def integrate(\n    self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n) -> \"DataArray\":"
     }
   ],
   "confidence": "medium",

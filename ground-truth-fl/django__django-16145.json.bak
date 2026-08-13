@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-16145",
+  "root_cause": [
+    {
+      "file": "django/core/management/commands/runserver.py",
+      "line": 150,
+      "statement": "\"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The runserver startup message formats the address using a ternary that only handles the IPv6 case. When the user passes '0' as the address (shorthand for 0.0.0.0), self._raw_ipv6 is False and self.addr is '0', so the message shows the raw '0' rather than the expanded '0.0.0.0'.",
+    "annotator2": "The server binding semantics already treat address 0 as all IPv4 interfaces, but the user-facing URL formatter did not normalize that special value."
+  }
+}

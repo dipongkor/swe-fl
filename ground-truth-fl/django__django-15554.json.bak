@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-15554",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1030,
+      "statement": "if (reuse is None or a in reuse) and j.equals(join)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Every relation traversal in a queryset goes through Query.join, which reuses an existing table alias when an equivalent join is already present. A join's full identity includes the FilteredRelation attached to it, and Join provides two comparisons: __eq__, which includes the filtered_relation, and equals, which deliberately ignores it. The reuse check in Query.join uses the ignoring variant, so two FilteredRelation annotations over the same relation path, whose joins differ only in their filter condition, are treated as the same join: the second annotation reuses the alias of the first instead of creating its own JOIN. The generated SQL contains a single join carrying only the first condition, and columns referenced through the second alias come from that join, so the second FilteredRelation's condition is silently ignored (e.g. book_title_jane returns the Alice-filtered rows' NULLs instead of Jane's books).",
+    "annotator2": "Resolving each FilteredRelation annotation constructs a Join for the book relation with a distinct filtering condition. Query.join searches existing aliases using Join.equals, whose equality rule omits filtered_relation. The second annotation is consequently mapped to the first annotation's alias rather than receiving a separately filtered join. Both projected columns then come from the Alice-filtered join, producing one row with both titles None instead of two rows containing the Jane titles. Line 1030 is the minimal root cause because it is where distinct filtered joins are collapsed despite their different SQL conditions."
+  }
+}

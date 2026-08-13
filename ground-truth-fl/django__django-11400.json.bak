@@ -1,0 +1,26 @@
+{
+  "instance_id": "django__django-11400",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/__init__.py",
+      "line": 830,
+      "statement": "for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)"
+    },
+    {
+      "file": "django/db/models/fields/reverse_related.py",
+      "line": 126,
+      "statement": "(x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)"
+    },
+    {
+      "file": "django/contrib/admin/filters.py",
+      "line": 422,
+      "statement": "return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Related-field choice lists are built by two get_choices implementations (forward fields in Field.get_choices, reverse relations in ForeignObjectRel.get_choices), both of which apply .order_by(*ordering) unconditionally to the related model's default manager queryset. Calling order_by() with an empty ordering does not preserve the queryset's existing order — it removes it, including the default ordering the manager derives from the related model's Meta.ordering. RelatedFieldListFilter passes ordering=() whenever the related model has no registered ModelAdmin (or its admin declares no ordering), so in exactly the fallback case the choices lose their declared default order and appear in arbitrary database order. Separately, RelatedOnlyFieldListFilter overrides field_choices to restrict choices to values present in the changelist queryset but drops the ordering argument from its get_choices call altogether, so even an explicitly configured related-ModelAdmin ordering is ignored for that filter.",
+    "annotator2": "Admin related filters obtain their labels through field.get_choices. RelatedOnlyFieldListFilter never forwards ordering from the registered related ModelAdmin, producing Jack before Albert despite ordering=('name',). For ordinary and reverse fields, an empty explicit ordering is passed to QuerySet.order_by, which clears Meta.ordering rather than falling back to it. The three statements are the minimal independently reachable choices governing related-only admin ordering and default ordering for forward and reverse relations."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "instance_id": "django__django-13121",
+  "root_cause": [
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 60,
+      "statement": "other = DurationValue(other, output_field=fields.DurationField())"
+    },
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 452,
+      "statement": "if (not connection.features.has_native_duration_field and ((lhs_output and lhs_output.get_internal_type() == 'DurationField') or (rhs_output and rhs_output.get_internal_type() == 'DurationField'))):"
+    },
+    {
+      "file": "django/db/models/expressions.py",
+      "line": 717,
+      "statement": "return connection.ops.date_interval_sql(self.value), []"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "The reported query is duration-only arithmetic: F('estimated_time') + datetime.timedelta(...). The ORM treated the timedelta as a special SQL interval and routed the whole expression through DurationExpression whenever either side was a DurationField. On backends without native duration support, that produced SQL values that were not converted back as duration microseconds."
+  }
+}

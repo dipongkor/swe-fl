@@ -40,6 +40,15 @@
       "statement": "value = value.rstrip().replace(\"''\", \"'\")"
     }
   ],
+  "astropy__astropy-7606": [
+    {
+      "file": "astropy/units/core.py",
+      "line": "1713",
+      "start_line": 1713,
+      "end_line": 1713,
+      "statement": "other = Unit(other, parse_strict='silent')"
+    }
+  ],
   "astropy__astropy-7671": [
     {
       "file": "astropy/utils/introspection.py",
@@ -47,6 +56,57 @@
       "start_line": 143,
       "end_line": 143,
       "statement": "return LooseVersion(have_version) >= LooseVersion(version)"
+    }
+  ],
+  "astropy__astropy-8707": [
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": "557",
+      "start_line": 557,
+      "end_line": 557,
+      "statement": "card._image = _pad(image)"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": "369",
+      "start_line": 369,
+      "end_line": 369,
+      "statement": "end_idx = data.index(sep, idx)"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": "377",
+      "start_line": 377,
+      "end_line": 377,
+      "statement": "if next_image[:8] == 'CONTINUE':"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": "380",
+      "start_line": 380,
+      "end_line": 380,
+      "statement": "cards.append(Card.fromstring(''.join(image)))"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": "383",
+      "start_line": 383,
+      "end_line": 383,
+      "statement": "if next_image == END_CARD:"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": "387",
+      "start_line": 387,
+      "end_line": 387,
+      "statement": "if next_image.split(sep)[0].rstrip() == 'END':"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "line": "395",
+      "start_line": 395,
+      "end_line": 395,
+      "statement": "cards.append(Card.fromstring(''.join(image)))"
     }
   ],
   "astropy__astropy-8872": [
@@ -63,6 +123,159 @@
       "start_line": 380,
       "end_line": 382,
       "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n                           or value.dtype.fields)\n                      or value.dtype.kind == 'O'):"
+    }
+  ],
+  "django__django-10554": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "359",
+      "start_line": 359,
+      "end_line": 359,
+      "statement": "raise DatabaseError('ORDER BY term does not match any column in the result set.')"
+    }
+  ],
+  "django__django-11138": [
+    {
+      "file": "django/db/backends/sqlite3/base.py",
+      "line": "409",
+      "start_line": 409,
+      "end_line": 409,
+      "statement": "dt = timezone.localtime(dt, pytz.timezone(tzname))"
+    },
+    {
+      "file": "django/db/backends/sqlite3/operations.py",
+      "line": "88",
+      "start_line": 88,
+      "end_line": 88,
+      "statement": "return \"'%s'\" % tzname if settings.USE_TZ else 'NULL'"
+    },
+    {
+      "file": "django/db/backends/mysql/operations.py",
+      "line": "73",
+      "start_line": 73,
+      "end_line": 73,
+      "statement": "field_name = \"CONVERT_TZ(%s, 'UTC', '%s')\" % (field_name, tzname)"
+    },
+    {
+      "file": "django/db/backends/oracle/operations.py",
+      "line": "104",
+      "start_line": 104,
+      "end_line": 104,
+      "statement": "return \"CAST((FROM_TZ(%s, '0:00') AT TIME ZONE '%s') AS TIMESTAMP)\" % (field_name, tzname)"
+    }
+  ],
+  "django__django-11265": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "1668",
+      "start_line": 1668,
+      "end_line": 1668,
+      "statement": "query = Query(self.model)"
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "2145",
+      "start_line": 2145,
+      "end_line": 2145,
+      "statement": "if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:"
+    }
+  ],
+  "django__django-11400": [
+    {
+      "file": "django/db/models/fields/__init__.py",
+      "line": "830",
+      "start_line": 828,
+      "end_line": 831,
+      "statement": "return (blank_choice if include_blank else []) + [\n    (choice_func(x), str(x))\n    for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)\n]"
+    },
+    {
+      "file": "django/db/models/fields/reverse_related.py",
+      "line": "126",
+      "start_line": 125,
+      "end_line": 127,
+      "statement": "return (blank_choice if include_blank else []) + [\n    (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)\n]"
+    },
+    {
+      "file": "django/contrib/admin/filters.py",
+      "line": "422",
+      "start_line": 422,
+      "end_line": 422,
+      "statement": "return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})"
+    }
+  ],
+  "django__django-11532": [
+    {
+      "file": "django/core/mail/utils.py",
+      "line": "16",
+      "start_line": 16,
+      "end_line": 16,
+      "statement": "self._fqdn = socket.getfqdn()"
+    }
+  ],
+  "django__django-11728": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": "172",
+      "start_line": 172,
+      "end_line": 172,
+      "statement": "if unmatched_open_brackets == 0:"
+    },
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": "204",
+      "start_line": 204,
+      "end_line": 204,
+      "statement": "if unmatched_open_brackets == 0:"
+    }
+  ],
+  "django__django-11734": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "1705",
+      "start_line": 1705,
+      "end_line": 1705,
+      "statement": "if isinstance(filter_rhs, F):"
+    },
+    {
+      "file": "django/db/models/fields/related_lookups.py",
+      "line": "104",
+      "start_line": 104,
+      "end_line": 104,
+      "statement": "if not isinstance(self.lhs, MultiColSource) and self.rhs_is_direct_value():"
+    }
+  ],
+  "django__django-11740": [
+    {
+      "file": "django/db/migrations/autodetector.py",
+      "line": "966",
+      "start_line": 966,
+      "end_line": 974,
+      "statement": "self.add_operation(\n    app_label,\n    operations.AlterField(\n        model_name=model_name,\n        name=field_name,\n        field=field,\n        preserve_default=preserve_default,\n    )\n)"
+    }
+  ],
+  "django__django-12155": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": "37",
+      "start_line": 37,
+      "end_line": 37,
+      "statement": "indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())"
+    }
+  ],
+  "django__django-12406": [
+    {
+      "file": "django/forms/models.py",
+      "line": "1188",
+      "start_line": 1188,
+      "end_line": 1188,
+      "statement": "if required and (initial is not None):"
+    },
+    {
+      "file": "django/db/models/fields/related.py",
+      "line": "978",
+      "start_line": 978,
+      "end_line": 983,
+      "statement": "return super().formfield(**{\n    'form_class': forms.ModelChoiceField,\n    'queryset': self.remote_field.model._default_manager.using(using),\n    'to_field_name': self.remote_field.field_name,\n    **kwargs,\n})"
     }
   ],
   "django__django-13121": [
@@ -88,6 +301,123 @@
       "statement": "return connection.ops.date_interval_sql(self.value), []"
     }
   ],
+  "django__django-13158": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "296",
+      "start_line": 296,
+      "end_line": 296,
+      "statement": "obj.__dict__ = self.__dict__.copy()"
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "1779",
+      "start_line": 1779,
+      "end_line": 1779,
+      "statement": "self.where.add(NothingNode(), AND)"
+    }
+  ],
+  "django__django-13195": [
+    {
+      "file": "django/http/response.py",
+      "line": "213",
+      "start_line": 213,
+      "end_line": 213,
+      "statement": "def delete_cookie(self, key, path='/', domain=None):"
+    },
+    {
+      "file": "django/http/response.py",
+      "line": "216",
+      "start_line": 216,
+      "end_line": 216,
+      "statement": "secure = key.startswith(('__Secure-', '__Host-'))"
+    },
+    {
+      "file": "django/http/response.py",
+      "line": "217",
+      "start_line": 217,
+      "end_line": 220,
+      "statement": "self.set_cookie(\n    key, max_age=0, path=path, domain=domain, secure=secure,\n    expires='Thu, 01 Jan 1970 00:00:00 GMT',\n)"
+    },
+    {
+      "file": "django/contrib/messages/storage/cookie.py",
+      "line": "95",
+      "start_line": 95,
+      "end_line": 95,
+      "statement": "response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)"
+    },
+    {
+      "file": "django/contrib/sessions/middleware.py",
+      "line": "41",
+      "start_line": 41,
+      "end_line": 45,
+      "statement": "response.delete_cookie(\n    settings.SESSION_COOKIE_NAME,\n    path=settings.SESSION_COOKIE_PATH,\n    domain=settings.SESSION_COOKIE_DOMAIN,\n)"
+    }
+  ],
+  "django__django-13297": [
+    {
+      "file": "django/views/generic/base.py",
+      "line": "172",
+      "start_line": 172,
+      "end_line": 172,
+      "statement": "@SimpleLazyObject"
+    }
+  ],
+  "django__django-13343": [
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": "282",
+      "start_line": 282,
+      "end_line": 282,
+      "statement": "kwargs['storage'] = self.storage"
+    },
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": "232",
+      "start_line": 232,
+      "end_line": 232,
+      "statement": "self.storage = self.storage()"
+    }
+  ],
+  "django__django-13344": [
+    {
+      "file": "django/middleware/security.py",
+      "line": "22",
+      "start_line": 22,
+      "end_line": 22,
+      "statement": "self.get_response = get_response"
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": "73",
+      "start_line": 73,
+      "end_line": 73,
+      "statement": "self.get_response = get_response"
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": "135",
+      "start_line": 135,
+      "end_line": 135,
+      "statement": "self.get_response = get_response"
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": "177",
+      "start_line": 177,
+      "end_line": 177,
+      "statement": "self.get_response = get_response"
+    }
+  ],
+  "django__django-13346": [
+    {
+      "file": "django/db/models/query_utils.py",
+      "line": "183",
+      "start_line": 183,
+      "end_line": 183,
+      "statement": "return self.output_field.get_lookup(lookup_name)"
+    }
+  ],
   "django__django-13449": [
     {
       "file": "django/db/models/expressions.py",
@@ -95,6 +425,31 @@
       "start_line": 1256,
       "end_line": 1256,
       "statement": "class Window(Expression):"
+    }
+  ],
+  "django__django-13512": [
+    {
+      "file": "django/forms/fields.py",
+      "line": "1261",
+      "start_line": 1261,
+      "end_line": 1261,
+      "statement": "return json.dumps(value, cls=self.encoder)"
+    },
+    {
+      "file": "django/contrib/admin/utils.py",
+      "line": "403",
+      "start_line": 403,
+      "end_line": 403,
+      "statement": "return field.get_prep_value(value)"
+    }
+  ],
+  "django__django-13810": [
+    {
+      "file": "django/core/handlers/base.py",
+      "line": "54",
+      "start_line": 54,
+      "end_line": 57,
+      "statement": "handler = self.adapt_method_mode(\n    middleware_is_async, handler, handler_is_async,\n    debug=settings.DEBUG, name='middleware %s' % middleware_path,\n)"
     }
   ],
   "django__django-14007": [
@@ -120,13 +475,336 @@
       "statement": "return [(self.connection.ops.last_insert_id(\n    cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column\n),)]"
     }
   ],
+  "django__django-14011": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": "80",
+      "start_line": 80,
+      "end_line": 80,
+      "statement": "class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):"
+    }
+  ],
+  "django__django-14034": [
+    {
+      "file": "django/forms/boundfield.py",
+      "line": "236",
+      "start_line": 236,
+      "end_line": 236,
+      "statement": "attrs['required'] = True"
+    }
+  ],
+  "django__django-14053": [
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "line": "232",
+      "start_line": 232,
+      "end_line": 232,
+      "statement": "yield name, hashed_name, processed"
+    },
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "line": "239",
+      "start_line": 239,
+      "end_line": 239,
+      "statement": "yield name, hashed_name, processed"
+    }
+  ],
+  "django__django-14170": [
+    {
+      "file": "django/db/models/lookups.py",
+      "line": "544",
+      "start_line": 544,
+      "end_line": 544,
+      "statement": "bounds = connection.ops.year_lookup_bounds_for_datetime_field(year)"
+    },
+    {
+      "file": "django/db/models/lookups.py",
+      "line": "546",
+      "start_line": 546,
+      "end_line": 546,
+      "statement": "bounds = connection.ops.year_lookup_bounds_for_date_field(year)"
+    }
+  ],
+  "django__django-14315": [
+    {
+      "file": "django/db/backends/base/client.py",
+      "line": "24",
+      "start_line": 24,
+      "end_line": 24,
+      "statement": "if env:"
+    },
+    {
+      "file": "django/db/backends/postgresql/client.py",
+      "line": "54",
+      "start_line": 54,
+      "end_line": 54,
+      "statement": "return args, env"
+    }
+  ],
+  "django__django-14349": [
+    {
+      "file": "django/core/validators.py",
+      "line": "101",
+      "start_line": 101,
+      "end_line": 101,
+      "statement": "def __call__(self, value):"
+    }
+  ],
+  "django__django-14434": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "1244",
+      "start_line": 1244,
+      "end_line": 1244,
+      "statement": "table = Table(model._meta.db_table, self.quote_name)"
+    }
+  ],
+  "django__django-15128": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "615",
+      "start_line": 615,
+      "end_line": 615,
+      "statement": "change_map[alias] = new_alias"
+    }
+  ],
+  "django__django-15503": [
+    {
+      "file": "django/db/models/fields/json.py",
+      "line": "196",
+      "start_line": 196,
+      "end_line": 202,
+      "statement": "rhs_params.append(\n    \"%s%s\"\n    % (\n        lhs_json_path,\n        compile_json_path(rhs_key_transforms, include_root=False),\n    )\n)"
+    }
+  ],
+  "django__django-15554": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "1030",
+      "start_line": 1027,
+      "end_line": 1031,
+      "statement": "reuse_aliases = [\n    a\n    for a, j in self.alias_map.items()\n    if (reuse is None or a in reuse) and j.equals(join)\n]"
+    }
+  ],
+  "django__django-15563": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1839",
+      "start_line": 1839,
+      "end_line": 1839,
+      "statement": "query.add_fields([query.get_meta().pk.name])"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1857",
+      "start_line": 1857,
+      "end_line": 1857,
+      "statement": "self.query.related_ids = idents"
+    },
+    {
+      "file": "django/db/models/sql/subqueries.py",
+      "line": "137",
+      "start_line": 137,
+      "end_line": 137,
+      "statement": "query.add_filter(\"pk__in\", self.related_ids)"
+    }
+  ],
+  "django__django-15572": [
+    {
+      "file": "django/template/autoreload.py",
+      "line": "20",
+      "start_line": 20,
+      "end_line": 20,
+      "statement": "items.update(cwd / to_path(dir) for dir in backend.engine.dirs)"
+    },
+    {
+      "file": "django/template/autoreload.py",
+      "line": "28",
+      "start_line": 25,
+      "end_line": 29,
+      "statement": "items.update(\n    cwd / to_path(directory)\n    for directory in loader.get_dirs()\n    if not is_django_path(directory)\n)"
+    }
+  ],
+  "django__django-15629": [
+    {
+      "file": "django/db/models/fields/related.py",
+      "line": "1183",
+      "start_line": 1183,
+      "end_line": 1183,
+      "statement": "return {\"type\": self.db_type(connection), \"check\": self.db_check(connection)}"
+    },
+    {
+      "file": "django/db/backends/sqlite3/schema.py",
+      "line": "458",
+      "start_line": 458,
+      "end_line": 458,
+      "statement": "if new_field.unique and old_type != new_type:"
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "832",
+      "start_line": 826,
+      "end_line": 833,
+      "statement": "drop_foreign_keys = (\n    self.connection.features.supports_foreign_keys\n    and (\n        (old_field.primary_key and new_field.primary_key)\n        or (old_field.unique and new_field.unique)\n    )\n    and old_type != new_type\n)"
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "1041",
+      "start_line": 1041,
+      "end_line": 1043,
+      "statement": "fragment, other_actions = self._alter_column_type_sql(\n    new_rel.related_model, old_rel.field, new_rel.field, rel_type\n)"
+    }
+  ],
+  "django__django-15732": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "565",
+      "start_line": 565,
+      "end_line": 570,
+      "statement": "constraint_names = self._constraint_names(\n    model,\n    columns,\n    exclude=meta_constraint_names | meta_index_names,\n    **constraint_kwargs,\n)"
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": "531",
+      "start_line": 530,
+      "end_line": 532,
+      "statement": "self._delete_composed_index(\n    model, fields, {\"unique\": True}, self.sql_delete_unique\n)"
+    }
+  ],
+  "django__django-15916": [
+    {
+      "file": "django/forms/models.py",
+      "line": "639",
+      "start_line": 639,
+      "end_line": 639,
+      "statement": "form_class_attrs = {\"Meta\": Meta, \"formfield_callback\": formfield_callback}"
+    },
+    {
+      "file": "django/forms/models.py",
+      "line": "266",
+      "start_line": 266,
+      "end_line": 266,
+      "statement": "formfield_callback = attrs.pop(\"formfield_callback\", base_formfield_callback)"
+    }
+  ],
   "django__django-16145": [
     {
       "file": "django/core/management/commands/runserver.py",
-      "line": "154",
+      "line": "150",
       "start_line": 140,
       "end_line": 154,
       "statement": "self.stdout.write(\n    (\n        \"Django version %(version)s, using settings %(settings)r\\n\"\n        \"Starting development server at %(protocol)s://%(addr)s:%(port)s/\\n\"\n        \"Quit the server with %(quit_command)s.\"\n    )\n    % {\n        \"version\": self.get_version(),\n        \"settings\": settings.SETTINGS_MODULE,\n        \"protocol\": self.protocol,\n        \"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,\n        \"port\": self.port,\n        \"quit_command\": quit_command,\n    }\n)"
+    }
+  ],
+  "django__django-16256": [
+    {
+      "file": "django/db/models/manager.py",
+      "line": "87",
+      "start_line": 87,
+      "end_line": 87,
+      "statement": "return getattr(self.get_queryset(), name)(*args, **kwargs)"
+    }
+  ],
+  "django__django-16315": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1728",
+      "start_line": 1725,
+      "end_line": 1730,
+      "statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": "1729",
+      "start_line": 1725,
+      "end_line": 1730,
+      "statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)"
+    }
+  ],
+  "django__django-16454": [
+    {
+      "file": "django/core/management/base.py",
+      "line": "46",
+      "start_line": 46,
+      "end_line": 46,
+      "statement": "class CommandParser(ArgumentParser):"
+    }
+  ],
+  "django__django-16502": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": "113",
+      "start_line": 113,
+      "end_line": 113,
+      "statement": "class ServerHandler(simple_server.ServerHandler):"
+    },
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": "136",
+      "start_line": 136,
+      "end_line": 136,
+      "statement": "if \"Content-Length\" not in self.headers:"
+    }
+  ],
+  "django__django-16631": [
+    {
+      "file": "django/contrib/auth/__init__.py",
+      "line": "202",
+      "start_line": 202,
+      "end_line": 204,
+      "statement": "session_hash_verified = session_hash and constant_time_compare(\n    session_hash, user.get_session_auth_hash()\n)"
+    }
+  ],
+  "django__django-16901": [
+    {
+      "file": "django/db/models/sql/where.py",
+      "line": "138",
+      "start_line": 138,
+      "end_line": 138,
+      "statement": "rhs = Exact(1, rhs_sum)"
+    }
+  ],
+  "django__django-16938": [
+    {
+      "file": "django/core/serializers/python.py",
+      "line": "82",
+      "start_line": 82,
+      "end_line": 82,
+      "statement": "return getattr(obj, field.name).only(\"pk\").iterator()"
+    },
+    {
+      "file": "django/core/serializers/xml_serializer.py",
+      "line": "158",
+      "start_line": 158,
+      "end_line": 158,
+      "statement": "return getattr(obj, field.name).only(\"pk\").iterator()"
+    }
+  ],
+  "django__django-17084": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": "449",
+      "start_line": 449,
+      "end_line": 457,
+      "statement": "if (\n    isinstance(self.group_by, tuple)\n    or self.is_sliced\n    or has_existing_aggregation\n    or refs_subquery\n    or qualify\n    or self.distinct\n    or self.combinator\n):"
+    }
+  ],
+  "matplotlib__matplotlib-20859": [
+    {
+      "file": "lib/matplotlib/legend.py",
+      "line": "437",
+      "start_line": 437,
+      "end_line": 437,
+      "statement": "elif isinstance(parent, Figure):"
+    }
+  ],
+  "matplotlib__matplotlib-22719": [
+    {
+      "file": "lib/matplotlib/category.py",
+      "line": "61",
+      "start_line": 61,
+      "end_line": 61,
+      "statement": "if is_numlike:"
     }
   ],
   "matplotlib__matplotlib-23299": [
@@ -147,6 +825,86 @@
       "statement": "axes.set_prop_cycle(color=colors)"
     }
   ],
+  "matplotlib__matplotlib-24637": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": "1461",
+      "start_line": 1461,
+      "end_line": 1461,
+      "statement": "self.offsetbox.draw(renderer)"
+    }
+  ],
+  "matplotlib__matplotlib-25287": [
+    {
+      "file": "lib/matplotlib/axis.py",
+      "line": "2258",
+      "start_line": 2252,
+      "end_line": 2259,
+      "statement": "self.offsetText.set(\n    x=1, y=0,\n    verticalalignment='top', horizontalalignment='right',\n    transform=mtransforms.blended_transform_factory(\n        self.axes.transAxes, mtransforms.IdentityTransform()),\n    fontsize=mpl.rcParams['xtick.labelsize'],\n    color=mpl.rcParams['xtick.color'],\n)"
+    },
+    {
+      "file": "lib/matplotlib/axis.py",
+      "line": "2518",
+      "start_line": 2512,
+      "end_line": 2519,
+      "statement": "self.offsetText.set(\n    x=0, y=0.5,\n    verticalalignment='baseline', horizontalalignment='left',\n    transform=mtransforms.blended_transform_factory(\n        self.axes.transAxes, mtransforms.IdentityTransform()),\n    fontsize=mpl.rcParams['ytick.labelsize'],\n    color=mpl.rcParams['ytick.color'],\n)"
+    }
+  ],
+  "matplotlib__matplotlib-25311": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": "1508",
+      "start_line": 1508,
+      "end_line": 1508,
+      "statement": "self.canvas = self.ref_artist.figure.canvas"
+    }
+  ],
+  "matplotlib__matplotlib-25479": [
+    {
+      "file": "lib/matplotlib/cm.py",
+      "line": "148",
+      "start_line": 148,
+      "end_line": 148,
+      "statement": "self._cmaps[name] = cmap.copy()"
+    },
+    {
+      "file": "lib/matplotlib/colors.py",
+      "line": "777",
+      "start_line": 777,
+      "end_line": 778,
+      "statement": "if (not isinstance(other, Colormap) or self.name != other.name or\n        self.colorbar_extend != other.colorbar_extend):"
+    }
+  ],
+  "matplotlib__matplotlib-25960": [
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": "2279",
+      "start_line": 2279,
+      "end_line": 2279,
+      "statement": "dx = wr[self._subplotspec.colspan].sum() / wr.sum()"
+    },
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": "2280",
+      "start_line": 2280,
+      "end_line": 2280,
+      "statement": "dy = hr[self._subplotspec.rowspan].sum() / hr.sum()"
+    },
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": "2281",
+      "start_line": 2281,
+      "end_line": 2281,
+      "statement": "x0 = wr[:self._subplotspec.colspan.start].sum() / wr.sum()"
+    },
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": "2282",
+      "start_line": 2282,
+      "end_line": 2282,
+      "statement": "y0 = 1 - hr[:self._subplotspec.rowspan.stop].sum() / hr.sum()"
+    }
+  ],
   "matplotlib__matplotlib-26208": [
     {
       "file": "lib/matplotlib/axes/_base.py",
@@ -161,6 +919,22 @@
       "start_line": 4473,
       "end_line": 4473,
       "statement": "return ax2"
+    }
+  ],
+  "matplotlib__matplotlib-26466": [
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": "1459",
+      "start_line": 1459,
+      "end_line": 1459,
+      "statement": "self.xy = xy"
+    },
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": "1392",
+      "start_line": 1392,
+      "end_line": 1392,
+      "statement": "self._ref_coord = ref_coord"
     }
   ],
   "mwaskom__seaborn-3187": [
@@ -197,6 +971,15 @@
       "statement": "return to_native_string(data)"
     }
   ],
+  "pydata__xarray-3095": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": "1950",
+      "start_line": 1950,
+      "end_line": 1950,
+      "statement": "data = PandasIndexAdapter(self._data.array.copy(deep=True))"
+    }
+  ],
   "pydata__xarray-3305": [
     {
       "file": "xarray/core/variable.py",
@@ -218,6 +1001,15 @@
       "start_line": 4770,
       "end_line": 4772,
       "statement": "variables[name] = var.quantile(\n    q, dim=reduce_dims, interpolation=interpolation\n)"
+    }
+  ],
+  "pydata__xarray-3993": [
+    {
+      "file": "xarray/core/dataarray.py",
+      "line": "3484",
+      "start_line": 3483,
+      "end_line": 3485,
+      "statement": "def integrate(\n    self, dim: Union[Hashable, Sequence[Hashable]], datetime_unit: str = None\n) -> \"DataArray\":"
     }
   ],
   "pydata__xarray-4687": [
@@ -245,6 +1037,56 @@
       "statement": "if x.dtype.kind in \"mM\":"
     }
   ],
+  "pydata__xarray-6938": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": "2884",
+      "start_line": 2884,
+      "end_line": 2884,
+      "statement": "return self"
+    }
+  ],
+  "pydata__xarray-6992": [
+    {
+      "file": "xarray/core/dataset.py",
+      "line": "4180",
+      "start_line": 4180,
+      "end_line": 4180,
+      "statement": "coord_names = set(new_variables) | self._coord_names"
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": "4182",
+      "start_line": 4182,
+      "end_line": 4182,
+      "statement": "return self._replace(variables, coord_names=coord_names, indexes=indexes)"
+    },
+    {
+      "file": "xarray/core/dataset.py",
+      "line": "4169",
+      "start_line": 4169,
+      "end_line": 4169,
+      "statement": "if drop:"
+    }
+  ],
+  "pydata__xarray-7229": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": "1863",
+      "start_line": 1863,
+      "end_line": 1863,
+      "statement": "keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})"
+    }
+  ],
+  "pylint-dev__pylint-4604": [
+    {
+      "file": "pylint/checkers/variables.py",
+      "line": "1829",
+      "start_line": 1829,
+      "end_line": 1829,
+      "statement": "if not isinstance(type_annotation, astroid.Subscript):"
+    }
+  ],
   "pylint-dev__pylint-6386": [
     {
       "file": "pylint/config/utils.py",
@@ -254,6 +1096,22 @@
       "statement": "if not argument.startswith(\"--\"):"
     }
   ],
+  "pylint-dev__pylint-6528": [
+    {
+      "file": "pylint/lint/pylinter.py",
+      "line": "567",
+      "start_line": 567,
+      "end_line": 567,
+      "statement": "@staticmethod"
+    },
+    {
+      "file": "pylint/lint/pylinter.py",
+      "line": "568",
+      "start_line": 568,
+      "end_line": 568,
+      "statement": "def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:"
+    }
+  ],
   "pylint-dev__pylint-8898": [
     {
       "file": "pylint/config/argument.py",
@@ -261,6 +1119,15 @@
       "start_line": 117,
       "end_line": 117,
       "statement": "for pattern in _csv_transformer(value):"
+    }
+  ],
+  "pytest-dev__pytest-10051": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": "443",
+      "start_line": 443,
+      "end_line": 443,
+      "statement": "self.handler.reset()"
     }
   ],
   "pytest-dev__pytest-5787": [
@@ -281,11 +1148,27 @@
   ],
   "pytest-dev__pytest-5840": [
     {
+      "file": "src/_pytest/config/__init__.py",
+      "line": "415",
+      "start_line": 415,
+      "end_line": 415,
+      "statement": "for parent in directory.parts():"
+    },
+    {
       "file": "src/_pytest/pathlib.py",
       "line": "346",
       "start_line": 346,
       "end_line": 346,
       "statement": "return type(path)(normcase(str(path.realpath())))"
+    }
+  ],
+  "pytest-dev__pytest-6197": [
+    {
+      "file": "src/_pytest/python.py",
+      "line": "642",
+      "start_line": 642,
+      "end_line": 642,
+      "statement": "self._mount_obj_if_needed()"
     }
   ],
   "pytest-dev__pytest-7205": [
@@ -297,6 +1180,67 @@
       "statement": "tw.write(\"[{}]\".format(fixturedef.cached_param))"
     }
   ],
+  "pytest-dev__pytest-7236": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": "223",
+      "start_line": 223,
+      "end_line": 223,
+      "statement": "if self.config.getoption(\"usepdb\"):"
+    }
+  ],
+  "pytest-dev__pytest-7324": [
+    {
+      "file": "src/_pytest/mark/expression.py",
+      "line": "164",
+      "start_line": 164,
+      "end_line": 164,
+      "statement": "return ast.Name(ident.value, ast.Load())"
+    }
+  ],
+  "pytest-dev__pytest-7490": [
+    {
+      "file": "src/_pytest/skipping.py",
+      "line": "251",
+      "start_line": 251,
+      "end_line": 251,
+      "statement": "item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)"
+    }
+  ],
+  "pytest-dev__pytest-7571": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": "437",
+      "start_line": 437,
+      "end_line": 437,
+      "statement": "self.handler.setLevel(level)"
+    }
+  ],
+  "pytest-dev__pytest-8399": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": "147",
+      "start_line": 143,
+      "end_line": 148,
+      "statement": "@pytest.fixture(\n    scope=scope,\n    autouse=True,\n    # Use a unique name to speed up lookup.\n    name=f\"unittest_{setup_name}_fixture_{obj.__qualname__}\",\n)"
+    }
+  ],
+  "scikit-learn__scikit-learn-10297": [
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "line": "1336",
+      "start_line": 1335,
+      "end_line": 1336,
+      "statement": "def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\n             normalize=False, scoring=None, cv=None, class_weight=None):"
+    },
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "line": "1339",
+      "start_line": 1337,
+      "end_line": 1339,
+      "statement": "super(RidgeClassifierCV, self).__init__(\n    alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n    scoring=scoring, cv=cv)"
+    }
+  ],
   "scikit-learn__scikit-learn-12973": [
     {
       "file": "sklearn/linear_model/least_angle.py",
@@ -304,6 +1248,24 @@
       "start_line": 1503,
       "end_line": 1504,
       "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(\n    X, y, self.fit_intercept, self.normalize, self.copy_X)"
+    }
+  ],
+  "scikit-learn__scikit-learn-13124": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": "623",
+      "start_line": 623,
+      "end_line": 623,
+      "statement": "rng = self.random_state"
+    }
+  ],
+  "scikit-learn__scikit-learn-13142": [
+    {
+      "file": "sklearn/mixture/base.py",
+      "line": "263",
+      "start_line": 263,
+      "end_line": 263,
+      "statement": "_, log_resp = self._e_step(X)"
     }
   ],
   "scikit-learn__scikit-learn-14496": [
@@ -315,6 +1277,58 @@
       "statement": "min_samples = max(2, min_samples * n_samples)"
     }
   ],
+  "scikit-learn__scikit-learn-14629": [
+    {
+      "file": "sklearn/multioutput.py",
+      "line": "167",
+      "start_line": 167,
+      "end_line": 170,
+      "statement": "self.estimators_ = Parallel(n_jobs=self.n_jobs)(\n    delayed(_fit_estimator)(\n        self.estimator, X, y[:, i], sample_weight)\n    for i in range(y.shape[1]))"
+    }
+  ],
+  "scikit-learn__scikit-learn-14983": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": "1066",
+      "start_line": 1066,
+      "end_line": 1066,
+      "statement": "class _RepeatedSplits(metaclass=ABCMeta):"
+    },
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": "2160",
+      "start_line": 2160,
+      "end_line": 2160,
+      "statement": "value = getattr(self, key, None)"
+    }
+  ],
+  "scikit-learn__scikit-learn-25747": [
+    {
+      "file": "sklearn/utils/_set_output.py",
+      "line": "59",
+      "start_line": 59,
+      "end_line": 59,
+      "statement": "data_to_wrap.index = index"
+    }
+  ],
+  "scikit-learn__scikit-learn-25931": [
+    {
+      "file": "sklearn/ensemble/_iforest.py",
+      "line": "348",
+      "start_line": 348,
+      "end_line": 348,
+      "statement": "self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)"
+    }
+  ],
+  "scikit-learn__scikit-learn-25973": [
+    {
+      "file": "sklearn/feature_selection/_sequential.py",
+      "line": "312",
+      "start_line": 308,
+      "end_line": 315,
+      "statement": "scores[feature_idx] = cross_val_score(\n    estimator,\n    X_new,\n    y,\n    cv=self.cv,\n    scoring=self.scoring,\n    n_jobs=self.n_jobs,\n).mean()"
+    }
+  ],
   "scikit-learn__scikit-learn-26194": [
     {
       "file": "sklearn/metrics/_ranking.py",
@@ -322,6 +1336,99 @@
       "start_line": 1086,
       "end_line": 1086,
       "statement": "thresholds = np.r_[thresholds[0] + 1, thresholds]"
+    }
+  ],
+  "scikit-learn__scikit-learn-9288": [
+    {
+      "file": "sklearn/cluster/k_means_.py",
+      "line": "372",
+      "start_line": 368,
+      "end_line": 372,
+      "statement": "labels, inertia, centers, n_iter_ = kmeans_single(\n    X, sample_weight, n_clusters, max_iter=max_iter, init=init,\n    verbose=verbose, precompute_distances=precompute_distances,\n    tol=tol, x_squared_norms=x_squared_norms,\n    random_state=random_state)"
+    }
+  ],
+  "sphinx-doc__sphinx-10449": [
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": "126",
+      "start_line": 126,
+      "end_line": 126,
+      "statement": "if 'return' in annotations and 'return' not in arguments:"
+    },
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": "62",
+      "start_line": 62,
+      "end_line": 62,
+      "statement": "modify_field_list(field_list, annotations[fullname])"
+    }
+  ],
+  "sphinx-doc__sphinx-11510": [
+    {
+      "file": "sphinx/directives/other.py",
+      "line": "379",
+      "start_line": 379,
+      "end_line": 379,
+      "statement": "return super().run()"
+    }
+  ],
+  "sphinx-doc__sphinx-7462": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": "121",
+      "start_line": 121,
+      "end_line": 121,
+      "statement": "result.pop()"
+    },
+    {
+      "file": "sphinx/pycode/ast.py",
+      "line": "117",
+      "start_line": 117,
+      "end_line": 117,
+      "statement": "return \", \".join(unparse(e) for e in node.elts)"
+    }
+  ],
+  "sphinx-doc__sphinx-7910": [
+    {
+      "file": "sphinx/ext/napoleon/__init__.py",
+      "line": "441",
+      "start_line": 441,
+      "end_line": 441,
+      "statement": "cls = obj.__globals__[cls_path]"
+    }
+  ],
+  "sphinx-doc__sphinx-8056": [
+    {
+      "file": "sphinx/ext/napoleon/docstring.py",
+      "line": "276",
+      "start_line": 276,
+      "end_line": 276,
+      "statement": "fields.append((_name, _type, _desc,))"
+    },
+    {
+      "file": "sphinx/ext/napoleon/docstring.py",
+      "line": "684",
+      "start_line": 684,
+      "end_line": 684,
+      "statement": "fields = self._consume_fields()"
+    }
+  ],
+  "sphinx-doc__sphinx-8120": [
+    {
+      "file": "sphinx/application.py",
+      "line": "296",
+      "start_line": 296,
+      "end_line": 296,
+      "statement": "locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)"
+    }
+  ],
+  "sphinx-doc__sphinx-8475": [
+    {
+      "file": "sphinx/builders/linkcheck.py",
+      "line": "175",
+      "start_line": 175,
+      "end_line": 175,
+      "statement": "except HTTPError:"
     }
   ],
   "sphinx-doc__sphinx-8548": [
@@ -354,6 +1461,54 @@
       "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,\n                               '\\n'.join(docstring))"
     }
   ],
+  "sphinx-doc__sphinx-8551": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": "274",
+      "start_line": 274,
+      "end_line": 274,
+      "statement": "result['refspecific'] = True"
+    },
+    {
+      "file": "sphinx/util/docfields.py",
+      "line": "293",
+      "start_line": 293,
+      "end_line": 298,
+      "statement": "xrefs = typed_field.make_xrefs(\n    typed_field.typerolename,\n    self.directive.domain,\n    target,\n    contnode=content[0],\n)"
+    }
+  ],
+  "sphinx-doc__sphinx-9320": [
+    {
+      "file": "sphinx/cmd/quickstart.py",
+      "line": "226",
+      "start_line": 225,
+      "end_line": 226,
+      "statement": "d['path'] = do_prompt(__('Please enter a new root path (or just Enter to exit)'),\n                      '', is_path)"
+    }
+  ],
+  "sphinx-doc__sphinx-9602": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": "126",
+      "start_line": 126,
+      "end_line": 126,
+      "statement": "return [nodes.Text(node.value)]"
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": "150",
+      "start_line": 150,
+      "end_line": 150,
+      "statement": "result.extend(unparse(node.slice))"
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": "182",
+      "start_line": 182,
+      "end_line": 182,
+      "statement": "if isinstance(node, nodes.Text) and node.strip():"
+    }
+  ],
   "sphinx-doc__sphinx-9658": [
     {
       "file": "sphinx/ext/autodoc/mock.py",
@@ -377,6 +1532,334 @@
       "start_line": 54,
       "end_line": 54,
       "statement": "if extension.version == 'unknown version' or reqversion > extension.version:"
+    }
+  ],
+  "sympy__sympy-13031": [
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": "1194",
+      "start_line": 1194,
+      "end_line": 1194,
+      "statement": "if not self:"
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": "1195",
+      "start_line": 1195,
+      "end_line": 1195,
+      "statement": "return type(self)(other)"
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": "988",
+      "start_line": 988,
+      "end_line": 988,
+      "statement": "if not self:"
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "line": "989",
+      "start_line": 989,
+      "end_line": 989,
+      "statement": "return type(self)(other)"
+    }
+  ],
+  "sympy__sympy-13877": [
+    {
+      "file": "sympy/matrices/matrices.py",
+      "line": "180",
+      "start_line": 180,
+      "end_line": 180,
+      "statement": "if val:"
+    }
+  ],
+  "sympy__sympy-14248": [
+    {
+      "file": "sympy/printing/str.py",
+      "line": "307",
+      "start_line": 307,
+      "end_line": 308,
+      "statement": "return '*'.join([self.parenthesize(arg, precedence(expr))\n    for arg in expr.args])"
+    },
+    {
+      "file": "sympy/printing/str.py",
+      "line": "315",
+      "start_line": 315,
+      "end_line": 316,
+      "statement": "return ' + '.join([self.parenthesize(arg, precedence(expr))\n    for arg in expr.args])"
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": "1481",
+      "start_line": 1481,
+      "end_line": 1481,
+      "statement": "tex = \" + \".join(map(self._print, terms))"
+    },
+    {
+      "file": "sympy/printing/latex.py",
+      "line": "1491",
+      "start_line": 1491,
+      "end_line": 1491,
+      "statement": "return ' '.join(map(parens, expr.args))"
+    },
+    {
+      "file": "sympy/printing/pretty/pretty.py",
+      "line": "822",
+      "start_line": 822,
+      "end_line": 822,
+      "statement": "return self._print_seq(expr.args, None, None, ' + ')"
+    }
+  ],
+  "sympy__sympy-15345": [
+    {
+      "file": "sympy/printing/mathematica.py",
+      "line": "102",
+      "start_line": 102,
+      "end_line": 102,
+      "statement": "return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")"
+    }
+  ],
+  "sympy__sympy-15976": [
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": "789",
+      "start_line": 789,
+      "end_line": 789,
+      "statement": "x.appendChild(msub)"
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": "795",
+      "start_line": 795,
+      "end_line": 795,
+      "statement": "x.appendChild(msup)"
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": "801",
+      "start_line": 801,
+      "end_line": 801,
+      "statement": "x.appendChild(msubsup)"
+    }
+  ],
+  "sympy__sympy-16597": [
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": "166",
+      "start_line": 163,
+      "end_line": 201,
+      "statement": "_assume_rules = FactRules([\n\n    'integer        ->  rational',\n    'rational       ->  real',\n    'rational       ->  algebraic',\n    'algebraic      ->  complex',\n    'real           ->  complex',\n    'real           ->  hermitian',\n    'imaginary      ->  complex',\n    'imaginary      ->  antihermitian',\n    'complex        ->  commutative',\n\n    'odd            ==  integer & !even',\n    'even           ==  integer & !odd',\n\n    'real           ==  negative | zero | positive',\n    'transcendental ==  complex & !algebraic',\n\n    'negative       ==  nonpositive & nonzero',\n    'positive       ==  nonnegative & nonzero',\n    'zero           ==  nonnegative & nonpositive',\n\n    'nonpositive    ==  real & !positive',\n    'nonnegative    ==  real & !negative',\n\n    'zero           ->  even & finite',\n\n    'prime          ->  integer & positive',\n    'composite      ->  integer & positive & !prime',\n    '!composite     ->  !positive | !even | prime',\n\n    'irrational     ==  real & !rational',\n\n    'imaginary      ->  !real',\n\n    'infinite       ->  !finite',\n    'noninteger     ==  real & !integer',\n    'nonzero        ==  real & !zero',\n])"
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": "168",
+      "start_line": 163,
+      "end_line": 201,
+      "statement": "_assume_rules = FactRules([\n\n    'integer        ->  rational',\n    'rational       ->  real',\n    'rational       ->  algebraic',\n    'algebraic      ->  complex',\n    'real           ->  complex',\n    'real           ->  hermitian',\n    'imaginary      ->  complex',\n    'imaginary      ->  antihermitian',\n    'complex        ->  commutative',\n\n    'odd            ==  integer & !even',\n    'even           ==  integer & !odd',\n\n    'real           ==  negative | zero | positive',\n    'transcendental ==  complex & !algebraic',\n\n    'negative       ==  nonpositive & nonzero',\n    'positive       ==  nonnegative & nonzero',\n    'zero           ==  nonnegative & nonpositive',\n\n    'nonpositive    ==  real & !positive',\n    'nonnegative    ==  real & !negative',\n\n    'zero           ->  even & finite',\n\n    'prime          ->  integer & positive',\n    'composite      ->  integer & positive & !prime',\n    '!composite     ->  !positive | !even | prime',\n\n    'irrational     ==  real & !rational',\n\n    'imaginary      ->  !real',\n\n    'infinite       ->  !finite',\n    'noninteger     ==  real & !integer',\n    'nonzero        ==  real & !zero',\n])"
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": "179",
+      "start_line": 163,
+      "end_line": 201,
+      "statement": "_assume_rules = FactRules([\n\n    'integer        ->  rational',\n    'rational       ->  real',\n    'rational       ->  algebraic',\n    'algebraic      ->  complex',\n    'real           ->  complex',\n    'real           ->  hermitian',\n    'imaginary      ->  complex',\n    'imaginary      ->  antihermitian',\n    'complex        ->  commutative',\n\n    'odd            ==  integer & !even',\n    'even           ==  integer & !odd',\n\n    'real           ==  negative | zero | positive',\n    'transcendental ==  complex & !algebraic',\n\n    'negative       ==  nonpositive & nonzero',\n    'positive       ==  nonnegative & nonzero',\n    'zero           ==  nonnegative & nonpositive',\n\n    'nonpositive    ==  real & !positive',\n    'nonnegative    ==  real & !negative',\n\n    'zero           ->  even & finite',\n\n    'prime          ->  integer & positive',\n    'composite      ->  integer & positive & !prime',\n    '!composite     ->  !positive | !even | prime',\n\n    'irrational     ==  real & !rational',\n\n    'imaginary      ->  !real',\n\n    'infinite       ->  !finite',\n    'noninteger     ==  real & !integer',\n    'nonzero        ==  real & !zero',\n])"
+    },
+    {
+      "file": "sympy/core/assumptions.py",
+      "line": "194",
+      "start_line": 163,
+      "end_line": 201,
+      "statement": "_assume_rules = FactRules([\n\n    'integer        ->  rational',\n    'rational       ->  real',\n    'rational       ->  algebraic',\n    'algebraic      ->  complex',\n    'real           ->  complex',\n    'real           ->  hermitian',\n    'imaginary      ->  complex',\n    'imaginary      ->  antihermitian',\n    'complex        ->  commutative',\n\n    'odd            ==  integer & !even',\n    'even           ==  integer & !odd',\n\n    'real           ==  negative | zero | positive',\n    'transcendental ==  complex & !algebraic',\n\n    'negative       ==  nonpositive & nonzero',\n    'positive       ==  nonnegative & nonzero',\n    'zero           ==  nonnegative & nonpositive',\n\n    'nonpositive    ==  real & !positive',\n    'nonnegative    ==  real & !negative',\n\n    'zero           ->  even & finite',\n\n    'prime          ->  integer & positive',\n    'composite      ->  integer & positive & !prime',\n    '!composite     ->  !positive | !even | prime',\n\n    'irrational     ==  real & !rational',\n\n    'imaginary      ->  !real',\n\n    'infinite       ->  !finite',\n    'noninteger     ==  real & !integer',\n    'nonzero        ==  real & !zero',\n])"
+    }
+  ],
+  "sympy__sympy-16792": [
+    {
+      "file": "sympy/utilities/codegen.py",
+      "line": "742",
+      "start_line": 742,
+      "end_line": 742,
+      "statement": "new_args.append(InputArgument(symbol))"
+    }
+  ],
+  "sympy__sympy-17318": [
+    {
+      "file": "sympy/simplify/sqrtdenest.py",
+      "line": "159",
+      "start_line": 159,
+      "end_line": 159,
+      "statement": "if all((x**2).is_Rational for x in pargs):"
+    }
+  ],
+  "sympy__sympy-18698": [
+    {
+      "file": "sympy/polys/polytools.py",
+      "line": "5953",
+      "start_line": 5953,
+      "end_line": 5953,
+      "statement": "return coeff, factors"
+    }
+  ],
+  "sympy__sympy-19495": [
+    {
+      "file": "sympy/sets/conditionset.py",
+      "line": "245",
+      "start_line": 245,
+      "end_line": 245,
+      "statement": "if cond is S.true:"
+    },
+    {
+      "file": "sympy/sets/conditionset.py",
+      "line": "246",
+      "start_line": 246,
+      "end_line": 246,
+      "statement": "return ConditionSet(new, Contains(new, base), base)"
+    }
+  ],
+  "sympy__sympy-19783": [
+    {
+      "file": "sympy/physics/quantum/operator.py",
+      "line": "310",
+      "start_line": 310,
+      "end_line": 310,
+      "statement": "if isinstance(other, Operator):"
+    },
+    {
+      "file": "sympy/physics/quantum/dagger.py",
+      "line": "13",
+      "start_line": 13,
+      "end_line": 13,
+      "statement": "class Dagger(adjoint):"
+    }
+  ],
+  "sympy__sympy-20438": [
+    {
+      "file": "sympy/sets/handlers/issubset.py",
+      "line": "13",
+      "start_line": 13,
+      "end_line": 13,
+      "statement": "return None"
+    },
+    {
+      "file": "sympy/sets/handlers/comparison.py",
+      "line": "59",
+      "start_line": 59,
+      "end_line": 59,
+      "statement": "return None"
+    },
+    {
+      "file": "sympy/sets/handlers/comparison.py",
+      "line": "29",
+      "start_line": 29,
+      "end_line": 29,
+      "statement": "return False"
+    },
+    {
+      "file": "sympy/core/relational.py",
+      "line": "308",
+      "start_line": 308,
+      "end_line": 308,
+      "statement": "dif = r.lhs - r.rhs"
+    },
+    {
+      "file": "sympy/core/relational.py",
+      "line": "569",
+      "start_line": 569,
+      "end_line": 570,
+      "statement": "m, b = linear_coeffs(\n    e.rewrite(Add, evaluate=False), x)"
+    }
+  ],
+  "sympy__sympy-21379": [
+    {
+      "file": "sympy/core/mod.py",
+      "line": "169",
+      "start_line": 169,
+      "end_line": 169,
+      "statement": "G = gcd(p, q)"
+    }
+  ],
+  "sympy__sympy-21596": [
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": "309",
+      "start_line": 309,
+      "end_line": 309,
+      "statement": "base_set -= FiniteSet(xis)"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": "311",
+      "start_line": 311,
+      "end_line": 311,
+      "statement": "base_set -= ConditionSet(n, Eq(im, 0), S.Integers)"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": "307",
+      "start_line": 307,
+      "end_line": 307,
+      "statement": "x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": "315",
+      "start_line": 315,
+      "end_line": 315,
+      "statement": "sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "line": "319",
+      "start_line": 319,
+      "end_line": 319,
+      "statement": "base_set -= FiniteSet(xis)"
+    }
+  ],
+  "sympy__sympy-21930": [
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": "481",
+      "start_line": 481,
+      "end_line": 481,
+      "statement": "return \"b^\\\\dagger_{%s}\" % self.state.name"
+    },
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": "942",
+      "start_line": 942,
+      "end_line": 942,
+      "statement": "return \"a^\\\\dagger_{%s}\" % self.state.name"
+    },
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": "221",
+      "start_line": 221,
+      "end_line": 225,
+      "statement": "return \"%s^{%s}_{%s}\" % (\n    self.symbol,\n    \"\".join([ i.name for i in self.args[1]]),\n    \"\".join([ i.name for i in self.args[2]])\n)"
+    }
+  ],
+  "sympy__sympy-22080": [
+    {
+      "file": "sympy/printing/codeprinter.py",
+      "line": "490",
+      "start_line": 490,
+      "end_line": 490,
+      "statement": "a_str = [self.parenthesize(x, prec) for x in a]"
+    },
+    {
+      "file": "sympy/printing/precedence.py",
+      "line": "134",
+      "start_line": 134,
+      "end_line": 134,
+      "statement": "return PRECEDENCE_VALUES[n]"
+    }
+  ],
+  "sympy__sympy-24562": [
+    {
+      "file": "sympy/core/numbers.py",
+      "line": "1630",
+      "start_line": 1630,
+      "end_line": 1630,
+      "statement": "q *= p.q"
     }
   ]
 }

@@ -4,7 +4,7 @@
     {
       "file": "sklearn/linear_model/least_angle.py",
       "line": 1503,
-      "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(X, y, self.fit_intercept, self.normalize, self.copy_X)"
+      "statement": "X, y, Xmean, ymean, Xstd = LinearModel._preprocess_data(\n    X, y, self.fit_intercept, self.normalize, self.copy_X)"
     }
   ],
   "confidence": "high",

@@ -1,0 +1,26 @@
+{
+  "instance_id": "sympy__sympy-21930",
+  "root_cause": [
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 481,
+      "statement": "return \"b^\\\\dagger_{%s}\" % self.state.name"
+    },
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 942,
+      "statement": "return \"a^\\\\dagger_{%s}\" % self.state.name"
+    },
+    {
+      "file": "sympy/physics/secondquant.py",
+      "line": 221,
+      "statement": "return \"%s^{%s}_{%s}\" % ("
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "The secondquant LaTeX printers for creation operators and antisymmetric tensors return fragments that already contain a superscript, b^\\dagger_{i}, a^\\dagger_{p}, t^{ab}_{ij}, without wrapping them in a brace group. A _latex result is embedded verbatim into surrounding constructions, and the generic printer renders a power by appending ^{n} to the base's fragment; applied to these fragments that produces forms like b^\\dagger_{0}^{2}, a LaTeX double superscript, which is invalid and fails to render (e.g. in Jupyter). Standalone the fragments are fine, so the defect only surfaces when the operator is composed under another superscript, as in Commutator(Bd(a)**2, B(a)). Brace-grouping the fragment ({b^\\dagger_{0}}^{2}) makes it an atomic base for further scripts.",
+    "annotator2": ""
+  }
+}

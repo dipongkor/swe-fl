@@ -1,0 +1,36 @@
+{
+  "instance_id": "django__django-13195",
+  "root_cause": [
+    {
+      "file": "django/http/response.py",
+      "line": 213,
+      "statement": "def delete_cookie(self, key, path='/', domain=None):"
+    },
+    {
+      "file": "django/http/response.py",
+      "line": 216,
+      "statement": "secure = key.startswith(('__Secure-', '__Host-'))"
+    },
+    {
+      "file": "django/http/response.py",
+      "line": 217,
+      "statement": "self.set_cookie(key, max_age=0, path=path, domain=domain, secure=secure, expires='Thu, 01 Jan 1970 00:00:00 GMT')"
+    },
+    {
+      "file": "django/contrib/messages/storage/cookie.py",
+      "line": 95,
+      "statement": "response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)"
+    },
+    {
+      "file": "django/contrib/sessions/middleware.py",
+      "line": 41,
+      "statement": "response.delete_cookie(settings.SESSION_COOKIE_NAME, path=settings.SESSION_COOKIE_PATH, domain=settings.SESSION_COOKIE_DOMAIN)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Cookie deletion works by replacing a cookie with an expired value under matching attributes. HttpResponseBase.delete_cookie cannot accept or emit SameSite, and its Secure heuristic does not cover SameSite=None. The message and session integrations also discard their configured SameSite value when requesting deletion. Direct calls raise TypeError when samesite is supplied, while middleware-generated deletion headers omit the attribute. These locations independently cover the API surface, browser acceptance rule, and both settings-driven consumers."
+  }
+}

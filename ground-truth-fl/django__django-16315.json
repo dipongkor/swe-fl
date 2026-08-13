@@ -4,12 +4,12 @@
     {
       "file": "django/db/models/sql/compiler.py",
       "line": 1728,
-      "statement": "self.query.update_fields,"
+      "statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)"
     },
     {
       "file": "django/db/models/sql/compiler.py",
       "line": 1729,
-      "statement": "self.query.unique_fields,"
+      "statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)"
     }
   ],
   "confidence": "high",

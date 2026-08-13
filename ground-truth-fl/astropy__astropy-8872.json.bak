@@ -1,0 +1,21 @@
+{
+  "instance_id": "astropy__astropy-8872",
+  "root_cause": [
+    {
+      "file": "astropy/units/quantity.py",
+      "line": 299,
+      "statement": "if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):"
+    },
+    {
+      "file": "astropy/units/quantity.py",
+      "line": 380,
+      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The dtype preservation logic uses np.can_cast(np.float32, value.dtype) to detect non-float types that should be upgraded to float. The intent is to catch integers and booleans. However np.can_cast uses 'safe' casting rules by default, and float32 cannot safely cast to float16 (precision loss), so float16 fails the check and gets upgraded to float64.",
+    "annotator2": "The intended policy is to promote integer and object inputs to floating point by default while preserving floating dtypes, including float16. The old can_cast(np.float32, dtype) check answers a different question and classifies float16 as needing promotion. Checking dtype.kind directly preserves all floating dtypes and still promotes integer/object inputs."
+  }
+}

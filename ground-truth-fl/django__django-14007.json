@@ -14,7 +14,7 @@
     {
       "file": "django/db/models/sql/compiler.py",
       "line": 1419,
-      "statement": "return [(self.connection.ops.last_insert_id(cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column),)]"
+      "statement": "return [(self.connection.ops.last_insert_id(\n    cursor, self.query.get_meta().db_table, self.query.get_meta().pk.column\n),)]"
     }
   ],
   "confidence": "high",

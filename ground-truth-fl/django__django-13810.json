@@ -4,7 +4,7 @@
     {
       "file": "django/core/handlers/base.py",
       "line": 54,
-      "statement": "handler = self.adapt_method_mode(middleware_is_async, handler, handler_is_async, debug=settings.DEBUG, name='middleware %s' % middleware_path)"
+      "statement": "handler = self.adapt_method_mode(\n    middleware_is_async, handler, handler_is_async,\n    debug=settings.DEBUG, name='middleware %s' % middleware_path,\n)"
     }
   ],
   "confidence": "high",

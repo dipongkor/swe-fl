@@ -14,12 +14,12 @@
     {
       "file": "django/db/backends/base/schema.py",
       "line": 832,
-      "statement": "and old_type != new_type"
+      "statement": "drop_foreign_keys = (\n    self.connection.features.supports_foreign_keys\n    and (\n        (old_field.primary_key and new_field.primary_key)\n        or (old_field.unique and new_field.unique)\n    )\n    and old_type != new_type\n)"
     },
     {
       "file": "django/db/backends/base/schema.py",
       "line": 1041,
-      "statement": "fragment, other_actions = self._alter_column_type_sql("
+      "statement": "fragment, other_actions = self._alter_column_type_sql(\n    new_rel.related_model, old_rel.field, new_rel.field, rel_type\n)"
     }
   ],
   "confidence": "high",
