@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-14034",
+  "root_cause": [
+    {
+      "file": "django/forms/boundfield.py",
+      "line": 236,
+      "statement": "attrs['required'] = True"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "When rendering a bound field, build_widget_attrs decides whether to emit the HTML required attribute from the field-level required flag and writes it into the widget attrs once. A MultiValueField renders through a MultiWidget, which passes the parent attrs down to each of its subwidgets, so that single flag lands on every rendered input. With require_all_fields=False the field's subfields declare their own requiredness, and the composite field itself may be required merely because at least one subfield is; propagating the outer flag wholesale marks the optional subfields' inputs required in the HTML. Client-side, the browser then blocks submission whenever such an input is left empty — even though server-side validation accepts it — so the rendered form contradicts the field definition. The rendering is the only thing at fault on this path: the same form's server-side validation of the tested scenarios behaves correctly at base.",
+    "annotator2": "Rendering the partially required MultiValueField calls build_widget_attrs once for its MultiWidget. Because the outer field is required, this assignment supplies a blanket required attribute that the widget propagates to both text inputs. The second input is consequently rendered as required despite belonging to a non-required CharField. This is the minimal root cause because the incorrect attribute enters the rendering path at this assignment."
+  }
+}

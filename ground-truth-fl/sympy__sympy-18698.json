@@ -1,0 +1,16 @@
+{
+  "instance_id": "sympy__sympy-18698",
+  "root_cause": [
+    {
+      "file": "sympy/polys/polytools.py",
+      "line": 5953,
+      "statement": "return coeff, factors"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "sqf_list on an unexpanded product takes the symbolic path: _symbolic_factor_list splits the expression into its Mul arguments, runs the square-free decomposition on each argument independently, and concatenates the resulting (factor, multiplicity) pairs. Each argument's own decomposition is correct, but square-free decomposition is only canonical for the whole polynomial: all factors of a given multiplicity must be collected into one square-free, pairwise-coprime part. Because nothing merges the per-argument results, structurally distinct arguments that happen to share a multiplicity — like (x-2)**3 and (x-3)**3 — survive as separate list entries, whereas the same polynomial given expanded goes through the dense sqf algorithm and yields the merged part (x**2-5x+6, 3). The output shape therefore depends on how the input was written, which is the reported inconsistency between sqf/sqf_list results for equivalent inputs.",
+    "annotator2": ""
+  }
+}

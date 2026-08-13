@@ -1,0 +1,27 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-26194",
+  "root_cause": [
+    {
+      "file": "sklearn/metrics/_ranking.py",
+      "line": 1086,
+      "statement": "thresholds = np.r_[thresholds[0] + 1, thresholds]",
+      "note": "Sentinel threshold prepended as max(y_score)+1 instead of np.inf. For probability estimates this produces a value just above 1.0 rather than a proper sentinel, breaking callers that check isinf(thresholds[0]) and the drop_intermediate filter which expects inf."
+    }
+  ],
+  "reasoning": "thresholds[0] is the highest score in the data since thresholds are sorted in descending order, so prepending thresholds[0]+1 produces a finite sentinel just above the maximum score. When y_score contains probability estimates bounded to [0,1], this sentinel is only slightly above 1.0 rather than np.inf, breaking callers that check np.isinf(thresholds[0]).",
+  "fault_triggering_call_site": [
+    {
+      "file": "sklearn/metrics/tests/test_ranking.py",
+      "line": 420,
+      "statement": "tpr, fpr, thresholds = roc_curve(y_true, y_score, drop_intermediate=True)",
+      "note": "Pre-existing test. Expects thresholds[0]=inf, gets 2.0. Confirmed via traceback.print_stack() at _ranking.py:976."
+    },
+    {
+      "file": "sklearn/metrics/tests/test_ranking.py",
+      "line": 2214,
+      "statement": "_, _, thresholds = roc_curve(y_true, y_score)",
+      "note": "Pre-existing test. Checks np.isinf(thresholds[0]), gets False because sentinel is ~1.97. Confirmed via traceback.print_stack() at _ranking.py:976."
+    }
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-11532",
+  "root_cause": [
+    {
+      "file": "django/core/mail/utils.py",
+      "line": 16,
+      "statement": "self._fqdn = socket.getfqdn()"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "DNS_NAME supplies the host's FQDN for wire-level mail fields that must be ASCII, but caches socket.getfqdn() without converting an internationalized hostname to its IDNA/punycode form. With a non-ASCII hostname the Message-ID value contains raw non-ASCII, so forbid_multi_line_headers' ascii check fails and the RFC-2047 fallback Header(val, encoding).encode() crashes when the message encoding cannot represent the characters (iso-8859-1 vs CJK). The same unconverted value used as smtplib's local_hostname makes every EHLO crash in smtplib's ascii command encoding. Because the value is cached on a process-wide singleton, one computation of the non-ASCII name poisons all later mail operations in the process.",
+    "annotator2": ""
+  }
+}

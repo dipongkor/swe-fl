@@ -1,0 +1,16 @@
+{
+  "instance_id": "sympy__sympy-16792",
+  "root_cause": [
+    {
+      "file": "sympy/utilities/codegen.py",
+      "line": 742,
+      "statement": "new_args.append(InputArgument(symbol))"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "CodeGen.routine builds the argument list from the symbols appearing in the expression, attaching dimensions metadata to array-like symbols (Indexed bases, MatrixSymbols) so that printers declare them as pointer/array parameters. When the caller supplies argument_sequence, any requested symbol that does not occur in the expression misses the expression-derived lookup table and is reconstructed in a fallback branch as a plain InputArgument with no metadata at all. The symbol's own array nature, a MatrixSymbol's shape, is ignored, so the generated routine declares it as a scalar: autowrap(1.0, args=(x,), backend='cython') with x a 2x1 MatrixSymbol emits double autofunc(double x) instead of double autofunc(double *x), and calling the wrapper with a numpy array fails with TypeError: only size-1 arrays can be converted to Python scalars. Arguments that do appear in the expression are unaffected, which is why adding any dependence on x masks the bug.",
+    "annotator2": "CodeGen initially derives argument metadata from symbols used by the generated expression. When argument_sequence additionally requests x but the constant expression does not reference x, the name lookup fails and line 742 creates a dimensionless InputArgument. The C generator consequently emits double x instead of double *x. Cython then attempts to pass the caller's array to a scalar C parameter and raises TypeError. This line is the minimal root cause because the used-array path already carries dimensions; only the redundant-argument path discards the MatrixSymbol's shape."
+  }
+}

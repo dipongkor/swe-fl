@@ -1,0 +1,16 @@
+{
+  "instance_id": "sympy__sympy-21379",
+  "root_cause": [
+    {
+      "file": "sympy/core/mod.py",
+      "line": 169,
+      "statement": "G = gcd(p, q)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Mod.eval ends with an opportunistic simplification: compute the polynomial gcd of its two arguments and divide it out. The polys gcd routine polifies its inputs and deliberately raises PolynomialError when a generator is a Piecewise, since Piecewise cannot serve as a polynomial generator. Mod arguments containing Piecewise arise naturally from the assumptions machinery: for real symbols, sinh(...).is_zero (queried, e.g., while exp evaluates its argument during subs) reduces to asking whether the imaginary part modulo pi vanishes, building Mod(Piecewise(...)/z, pi)-style expressions. With the gcd call unguarded, the PolynomialError propagates out of Mod.eval, through the assumption query, and up to the user as a crash on an innocuous operation like expr.subs({1: 1.0}). The failure is state-dependent — once the assumption results are cached, re-running the same subs succeeds — and only appears under configurations (real x and y, a division supplying a compound argument, sinh/cosh/tanh whose real/imaginary split produces the Mod) that route a Piecewise into Mod's gcd.",
+    "annotator2": "Substitution rebuilds expressions containing Mod, eventually reaching Mod.eval with a Piecewise-based numerator or denominator. The unconditional gcd calculation attempts polynomial conversion for that general symbolic expression and raises PolynomialError instead of leaving the modulus unevaluated. This call is the smallest root cause because the exception originates at this unsupported simplification attempt."
+  }
+}

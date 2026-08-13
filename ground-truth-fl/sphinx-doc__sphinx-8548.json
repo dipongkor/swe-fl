@@ -4,42 +4,28 @@
     {
       "file": "sphinx/ext/autodoc/importer.py",
       "line": 310,
-      "statement": "if analyzer:",
-      "note": "The entire analyzer block is outside the MRO loop — instance attribute lookup never iterates superclasses."
+      "statement": "if analyzer:"
     },
     {
       "file": "sphinx/ext/autodoc/importer.py",
       "line": 312,
-      "statement": "namespace = '.'.join(objpath)",
-      "note": "Namespace hardcoded to target subclass path. Even if moved inside the MRO loop, superclass attr_docs entries would never match."
+      "statement": "namespace = '.'.join(objpath)"
     },
     {
       "file": "sphinx/ext/autodoc/importer.py",
       "line": 314,
-      "statement": "if namespace == ns and name not in members:",
-      "note": ""
+      "statement": "if namespace == ns and name not in members:"
     },
     {
       "file": "sphinx/ext/autodoc/importer.py",
       "line": 315,
-      "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,\n                               '\\n'.join(docstring))",
-      "note": ""
+      "statement": "members[name] = ClassAttribute(subject, name, INSTANCEATTR,"
     }
   ],
-  "reasoning": "get_class_members walks the MRO for annotation-only members but the analyzer block sits entirely outside that loop, making it a flat single-pass scan scoped only to the target subclass. Even if the block were moved inside the loop, the namespace is hardcoded to the subclass's objpath, so superclass entries in attr_docs would never satisfy the namespace == ns check. Together these two faults mean instance attributes defined on any superclass via self.attr = ... are always silently skipped, producing incomplete member output when inherited-members is enabled.",
-  "fault_triggering_call_site": [
-    {
-      "file": "sphinx/ext/autodoc/__init__.py",
-      "line": 1587,
-      "statement": "members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)",
-      "note": "Passes a single analyzer scoped to the target class. The analyzer is never re-fetched per MRO entry inside get_class_members, so superclass instance attributes are invisible to the lookup."
-    },
-    {
-      "file": "tests/test_ext_autodoc_autoclass.py",
-      "line": 83,
-      "statement": "assert list(actual) == [...]",
-      "note": "New test added in patch. Failure is a value mismatch with no stack trace — Bar's inherited instance attributes attr1/attr2 from Foo are absent from the rendered output."
-    }
-  ],
-  "confidence": "medium"
+  "confidence": "medium",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "get_class_members walks the MRO for annotation-only members but the analyzer block sits entirely outside that loop, making it a flat single-pass scan scoped only to the target subclass. Even if the block were moved inside the loop, the namespace is hardcoded to the subclass's objpath, so superclass entries in attr_docs would never satisfy the namespace == ns check. Together these two faults mean instance attributes defined on any superclass via self.attr = ... are always silently skipped, producing incomplete member output when inherited-members is enabled.",
+    "annotator2": ""
+  }
 }

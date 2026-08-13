@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8551",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 274,
+      "statement": "result['refspecific'] = True"
+    },
+    {
+      "file": "sphinx/util/docfields.py",
+      "line": 293,
+      "statement": "xrefs = typed_field.make_xrefs("
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Cross-references created implicitly by info fields resolve differently from explicit roles because they are created without scoping context. Explicit py-domain roles stamp py:module and py:class onto the pending_xref from env.ref_context, and the resolver uses those to search the current module, then parents. The info-field pipeline builds its xrefs in PyXrefMixin.make_xref with refspecific=True - permitting suffix matching for unqualified names - but stamps no scope, and one of its two call paths does not even forward env. An unqualified 'A' in :type:/:rtype: therefore suffix-matches candidates in every module, emitting 'more than one target found for cross-reference' warnings under nitpick and resolving to an arbitrary wrong class instead of the current module's.",
+    "annotator2": "Implicit :type:, :rtype:, and typed :param: references lack the scope attributes carried by explicit Python-domain roles. PyXrefMixin marks them refspecific but omits py:module and py:class, while one DocFieldTransformer call path also omits env entirely. Resolution therefore cannot begin in the current class or module and instead suffix-matches unrelated candidates with the same short name."
+  }
+}

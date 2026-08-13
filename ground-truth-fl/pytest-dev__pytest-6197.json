@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-6197",
+  "root_cause": [
+    {
+      "file": "src/_pytest/python.py",
+      "line": 642,
+      "statement": "self._mount_obj_if_needed()"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Previously Package.collect() only constructed a Module for the package's __init__.py after it passed the python_files pattern filter, and the actual import happened lazily when a collected module's obj was accessed. Placing _mount_obj_if_needed() at the top of Package.collect() moves the import to collection time for every package directory under the rootdir, unconditionally. Unimportable __init__.py files (which previously were simply never imported) now produce 'Interrupted: 1 errors during collection', and the import's sys.path side effect leaks package parent directories like src/ onto sys.path during the test run.",
+    "annotator2": "Package.collect should traverse files without importing an otherwise irrelevant package. The unconditional _mount_obj_if_needed call materializes Package.obj, which imports __init__.py and mutates import state before collection decisions are made. This executes arbitrary package initialization code and leaks directories such as src onto sys.path."
+  }
+}

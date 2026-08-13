@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-14170",
+  "root_cause": [
+    {
+      "file": "django/db/models/lookups.py",
+      "line": 544,
+      "statement": "bounds = connection.ops.year_lookup_bounds_for_datetime_field(year)"
+    },
+    {
+      "file": "django/db/models/lookups.py",
+      "line": 546,
+      "statement": "bounds = connection.ops.year_lookup_bounds_for_date_field(year)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "YearLookup optimizes filters on year extracts by replacing the EXTRACT comparison with a BETWEEN over the underlying column, using bounds computed by year_lookup_bounds. The same YearExact/YearGt/YearGte/YearLt/YearLte lookups are registered on ExtractIsoYear, but year_lookup_bounds ignores which extract the lookup is attached to and always asks the backend for calendar-year bounds (January 1 through December 31). ISO-8601 week-numbering years do not coincide with calendar years: the days around January 1 can belong to the previous or next ISO year. So a filter like start_datetime__iso_year=2015 compiles to BETWEEN 2015-01-01 AND 2015-12-31, silently excluding late-December dates whose ISO year is 2015 and including early-January dates whose ISO year is 2014 — wrong rows with no error. The same extract used in an annotation compiles to a genuine EXTRACT('isoyear') and behaves correctly, which is why only filtered lookups misbehave; the range lookups (gt/gte/lt/lte) inherit the same wrong bounds through their get_bound_params.",
+    "annotator2": "The __iso_year lookup is handled by YearLookup's BETWEEN optimization. Both branches derive January 1 through December 31 bounds solely from the requested integer, without considering that ISO years begin and end on ISO-week boundaries. Filtering for ISO year 2015 therefore misses December 31, 2014 even though ExtractIsoYear reports 2015. Lines 544 and 546 are the independently reachable datetime and date decisions that select the wrong bound semantics."
+  }
+}

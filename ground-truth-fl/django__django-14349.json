@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-14349",
+  "root_cause": [
+    {
+      "file": "django/core/validators.py",
+      "line": 101,
+      "statement": "def __call__(self, value):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "URLValidator validates the raw value against its regex and, when that fails, retries once through an IDN-normalization path: it splits the original value with urlsplit, punycodes the netloc, reassembles with urlunsplit, and validates the reconstructed URL as a proxy for the input. That proxy argument silently assumes urlsplit/urlunsplit round-trip everything except the intended IDN encoding. Python's fix for bpo-43882 (in 3.9.5+ and backported security releases, including this environment's 3.8.20 — verified: urlsplit('http://x.com/\\nfoo').path == '/foo') broke the assumption: urlsplit now strips every linefeed, carriage return, and tab from the URL before splitting. A value like 'http://www.djangoproject.com/\\n' therefore fails the first regex check (as it should), enters the retry, is quietly sanitized by the split/unsplit round-trip, and the cleaned reconstruction passes — so the validator accepts input containing header-injection-capable control characters. On older unpatched Pythons the same code rejected these values because the retry preserved the characters and failed again; the bug materialized through the stdlib behavior change, and the validator lacks any rejection of the unsafe characters on the input itself.",
+    "annotator2": "The raw URL first fails the regular expression because it contains a control character. URLValidator then enters its IDN retry, passes the original value through urlsplit and urlunsplit, and validates the reconstruction. Python URL splitting removes line feeds, carriage returns, and tabs, so the reconstructed URL is clean and passes even though the original input is unsafe. The method entry is the minimal absence anchor because the validation path never rejects those characters on the original value before a lossy normalization step."
+  }
+}

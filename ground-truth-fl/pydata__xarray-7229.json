@@ -1,0 +1,16 @@
+{
+  "instance_id": "pydata__xarray-7229",
+  "root_cause": [
+    {
+      "file": "xarray/core/computation.py",
+      "line": 1863,
+      "statement": "keep_attrs = lambda attrs, context: getattr(x, \"attrs\", {})"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "xr.where(cond, x, y, keep_attrs=True) implements 'keep the attributes of x' by replacing the keep_attrs flag with a lambda that returns getattr(x, 'attrs', {}) and passing it to apply_ufunc as the attribute-combining strategy. That strategy is invoked for every attrs merge the operation performs: xarray's merge_attrs calls a callable combine_attrs once for the output object and once for each output coordinate. Because the lambda ignores its attrs and context arguments, every one of those merges yields x's top-level attribute dict, so each coordinate of the result has its own attributes overwritten by the data variable's attributes (e.g. a time coordinate ends up carrying 'units': 'degK' and the rest of the air-temperature metadata instead of its own standard_name/long_name).",
+    "annotator2": "xr.where delegates its three inputs to apply_ufunc. With keep_attrs=True, line 1863 converts the option into a callback that ignores the attrs and context supplied for the object currently being merged and always returns x.attrs. The callback is also invoked for coordinate variables, so coordinate a receives {'attr': 'x_da'} rather than its own {'attr': 'x_coord'}. This line is the minimal root cause because the computed values and coordinates are correct; only the context-insensitive attribute policy overwrites metadata at every output level."
+  }
+}

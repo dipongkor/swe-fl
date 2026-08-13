@@ -1,0 +1,16 @@
+{
+  "instance_id": "sympy__sympy-15345",
+  "root_cause": [
+    {
+      "file": "sympy/printing/mathematica.py",
+      "line": 102,
+      "statement": "return expr.func.__name__ + \"[%s]\" % self.stringify(expr.args, \", \")"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "MCodePrinter has no printing path for Min/Max. SymPy printers dispatch by looking up _print_<ClassName> along the expression's MRO; Max is an Application/LatticeOp, not a Function subclass, so MCodePrinter._print_Function - the only method that knows Mathematica's bracket application syntax - is never selected, and no _print_MinMaxBase/_print_Max handler exists. The printer falls back to the generic emptyPrinter, returning the default str() form with parentheses, so mathematica_code(Max(x, 2)) yields 'Max(2, x)': syntactically invalid Mathematica emitted silently. The '2, x' ordering is Max's canonical argument sorting and is not itself wrong; the invalid parenthesis syntax is the defect.",
+    "annotator2": "MCodePrinter already knows how to render function-like applications with Mathematica brackets, but printer dispatch walks the expression MRO and Max/Min reach MinMaxBase before any class handled by this method. With no _print_MinMaxBase alias, they fall through to generic string output such as Max(2, x)."
+  }
+}

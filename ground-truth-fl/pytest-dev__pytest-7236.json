@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-7236",
+  "root_cause": [
+    {
+      "file": "src/_pytest/unittest.py",
+      "line": 223,
+      "statement": "if self.config.getoption(\"usepdb\"):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "For a test decorated with @unittest.skip, unittest.TestCase.run() returns before any lifecycle method; without --pdb nothing ever calls tearDown and the test is cleanly skipped. With --pdb, the postponement in runtest stashes tearDown unconditionally and pytest's teardown phase invokes whatever was stashed, so tearDown runs on an instance whose setUp never ran, for a skipped test - producing an error alongside the skip (NameError in the reported reproducer). The condition lacks any awareness of the __unittest_skip__ flag. A test skipped via @pytest.mark.skip is unaffected because pytest's own skip machinery prevents runtest from being called at all, which is why only the @unittest.skip parametrization fails.",
+    "annotator2": "The --pdb path temporarily replaces a unittest TestCase's tearDown so it can be delayed for debugging. The base condition checks only usepdb and ignores unittest's skip marker. A skipped TestCase therefore enters teardown-postponement bookkeeping and its real tearDown is called despite the skip contract."
+  }
+}

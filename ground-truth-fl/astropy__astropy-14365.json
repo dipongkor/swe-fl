@@ -4,24 +4,18 @@
     {
       "file": "astropy/io/ascii/qdp.py",
       "line": 71,
-      "statement": "_line_type_re = re.compile(_type_re)",
-      "note": "The regex is compiled without re.IGNORECASE. _command_re uses uppercase 'READ [TS]ERR' so lowercase commands like 'read terr 1' fail to match, raising ValueError: Unrecognized QDP line."
+      "statement": "_line_type_re = re.compile(_type_re)"
     },
     {
       "file": "astropy/io/ascii/qdp.py",
       "line": 309,
-      "statement": "if v == \"NO\":",
-      "note": "Case-sensitive exact string comparison means lowercase 'no' values in data lines are not recognized as masked values and are not converted to np.ma.masked."
+      "statement": "if v == \"NO\":"
     }
   ],
-  "reasoning": "QDP format is case-insensitive but the parser assumes uppercase. The regex compiled without re.IGNORECASE rejects lowercase commands, and the 'NO' masked value check uses exact string comparison. Both must be fixed for full case-insensitive support.",
-  "fault_triggering_call_site": [
-    {
-      "file": "astropy/io/ascii/tests/test_qdp.py",
-      "line": 93,
-      "statement": "table = _read_table_qdp(path, names=['MJD', 'Rate'], table_id=0)",
-      "note": "Pre-existing test (test_roundtrip[True]). lowercase=True converts all commands to lowercase. _read_table_qdp -> _get_tables_from_qdp_file -> _get_type_from_list_of_lines -> _line_type raises ValueError on 'read terr 1'."
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "QDP format is case-insensitive but the parser assumes uppercase. The regex compiled without re.IGNORECASE rejects lowercase commands, and the 'NO' masked value check uses exact string comparison. Both must be fixed for full case-insensitive support.",
+    "annotator2": "QDP parsing uses two case-sensitive decisions. The command regex rejects lowercase directives such as read terr 1 before the data section is parsed. When parsing data tokens, the exact comparison with \"NO\" also sends lowercase no through numeric conversion, which raises ValueError instead of producing a masked value. The two statements independently affect command recognition and missing-value recognition."
+  }
 }

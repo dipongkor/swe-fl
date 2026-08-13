@@ -1,0 +1,31 @@
+{
+  "instance_id": "django__django-13344",
+  "root_cause": [
+    {
+      "file": "django/middleware/security.py",
+      "line": 22,
+      "statement": "self.get_response = get_response"
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 73,
+      "statement": "self.get_response = get_response"
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 135,
+      "statement": "self.get_response = get_response"
+    },
+    {
+      "file": "django/middleware/cache.py",
+      "line": 177,
+      "statement": "self.get_response = get_response"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Django's middleware chain decides sync/async adaptation per layer from asyncio.iscoroutinefunction(middleware_instance). MiddlewareMixin instances are sync callables that dispatch to an async __acall__ at runtime, so MiddlewareMixin.__init__ runs _async_check(), which stamps self._is_coroutine on the instance when its get_response is a coroutine function, making iscoroutinefunction report True. SecurityMiddleware, UpdateCacheMiddleware, FetchFromCacheMiddleware, and CacheMiddleware override __init__, store get_response themselves, and never run _async_check, so under ASGI their instances are unstamped. During load_middleware the exception-conversion wrapper around such an instance is therefore built sync and returns the middleware's coroutine without awaiting it, while the chain still records that layer as async, so no adapter is inserted. The middleware listed immediately before the unstamped one consequently sees a sync-looking get_response, takes MiddlewareMixin.__call__'s synchronous path, and receives the unawaited coroutine object as its response, which it passes to process_response, e.g. the first middleware in MIDDLEWARE getting a coroutine instead of an HttpResponse when SecurityMiddleware is second.",
+    "annotator2": "MiddlewareMixin initialization records get_response and classifies the middleware as coroutine-capable when the downstream handler is async. These four overriding constructors duplicate only the assignment and never perform that classification. asyncio.iscoroutinefunction therefore returns False for each instance even when it wraps async_get_response. In an ASGI chain, the outer handler follows the synchronous middleware path and the response-phase hook can receive the unawaited coroutine returned downstream instead of an HttpResponse. The four assignments are independently faulty because each constructor bypasses the same required inherited state transition and each appears as a separate failing subtest."
+  }
+}

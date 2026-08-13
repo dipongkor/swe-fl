@@ -1,0 +1,16 @@
+{
+  "instance_id": "sympy__sympy-17318",
+  "root_cause": [
+    {
+      "file": "sympy/simplify/sqrtdenest.py",
+      "line": 159,
+      "statement": "if all((x**2).is_Rational for x in pargs):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "While matching a nested radical, _sqrt_match decides whether an Add can be processed by split_surds, which splits a sum of real surds by the gcd of their squares. The gate accepts the Add when every term's square is Rational, but that also holds for purely imaginary terms: I**2 == -1 is a (negative) rational. For an expression like 4 + 3*I every term passes the check, yet neither 4 nor 3*I is a square root, so split_surds extracts no surds and calls _split_gcd with no arguments, which immediately indexes its empty argument tuple and raises IndexError: tuple index out of range. sqrtdenest of any expression containing such a subexpression, e.g. (3 - sqrt(2)*sqrt(4 + 3*I) + 3*I)/2, therefore crashes instead of denesting or returning the input unchanged; the correct precondition is that the squares be positive rationals, i.e. the terms are real surds.",
+    "annotator2": "sqrtdenest recursively calls _sqrt_match for additive radicands. For 4 + I, both term squares are rational, so line 159 accepts the expression even though the imaginary term is outside the positive-surd domain expected by split_surds. The splitter constructs an empty surd collection and _split_gcd accesses its first element, raising IndexError instead of allowing the undenestable expression to remain unchanged. The condition is the minimal root cause because it is the decision that routes an unsupported radicand into the failing algorithm."
+  }
+}

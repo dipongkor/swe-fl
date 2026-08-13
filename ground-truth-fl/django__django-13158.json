@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-13158",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 296,
+      "statement": "obj.__dict__ = self.__dict__.copy()"
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1779,
+      "statement": "self.where.add(NothingNode(), AND)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Calling none() clones the union query and marks the clone empty. The clone shares its combined components, while set_empty only changes the wrapper's where tree. Union compilation continues to use the unchanged component queries and returns their rows instead of no rows. The clone and empty-state statements are the minimal jointly faulty decisions: one defines ownership of the combined structure and the other fails to propagate the semantic state into that structure."
+  }
+}

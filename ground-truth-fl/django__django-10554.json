@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-10554",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 359,
+      "statement": "raise DatabaseError('ORDER BY term does not match any column in the result set.')"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "SQL permits ordering a compound (UNION) query only by positions or names of the combined select list, so for combined querysets the compiler translates every ORDER BY expression into an ordinal by locating it among the selected columns. If the ordering column is not among them — which is exactly what happens when values()/values_list() narrows the select list of a union queryset and order_by() then names a different column, like ordering by pk while selecting only 'order' — the lookup loop falls through to an unconditional DatabaseError('ORDER BY term does not match any column in the result set.'). The query is expressible: the missing column can be added to each side of the compound select and referenced by its new position. Because the compiler instead raises, any values_list + order_by combination on a union queryset whose ordering column is outside the selection fails at evaluation time.",
+    "annotator2": "A union queryset is ordered by pk or name and then projected to the order field. SQLCompiler resolves combined-query ordering against the selected result columns. When the ordering source has no matching selected expression, line 359 unconditionally raises DatabaseError. Evaluation therefore fails before the database can return the requested projection. This fallback is the minimal root cause because it handles the exact missing unaliased order column encountered after values_list narrows the result."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-16454",
+  "root_cause": [
+    {
+      "file": "django/core/management/base.py",
+      "line": 46,
+      "statement": "class CommandParser(ArgumentParser):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Django management commands parse arguments with CommandParser, whose error() method has two modes: when the parser was created from the command line (called_from_command_line set by create_parser), argparse's normal error path prints usage plus a one-line error and exits; otherwise it raises CommandError for programmatic callers. That mode flag lives in constructor state. When a command defines subcommands via parser.add_subparsers().add_parser(), argparse instantiates the subparser class itself — by default the same CommandParser type — passing only its own kwargs, so the flag is never forwarded and defaults to None. The top-level parser thus reports missing arguments with a clean usage message, but any error raised while parsing a subcommand's arguments (a missing or invalid value) goes through the subparser's error(), which raises CommandError; run_from_argv performs parse_args outside its CommandError handling, so the user sees a Python traceback ending in 'django.core.management.base.CommandError: Error: ...' instead of 'manage.py <cmd> <subcmd>: error: ...'.",
+    "annotator2": "The top-level management parser is marked as command-line driven, so its errors produce normal usage output. argparse creates a CommandParser child for a selected subcommand but does not pass Django's called_from_command_line state, leaving the child in programmatic mode. An invalid subcommand argument then raises CommandError, which escapes as a traceback rather than two lines of usage and error text. The class declaration is the minimal absence anchor because the customized parser lacks the subparser behavior required to preserve its own error-mode state."
+  }
+}

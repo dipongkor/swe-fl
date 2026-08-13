@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-12155",
+  "root_cause": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 37,
+      "statement": "indent = min(len(line) - len(line.lstrip()) for line in lines if line.lstrip())"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "admindocs renders view/model docstrings through docutils. Before rendering, trim_docstring normalizes indentation following the PEP 257 recipe: find the smallest indentation among non-blank lines and remove it from every line after the first. The implementation, however, includes the first line itself in the minimum. Django's own docstrings start with an empty first line so the first content line carries the block's indentation and the minimum comes out right; but for the common style where text begins immediately after the opening quotes, the first line's indentation is zero, the computed common indent is zero, and the continuation lines are returned still carrying their source indentation. When parse_rst then embeds this text beneath the '.. default-role:: cmsreference' directive it prepends, docutils treats the indented lines as content of that directive, and since default-role permits no content it emits a system-message error block instead of the rendered docstring — so admindoc pages error on any docstring whose first line is non-empty.",
+    "annotator2": ""
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "instance_id": "sphinx-doc__sphinx-7910",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/napoleon/__init__.py",
+      "line": 441,
+      "statement": "cls = obj.__globals__[cls_path]"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "napoleon's _skip_member decides whether to un-skip a documented special/init member by verifying the member actually belongs to its class: it takes the class name from obj.__qualname__ and looks it up in obj.__globals__. When the method is wrapped by a decorator (e.g. functools.wraps), obj is the wrapper function, and while wraps copies __qualname__ and __doc__ onto the wrapper, __globals__ still points at the module where the wrapper was defined — the decorator's module, not the class's. The class name is therefore missing from that namespace, the lookup raises KeyError, the except clause records cls_is_owner = False, and _skip_member returns None instead of False. With no override from napoleon, autodoc applies its default and the decorated member disappears from the docs even though napoleon_include_*_with_doc asked for it.",
+    "annotator2": "Napoleon includes documented special methods only after confirming that the method belongs to the class being documented. A decorator preserving __doc__ and __qualname__ still presents its wrapper function to _skip_member. Line 441 resolves the class through that wrapper's __globals__; when the wrapper was defined outside the class's module, the class name is absent, the exception path leaves cls_is_owner false, and _skip_member returns None rather than explicitly retaining the documented special member. This lookup is the minimal root cause because the preceding metadata correctly identifies the class path and the failure occurs only when resolving it through the wrapper object."
+  }
+}

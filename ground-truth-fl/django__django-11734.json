@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-11734",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 1705,
+      "statement": "if isinstance(filter_rhs, F):"
+    },
+    {
+      "file": "django/db/models/fields/related_lookups.py",
+      "line": 104,
+      "statement": "if not isinstance(self.lhs, MultiColSource) and self.rhs_is_direct_value():"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "exclude() (and filter(~Q())) on a lookup that spans a multi-valued relation cannot be expressed by negating a JOIN condition, so Query.split_exclude rewrites it as NOT-IN/EXISTS: it constructs a brand-new inner query for the same model and re-applies the condition there, one subquery level deeper than where the user wrote it. Values referencing enclosing queries must therefore be re-leveled: a plain F('x') becomes OuterRef('x') (pointing at the query being split), and an OuterRef — which already pointed one level out from the user's queryset — must be wrapped in a second OuterRef so that each resolution step unwraps one layer and the reference still lands on the originally intended query. The base code handles only the F case, and since OuterRef is a subclass of F, an OuterRef rhs takes the F branch and comes out at unchanged depth; when the inner query resolves it, it binds to the wrong (too-near) query — a FieldError naming the wrong model's fields in the reported m2m case, or the 'may only be used in a subquery' ValueError in the issue's annotate examples. A second, compounding defect sits in the related-field lookup layer: RelatedLookupMixin.get_prep_lookup classifies any rhs without as_sql as a direct value, which includes unresolved OuterRefs, sending them through model-value normalization and target-field prep instead of expression resolution — enough to corrupt the comparison so results are silently wrong even once split_exclude re-levels correctly. The fix adds the OuterRef re-wrapping branch in split_exclude, changes the prep guard to skip anything with resolve_expression, and deletes the now-dead AutoField.get_prep_value pass-through hack that had papered over the misclassification.",
+    "annotator2": "The Exists query contains exclude(jobs=OuterRef('job')), which split_exclude moves into another subquery. The generic F branch reconstructs the existing OuterRef from only its name, making it refer to the immediate Responsibility query instead of the next outer JobResponsibilities query. Related lookup preparation also mistakes the unresolved expression for a literal and normalizes it through the target field. Resolution then searches Responsibility for a field named job and raises FieldError. Both expression classification and correlation depth are needed to explain the nested relation failure."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-22080",
+  "root_cause": [
+    {
+      "file": "sympy/printing/codeprinter.py",
+      "line": 490,
+      "statement": "a_str = [self.parenthesize(x, prec) for x in a]"
+    },
+    {
+      "file": "sympy/printing/precedence.py",
+      "line": 134,
+      "statement": "return PRECEDENCE_VALUES[n]"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "With modules=[], lambdify uses the Python code printer. The expression -Mod(x, y) enters CodePrinter._print_Mul as a negative product with Mod as its only positive factor. Line 490 treats that factor as an ordinary multiplication operand, producing -x % y; Python evaluates this as (-x) % y and returns 4 for (3, 7), while the symbolic expression is -(3 % 7), or -3. Independently, precedence() classifies Mod through its Function base even though the printer renders it as %, so Mod(-x, y) also loses the grouping around its negative first operand. The two lines are the minimal decisions governing the outer unary sign and the inner infix operator."
+  }
+}

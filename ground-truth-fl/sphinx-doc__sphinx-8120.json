@@ -1,0 +1,16 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8120",
+  "root_cause": [
+    {
+      "file": "sphinx/application.py",
+      "line": 296,
+      "statement": "locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "For built-in system messages (the 'sphinx' gettext catalog: 'Fig. %s', 'Quick search', ...), Sphinx._init_i18n assembles the catalog search list as [None, <sphinx package locale dir>] + <user locale_dirs>. locale.init loads these in order and merges them with gettext's fallback chaining: the first catalog found becomes the primary translator and each later catalog is only a fallback consulted for messages the earlier ones lack. Because the bundled sphinx catalog for the configured language is listed before the user's locale_dirs, every message that Sphinx's official translation already covers is answered by the bundled catalog, and the user's customized sphinx.po/.mo in locale_dirs — although found, compiled, and loaded — is relegated to a fallback that is never consulted for those messages. User overrides of system-message translations are therefore silently ignored in favor of the official translations.",
+    "annotator2": "_init_i18n compiles project catalogs and then passes an ordered directory list to locale.init. Line 296 places the packaged locale before repo.locale_dirs. For German, the packaged catalog supplies 'Schnellsuche' for 'Quick search' before the project catalog supplying 'QUICK SEARCH' is combined, so the project value is ignored even though its .mo file exists. The directory-order statement is the minimal root cause because compilation succeeds and the incorrect result is determined solely by catalog precedence during translator construction."
+  }
+}

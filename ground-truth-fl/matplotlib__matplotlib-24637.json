@@ -1,0 +1,16 @@
+{
+  "instance_id": "matplotlib__matplotlib-24637",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "line": 1461,
+      "statement": "self.offsetbox.draw(renderer)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Saving as SVG calls AnnotationBbox.draw, which renders its arrow, frame, and offsetbox children individually. The gid belongs to the enclosing AnnotationBbox, but this draw path enters child rendering without establishing an enclosing renderer group associated with that artist. The SVG contains the image and other components but no group carrying the configured id. Line 1461 is the minimal root-cause operation because it completes the nested rendering while bypassing the only level at which the AnnotationBbox gid is available."
+  }
+}

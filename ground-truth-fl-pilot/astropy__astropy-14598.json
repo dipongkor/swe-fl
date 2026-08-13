@@ -1,0 +1,27 @@
+{
+  "instance_id": "astropy__astropy-14598",
+  "root_cause": [
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": 69,
+      "statement": "_strg_comment_RE = re.compile(f\"({_strg})? *{_comm_field}?\")",
+      "note": "Missing end anchor $ allows the regex to match a prefix of the value+comment string, stopping early at a card boundary where '' appears. The second quote is left out of the match and incorrectly attributed to the comment field rather than the value."
+    },
+    {
+      "file": "astropy/io/fits/card.py",
+      "line": 862,
+      "statement": "value = value.rstrip().replace(\"''\", \"'\")",
+      "note": "Each subcard's string contribution has '' replaced with ' during assembly. A '' that spans a subcard boundary (one ' at end of subcard N, one ' at start of subcard N+1) is never seen as '' and the replacement drops one quote, corrupting the value."
+    }
+  ],
+  "reasoning": "Long string values in FITS are split across multiple continuation cards. When reading back, _split() calls _itersubcards() to reassemble the value. _strg_comment_RE without $ can match a prefix, causing the regex to stop before consuming the full value including a trailing ''. Additionally, replace(\"''\", \"'\") on each subcard's value independently corrupts '' sequences that span card boundaries.",
+  "fault_triggering_call_site": [
+    {
+      "file": "astropy/io/fits/tests/test_header.py",
+      "line": 589,
+      "statement": "assert c.value == testval",
+      "note": "Pre-existing test. testval = 'x'*100 + \"''\". c is round-tripped through Card.fromstring(c.image). Confirmed via traceback.print_stack() at card.py:830."
+    }
+  ],
+  "confidence": "high"
+}

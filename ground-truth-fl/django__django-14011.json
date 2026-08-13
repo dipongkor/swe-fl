@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-14011",
+  "root_cause": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 80,
+      "statement": "class ThreadedWSGIServer(socketserver.ThreadingMixIn, WSGIServer):"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "LiveServerTestCase runs its HTTP server on ThreadedWSGIServer, whose ThreadingMixIn handles every request in a fresh thread. Django database connections are thread-local: each request thread that touches the ORM opens its own connection set. The live-server machinery only cleans up the connections of its own server thread (LiveServerThread.run closes them in a finally clause) and, at class teardown, of the main thread — the per-request threads' connections are simply abandoned when those threads finish. On backends with real client-server connections such as PostgreSQL, the abandoned connections linger until process exit, so when the test run ends and destroy_test_db drops the test database, it intermittently fails with OperationalError('database is being accessed by other users') — a race, reappearing only in runs where a leaked connection outlives the tests. Reverting the live server to the single-threaded WSGIServer masks the leak because every request then runs in the one thread whose cleanup does execute.",
+    "annotator2": "The development server handles a request in a separate thread, and that thread opens or receives a database connection while serving the view. ThreadingMixIn completes the request without invoking Django's connection cleanup for that worker, leaving the connection object open after the response. The threaded-server dispatch declaration is the smallest existing design point responsible for starting request threads without a matching lifecycle hook."
+  }
+}

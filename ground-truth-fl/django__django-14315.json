@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-14315",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/client.py",
+      "line": 24,
+      "statement": "if env:"
+    },
+    {
+      "file": "django/db/backends/postgresql/client.py",
+      "line": 54,
+      "statement": "return args, env"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "subprocess.run treats env=None as 'inherit the parent's os.environ' but env={} as 'run the child with a completely empty environment'. BaseDatabaseClient.runshell merges the backend-provided env over os.environ only under a truthiness guard, passing falsy values straight through to subprocess.run. The PostgreSQL backend's settings_to_cmd_args_env accumulates PG-specific variables into a dict that starts empty, so when the connection settings need no PGPASSWORD/PGSERVICE/PGSSL*/PGPASSFILE entries it returns {}. That empty dict skips the merge and reaches subprocess.run verbatim, so dbshell launches psql with an empty environment instead of the user's: PATH, LANG, PGDATABASE and every other inherited variable are stripped, precisely in the common case where no Django-supplied env vars are needed.",
+    "annotator2": ""
+  }
+}

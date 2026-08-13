@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-7490",
+  "root_cause": [
+    {
+      "file": "src/_pytest/skipping.py",
+      "line": 251,
+      "statement": "item._store[xfailed_key] = xfailed = evaluate_xfail_marks(item)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "pytest_runtest_call enters before the test function and evaluates the item's xfail markers while none is present. The test then adds an xfail marker dynamically, but the stored pre-call result remains None when pytest_runtest_makereport classifies the outcome. A failing dynamically marked test is reported as failed rather than xfailed, while a passing strict dynamically marked test is reported as passed rather than failed. Line 251 is the minimal root cause because it commits the report path to a snapshot taken before the only point at which these markers are introduced."
+  }
+}

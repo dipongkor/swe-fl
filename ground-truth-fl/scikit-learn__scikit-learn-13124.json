@@ -1,0 +1,16 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13124",
+  "root_cause": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "line": 623,
+      "statement": "rng = self.random_state"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "StratifiedKFold._make_test_folds assigns the raw random_state attribute to rng and passes it as the random_state of one internal shuffling KFold per class. With an integer seed, each of those per-class KFolds seeds its own identical random number generator, so all classes receive the same permutation. Sample i of every class therefore always lands in the same fold: the fold compositions are exactly the unshuffled ones, only the order in which folds are emitted changes, and different integer seeds produce the same set of test batches. shuffle=True thus never varies which samples are grouped together, defeating its purpose for cross-validation. The bug is masked when random_state is None, because each per-class KFold then draws from the global generator and the permutations differ.",
+    "annotator2": "StratifiedKFold constructs one shuffled KFold for each class. When random_state is an integer, _make_test_folds copies that integer directly into rng and supplies it to every class-specific KFold. Each KFold reinitializes from the same seed, giving the two five-sample classes the same relative fold assignment. Sorting the resulting test pairs then removes the only ordering difference, so random_state=0 and random_state=1 both produce [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9)]. Line 623 is the minimal root cause because it determines whether the class-specific splitters share evolving random state or repeatedly restart from an integer seed."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-16631",
+  "root_cause": [
+    {
+      "file": "django/contrib/auth/__init__.py",
+      "line": 202,
+      "statement": "session_hash_verified = session_hash and constant_time_compare(session_hash, user.get_session_auth_hash())"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Logged-in sessions store an HMAC of the user's password (HASH_SESSION_KEY), keyed on SECRET_KEY. On every request, django.contrib.auth.get_user recomputes that HMAC via user.get_session_auth_hash() — which salts salted_hmac with the current SECRET_KEY — and treats the session as invalid unless it matches the stored value exactly. SECRET_KEY_FALLBACKS exists precisely so that values signed under a previous key keep validating during rotation, and other consumers of the secret honor it, but this verification never checks the fallback keys. So when SECRET_KEY is rotated and the old key moved into SECRET_KEY_FALLBACKS, every existing session's stored hash — computed under the old key — mismatches the recomputed one, the session is flushed, and all users are logged out, contradicting the documented rotation procedure.",
+    "annotator2": "get_user loads the authenticated user and validates the password-derived session hash. Lines 202-204 calculate only the current-secret hash. After SECRET_KEY rotation, the stored hash differs, so the following failure branch flushes the session and returns AnonymousUser without consulting configured fallback secrets. The comparison is the minimal pre-existing decision because it defines the complete accepted hash set for an otherwise valid session."
+  }
+}

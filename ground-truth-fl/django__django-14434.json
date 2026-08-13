@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-14434",
+  "root_cause": [
+    {
+      "file": "django/db/backends/base/schema.py",
+      "line": 1244,
+      "statement": "table = Table(model._meta.db_table, self.quote_name)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Creating SQL for a field-based UniqueConstraint constructs a Table object and passes it into _index_columns. The resulting Statement can render valid SQL and recognize its table fragment, but its Columns fragment stores the object where reference introspection expects the model's table-name string. references_column(table_name, 'name') therefore returns false for a column the statement uses. This early conversion is the minimal source of the mismatched table identity."
+  }
+}

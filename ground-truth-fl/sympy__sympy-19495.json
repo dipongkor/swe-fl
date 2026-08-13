@@ -1,0 +1,21 @@
+{
+  "instance_id": "sympy__sympy-19495",
+  "root_cause": [
+    {
+      "file": "sympy/sets/conditionset.py",
+      "line": 245,
+      "statement": "if cond is S.true:"
+    },
+    {
+      "file": "sympy/sets/conditionset.py",
+      "line": 246,
+      "statement": "return ConditionSet(new, Contains(new, base), base)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "For a ConditionSet, self.sym is a bound (dummy) variable, so substituting a free symbol must leave it untouched. The buggy branch special-cased 'condition became true after subs' and returned ConditionSet(new, Contains(new, base), base), injecting the substitution target 'new' as the bound variable. This produces the nonsensical output in the issue ({1/3 | 1/3 ∊ ...}) and, when the condition evaluates to true purely from symbol assumptions (e.g. n negative, p positive makes (n < p) == True), silently collapses the set to EmptySet via the Contains check. xreplace and subs(simultaneous=True) behave correctly because they bypass _eval_subs, confirming the fault is localized there.",
+    "annotator2": "When a substitution targets a free symbol in a ConditionSet condition and base set, _eval_subs first substitutes both expressions. If assumptions make the condition S.true, the base implementation enters lines 245-246 and replaces self.sym with new. That conflates the free symbol being substituted with the bound ConditionSet variable. It also incorrectly changes a ConditionSet over Interval(-oo, 0) into EmptySet merely because the positive replacement is not in the base."
+  }
+}

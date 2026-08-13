@@ -4,17 +4,13 @@
     {
       "file": "django/db/models/expressions.py",
       "line": 1256,
-      "statement": "class Window(Expression):",
-      "note": "Window does not inherit SQLiteNumericMixin and has no as_sqlite() override. When the window expression's output_field is DecimalField, SQLiteNumericMixin.as_sqlite() on the inner Lag expression wraps it in CAST before the OVER clause is applied, generating CAST(LAG(...) AS NUMERIC) OVER (...) which SQLite cannot parse. The CAST must wrap the entire window expression: CAST(LAG(...) OVER (...) AS NUMERIC)."
+      "statement": "class Window(Expression):"
     }
   ],
-  "reasoning": "SQLite lacks native decimal support so Django uses SQLiteNumericMixin to wrap DecimalField expressions in CAST(... AS NUMERIC). For a Window expression with a DecimalField output, the CAST is applied to the inner aggregate (Lag) before the OVER clause, producing invalid SQL. Window has no as_sqlite() to intercept and reorder the CAST. The fix makes Window inherit SQLiteNumericMixin and adds as_sqlite() which temporarily changes the inner expression's output_field to FloatField (suppressing the inner CAST), then lets the outer Window.as_sqlite() via SQLiteNumericMixin apply the CAST around the complete window expression.",
-  "fault_triggering_call_site": [
-    {
-      "file": "tests/expressions_window/tests.py",
-      "line": 219,
-      "statement": "self.assertQuerysetEqual(qs, [...])"
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "SQLite lacks native decimal support so Django uses SQLiteNumericMixin to wrap DecimalField expressions in CAST(... AS NUMERIC). For a Window expression with a DecimalField output, the CAST is applied to the inner aggregate (Lag) before the OVER clause, producing invalid SQL. Window has no as_sqlite() to intercept and reorder the CAST. The fix makes Window inherit SQLiteNumericMixin and adds as_sqlite() which temporarily changes the inner expression's output_field to FloatField (suppressing the inner CAST), then lets the outer Window.as_sqlite() via SQLiteNumericMixin apply the CAST around the complete window expression.",
+    "annotator2": ""
+  }
 }

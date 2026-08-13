@@ -1,0 +1,16 @@
+{
+  "instance_id": "sympy__sympy-13877",
+  "root_cause": [
+    {
+      "file": "sympy/matrices/matrices.py",
+      "line": 180,
+      "statement": "if val:"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Bareiss' exact-division step requires every chosen pivot to be truly nonzero, but _find_pivot tests candidates with 'if val:' (structural non-zeroness only), so unevaluated zero expressions from the rank-deficient symbolic matrix [[i + a*j]] are accepted as pivots. Dividing by such a zero-equivalent pivot produces 0/0 = nan: det gives nan for n=5, and for n=6 the nan flows into cancel -> factor_terms -> Expr.__lt__ raising TypeError 'Invalid NaN comparison'.",
+    "annotator2": "Matrix.det uses MatrixDeterminant._eval_det_bareiss, whose nested _find_pivot scans the first column. Line 180 accepts the first truthy expression without establishing that it is mathematically nonzero. For the regression matrices, an unexpanded polynomial or rational expression can be truthy even though expansion reduces it to zero; Bareiss then uses that invalid pivot and the determinant becomes nan or raises during later NaN comparison. The call at line 195 only invokes the defective pivot search, so line 180 is the minimal faulty decision."
+  }
+}

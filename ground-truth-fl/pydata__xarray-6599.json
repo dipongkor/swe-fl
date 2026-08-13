@@ -4,18 +4,13 @@
     {
       "file": "xarray/core/computation.py",
       "line": 1936,
-      "statement": "if x.dtype.kind in \"mM\":",
-      "note": "Both datetime (M) and timedelta (m) arrays enter the same branch and are passed to datetime_to_numeric. For timedeltas, datetime_to_numeric sets offset via _datetime_nanmin which returns a datetime64 value. Subtracting datetime64 from timedelta64 is a numpy type error."
+      "statement": "if x.dtype.kind in \"mM\":"
     }
   ],
-  "reasoning": "polyval calls _ensure_numeric on the coord. to_floatable handles both datetime and timedelta kinds with a single branch, routing both through datetime_to_numeric. datetime_to_numeric defaults offset to _datetime_nanmin(array) for dtype.kind in 'Mm'. For a timedelta array, _datetime_nanmin returns a datetime64 value (e.g. 1970-01-01). The subtraction array - offset then attempts timedelta64 - datetime64 which numpy cannot resolve, raising UFuncBinaryResolutionError.",
-  "fault_triggering_call_site": [
-    {
-      "file": "xarray/tests/test_computation.py",
-      "line": 2035,
-      "statement": "actual = xr.polyval(coord=x, coeffs=coeffs)",
-      "note": "Pre-existing parametrized test, timedelta case. x is timedelta64[ns]. Triggers _ensure_numeric -> to_floatable -> datetime_to_numeric, which crashes at array - offset due to type mismatch."
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "polyval calls _ensure_numeric on the coord. to_floatable handles both datetime and timedelta kinds with a single branch, routing both through datetime_to_numeric. datetime_to_numeric defaults offset to _datetime_nanmin(array) for dtype.kind in 'Mm'. For a timedelta array, _datetime_nanmin returns a datetime64 value (e.g. 1970-01-01). The subtraction array - offset then attempts timedelta64 - datetime64 which numpy cannot resolve, raising UFuncBinaryResolutionError.",
+    "annotator2": "polyval first coerces coordinate-like inputs to numeric values. Datetimes need datetime_to_numeric because they represent absolute points in time, but timedeltas represent elapsed durations and should simply be cast to float. Splitting dtype.kind == 'M' from dtype.kind == 'm' preserves correct handling for both."
+  }
 }

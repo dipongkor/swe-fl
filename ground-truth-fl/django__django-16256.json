@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-16256",
+  "root_cause": [
+    {
+      "file": "django/db/models/manager.py",
+      "line": 87,
+      "statement": "return getattr(self.get_queryset(), name)(*args, **kwargs)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Related managers override create, get_or_create, and update_or_create to attach new objects to their owning instance. Their async names are inherited through BaseManager's generic queryset proxy. Line 87 resolves acreate, aget_or_create, and aupdate_or_create on the queryset instead of routing through those relation-aware manager operations. Objects are created without the relation, so later related counts remain zero or lookups raise DoesNotExist. This proxy is the minimal pre-existing dispatch decision shared by the failing forward, reverse, many-to-many, and generic relation paths."
+  }
+}

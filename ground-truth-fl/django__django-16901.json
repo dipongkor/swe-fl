@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-16901",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/where.py",
+      "line": 138,
+      "statement": "rhs = Exact(1, rhs_sum)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Q objects combined with ^ compile to an XOR connector in the WHERE tree. Backends with native XOR (MySQL) evaluate a chained a XOR b XOR c as left-associative pairwise XOR, which is true exactly when an odd number of operands are true. For backends without the operator (PostgreSQL, SQLite), WhereNode.as_sql substitutes an emulation: (a OR b OR c ...) AND (sum of one-per-true-operand CASE expressions) = 1. That right-hand side asserts the count of true operands is exactly one, which agrees with parity only for two operands. From three operands up the two semantics part ways — three true operands make the chain true (odd) but the emulated count test false — so the same ORM expression silently means 'exactly one' on PostgreSQL and 'odd number' on MySQL, and filters like Q(x) ^ Q(x) ^ Q(x) return no rows even when Q(x) matches.",
+    "annotator2": "On a database without native logical XOR, the query converts its children to an OR plus a count of true conditions. Comparing that count to one models one-hot selection, so rows satisfying three or five predicates are incorrectly excluded. The equality construction is the minimal root cause because the OR portion is valid and the wrong parity semantics arise entirely from this comparison."
+  }
+}

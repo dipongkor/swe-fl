@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-16502",
+  "root_cause": [
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 113,
+      "statement": "class ServerHandler(simple_server.ServerHandler):"
+    },
+    {
+      "file": "django/core/servers/basehttp.py",
+      "line": 136,
+      "statement": "if \"Content-Length\" not in self.headers:"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "RFC-compliant servers must not send a message body in response to HEAD. Django 1.9 stripped HEAD bodies in its own handler; #26052 removed that in 1.10, delegating to the web server since production servers already comply. runserver, however, is built on wsgiref's simple_server, which performs no such stripping: its finish_response writes every chunk the WSGI app returns, method notwithstanding. Django's ServerHandler subclass customizes header cleanup and connection lifecycle but nothing about HEAD, so from 1.10 onward curl -iX HEAD against runserver receives the full HTML body after the headers (and compliant clients that hang up after headers produce 'Broken pipe' errors in the console). The fix teaches the runserver handler about HEAD end to end: finish_response drains the app's response iterator without writing it (still honoring close/cleanup semantics), headers are sent if the app never triggered a write, any Content-Length header is dropped (RFC 9110 permits HEAD responses to omit it, and after discarding the body the handler cannot honestly compute one), and the unknown-length 'Connection: close' fallback is scoped to non-HEAD requests since a bodiless response needs no length to be framed safely.",
+    "annotator2": "WSGIRequestHandler delegates response emission to ServerHandler. For HEAD, the inherited finalization consumes and writes the application's iterable just like GET, so the response includes the HTML body. Header cleanup also applies its generic missing-length rule and closes the connection. The inherited finalization boundary and unconditional header condition independently explain the body and connection-header failures checked by the regression."
+  }
+}

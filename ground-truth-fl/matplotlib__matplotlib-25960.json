@@ -1,0 +1,31 @@
+{
+  "instance_id": "matplotlib__matplotlib-25960",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": 2279,
+      "statement": "dx = wr[self._subplotspec.colspan].sum() / wr.sum()"
+    },
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": 2280,
+      "statement": "dy = hr[self._subplotspec.rowspan].sum() / hr.sum()"
+    },
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": 2281,
+      "statement": "x0 = wr[:self._subplotspec.colspan.start].sum() / wr.sum()"
+    },
+    {
+      "file": "lib/matplotlib/figure.py",
+      "line": 2282,
+      "statement": "y0 = 1 - hr[:self._subplotspec.rowspan.stop].sum() / hr.sum()"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Figure.subfigures accepts wspace/hspace and forwards them into the GridSpec, but subfigure placement without a layout engine goes through SubFigure._redo_transform_rel_fig, which computes each panel's relative bbox from the row/column ratios alone. The spacing parameters therefore have no observable effect: every value produces identically tiled subfigures (with hspace=0.5 the top row should start at 0.6h but sits at 0.5h). Under constrained layout the parameters do work, because the layout engine repositions subfigures from the gridspec and honors its spacing, which is why the defect is specific to the no-layout-engine path.",
+    "annotator2": "FigureBase.subfigures accepts wspace and hspace and passes them to GridSpec, but without a layout engine SubFigure._redo_transform_rel_fig computes width, height, and origins solely from width_ratios and height_ratios. Those four calculations discard GridSpec's inter-cell spacing, so the returned grid remains contiguous."
+  }
+}

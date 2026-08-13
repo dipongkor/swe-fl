@@ -1,0 +1,16 @@
+{
+  "instance_id": "pydata__xarray-3095",
+  "root_cause": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": 1950,
+      "statement": "data = PandasIndexAdapter(self._data.array.copy(deep=True))"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "PandasIndexAdapter deliberately decouples the exposed numpy dtype from the wrapped pandas.Index dtype, because pandas coerces fixed-width unicode arrays to object. Any code that reconstructs an adapter from the wrapped index alone therefore discards that decoupling: dtype inference from the index yields object. IndexVariable.copy(deep=True) does exactly that reconstruction, so every deep copy of a unicode index coordinate (Dataset.copy(deep=True), DataArray.copy, copy.deepcopy) silently casts '<U*' to object, while shallow Dataset copies that reuse the adapter object are unaffected.",
+    "annotator2": "IndexVariable stores its index through PandasIndexAdapter, which can preserve a logical dtype distinct from the underlying pandas Index dtype. Base line 1950 bypasses the adapter state during a deep copy and constructs a new adapter solely from the copied pandas Index. For string data, the new adapter infers object dtype and loses the original Unicode dtype."
+  }
+}

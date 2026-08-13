@@ -4,26 +4,18 @@
     {
       "file": "lib/matplotlib/axes/_base.py",
       "line": 4444,
-      "statement": "return ax2",
-      "note": "ax2 is returned without copying ax1.xaxis.units to ax2.xaxis.units. ax2.xaxis.units remains None, causing unit conversion failures and dataLim corruption on ax1 when data is later plotted on ax2."
+      "statement": "return ax2"
     },
     {
       "file": "lib/matplotlib/axes/_base.py",
       "line": 4473,
-      "statement": "return ax2",
-      "note": "Same omission in twiny(): ax2 is returned without copying ax1.yaxis.units to ax2.yaxis.units."
+      "statement": "return ax2"
     }
   ],
-  "reasoning": "twinx() and twiny() create a new axes sharing one axis with the original. The units attribute is per-axis and is not copied during twin creation. After ax1.plot(a, b) with categorical/string data, ax1.xaxis.units holds the string unit converter. twinx() returns ax2 without propagating this to ax2.xaxis.units, leaving it None. When data is subsequently plotted on ax2, the missing units cause the shared axis to reset its data limits to ±inf, corrupting ax1's dataLim.",
-  "fault_triggering_call_site": [
-    {
-      "file": "lib/matplotlib/tests/test_axes.py",
-      "line": 391,
-      "statement": "ax2 = getattr(ax1, twin_func)()",
-      "note": "Pre-existing parametrized test for both twinx and twiny. Confirmed via traceback.print_stack() at _base.py:4436 (twinx) and _base.py:4467 (twiny). ax2.xaxis.units / ax2.yaxis.units is None after the call.",
-      "is_test_file": true,
-      "is_modified_in_patch": false
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "twinx() and twiny() create a new axes sharing one axis with the original. The units attribute is per-axis and is not copied during twin creation. After ax1.plot(a, b) with categorical/string data, ax1.xaxis.units holds the string unit converter. twinx() returns ax2 without propagating this to ax2.xaxis.units, leaving it None. When data is subsequently plotted on ax2, the missing units cause the shared axis to reset its data limits to ±inf, corrupting ax1's dataLim.",
+    "annotator2": ""
+  }
 }

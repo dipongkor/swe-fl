@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-13343",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": 282,
+      "statement": "kwargs['storage'] = self.storage"
+    },
+    {
+      "file": "django/db/models/fields/files.py",
+      "line": 232,
+      "statement": "self.storage = self.storage()"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator1",
+  "reasoning": {
+    "annotator1": "FileField accepts a callable for storage precisely so the storage backend can be chosen at runtime and differ between environments. At field construction the callable is called and its result assigned back onto self.storage, discarding the callable reference entirely. When makemigrations later deconstructs the field, deconstruct() copies self.storage into the kwargs — now the evaluated Storage instance — so the migration is written with whichever concrete storage the callable happened to return in the environment that generated it. The runtime-variability the callable was declared for is silently lost, and the deconstructed form no longer round-trips to the declared field. Callable upload_to on the same field shows the intended behavior: it is never evaluated on the field, so deconstruction returns the callable reference unchanged.",
+    "annotator2": ""
+  }
+}

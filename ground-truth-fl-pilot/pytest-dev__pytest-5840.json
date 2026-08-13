@@ -1,0 +1,21 @@
+{
+    "instance_id": "pytest-dev__pytest-5840",
+    "root_cause": [
+        {
+            "file": "src/_pytest/pathlib.py",
+            "line": 346,
+            "statement": "return type(path)(normcase(str(path.realpath())))",
+            "note": "unique_path() normalizes paths via normcase(), which on case-insensitive but case-preserving file systems such as Windows lowercases the entire path string. When this lowercased path is used to import conftest modules, Python cannot find the package because the real directory name differs in case (e.g. 'PIsys' becomes 'pisys'), directly causing ModuleNotFoundError."
+        }
+    ],
+    "reasoning": "unique_path() normalizes paths via normcase(), which on case-insensitive but case-preserving file systems such as Windows lowercases the entire path string. When this lowercased path is used to import conftest modules, Python cannot find the package because the real directory name differs in case (e.g. 'PIsys' becomes 'pisys'), directly causing ModuleNotFoundError.",
+    "fault_triggering_call_site": [
+        {
+            "file": "testing/test_conftest.py",
+            "line": 170,
+            "statement": "assert key in conftest._conftestpath2mod",
+            "note": "In test_setinitial_conftest_subdirs[test] and test_setinitial_conftest_subdirs[tests]. key = Path(str(subconftest)).resolve() is a resolved pathlib.Path, but the buggy unique_path() stores a normcase-lowercased py.path as the key. The two are not equal as dict keys, so the assertion fails. The 'whatever' and '.dotdir' cases pass because they assert the key is NOT present, which holds under both buggy and fixed code."
+        }
+    ],
+    "confidence": "high"
+}

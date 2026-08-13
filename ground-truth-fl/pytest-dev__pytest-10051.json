@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-10051",
+  "root_cause": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": 443,
+      "statement": "self.handler.reset()"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "caplog.get_records(when) reads per-stage record lists from the item stash. At the start of each stage, pytest stores the capture handler's records list into that stash by reference, so the stash entry and handler.records are one object and the stash stays a live view as the handler appends. caplog.clear() delegates to the handler's reset(), which replaces self.records with a brand-new empty list instead of emptying the existing one. The stash still points at the old list, so the two views diverge permanently: get_records keeps returning the records captured before the clear (it never looks cleared), and records logged after the clear are appended only to the handler's new list (they never appear in get_records). Direct views through caplog.records track the handler attribute and look correct, which makes the divergence surface only through get_records after a clear.",
+    "annotator2": "At the start of the call stage, the stash and handler.records refer to the same list. LogCaptureFixture.clear invokes reset(), which assigns a new list to handler.records rather than emptying the shared list. The stashed call-stage list retains the old record and never receives later records, so get_records('call') remains stale. Line 443 is the minimal root cause because it selects the identity-breaking reset operation."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-7571",
+  "root_cause": [
+    {
+      "file": "src/_pytest/logging.py",
+      "line": 437,
+      "statement": "self.handler.setLevel(level)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "caplog.set_level changes two pieces of logging state: the selected logger and the capture handler. The fixture saves the logger's initial level, but line 437 mutates the handler without preserving equivalent restoration state. _finalize consequently restores only the logger. Because the capture handler is reused, test1 leaves it at level 41, and the initial assertions in test2 and test3 observe 41 instead of 0. The handler mutation is the minimal root cause because the logger restoration path works and the leaked value is exactly the level assigned here."
+  }
+}

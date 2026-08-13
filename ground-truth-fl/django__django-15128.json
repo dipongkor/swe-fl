@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-15128",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "line": 615,
+      "statement": "change_map[alias] = new_alias"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Combining the two querysets imports several right-hand joins into a left-hand query that already occupies overlapping alias names. As each imported join is assigned a new alias, the mapping can form a chain in which one alias appears both as a key and as a value. Relabeling the next join with that map raises the alias-change assertion instead of producing the combined queryset. This mapping assignment is the minimal root cause because it creates the conflicting bookkeeping state."
+  }
+}

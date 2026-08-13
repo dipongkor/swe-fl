@@ -4,18 +4,13 @@
     {
       "file": "requests/models.py",
       "line": 84,
-      "statement": "return to_native_string(data)",
-      "note": "When data is bytes, to_native_string attempts to decode it as ASCII. Non-ASCII binary payloads (e.g. UTF-8 encoded text) raise UnicodeDecodeError. Binary body data should be returned as-is without any string conversion."
+      "statement": "return to_native_string(data)"
     }
   ],
-  "reasoning": "_encode_params receives the request body data. When data is a str or bytes instance it was routed through to_native_string, which decodes bytes using ASCII by default. A binary payload containing non-ASCII bytes (e.g. u'ööö'.encode('utf-8') = b'\\xc3\\xb6...') cannot be decoded as ASCII and raises UnicodeDecodeError.",
-  "fault_triggering_call_site": [
-    {
-      "file": "test_requests.py",
-      "line": 161,
-      "statement": "request = requests.Request('PUT', 'http://example.com', data=u'ööö'.encode('utf-8')).prepare()",
-      "note": "Pre-existing test. Passes non-ASCII UTF-8 bytes as body data. Triggers _encode_params -> to_native_string which crashes on ASCII decode."
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "_encode_params receives the request body data. When data is a str or bytes instance it was routed through to_native_string, which decodes bytes using ASCII by default. A binary payload containing non-ASCII bytes (e.g. u'ööö'.encode('utf-8') = b'\\xc3\\xb6...') cannot be decoded as ASCII and raises UnicodeDecodeError.",
+    "annotator2": "The failure occurs while preparing a binary request body. _encode_params unconditionally passes bytes through to_native_string, decoding arbitrary payload bytes as text before transmission. Binary content that is not valid in the assumed character encoding therefore raises during request preparation instead of being sent unchanged. The coercion in _encode_params is the minimal production decision reached by the failing body-preparation path."
+  }
 }

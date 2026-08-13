@@ -1,0 +1,21 @@
+{
+  "instance_id": "sphinx-doc__sphinx-10449",
+  "root_cause": [
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": 126,
+      "statement": "if 'return' in annotations and 'return' not in arguments:"
+    },
+    {
+      "file": "sphinx/ext/autodoc/typehints.py",
+      "line": 62,
+      "statement": "modify_field_list(field_list, annotations[fullname])"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "With autodoc_typehints = 'description', autodoc records signature annotations and merge_typehints later injects them into the rendered body as Parameters/Return type fields. A class's recorded signature is its __init__'s, including the conventional '-> None' return annotation, and the merge path treats every object type identically: modify_field_list appends an ':rtype:' field for any undocumented return annotation, and its caller passes no object-type context. As a result every annotated class is rendered with a meaningless 'Return type: None' block, while the same field on the __init__ method itself is correct - the defect is specific to merging a constructor's return annotation into the class documentation.",
+    "annotator2": "The description-typehint merge treats a class like a function. Its caller discards the object-kind context, and the callee unconditionally adds a return field whenever a return annotation exists. Thus __init__'s -> None leaks into the class section, while retaining it in the separately documented __init__ section is correct. Both the context-passing and decision sites are required."
+  }
+}

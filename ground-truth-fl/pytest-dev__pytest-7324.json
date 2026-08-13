@@ -1,0 +1,16 @@
+{
+  "instance_id": "pytest-dev__pytest-7324",
+  "root_cause": [
+    {
+      "file": "src/_pytest/mark/expression.py",
+      "line": 164,
+      "statement": "return ast.Name(ident.value, ast.Load())"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The parser lifts identifiers from a language where True/False/None are ordinary names into Python AST, where they are reserved constants, without any escaping. Any match expression containing such an identifier therefore produces an illegal ast.Name node, and compiling it either raises ValueError (release CPython 3.8+) or aborts a debug interpreter via the compiler_nameop assertion, as in the reported reproducer Expression.compile(\"False\"). Identifiers not colliding with reserved constants are unaffected, which is why only the True/False/None cases fail.",
+    "annotator2": "Pytest's marker-expression scanner accepts True, False, and None as identifier tokens, but not_expr represents every such token as a Python AST Name. Python's AST validator prohibits those reserved constant spellings in Name nodes, producing ValueError before the matcher can evaluate the marker expression. The AST construction line is the minimal root cause because it is the point where otherwise valid marker names acquire an invalid Python representation."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "instance_id": "django__django-11728",
+  "root_cause": [
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 172,
+      "statement": "if unmatched_open_brackets == 0:"
+    },
+    {
+      "file": "django/contrib/admindocs/utils.py",
+      "line": 204,
+      "statement": "if unmatched_open_brackets == 0:"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Both scanners walk from an opening parenthesis and record a group only when their balance counter is zero at the beginning of a later iteration. A trailing closing parenthesis reduces the counter during the final iteration, leaving no subsequent iteration to observe zero. Named and unnamed trailing groups therefore remain partially or wholly unreplaced. The two conditions are independently faulty decisions in the separate replacement passes."
+  }
+}

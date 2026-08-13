@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-13346",
+  "root_cause": [
+    {
+      "file": "django/db/models/query_utils.py",
+      "line": 183,
+      "statement": "return self.output_field.get_lookup(lookup_name)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "Resolving value__key__in reaches the key transform first. Because the transform has no specialized lookup for in, this fallback selects the generic field implementation, which compares extracted JSON text against improperly prepared right-hand values on non-native JSON backends. Valid scalar, list, and object values then fail to match their rows. The fallback return is the minimal existing dispatch decision responsible for routing these lookups through incompatible preparation."
+  }
+}

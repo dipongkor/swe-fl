@@ -1,0 +1,33 @@
+{
+  "instance_id": "mwaskom__seaborn-3187",
+  "root_cause": [
+    {
+      "file": "seaborn/_core/scales.py",
+      "line": 381,
+      "statement": "labels = axis.major.formatter.format_ticks(locs)",
+      "note": "format_ticks is called without disabling offset/scientific notation. ScalarFormatter computes a multiplicative offset and formats ticks as small relative values (e.g. 1.0, 2.5). The offset is never shown in the legend, so the displayed values are numerically incorrect."
+    },
+    {
+      "file": "seaborn/utils.py",
+      "line": 701,
+      "statement": "formatter = mpl.ticker.ScalarFormatter()",
+      "note": "ScalarFormatter is constructed with default settings leaving useOffset and scientific notation enabled. format_ticks then produces offset-relative labels with no offset shown anywhere in the legend, making the values wrong."
+    }
+  ],
+  "reasoning": "Both code paths construct or use a ScalarFormatter and call format_ticks without disabling offset/scientific notation. When data values are large (e.g. z + 1e8), ScalarFormatter computes a multiplicative offset and formats each tick as a small relative value (e.g. '1.0', '2.5' instead of '1e8+1.0', '1e8+2.5'). The offset itself is never rendered in the legend — there is no title, annotation, or label showing it. The result is that legend entries display numerically incorrect values: the test asserts float(text) > 1e7 but gets 1.0 or 2.5.",
+  "fault_triggering_call_site": [
+    {
+      "file": "tests/_core/test_plot.py",
+      "line": 2057,
+      "statement": "p = Plot(**xy, color=color).add(MockMark()).plot()",
+      "note": "Pre-existing test. color values are xy['x'] + 1e8. Confirmed via traceback.print_stack() at scales.py:325."
+    },
+    {
+      "file": "tests/test_relational.py",
+      "line": 680,
+      "statement": "g = relplot(data=long_df, x='x', y='y', hue=long_df['z'] + 1e8)",
+      "note": "Pre-existing test. hue values are large floats shifted by 1e8. Confirmed via traceback.print_stack() at utils.py:688."
+    }
+  ],
+  "confidence": "high"
+}

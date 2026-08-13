@@ -3,19 +3,19 @@
   "root_cause": [
     {
       "file": "pylint/lint/pylinter.py",
-      "line": 568,
-      "statement": "def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:",
-      "note": "Defined as a staticmethod with no access to self.config. The os.walk loop yields subdirectory roots without ever checking ignore/ignore_patterns/ignore_paths, so ignored subdirectories are passed downstream as valid module roots."
-    }
-  ],
-  "reasoning": "_discover_files walks the directory tree recursively and yields discovered paths, but never consults the ignore configuration. The ignore check in expand_modules only applies to the top-level inputs passed by the caller — it never sees subdirectories that _discover_files surfaces during the walk.",
-  "fault_triggering_call_site": [
+      "line": 567,
+      "statement": "@staticmethod"
+    },
     {
-      "file": "tests/lint/unittest_lint.py",
-      "line": 879,
-      "statement": "run = Run(['--recursive', 'y', ignore_parameter, ignore_parameter_value, join(REGRTEST_DATA_DIR, 'directory')], exit=False)",
-      "note": "Pre-existing parametrized test. Triggers _discover_files via linter.check() -> _discover_files. Confirmed via traceback.print_stack() at pylinter.py:569."
+      "file": "pylint/lint/pylinter.py",
+      "line": 568,
+      "statement": "def _discover_files(files_or_modules: Sequence[str]) -> Iterator[str]:"
     }
   ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "_discover_files walks the directory tree recursively and yields discovered paths, but never consults the ignore configuration. The ignore check in expand_modules only applies to the top-level inputs passed by the caller — it never sees subdirectories that _discover_files surfaces during the walk.",
+    "annotator2": "With recursive mode enabled, PyLinter._discover_files walks every directory and yields Python files or package roots. Since discovery has no linter instance or ignore configuration, ignored_subdirectory is traversed and failing.py enters the lint target list despite matching --ignore or --ignore-patterns. Pylint then reports messages from that file and returns status 20. The static discovery boundary is the minimal root cause because it prevents ignore rules from participating while the recursive tree is formed."
+  }
 }

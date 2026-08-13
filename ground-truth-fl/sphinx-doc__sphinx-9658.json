@@ -4,24 +4,18 @@
     {
       "file": "sphinx/ext/autodoc/mock.py",
       "line": 43,
-      "statement": "self.__qualname__ = ''",
-      "note": "Hardcodes qualname to empty string on every instantiation, discarding class identity"
+      "statement": "self.__qualname__ = ''"
     },
     {
       "file": "sphinx/ext/autodoc/mock.py",
       "line": 74,
-      "statement": "attrs = {'__module__': module,\n         '__display_name__': module + '.' + name,\n         '__sphinx_decorator_args__': decorator_args}",
-      "note": "__name__ never set in subclass attrs, so __init__ has nothing correct to draw from"
-    }
-  ],
-  "fault_triggering_call_site": [
-    {
-      "file": "tests/test_util_typing.py",
-      "line": 177,
-      "statement": "assert restify(unknown.secret.Class) == ':py:class:`unknown.secret.Class`'",
-      "note": "New test added in patch — not pre-existing. restify reads __qualname__ which is ''"
+      "statement": "attrs = {'__module__': module, '__display_name__': module + '.' + name, '__sphinx_decorator_args__': decorator_args}"
     }
   ],
   "confidence": "high",
-  "reasoning": "When a mock subclass is created via _make_subclass, the attrs dict never includes __name__, so the subclass inherits the class-level default __name__ = '' from _MockObject. Then when any instance of that subclass is initialized, __init__ runs self.__qualname__ = self.__name__ — which is '' — clobbering the qualname to empty string. So when restify reads __qualname__ to build the cross-reference string, it gets nothing, producing :py:class:unknown.secret. instead of `:py:class:`unknown.secret.Class."
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "When a mock subclass is created via _make_subclass, the attrs dict never includes __name__, so the subclass inherits the class-level default __name__ = '' from _MockObject. Then when any instance of that subclass is initialized, __init__ runs self.__qualname__ = self.__name__ — which is '' — clobbering the qualname to empty string. So when restify reads __qualname__ to build the cross-reference string, it gets nothing, producing :py:class:unknown.secret. instead of `:py:class:`unknown.secret.Class.",
+    "annotator2": "When test_restify_mock calls restify(unknown.secret.Class), a chain of nested mock objects is created. restify() needs __name__ to extract the final class name ('Class'). In the original: (1) _MockObject has no __name__ class attribute, (2) _make_subclass never sets __name__ in attrs, and (3) __init__ resets __qualname__ to '' on instantiation, erasing any name the subclass had. Together these cause restify() to see an empty class name and return 'unknown.secret.' instead of 'unknown.secret.Class'."
+  }
 }

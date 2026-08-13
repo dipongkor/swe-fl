@@ -4,24 +4,18 @@
     {
       "file": "astropy/units/quantity.py",
       "line": 299,
-      "statement": "if not (np.can_cast(np.float32, value.dtype) or\n        value.dtype.fields):",
-      "note": "np.can_cast(np.float32, float16) is False because float32 cannot safely cast to float16. So the condition evaluates to not(False or False)=True and dtype=float is set, silently upgrading float16 to float64. The intent was to only upgrade integer/bool types to float, but the np.can_cast check incorrectly includes float16."
+      "statement": "if not (np.can_cast(np.float32, value.dtype) or value.dtype.fields):"
     },
     {
       "file": "astropy/units/quantity.py",
       "line": 380,
-      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype)\n                           or value.dtype.fields)\n                      or value.dtype.kind == 'O'):",
-      "note": "Same np.can_cast condition on the main path. float16 arrays are converted to float64 here as well."
+      "statement": "if dtype is None and (not (np.can_cast(np.float32, value.dtype) or value.dtype.fields) or value.dtype.kind == 'O'):"
     }
   ],
-  "reasoning": "The dtype preservation logic uses np.can_cast(np.float32, value.dtype) to detect non-float types that should be upgraded to float. The intent is to catch integers and booleans. However np.can_cast uses 'safe' casting rules by default, and float32 cannot safely cast to float16 (precision loss), so float16 fails the check and gets upgraded to float64.",
-  "fault_triggering_call_site": [
-    {
-      "file": "astropy/units/tests/test_quantity.py",
-      "line": 146,
-      "statement": "q3_16 = u.Quantity(a3_16, u.yr)",
-      "note": "Pre-existing test. a3_16 is np.array([1., 2.], dtype=np.float16). Quantity.__new__ incorrectly upgrades float16 to float64. Confirmed via traceback.print_stack() at quantity.py:274."
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The dtype preservation logic uses np.can_cast(np.float32, value.dtype) to detect non-float types that should be upgraded to float. The intent is to catch integers and booleans. However np.can_cast uses 'safe' casting rules by default, and float32 cannot safely cast to float16 (precision loss), so float16 fails the check and gets upgraded to float64.",
+    "annotator2": "The intended policy is to promote integer and object inputs to floating point by default while preserving floating dtypes, including float16. The old can_cast(np.float32, dtype) check answers a different question and classifies float16 as needing promotion. Checking dtype.kind directly preserves all floating dtypes and still promotes integer/object inputs."
+  }
 }

@@ -1,0 +1,26 @@
+{
+  "instance_id": "sympy__sympy-15976",
+  "root_cause": [
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 789,
+      "statement": "x.appendChild(msub)"
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 795,
+      "statement": "x.appendChild(msup)"
+    },
+    {
+      "file": "sympy/printing/mathml.py",
+      "line": 801,
+      "statement": "x.appendChild(msubsup)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The MathML presentation printer renders a Symbol by splitting its name into base, subscripts, and superscripts (a trailing digit like the '2' of 'x2' becomes a subscript), building the appropriate <msub>/<msup>/<msubsup> layout element, and then appending that element as a child of an outer <mi> it created up front. In MathML, <mi> is a token element: its content model is character data, not child elements. Wrapping a layout element inside it produces invalid markup — <mi><msub><mi>x</mi><mi>2</mi></msub></mi> — which conforming renderers such as Safari display as an empty box, making every symbol whose name carries a subscript or superscript part invisible. A bare name never triggers the bug because the plain branch only puts text inside the <mi>, which is valid, so 'x' renders while 'x2' vanishes.",
+    "annotator2": "The presentation printer builds valid msub, msup, or msubsup layout elements for scripted symbol names, then places each one inside an outer mi. An mi is a token element intended to contain character data, not layout markup, so the resulting MathML is invalid and affected renderers can display the symbol as empty. Plain symbols avoid the problem because their mi contains only text. The three append statements are independently faulty branch endpoints covering subscript-only, superscript-only, and combined-script symbols."
+  }
+}

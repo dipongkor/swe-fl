@@ -4,18 +4,13 @@
     {
       "file": "django/core/management/commands/runserver.py",
       "line": 150,
-      "statement": "self.stdout.write(\n    (\n        \"Django version %(version)s, using settings %(settings)r\\n\"\n        \"Starting development server at %(protocol)s://%(addr)s:%(port)s/\\n\"\n        \"Quit the server with %(quit_command)s.\"\n    )\n    % {\n        \"version\": self.get_version(),\n        \"settings\": settings.SETTINGS_MODULE,\n        \"protocol\": self.protocol,\n        \"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,\n        \"port\": self.port,\n        \"quit_command\": quit_command,\n    }\n)",
-      "note": "When self.addr is '0' (shorthand for 0.0.0.0), self._raw_ipv6 is False so the expression returns self.addr unchanged as '0'. The startup message then displays http://0:8000/ instead of http://0.0.0.0:8000/."
+      "statement": "\"addr\": \"[%s]\" % self.addr if self._raw_ipv6 else self.addr,"
     }
   ],
-  "reasoning": "The runserver startup message formats the address using a ternary that only handles the IPv6 case. When the user passes '0' as the address (shorthand for 0.0.0.0), self._raw_ipv6 is False and self.addr is '0', so the message shows the raw '0' rather than the expanded '0.0.0.0'.",
-  "fault_triggering_call_site": [
-    {
-      "file": "tests/admin_scripts/tests.py",
-      "line": 1593,
-      "statement": "call_command('runserver', addrport='0:8000', use_reloader=False, skip_checks=True, stdout=self.output)",
-      "note": "Pre-existing test. Passes addrport='0:8000' and asserts the output contains '0.0.0.0:8000'. Confirmed via traceback.print_stack() at runserver.py:123."
-    }
-  ],
-  "confidence": "high"
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "The runserver startup message formats the address using a ternary that only handles the IPv6 case. When the user passes '0' as the address (shorthand for 0.0.0.0), self._raw_ipv6 is False and self.addr is '0', so the message shows the raw '0' rather than the expanded '0.0.0.0'.",
+    "annotator2": "The server binding semantics already treat address 0 as all IPv4 interfaces, but the user-facing URL formatter did not normalize that special value."
+  }
 }

@@ -1,0 +1,16 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13142",
+  "root_cause": [
+    {
+      "file": "sklearn/mixture/base.py",
+      "line": 263,
+      "statement": "_, log_resp = self._e_step(X)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "BaseMixture.fit_predict runs EM from n_init random initializations, remembering the best parameters seen (by lower bound) in best_params while the model object itself always carries the parameters of the most recent run. After the loop it performs one final e-step to derive the labels to return, and only afterwards restores best_params onto the model. The final e-step therefore scores X under the last initialization's parameters, while the fitted estimator ends up holding the best initialization's parameters. When n_init > 1 and the best run is not the last, the labels returned by fit_predict come from a different model than the one a subsequent predict(X) uses, so fit_predict(X) and fit(X).predict(X) disagree; with the default n_init=1 the two coincide and the inconsistency is invisible.",
+    "annotator2": "fit_predict runs n_init optimization trials and records best_params whenever a trial improves the lower bound. After the loop, line 263 computes log_resp using whichever parameters remain from the final trial. Only afterward does line 272 install best_params. The labels returned by fit_predict therefore describe the last initialization, while a subsequent predict uses the selected best initialization. With multiple trials these parameter sets commonly differ, producing 878 mismatches for BayesianGaussianMixture and 815 for GaussianMixture in the regression inputs. Line 263 is the minimal root cause because the E-step itself is correct; its position makes it observe the wrong estimator state."
+  }
+}

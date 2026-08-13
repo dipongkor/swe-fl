@@ -1,0 +1,16 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8475",
+  "root_cause": [
+    {
+      "file": "sphinx/builders/linkcheck.py",
+      "line": 175,
+      "statement": "except HTTPError:"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Since linkcheck probes URLs with a HEAD request first, it guards that request with a fallback: if the HEAD attempt fails, retry with GET, because some servers mishandle HEAD. The guard's except clause names only HTTPError, the exception produced by raise_for_status for non-2xx responses. A server that enters an infinite redirect loop specifically for HEAD requests makes the requests library abort with TooManyRedirects instead; that exception bypasses the fallback clause entirely and lands in the builder's generic exception handler, which records the link as broken. URLs that respond normally to GET, and that older Sphinx versions using GET reported as working, are therefore flagged broken purely because the HEAD failure mode was not included in the fallback's exception filter.",
+    "annotator2": "check_uri probes an ordinary URL with HEAD before using GET. The test server redirects every HEAD request back to itself but returns 200 for GET. requests exhausts its redirect limit and raises TooManyRedirects at the HEAD call. Line 175 catches only HTTPError, so the exception escapes the fallback block and the outer link-check handling records the URL as broken with 'Exceeded 30 redirects.' The exception filter is the minimal root cause because it alone decides whether this HEAD-specific failure reaches the already existing GET path."
+  }
+}

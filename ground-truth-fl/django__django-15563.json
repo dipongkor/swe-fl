@@ -1,0 +1,26 @@
+{
+  "instance_id": "django__django-15563",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1839,
+      "statement": "query.add_fields([query.get_meta().pk.name])"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "line": 1857,
+      "statement": "self.query.related_ids = idents"
+    },
+    {
+      "file": "django/db/models/sql/subqueries.py",
+      "line": 137,
+      "statement": "query.add_filter(\"pk__in\", self.related_ids)"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "QuerySet.update() on an MTI child splits the assignments per table: fields owned by ancestors are queued as related_updates, and to keep the target rows stable across the multiple UPDATE statements the compiler first runs a select for the affected rows' identifiers, then filters every per-table UPDATE with pk__in on those identifiers. The design assumed a single identifier space: it selects only the child's primary key (the parent-link of the first parent) and hands that one flat list to every ancestor update. Under multiple inheritance from two concrete models, only the first parent shares that id space; the link to the second parent is a distinct ptr column with independently assigned AutoField values. Consequently updating a second-parent field through the child issues UPDATE second_parent SET ... WHERE second_parent_pk IN (first-parent-chain ids): the child's actual rows in the second parent's table are missed (queryset update silently ineffective) and any unrelated second-parent rows whose pks numerically collide with the first-parent ids are overwritten — the issue's OtherBase rows 1,2 being set to 55. The fix makes the pre-select carry one id column per off-chain ancestor (parents connected by an all-primary-key path still reuse the child pk), stores the ids as a per-model mapping, and has get_related_updates filter each ancestor's UPDATE by its own id list.",
+    "annotator2": "Updating an inherited field through Congressman or Senator is split into an update for the ancestor table. The compiler preselects only the concrete child's pk and stores those values as a single shared list. Each ancestor query then applies that list to its own pk, although a non-primary-key parent link may point to a different value. The update matches no intended Politician row and the title remains empty. These statements jointly define the insufficient selection, shared storage, and incorrect ancestor filter."
+  }
+}

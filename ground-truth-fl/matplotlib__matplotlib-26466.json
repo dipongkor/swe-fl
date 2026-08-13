@@ -1,0 +1,21 @@
+{
+  "instance_id": "matplotlib__matplotlib-26466",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": 1459,
+      "statement": "self.xy = xy"
+    },
+    {
+      "file": "lib/matplotlib/text.py",
+      "line": 1392,
+      "statement": "self._ref_coord = ref_coord"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "annotate() parameters that are read lazily at draw time are stored by reference rather than snapshotted: _AnnotationBase keeps the caller's xy object as the anchor and OffsetFrom keeps the caller's ref_coord for its offset transform. When these are numpy arrays, the caller and the artist alias the same mutable data, so mutations made after the annotate()/OffsetFrom construction retroactively move arrows and text at the next draw. Passing a copy (xy=arr.copy()) avoids the symptom, confirming aliasing as the mechanism.",
+    "annotator2": "Both constructors store coordinate inputs by alias rather than copying their two scalar components. The regression uses NumPy arrays, then mutates them after creating OffsetFrom and Annotation objects; the base objects immediately reflect [1, 1] and [2, 2] instead of retaining [0.5, 0.5]. These two assignments are independent instances of the same mutation bug."
+  }
+}

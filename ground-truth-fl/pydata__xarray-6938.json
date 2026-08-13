@@ -1,0 +1,16 @@
+{
+  "instance_id": "pydata__xarray-6938",
+  "root_cause": [
+    {
+      "file": "xarray/core/variable.py",
+      "line": 2884,
+      "statement": "return self"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "swap_dims builds each result variable by converting the source variable and then assigning new dims onto the converted object. Conversion of a plain Variable yields a fresh IndexVariable, so the assignment is isolated; but IndexVariable.to_index_variable returns self, aliasing the converted object to the one held in the source Dataset's variables dict, and the dims assignment then modifies the original in place. The reported reproducer manufactures the triggering state: after swap_dims/rename_dims/reset_index/reset_coords, 'lev' looks like a plain data variable but the underlying object is still an IndexVariable, so a subsequent swap_dims(z='lev') on the derived dataset stamps dims=('lev',) onto that dataset's own 'lev' variable.",
+    "annotator2": "Variable conversion methods are expected to return an independent variable that callers may safely modify. IndexVariable.to_index_variable instead aliases self. Dataset.swap_dims calls this method and then assigns to var.dims, so an IndexVariable input is changed in place during what appears to be a derived conversion. The returned and source variables consequently have identical object identity and shared mutable state."
+  }
+}

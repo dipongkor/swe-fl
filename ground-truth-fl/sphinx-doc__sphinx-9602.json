@@ -1,0 +1,26 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9602",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 126,
+      "statement": "return [nodes.Text(node.value)]"
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 150,
+      "statement": "result.extend(unparse(node.slice))"
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "line": 182,
+      "statement": "if isinstance(node, nodes.Text) and node.strip():"
+    }
+  ],
+  "confidence": "high",
+  "comments": "annotator2",
+  "reasoning": {
+    "annotator1": "",
+    "annotator2": "The parser loses the distinction between a subscripted type and the values inside Literal: constants are represented without faithful repr formatting, the Subscript branch emits them without a value marker, and the final classifier assumes all text is a type. The assignment on base line 183 is the consequence of the overbroad line-182 condition, not a separate root-cause statement."
+  }
+}

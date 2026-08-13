@@ -1,0 +1,16 @@
+{
+  "instance_id": "django__django-13297",
+  "root_cause": [
+    {
+      "file": "django/views/generic/base.py",
+      "line": 172,
+      "statement": "@SimpleLazyObject"
+    }
+  ],
+  "confidence": "high",
+  "comments": "both agreed",
+  "reasoning": {
+    "annotator1": "Since the TemplateView URL-kwargs deprecation, each kwarg forwarded to get_context_data is wrapped in a lazy object whose first evaluation emits a RemovedInDjango40Warning. The wrapper used is SimpleLazyObject, an attribute-forwarding proxy whose class remains SimpleLazyObject rather than the wrapped value's type and which is not a Promise. Django's ORM resolves Promise instances when preparing query parameters (Field.get_prep_value casts them), but it has no handling for SimpleLazyObject, so passing a wrapped URL kwarg into a queryset lookup, e.g. Model.objects.get(slug=kwargs['slug']), sends the proxy object itself to the database driver as a bind parameter; sqlite3 cannot adapt it and raises InterfaceError: Error binding parameter 0 - probably unsupported type. Code that worked in Django 3.0, where URL kwargs arrived as plain strings, therefore crashes in 3.1 unless the value is explicitly coerced with str().",
+    "annotator2": "TemplateView.get passes its URL kwargs through _wrap_url_kwargs_with_deprecation_warning before invoking get_context_data. The decorator on line 172 turns artist_name into a SimpleLazyObject so the warning can be delayed. Artist.objects.get then carries that object into query parameters. SQLite does not recognize SimpleLazyObject as a supported bound type and raises InterfaceError, even though evaluating it would yield the original string. The decorator is the minimal root cause because the URL converter produced a valid string and the proxy type is introduced only at this wrapping point."
+  }
+}
