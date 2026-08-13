@@ -9,12 +9,19 @@
 - aligned: **87**
 - partial: **7**
 
+## Label legend
+
+- **aligned** — Same causal mechanism; both describe the same faulty behavior producing the same failure (may differ only in wording/detail).
+- **partial** — Consistent but uneven; one annotator names a step, condition, or cause the other omits, with no conflict between them.
+- **divergent** — Different mechanisms that could both be true at once; two distinct causal stories that don't clash.
+- **contradictory** — Incompatible mechanisms that can't both be true; the annotators make opposing claims about what the code does.
+
 ## Reliability signals
 
-- Cross-model disagreements: **24** / 94
-- Order-swap disagreements: **6** / 94
+- Cross-model disagreements: **18** / 94
+- Order-swap disagreements: **7** / 94
 
-## Flagged for manual adjudication (24)
+## Flagged for manual adjudication (19)
 
 Cross-model or order-swap disagreements, divergent/contradictory finals, low-confidence, or failed verdicts.
 
@@ -23,35 +30,30 @@ Cross-model or order-swap disagreements, divergent/contradictory finals, low-con
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
 - label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
 
-### django__django-11138
+### astropy__astropy-7606
 - final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
+- label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
 
-### django__django-11265
+### django__django-11138
 - final: **aligned** (cross-model disagreement)
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
 - label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
 
 ### django__django-12155
 - final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
+- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
 - label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
 
-### django__django-13297
+### django__django-13810
 - final: **aligned** (cross-model disagreement)
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
 
-### django__django-13810
+### django__django-14011
 - final: **partial** (cross-model disagreement; order-swap disagreement)
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
 - label counts: {'partial': 3, 'aligned': 3}, order0=aligned, order1=partial
-
-### django__django-14011
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
 
 ### django__django-14053
 - final: **aligned** (cross-model disagreement; order-swap disagreement)
@@ -60,7 +62,7 @@ Cross-model or order-swap disagreements, divergent/contradictory finals, low-con
 
 ### django__django-14170
 - final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
+- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
 - label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
 
 ### django__django-15563
@@ -69,39 +71,24 @@ Cross-model or order-swap disagreements, divergent/contradictory finals, low-con
 - label counts: {'partial': 3, 'aligned': 3}, order0=aligned, order1=partial
 
 ### django__django-15572
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=aligned
+- final: **partial** (order-swap disagreement)
+- per-model: {'anthropic': 'partial', 'google': 'partial', 'openai': 'partial'}
+- label counts: {'aligned': 3, 'partial': 3}, order0=partial, order1=aligned
 
 ### django__django-16502
 - final: **aligned** (cross-model disagreement)
 - per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
 - label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
 
-### django__django-16901
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
-
-### django__django-16938
+### matplotlib__matplotlib-24026
 - final: **aligned** (cross-model disagreement)
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
-
-### matplotlib__matplotlib-23299
-- final: **partial** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'divergent', 'google': 'partial', 'openai': 'partial'}
-- label counts: {'divergent': 1, 'partial': 4, 'aligned': 1}, order0=divergent, order1=partial
+- label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
 
 ### matplotlib__matplotlib-25479
-- final: **partial** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'partial', 'openai': 'partial'}
-- label counts: {'aligned': 3, 'partial': 3}, order0=partial, order1=aligned
-
-### matplotlib__matplotlib-25960
 - final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
+- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
 
 ### pytest-dev__pytest-6197
 - final: **aligned** (cross-model disagreement)
@@ -113,28 +100,23 @@ Cross-model or order-swap disagreements, divergent/contradictory finals, low-con
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
 - label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
 
-### pytest-dev__pytest-7324
+### scikit-learn__scikit-learn-26194
 - final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'divergent'}
+- label counts: {'aligned': 5, 'divergent': 1}, order0=aligned, order1=aligned
 
 ### scikit-learn__scikit-learn-9288
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
-
-### sphinx-doc__sphinx-11510
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- final: **aligned** (cross-model disagreement; order-swap disagreement)
+- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
+- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
 
 ### sphinx-doc__sphinx-9658
 - final: **aligned** (cross-model disagreement)
 - per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
+- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
 
 ### sympy__sympy-21379
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- final: **aligned** (cross-model disagreement; order-swap disagreement)
+- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
+- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
 

@@ -107,6 +107,24 @@ def main() -> int:
     print("            " + head)
     for i, lab in enumerate(LABELS):
         print(f"  {lab:>13}" + "".join(f"{obs[i][c]:>7}" for c in range(k)))
+
+    # ---- per-class precision / recall (only for classes that appear) ----
+    # recall    = diagonal / human total for that class  (of the human's X, how
+    #             many the judge also called X)
+    # precision = diagonal / judge total for that class  (of the judge's X, how
+    #             many were truly X)
+    row = [sum(obs[i]) for i in range(k)]                     # human totals
+    col = [sum(obs[i][c] for i in range(k)) for c in range(k)]  # judge totals
+    used = [i for i in range(k) if row[i] or col[i]]
+    print("\nper-class agreement (only classes used by either rater)")
+    print(f"  {'class':>13}{'recall':>16}{'precision':>16}")
+    for i in used:
+        tp = obs[i][i]
+        recall = f"{tp}/{row[i]} = {tp / row[i]:.1%}" if row[i] else "-  (n=0)"
+        prec = f"{tp}/{col[i]} = {tp / col[i]:.1%}" if col[i] else "-  (n=0)"
+        print(f"  {LABELS[i]:>13}{recall:>16}{prec:>16}")
+    print("  recall  = of the human's X, how many the judge also called X")
+    print("  precision = of the judge's X, how many were truly X")
     return 0
 
 

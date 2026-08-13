@@ -1,16 +1,57 @@
 {
   "seed": 42,
-  "n": 20,
+  "n": 94,
+  "source": "reasoning_alignment.csv",
   "instances": {
-    "astropy__astropy-7606": {
+    "astropy__astropy-13579": {
       "annotator_1": "Eshgin",
       "annotator_2": "Atish"
+    },
+    "astropy__astropy-14365": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "astropy__astropy-14598": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "astropy__astropy-7606": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
     },
     "astropy__astropy-7671": {
       "annotator_1": "Eshgin",
       "annotator_2": "Atish"
     },
+    "astropy__astropy-8707": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "astropy__astropy-8872": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-10554": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-11138": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-11265": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-11400": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
     "django__django-11532": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-11734": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
@@ -19,6 +60,14 @@
       "annotator_2": "Eshgin"
     },
     "django__django-12155": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-12406": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-13297": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
@@ -26,23 +75,71 @@
       "annotator_1": "Eshgin",
       "annotator_2": "Atish"
     },
-    "django__django-15503": {
+    "django__django-13512": {
       "annotator_1": "Eshgin",
       "annotator_2": "Atish"
+    },
+    "django__django-13810": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-14011": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-14034": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-14053": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-14170": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-14349": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-15503": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "django__django-15554": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
     },
     "django__django-15563": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
     "django__django-15572": {
-      "annotator_1": "Atish",
-      "annotator_2": "Eshgin"
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
     },
     "django__django-15629": {
-      "annotator_1": "Atish",
-      "annotator_2": "Eshgin"
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-15732": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
     },
     "django__django-15916": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-16145": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-16315": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-16454": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
@@ -50,11 +147,135 @@
       "annotator_1": "Eshgin",
       "annotator_2": "Atish"
     },
-    "pydata__xarray-6938": {
+    "django__django-16631": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-16901": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-16938": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "django__django-17084": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "matplotlib__matplotlib-20859": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "matplotlib__matplotlib-23299": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
+    "matplotlib__matplotlib-24026": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "matplotlib__matplotlib-25287": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "matplotlib__matplotlib-25311": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "matplotlib__matplotlib-25479": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "matplotlib__matplotlib-25960": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "matplotlib__matplotlib-26466": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "mwaskom__seaborn-3187": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "psf__requests-2317": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "psf__requests-2931": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "pydata__xarray-3095": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "pydata__xarray-3993": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "pydata__xarray-6599": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pydata__xarray-6938": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pydata__xarray-7229": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pylint-dev__pylint-4604": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "pylint-dev__pylint-6528": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pylint-dev__pylint-8898": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "pytest-dev__pytest-10051": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "pytest-dev__pytest-6197": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pytest-dev__pytest-7205": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pytest-dev__pytest-7236": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "pytest-dev__pytest-7324": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
     "scikit-learn__scikit-learn-10297": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "scikit-learn__scikit-learn-12973": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "scikit-learn__scikit-learn-13124": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "scikit-learn__scikit-learn-13142": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "scikit-learn__scikit-learn-25931": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
@@ -62,23 +283,99 @@
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
-    "scikit-learn__scikit-learn-9288": {
+    "scikit-learn__scikit-learn-26194": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
+    },
+    "scikit-learn__scikit-learn-9288": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sphinx-doc__sphinx-10449": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sphinx-doc__sphinx-11510": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sphinx-doc__sphinx-7462": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
     },
     "sphinx-doc__sphinx-7910": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
+    "sphinx-doc__sphinx-8056": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
     "sphinx-doc__sphinx-8120": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
+    },
+    "sphinx-doc__sphinx-8475": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sphinx-doc__sphinx-8551": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sphinx-doc__sphinx-9320": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
     },
     "sphinx-doc__sphinx-9658": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     },
+    "sphinx-doc__sphinx-9711": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sympy__sympy-13877": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sympy__sympy-14248": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sympy__sympy-15345": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
     "sympy__sympy-15976": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sympy__sympy-16597": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sympy__sympy-16792": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sympy__sympy-17318": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sympy__sympy-19495": {
+      "annotator_1": "Atish",
+      "annotator_2": "Eshgin"
+    },
+    "sympy__sympy-20438": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sympy__sympy-21379": {
+      "annotator_1": "Eshgin",
+      "annotator_2": "Atish"
+    },
+    "sympy__sympy-24562": {
       "annotator_1": "Atish",
       "annotator_2": "Eshgin"
     }
