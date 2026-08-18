@@ -25,6 +25,16 @@ PYBIN="$(command -v python3 || command -v python)"
 [ -z "$PYBIN" ] && { echo "ERROR: no python3/python on PATH"; exit 1; }
 "$PYBIN" -c "import swebench" 2>/dev/null || { echo "ERROR: swebench not installed for $PYBIN. Run: pip3 install swebench datasets"; exit 1; }
 
+# --cache_level (per-instance image cleanup) exists only in newer swebench. Detect it;
+# without it, images may accumulate -> upgrade with: pip3 install -U swebench
+CACHE_FLAG=""
+if "$PYBIN" -m swebench.harness.run_evaluation --help 2>&1 | grep -q -- '--cache_level'; then
+  CACHE_FLAG="--cache_level env"
+else
+  echo "WARNING: this swebench lacks --cache_level; images may accumulate on disk."
+  echo "         Recommended: pip3 install -U swebench   (then re-run)"
+fi
+
 disk() { docker system df 2>/dev/null | awk '/^Images/{print "   docker images on disk: "$4" (reclaimable "$5")"}'; }
 
 for f in preds/gold.jsonl preds/agent__*.jsonl; do
@@ -38,7 +48,7 @@ for f in preds/gold.jsonl preds/agent__*.jsonl; do
     --instance_ids $IDS \
     --max_workers "$WORKERS" \
     --run_id "$RUN_ID" \
-    --cache_level env \
+    $CACHE_FLAG \
     2>&1 | grep -v "httpx\|HTTP Request"
   docker image prune -f >/dev/null 2>&1 || true      # drop dangling layers between files
   disk
