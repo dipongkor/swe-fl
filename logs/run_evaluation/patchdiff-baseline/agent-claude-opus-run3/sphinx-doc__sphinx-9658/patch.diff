@@ -1,0 +1,55 @@
+diff --git a/sphinx/ext/autodoc/mock.py b/sphinx/ext/autodoc/mock.py
+index b562f47fd..e6a5f9380 100644
+--- a/sphinx/ext/autodoc/mock.py
++++ b/sphinx/ext/autodoc/mock.py
+@@ -168,7 +168,7 @@ def ismock(subject: Any) -> bool:
+     try:
+         # check the object is mocked object
+         __mro__ = safe_getattr(type(subject), '__mro__', [])
+-        if len(__mro__) > 2 and __mro__[1] is _MockObject:
++        if len(__mro__) > 2 and __mro__[-2] is _MockObject:
+             return True
+     except AttributeError:
+         pass
+diff --git a/sphinx/util/typing.py b/sphinx/util/typing.py
+index 87707d48f..535de8221 100644
+--- a/sphinx/util/typing.py
++++ b/sphinx/util/typing.py
+@@ -106,6 +106,7 @@ def is_system_TypeVar(typ: Any) -> bool:
+ 
+ def restify(cls: Optional[Type]) -> str:
+     """Convert python class to a reST reference."""
++    from sphinx.ext.autodoc.mock import ismock  # lazy loading
+     from sphinx.util import inspect  # lazy loading
+ 
+     try:
+@@ -115,6 +116,10 @@ def restify(cls: Optional[Type]) -> str:
+             return '...'
+         elif isinstance(cls, str):
+             return cls
++        elif ismock(cls):
++            if not isinstance(cls, type):
++                cls = type(cls)
++            return ':py:class:`%s.%s`' % (cls.__module__, cls.__name__)
+         elif cls in INVALID_BUILTIN_CLASSES:
+             return ':py:class:`%s`' % INVALID_BUILTIN_CLASSES[cls]
+         elif inspect.isNewType(cls):
+@@ -300,6 +305,7 @@ def _restify_py36(cls: Optional[Type]) -> str:
+ 
+ def stringify(annotation: Any) -> str:
+     """Stringify type annotation object."""
++    from sphinx.ext.autodoc.mock import ismock  # lazy loading
+     from sphinx.util import inspect  # lazy loading
+ 
+     if isinstance(annotation, str):
+@@ -308,6 +314,10 @@ def stringify(annotation: Any) -> str:
+             return annotation[1:-1]
+         else:
+             return annotation
++    elif ismock(annotation):
++        if not isinstance(annotation, type):
++            annotation = type(annotation)
++        return '%s.%s' % (annotation.__module__, annotation.__name__)
+     elif isinstance(annotation, TypeVar):
+         if annotation.__module__ == 'typing':
+             return annotation.__name__

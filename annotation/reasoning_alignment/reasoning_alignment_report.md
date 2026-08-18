@@ -1,122 +1,163 @@
 # Reasoning-alignment report
 
-- Instances judged: **94**
-- Jury: anthropic:claude-opus-4-8, openai:gpt-5.3-codex, google:gemini-3.6-flash
-- Each juror judges every instance twice (2 orderings); the final label is the majority across all juror x ordering verdicts.
+- Instances: **94**  |  coded (binary): **93**  |  coverage: **98.9%**
 
-## Final alignment distribution
+- Jury: anthropic:claude-opus-4-8(T=None), openai:gpt-5.3-codex(T=None), google:gemini-3.6-flash(T=0.0)
+- Repeats per (juror x ordering): 1
+- Rubric hash: `fff5a48925cf`
+- Generated: 2026-08-16T12:43:45
 
-- aligned: **87**
-- partial: **7**
+PRIMARY code = binary **consistent** (aligned+partial) vs **conflicting**
+(divergent+contradictory). The 4-way split is an order-sensitive
+diagnostic (see below). Panel label = strict majority over jurors; each
+juror = strict majority over its orderings x repeats; ties ABSTAIN.
 
-## Label legend
+## Primary: consistent vs conflicting
 
-- **aligned** — Same causal mechanism; both describe the same faulty behavior producing the same failure (may differ only in wording/detail).
-- **partial** — Consistent but uneven; one annotator names a step, condition, or cause the other omits, with no conflict between them.
-- **divergent** — Different mechanisms that could both be true at once; two distinct causal stories that don't clash.
-- **contradictory** — Incompatible mechanisms that can't both be true; the annotators make opposing claims about what the code does.
+- consistent: **91** (96.8%)
+- conflicting: **2** (2.1%)
+- _abstained_: **1**
 
-## Reliability signals
+- Model-model Krippendorff's alpha (binary): **0.173** — below Krippendorff's floor (< 0.667)
+- consistent = aligned+partial; conflicting = divergent+contradictory.
 
-- Cross-model disagreements: **18** / 94
-- Order-swap disagreements: **7** / 94
+## Diagnostic: 4-way split (ORDER-SENSITIVE, do not report alone)
 
-## Flagged for manual adjudication (19)
+coded (4-way): **82** (87.2%)   Krippendorff alpha (4-way): **0.596** — below Krippendorff's floor (< 0.667)
 
-Cross-model or order-swap disagreements, divergent/contradictory finals, low-confidence, or failed verdicts.
+- aligned: **38** (40.4%)
+- partial: **42** (44.7%)
+- divergent: **2** (2.1%)
 
-### astropy__astropy-13579
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
+The aligned<->partial boundary is directional and position-sensitive;
+its flips do not change the binary code and are excluded from the
+primary result.
+
+### Label legend
+
+- **aligned** — Mutually recoverable mechanisms; neither adds causal content the other lacks (may differ in wording or detail).
+- **partial** — One-way subsumption; one annotator's mechanism strictly elaborates the other's, with no conflict between them.
+- **divergent** — Incomparable mechanisms; each has causal content the other lacks, but both could hold at once.
+- **contradictory** — Incompatible mechanisms that cannot both be true; the annotators make opposing claims about what the code does.
+
+## Per juror
+
+| juror | coverage | order-flip (binary) | order-flip (4-way) | self-consistency |
+|---|---|---|---|---|
+| anthropic:claude-opus-4-8 | 92.6% | 7.4% | 27.7% | n/a (repeats=1) |
+| google:gemini-3.6-flash | 98.9% | 1.1% | 27.7% | n/a (repeats=1) |
+| openai:gpt-5.3-codex | 98.9% | 1.1% | 31.9% | n/a (repeats=1) |
+
+### Pairwise juror agreement (4-way)
+
+| pair | n | raw | alpha |
+|---|---|---|---|
+| anthropic:claude-opus-4-8 vs google:gemini-3.6-flash | 51 | 80.4% | 0.650 |
+| anthropic:claude-opus-4-8 vs openai:gpt-5.3-codex | 47 | 74.5% | 0.519 |
+| google:gemini-3.6-flash vs openai:gpt-5.3-codex | 47 | 83.0% | 0.682 |
+
+High pairwise agreement across families is necessary but not
+sufficient: it can reflect shared bias rather than validity. Run
+judge_validation.py against the human gold codes [Ahmed2025].
+
+## Flagged for manual adjudication (16)
+
+Binary panel abstentions, binary cross-model/order-swap disagreement,
+or failed calls. (4-way-only disagreements are noted, not flagged.)
 
 ### astropy__astropy-7606
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
+- binary: **consistent** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=None per juror={'anthropic:claude-opus-4-8': 'divergent', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': None}  4-way abstained; 4-way cross-model; indeterminate (aligned/partial)
+- counts: {'divergent': 2, 'partial': 3, 'aligned': 1}  entropy=0.73
 
-### django__django-11138
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
-
-### django__django-12155
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
-
-### django__django-13810
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
-
-### django__django-14011
-- final: **partial** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'partial': 3, 'aligned': 3}, order0=aligned, order1=partial
-
-### django__django-14053
-- final: **aligned** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
-
-### django__django-14170
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
-
-### django__django-15563
-- final: **partial** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'partial': 3, 'aligned': 3}, order0=aligned, order1=partial
-
-### django__django-15572
-- final: **partial** (order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'partial', 'openai': 'partial'}
-- label counts: {'aligned': 3, 'partial': 3}, order0=partial, order1=aligned
-
-### django__django-16502
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
-
-### matplotlib__matplotlib-24026
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 1, 'aligned': 5}, order0=aligned, order1=aligned
-
-### matplotlib__matplotlib-25479
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
+### django__django-12406
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=aligned per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': None, 'google:gemini-3.6-flash': 'aligned'}  4-way order-swap flip; indeterminate (aligned/partial)
+- counts: {'divergent': 1, 'aligned': 3, 'partial': 2}  entropy=0.73
 
 ### pytest-dev__pytest-6197
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'aligned': 5, 'partial': 1}, order0=aligned, order1=aligned
+- binary: **consistent** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=None per juror={'anthropic:claude-opus-4-8': 'divergent', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': None}  4-way abstained; 4-way cross-model
+- counts: {'divergent': 2, 'partial': 3, 'aligned': 1}  entropy=0.73
 
-### pytest-dev__pytest-7236
-- final: **aligned** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
-
-### scikit-learn__scikit-learn-26194
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'aligned', 'google': 'aligned', 'openai': 'divergent'}
-- label counts: {'aligned': 5, 'divergent': 1}, order0=aligned, order1=aligned
-
-### scikit-learn__scikit-learn-9288
-- final: **aligned** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
+### scikit-learn__scikit-learn-13124
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=None per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': None, 'google:gemini-3.6-flash': None}  4-way abstained; 4-way order-swap flip; indeterminate (aligned/partial)
+- counts: {'partial': 3, 'aligned': 2, 'divergent': 1}  entropy=0.73
 
 ### sphinx-doc__sphinx-9658
-- final: **aligned** (cross-model disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'aligned'}
-- label counts: {'partial': 2, 'aligned': 4}, order0=aligned, order1=aligned
+- binary: **consistent** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=None per juror={'anthropic:claude-opus-4-8': 'contradictory', 'openai:gpt-5.3-codex': None, 'google:gemini-3.6-flash': 'aligned'}  4-way abstained; 4-way cross-model
+- counts: {'contradictory': 2, 'partial': 1, 'aligned': 3}  entropy=0.73
 
-### sympy__sympy-21379
-- final: **aligned** (cross-model disagreement; order-swap disagreement)
-- per-model: {'anthropic': 'partial', 'google': 'aligned', 'openai': 'partial'}
-- label counts: {'aligned': 4, 'partial': 2}, order0=aligned, order1=partial
+### django__django-14170
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': None}  indeterminate (aligned/partial)
+- counts: {'divergent': 1, 'partial': 4, 'aligned': 1}  entropy=0.63
+
+### pylint-dev__pylint-6528
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': None}  
+- counts: {'partial': 4, 'aligned': 1, 'divergent': 1}  entropy=0.63
+
+### django__django-16938
+- binary: **None** (no panel majority on consistent/conflicting (abstained); cross-model disagreement (binary); order-swap disagreement (binary); 1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': None}
+- 4-way: final=None per juror={'anthropic:claude-opus-4-8': 'divergent', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': None}  4-way abstained; 4-way order-swap flip; 4-way cross-model
+- counts: {'divergent': 3, 'partial': 3}  entropy=0.50
+
+### astropy__astropy-13579
+- binary: **consistent** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'consistent', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'conflicting'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': 'partial', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'divergent'}  4-way cross-model; indeterminate (partial/divergent)
+- counts: {'partial': 4, 'divergent': 2}  entropy=0.46
+
+### django__django-12155
+- binary: **consistent** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': 'divergent', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'partial'}  4-way cross-model
+- counts: {'divergent': 2, 'partial': 4}  entropy=0.46
+
+### matplotlib__matplotlib-23299
+- binary: **conflicting** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'conflicting'}
+- 4-way: final=divergent per juror={'anthropic:claude-opus-4-8': 'divergent', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'divergent'}  4-way cross-model; indeterminate (partial/divergent)
+- counts: {'divergent': 4, 'partial': 2}  entropy=0.46
+
+### matplotlib__matplotlib-24026
+- binary: **conflicting** (cross-model disagreement (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'conflicting', 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'conflicting'}
+- 4-way: final=divergent per juror={'anthropic:claude-opus-4-8': 'divergent', 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'divergent'}  4-way cross-model; indeterminate (partial/divergent)
+- counts: {'divergent': 4, 'partial': 2}  entropy=0.46
+
+### django__django-13810
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'partial'}  
+- counts: {'divergent': 1, 'partial': 5}  entropy=0.33
+
+### matplotlib__matplotlib-25287
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'partial'}  indeterminate (aligned/partial)
+- counts: {'divergent': 1, 'partial': 5}  entropy=0.33
+
+### pydata__xarray-6599
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'consistent', 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=partial per juror={'anthropic:claude-opus-4-8': None, 'openai:gpt-5.3-codex': 'partial', 'google:gemini-3.6-flash': 'partial'}  
+- counts: {'divergent': 1, 'partial': 5}  entropy=0.33
+
+### scikit-learn__scikit-learn-26194
+- binary: **consistent** (1 juror(s) abstained (binary))
+- per juror (binary): {'anthropic:claude-opus-4-8': 'consistent', 'openai:gpt-5.3-codex': None, 'google:gemini-3.6-flash': 'consistent'}
+- 4-way: final=aligned per juror={'anthropic:claude-opus-4-8': 'aligned', 'openai:gpt-5.3-codex': None, 'google:gemini-3.6-flash': 'aligned'}  
+- counts: {'aligned': 5, 'contradictory': 1}  entropy=0.33
 

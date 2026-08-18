@@ -1,0 +1,7 @@
+instance,n_apr_only,n_fix_without_understanding,n_understood_wrong_line,n_unjudged,n_models_fwu_any,n_models_fwu_majority,n_models_fwu_all,models_fwu,breakdown
+scikit-learn__scikit-learn-12973,7,5,2,0,3,2,2,claude-opus;gemini-3.1-flash-lite,claude-opus:1fwu/0uwl/1;gemini-3.1-flash-lite:3fwu/0uwl/3;gpt-5-3-codex:0fwu/1uwl/1;minimax-m3:1fwu/1uwl/2
+sphinx-doc__sphinx-9658,4,4,0,0,2,2,2,claude-opus;minimax-m3,claude-opus:3fwu/0uwl/3;minimax-m3:1fwu/0uwl/1
+pytest-dev__pytest-5840,2,2,0,0,2,2,2,claude-opus;minimax-m3,claude-opus:1fwu/0uwl/1;minimax-m3:1fwu/0uwl/1
+sympy__sympy-13877,8,5,2,1,3,1,1,claude-opus,claude-opus:3fwu/0uwl/3;gpt-5-3-codex:1fwu/1uwl/2;minimax-m3:1fwu/1uwl/3
+pydata__xarray-6599,2,1,0,1,1,1,1,claude-opus,claude-opus:1fwu/0uwl/1;minimax-m3:0fwu/0uwl/1
+scikit-learn__scikit-learn-13124,3,2,0,1,1,1,0,claude-opus,claude-opus:2fwu/0uwl/3

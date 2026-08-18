@@ -1,0 +1,27 @@
+{
+  "condition": "all",
+  "gt_reference": "single",
+  "repeats": 1,
+  "jurors": [
+    {
+      "provider": "anthropic",
+      "model": "claude-opus-4-8",
+      "temperature": null
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.3-codex",
+      "temperature": null
+    },
+    {
+      "provider": "google",
+      "model": "gemini-3.6-flash",
+      "temperature": 0.0
+    }
+  ],
+  "rubric_hash": "fff5a48925cf",
+  "tag": "base",
+  "skips": {
+    "no_localization": 284
+  }
+}

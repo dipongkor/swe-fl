@@ -1,0 +1,53 @@
+% ===========================================================================
+% Numeric quantities used in the prose.  Every reported number lives here so
+% it has a single source of truth and can be verified in one place.
+%
+% While the numbers are still being checked they render in RED.  To turn the
+% highlighting off for a clean PDF, flip the switch below to
+% \highlightnumbersfalse  (nothing else changes).
+% ===========================================================================
+
+\newif\ifhighlightnumbers
+\highlightnumberstrue          % <- set to \highlightnumbersfalse to remove red
+
+\newcommand{\num}[1]{\ifhighlightnumbers\textcolor{red}{#1}\else#1\fi}
+
+% --- Stack Overflow Developer Survey (2024 -> 2025) ------------------------
+\newcommand{\aiAdoptionPrev}{\num{76\%}}
+\newcommand{\aiAdoptionCur}{\num{84\%}}
+\newcommand{\aiTrustPrev}{\num{43\%}}
+\newcommand{\aiTrustCur}{\num{33\%}}
+\newcommand{\aiDistrustPrev}{\num{31\%}}
+\newcommand{\aiDistrustCur}{\num{46\%}}
+\newcommand{\aiAlmostRight}{\num{66\%}}
+
+% --- Prior SWE-bench patch-correctness studies ----------------------------
+\newcommand{\divergeLow}{\num{7.8\%}}
+\newcommand{\divergeHigh}{\num{29.6\%}}
+\newcommand{\certIncorrect}{\num{11\%}}
+
+% --- Our benchmark / study configuration ----------------------------------
+\newcommand{\numBugs}{\num{128}}
+\newcommand{\numTransforms}{\num{13}}
+\newcommand{\juryAgreement}{\num{97.8\%}}
+
+% --- Our headline results -------------------------------------------------
+\newcommand{\fullTrustBest}{\num{51.5\%}}
+\newcommand{\mislocRate}{\num{31\%}}       % resolved patches localized to the wrong line
+\newcommand{\wrongFileRate}{\num{3.5\%}}   % resolved patches that miss the faulty file
+\newcommand{\understoodShare}{\num{83\%}}  % of mislocalized-but-resolved, rationale still aligned
+
+\newcommand{\sweBenchVerified}{{SWE-bench Verified}}
+\newcommand{\trustRepair}{\textsc{TrustRepair}}
+\newcommand{\interpretability}{\emph{Interpretability}}
+\newcommand{\accuracy}{\emph{Accuracy}}
+\newcommand{\robustness}{\emph{Robustness}}
+
+% --- Section 3 notation: axis predicates and ground-truth symbols ----------
+\newcommand{\loc}{L}                 % claimed localization
+\newcommand{\rat}{R}                 % stated rationale
+\newcommand{\Acc}{\mathrm{Acc}}      % accuracy predicate
+\newcommand{\Loc}{\mathrm{Loc}}      % localization-validity predicate
+\newcommand{\Rat}{\mathrm{Rat}}      % rationale-alignment predicate
+\newcommand{\Int}{\mathrm{Int}}      % interpretability predicate
+\newcommand{\FT}{\mathrm{FT}}        % full-trust predicate

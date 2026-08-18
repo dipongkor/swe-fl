@@ -1,0 +1,6 @@
+scope,n,fl_correct_resolved,fl_correct_unresolved,fl_wrong_resolved,fl_wrong_unresolved,p_resolved_if_fl_correct,p_resolved_if_fl_wrong,lift,p_fl_correct_if_resolved,agreement,phi
+OVERALL,1268,457,305,214,292,0.600,0.423,+0.177,0.681,0.591,0.173
+claude-opus,389,208,74,64,43,0.738,0.598,+0.139,0.765,0.645,0.136
+gemini-3.1-flash-lite,226,44,53,43,86,0.454,0.333,+0.120,0.506,0.575,0.122
+gpt-5-3-codex,339,74,111,44,110,0.400,0.286,+0.114,0.627,0.543,0.119
+minimax-m3,314,131,67,63,53,0.662,0.543,+0.119,0.675,0.586,0.118

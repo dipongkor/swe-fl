@@ -1,0 +1,67 @@
+\documentclass[acmsmall,screen,review,anonymous]{acmart}
+
+% --- venue / metadata ------------------------------------------------------
+% FSE 2027 publishes in PACMSE (Proc. ACM Softw. Eng.); double-anonymous review.
+% Volume/number/article/DOI are assigned at acceptance -- placeholders for now.
+\acmJournal{PACMSE}
+\acmVolume{1}
+\acmNumber{FSE}
+\acmArticle{1}
+\acmYear{2027}
+\acmMonth{7}
+% \acmConference[FSE '27]{The ACM International Conference on the Foundations
+%   of Software Engineering}{2027}{}    % uncomment / complete at camera-ready
+
+% --- packages --------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage{subcaption}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,columns=fullflexible,keepspaces=true,
+  breaklines=true,showstringspaces=false,xleftmargin=1.2em,aboveskip=4pt,belowskip=2pt}
+
+% --- shared macros / result numbers ----------------------------------------
+\input{macros}
+
+% --- front matter ----------------------------------------------------------
+\begin{document}
+
+\title{A Trustworthiness Benchmark for Agentic Program Repair}
+
+\author{Anonymous Author(s)}
+\affiliation{%
+  \institution{Submission under review}
+  \country{}
+}
+
+\begin{abstract}
+Abstract to be written after the sections are drafted.
+\end{abstract}
+
+\keywords{trustworthiness, automated program repair, LLM agents, fault
+localization, LLM-as-a-judge, robustness, benchmark}
+
+\maketitle
+
+% --- body ------------------------------------------------------------------
+\input{sections/1-introduction}
+\input{sections/2-related-work}
+\input{sections/3-problem-statement-and-research-questions}
+\input{sections/4-dataset}
+\input{sections/5-methodology}
+\input{sections/6-results}
+\input{sections/7-discussion}
+\input{sections/8-validity-threats}
+\input{sections/9-artifacts}
+\input{sections/10-conclusion}
+
+% --- references ------------------------------------------------------------
+\clearpage
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

@@ -12,9 +12,9 @@ Root-cause locations are set-valued, so instance-level agree/conflict discards p
 | Granularity | Jaccard (macro) | Jaccard (micro) | Dice / F1 (micro) | Krippendorff α (MASI) |
 |---|---|---|---|---|
 | file | 0.964 | 0.933 | 0.966 | 0.957 |
-| statement | 0.817 | 0.721 | 0.838 | 0.781 |
-| line | 0.817 | 0.716 | 0.835 | 0.781 |
-| full | 0.817 | 0.716 | 0.835 | 0.781 |
+| statement | 0.817 | 0.722 | 0.839 | 0.781 |
+| line | 0.817 | 0.717 | 0.835 | 0.781 |
+| full | 0.817 | 0.717 | 0.835 | 0.781 |
 
 Disagreement composition (76 conflicting locations): **extra_location** 76 (100%)
 
@@ -899,7 +899,7 @@ Disagreement composition (76 conflicting locations): **extra_location** 76 (100%
 - root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
 
 ### pylint-dev__pylint-6528
-- root causes: Atish_Annotation=1, Eshgin_Annotation=1, agreed=1
+- root causes: Atish_Annotation=2, Eshgin_Annotation=2, agreed=2
 - _info_ ftcs_differs: {'Atish_Annotation': ["tests/lint/unittest_lint.py:879  run = Run(['--recursive', 'y', ignore_parameter, ignore_parameter_value, join(REGRTEST_DATA_DIR, 'directory')], exit=False)"], 'Eshgin_Annotation': ['tests/lint/unittest_lint.py:898  assert ignored_file not in linted_file_paths']}
 
 ### pylint-dev__pylint-8898

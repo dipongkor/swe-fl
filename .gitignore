@@ -21,3 +21,34 @@ repos
 # Scratch
 *.log
 *.tmp
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.idx
+*.ind
+*.ilg
+*.glo
+*.gls
+*.acn
+*.acr
+*.alg
+*-blx.bib
+# compiled manuscript output (keep figure PDFs, e.g. manuscript/figures/*.pdf)
+manuscript/main.pdf
+# vendored current acmart.cls (local build shim for TeXLive 2023, which lacks
+# PACMSE); the official FSE template / Overleaf ships its own -- not our source
+manuscript/acmart.cls

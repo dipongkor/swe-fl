@@ -1,0 +1,129 @@
+\section{Introduction}
+\label{sec:intro}
+
+Software maintenance accounts for the majority of the total cost of the software
+development life cycle, and locating and fixing defects is among its most effort-intensive
+activities~\cite{}. Automated Program Repair (APR) aims to reduce this
+burden by generating candidate fixes for defects automatically~\cite{legoues2019apr}, and
+it has entered an agentic era~\cite{}. Rather than producing a
+patch in a single step, modern repair systems built on Large Language Models (LLMs)
+operate as autonomous agents that explore a repository, localize the fault, edit the
+code, and run the project's tests before proposing a fix~\cite{yang2024sweagent,
+zhang2024autocoderover}. Such tools are increasingly adopted in software development
+practice~\cite{so2024, so2025}. At the same time, benchmarks built from real-world software
+issues have advanced their capability: on SWE-bench, a suite of bugs drawn from
+open-source \textsc{GitHub} projects~\cite{jimenez2024swebench}, and its human-validated
+subset \sweBenchVerified{}~\cite{swebenchverified2024}, the fraction of issues that
+agents resolve has risen within a few years.
+
+However, this adoption has not been matched by a corresponding growth in trust.
+According to the Stack Overflow Developer Survey, the share of developers using or
+planning to use AI tools rose from \aiAdoptionPrev{} in 2024 to \aiAdoptionCur{} in
+2025~\cite{so2024, so2025}. Over the same period, however, developers' trust in the
+\accuracy{} of AI output moved in the opposite direction, with the proportion who
+trust it falling from \aiTrustPrev{} to \aiTrustCur{} while active distrust rose from
+\aiDistrustPrev{} to \aiDistrustCur{}~\cite{so2024, so2025}. This widening gap between
+reliance and confidence is a symptom of the miscalibrated trust that prior work
+identifies as a central risk of adopting AI for software engineering~\cite{khati2025mapping}.
+Moreover, trust is not a single quantity. In a recent study of trust in LLM-based
+software engineering, practitioners ranked \accuracy{}, \interpretability{}, and \robustness{} as
+the antecedents that matter most for program repair~\cite{khati2025mapping}. The same study
+distinguishes
+\emph{trust}, a subjective user attitude, from \emph{trustworthiness}, an intrinsic and
+measurable property of the system. It is the latter that remains largely unmeasured
+for agentic program repair.
+
+These perceptions point to an underlying technical problem. In the same survey,
+\aiAlmostRight{} of developers report encountering AI solutions that are ``almost right,
+but not quite''~\cite{so2025}: output that looks correct yet fails on closer inspection. In program
+repair, this failure mode is built into how success is measured. The field evaluates a
+repair against a single criterion: a patch is considered correct if it passes the
+project's test suite. But passing the test suite is only a proxy for a correct fix, and a
+partial one: because the suite is necessarily incomplete, a patch can satisfy every
+available test while modifying the wrong code and masking, rather than fixing, the
+underlying fault. This is the well-studied problem of patch
+overfitting~\cite{smith2015overfitting, qi2015analysis}. It is not a hypothetical concern
+for agentic repair: even on the human-validated \sweBenchVerified{}, recent studies
+find that between \divergeLow{} and \divergeHigh{} of test-passing patches diverge from the
+developer's ground-truth fix, with roughly \certIncorrect{} outright
+incorrect~\cite{wang2026solved, yu2025utboost}. A developer therefore cannot safely trust a
+test-passing patch without understanding \emph{why} it works. We argue that
+trustworthiness should instead be measured directly, by recasting the three antecedents
+that practitioners rank as mattering most for program repair (\accuracy{}, \interpretability{},
+and \robustness{}) as concrete, checkable properties of a repair~\cite{khati2025mapping}.
+\accuracy{} asks whether the patch actually fixes the bug. \interpretability{}
+asks whether the agent repairs the bug for the right reasons, and decomposes into
+\emph{localization validity} (the agent identifies the true fault location before editing)
+and \emph{rationale alignment} (the agent's stated reasoning correctly identifies the root
+cause of the bug). \robustness{} asks whether \accuracy{} and \interpretability{} persist
+when the bug is semantically transformed. Together, these axes expose a failure that a
+pass/fail bar cannot: an agent may resolve a bug with a patch whose localization misses
+where the fault lies, fixing the bug without pointing at it, a pattern we call
+\emph{fix-without-localizing}. This pattern is not hypothetical: in our study, \mislocRate{}
+of the patches that pass the test suite are localized to the wrong line, and \wrongFileRate{}
+do not edit the faulty file at all.
+
+Evaluating these axes, however, is not straightforward. \accuracy{} is readily measured by
+executing the project's test suite, but \interpretability{} and \robustness{} are not.
+Assessing \interpretability{} requires, for every bug, a trusted ground truth for both the
+fault location and the root-cause mechanism, together with a way to compare an agent's
+free-form natural-language rationale against that mechanism at scale. Human judgment
+provides the reference here, but it does not scale to thousands of agent runs, whereas an
+automated judge must itself be shown to agree with humans before its verdicts can be
+trusted. Assessing robustness, in turn, requires transformations that alter a program's
+surface form while preserving its semantics, so that any change in an agent's behavior can
+be attributed to the transformation rather than to a change in the task. Meeting these
+three requirements is the methodological challenge we address.
+
+To this end, we introduce \trustRepair{}, a benchmark and evaluation pipeline that
+measures the trustworthiness of agentic program repair along all three axes.
+\trustRepair{} builds on \numBugs{} real-world bugs from \sweBenchVerified{}, for which two annotators independently established the ground-truth fault
+locations and root-cause rationales. To measure rationale alignment at scale, we employ a
+panel, or \emph{jury}, of three LLMs~\cite{verga2024poll} that compares an agent's reasoning
+against the human rationale under order-swapped, identity-blinded prompts, following best
+practices for LLM-based evaluation~\cite{zheng2023judging}; we validate this jury against
+the human labels and find that it agrees with them \juryAgreement{} of the time. To measure
+robustness, we apply \numTransforms{} semantics-preserving transformation rules to each bug and
+re-evaluate \accuracy{} and \interpretability{} on the transformed variant. Using this pipeline,
+we conduct an empirical study of four recent repair agents, each run three times
+per bug, and investigate two research questions:
+
+\begin{itemize}
+  \item \textbf{RQ1 (Trust axes and their alignment).} How well do these
+  agents perform on \accuracy{} and \interpretability{}, and do these axes agree at the level of
+  individual bugs, or do agents fix bugs without localizing or understanding them?
+  \item \textbf{RQ2 (Robustness of trust).} Do \accuracy{} and \interpretability{} persist when a
+  bug is subjected to semantics-preserving transformations, and which axes degrade most?
+\end{itemize}
+
+Our study yields several findings that a single-axis, \accuracy{}-only evaluation would
+obscure. First, single-axis competence substantially overstates trustworthiness: even the
+strongest agent earns \emph{full trust} (a correct fix that is both correctly localized
+and correctly explained) on only \fullTrustBest{} of bugs, well below its \accuracy{}. Second,
+fix-without-localizing is common rather than exceptional: \mislocRate{} of the patches that
+pass the test suite are localized to the wrong line and \wrongFileRate{} miss the faulty file
+entirely. This gap is one of localization rather than comprehension: \understoodShare{} of
+these mislocalized-but-resolved patches still describe the bug's mechanism correctly, so
+localization, not rationale, is the weaker link in the interpretability chain. Third, the
+axes are only weakly coupled at the instance level, so an agent that ranks well on one axis
+routinely fails another on the same bug. \textcolor{red}{[TODO: will be added later]} In summary, this paper makes the following contributions:
+
+\begin{itemize}
+  \item We introduce a multi-axis \emph{trustworthiness} benchmark and a reusable,
+  human-validated evaluation pipeline for agentic program repair that jointly measures
+  \accuracy{}, \interpretability{}, and \robustness{}.
+  \item We conduct an empirical study of four recent repair agents that reveals a
+  systematic dissociation between resolving a bug and localizing it: \mislocRate{} of
+  successful repairs are localized to the wrong line, most of them while still explaining the
+  bug correctly.
+  \item We release our benchmark, ground-truth annotations, jury, and leaderboard to
+  support replication and future research.\footnote{\textcolor{red}{[TODO: anonymized
+  artifact link for the double-anonymous submission.]}}
+\end{itemize}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} surveys
+related work; Section~\ref{sec:problem} defines the trust axes and research questions;
+Section~\ref{sec:benchmark} describes the construction of \trustRepair{};
+Section~\ref{sec:method} details our measurement methodology; Section~\ref{sec:results}
+reports our results; Sections~\ref{sec:discussion} and~\ref{sec:threats} discuss
+implications and threats to validity; and Section~\ref{sec:conclusion} concludes.

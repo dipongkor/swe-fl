@@ -1,0 +1,15 @@
+{
+  "agent_pred_files": [
+    "patch-diff/preds/agent__claude-opus-run1.jsonl",
+    "patch-diff/preds/agent__claude-opus-run2.jsonl",
+    "patch-diff/preds/agent__claude-opus-run3.jsonl",
+    "patch-diff/preds/agent__gemini-3.1-flash-lite-run1.jsonl",
+    "patch-diff/preds/agent__gemini-3.1-flash-lite-run2.jsonl",
+    "patch-diff/preds/agent__gemini-3.1-flash-lite-run3.jsonl",
+    "patch-diff/preds/agent__gpt-5-3-codex-run3.jsonl",
+    "patch-diff/preds/agent__minimax-m3-run2.jsonl",
+    "patch-diff/preds/agent__minimax-m3-run3.jsonl"
+  ],
+  "n_cells": 23,
+  "n_instances": 10
+}

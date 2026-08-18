@@ -1,0 +1,33 @@
+{
+  "jurors": [
+    {
+      "provider": "anthropic",
+      "model": "claude-opus-4-8",
+      "temperature": null
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.3-codex",
+      "temperature": null
+    },
+    {
+      "provider": "google",
+      "model": "gemini-3.6-flash",
+      "temperature": 0.0
+    }
+  ],
+  "repeats": 1,
+  "rubric_hash": "fff5a48925cf",
+  "labels": [
+    "aligned",
+    "partial",
+    "divergent",
+    "contradictory"
+  ],
+  "max_tokens": 4096,
+  "effort": "high",
+  "n_agreed": 94,
+  "n_codeable": 94,
+  "malformed": {},
+  "run_started": "2026-08-16T12:43:43"
+}

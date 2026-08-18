@@ -1,0 +1,187 @@
+\section{Problem Statement and Research Questions}
+\label{sec:problem}
+
+We study the trustworthiness of an individual repair attempt. Following the distinction
+drawn in Section~\ref{sec:related}, we treat trustworthiness not as a developer's
+subjective confidence but as a set of measurable properties of the artifact an agent
+produces for a bug. This section makes those properties precise. We first ground them in a
+concrete repair (Section~\ref{subsec:motivating}), then define them as predicates over a
+(bug, repair attempt) pair (Section~\ref{subsec:axes}), characterize how they can come
+apart (Section~\ref{subsec:dissociation}), and state the research questions that organize
+the rest of the paper (Section~\ref{subsec:rqs}).
+
+\subsection{A Motivating Example}
+\label{subsec:motivating}
+
+\begin{figure}[t]
+\small
+\textbf{(a) Gold patch: repair the source} (\texttt{sphinx/ext/autodoc/mock.py})
+\begin{lstlisting}
+ class _MockObject:
+     __display_name__ = '_MockObject'
++    __name__ = ''
+     def __init__(self, *args, **kwargs):
+-        self.__qualname__ = ''
++        self.__qualname__ = self.__name__
+
+ def _make_subclass(name, module, ...):
+     attrs = {'__module__': module,
+              '__display_name__': module + '.' + name,
++             '__name__': name,
+              ...}
+\end{lstlisting}
+\textbf{(b) \texttt{minimax-m3} run 3: guard one consumer} (\texttt{sphinx/util/typing.py})
+\begin{lstlisting}
+ def _restify_py37(cls):
+     elif hasattr(cls, '__qualname__'):
+         if cls.__module__ == 'typing':
+             return ':py:class:`~%s.%s`' % (cls.__module__, cls.__qualname__)
++        elif getattr(cls, '__sphinx_mock__', False):
++            return ':py:class:`%s`' % cls.__display_name__
+         else:
+             return ':py:class:`%s.%s`' % (cls.__module__, cls.__qualname__)
+\end{lstlisting}
+\caption{Two repairs for \texttt{sphinx-doc\_\_sphinx-9658}. Both pass the instance's test
+suite. The gold patch (a) restores a mock object's name at its source, so every consumer
+benefits. The agent's patch (b) guards a single downstream consumer, leaving the source and
+the sibling renderer \texttt{\_restify\_py36} unfixed. Accuracy cannot tell them apart;
+localization can.}
+\label{fig:motivating}
+\end{figure}
+
+Consider \texttt{sphinx-doc\_\_sphinx-9658} from \sweBenchVerified{}. When Sphinx documents
+a class whose base is a mocked import, it renders the base as \texttt{unknown.secret.}, a
+dangling name with an empty final component, instead of \texttt{unknown.secret.Class}. The
+cause lies in Sphinx's mock objects: \texttt{\_MockObject} carries no \texttt{\_\_name\_\_},
+\texttt{\_make\_subclass} never sets one on the subclasses it builds, and \texttt{\_\_init\_\_}
+hard-codes \texttt{self.\_\_qualname\_\_ = ''}. A mocked class therefore reaches the
+cross-reference renderer, \texttt{restify}, with no usable name. Both annotators localize
+the fault to its source in \texttt{mock.py}, and the developer's patch repairs the identity
+there, so every consumer of a mock's name benefits at once (Figure~\ref{fig:motivating}a).
+
+One agent run, \texttt{minimax-m3} run~3, resolves the bug by a different route
+(Figure~\ref{fig:motivating}b). Rather than restoring the mock's name at its source, it adds
+a special case to a single consumer: a branch in \texttt{\_restify\_py37} that detects a mock
+and substitutes \texttt{\_\_display\_name\_\_}. The patch passes every test in the instance's
+suite, and \sweBenchVerified{} records it as resolved, a verdict we confirmed by re-running
+the suite on the patched repository. Judged by accuracy alone, the two repairs are
+indistinguishable.
+
+They are not. The agent's patch guards one reader of the mock's name and leaves the source
+untouched, so the sibling renderer \texttt{\_restify\_py36}, and any other code that reads a
+mock's \texttt{\_\_qualname\_\_}, still sees the empty identity; the gold patch fixes all of
+them at once. The agent's localization reflects this: it points at \texttt{typing.py}, a
+faithful downstream consumer that renders correct output for every genuine class and
+mishandles mocks only because the name arriving there was already corrupted upstream.
+Measured against the ground truth, the localization is a miss, and a deserved one. The
+detail that makes this instance instructive is visible in the agent's trajectory: its own
+reasoning names the true source (\texttt{\_MockObject.\_\_init\_\_} sets
+\texttt{self.\_\_qualname\_\_} to the empty string) and then anchors the repair downstream
+regardless. The artifact a developer would receive, a passing patch and its stated
+localization, does not reflect where the fault lies, even though the agent had traced it.
+
+This is the phenomenon \trustRepair{} is built to measure: resolution and localization can
+diverge, and a test-passing bar cannot see the difference. The rest of this section defines
+the axes that can.
+
+\subsection{Trust Axes}
+\label{subsec:axes}
+
+\paragraph{Evaluation unit and ground truth.}
+A \emph{bug} $t$ is an issue reported against a fixed base commit of a repository. For each
+bug we assume a human-established ground truth consisting of a \emph{fault location}
+$\loc^{\star}(t)$ (the code that must change to fix the bug) and a \emph{root-cause
+rationale} $\rat^{\star}(t)$ (a natural-language account of why the bug occurs). How this
+ground truth is constructed is deferred to Section~\ref{sec:benchmark}. A \emph{repair
+attempt} $a$ for $t$ is the output of an agent run: a \emph{patch} $p$, a \emph{claimed
+localization} $\loc$ (the code the attempt treats as faulty, as evidenced by its edits and
+explanation), and a \emph{stated rationale} $\rat$ (the agent's account of the bug). We
+define trustworthiness as three predicates over the pair $(t, a)$.
+
+\paragraph{\accuracy{}.}
+$\Acc(t, a) = 1$ iff the patch $p$ resolves the bug, that is, the repository with $p$
+applied passes the instance's fail-to-pass and pass-to-pass test suites. Accuracy is the
+criterion the field already uses; it is a necessary but, as we argue below, insufficient
+condition for trust.
+
+\paragraph{\interpretability{}.}
+Interpretability asks whether the agent repairs the bug for the right reasons. It is the
+conjunction of two predicates:
+\emph{localization validity} $\Loc(t, a) = 1$ iff the claimed localization $\loc$ coincides
+with the ground-truth fault location $\loc^{\star}(t)$, and
+\emph{rationale alignment} $\Rat(t, a) = 1$ iff the stated rationale $\rat$ correctly
+identifies the root cause $\rat^{\star}(t)$.
+We write $\Int(t, a) = \Loc(t, a) \wedge \Rat(t, a)$. Rationale alignment is a judgement on
+free-form text; we assess it on an ordinal rubric that we collapse to this binary predicate,
+and we defer the judging procedure and its validation to Section~\ref{sec:method}.
+
+\paragraph{Full trust.}
+An attempt earns \emph{full trust} when it is accurate, correctly localized, and correctly
+explained: $\FT(t, a) = \Acc(t, a) \wedge \Loc(t, a) \wedge \Rat(t, a)$. Full trust is the
+property a developer would need in order to accept a patch \emph{because} it addresses the
+actual defect, rather than merely because it passes the available tests.
+
+\paragraph{\robustness{}.}
+Let $\mathcal{T}$ be a set of semantics-preserving transformations: for $\tau \in
+\mathcal{T}$, the variant $\tau(t)$ presents the same fault under an altered surface form,
+and re-running the agent on $\tau(t)$ yields an attempt $a_\tau$. For a property $P \in
+\{\Acc, \Loc, \Rat, \Int, \FT\}$, robustness is \emph{persistence} of the verdict under
+transformation: $P$ is preserved on $(t, \tau)$ iff $P(\tau(t), a_\tau) = P(t, a)$. We
+report robustness as the rate at which a property that holds on the original bug still
+holds after transformation. The transformation set $\mathcal{T}$ is described in
+Section~\ref{sec:benchmark} and the re-evaluation procedure in Section~\ref{sec:method}.
+
+\subsection{Axis Dissociation}
+\label{subsec:dissociation}
+
+Because accuracy and interpretability are defined independently, an attempt can satisfy one
+without the other. The dissociation central to this paper is \emph{fix-without-localizing},
+$\Acc \wedge \lnot \Loc$ (which we also denote $\mathsf{fl\_wrong\_resolved}$): the patch
+resolves the bug while its localization points at code in which the true fault does not lie,
+as in Figure~\ref{fig:motivating}. A stronger form, \emph{fix-without-understanding}, adds a
+failed rationale, $\Acc \wedge \lnot \Loc \wedge \lnot \Rat$: the patch resolves the bug
+while the agent neither localizes nor explains the fault correctly. As we show in
+Section~\ref{sec:results}, fix-without-localizing is common while its stronger form is rare,
+because an agent that resolves a bug usually does describe its mechanism even when it
+localizes elsewhere. The complementary case, $\mathsf{fl\_correct\_unresolved}$
+($\Loc \wedge \lnot \Acc$), is one in which the agent identifies the faulty location but
+fails to produce a passing fix.
+
+These cases matter for different reasons. $\mathsf{fl\_wrong\_resolved}$ shows that a
+passing patch is not evidence of correct localization, so accuracy overstates
+trustworthiness. $\mathsf{fl\_correct\_unresolved}$ shows that correct
+localization does not guarantee a fix, so localization carries information that accuracy
+does not. Together they establish that the axes are not redundant restatements of one
+another: each must be measured, and reported, in its own right. We study these dissociations
+at the level of individual bugs rather than as an aggregate correlation, because a developer
+confronts one repair at a time, and two agents with identical per-axis rates can still
+disagree on which bugs they get right.
+
+\subsection{Research Questions}
+\label{subsec:rqs}
+
+We organize the study around two research questions, each with two parts.
+
+\begin{description}
+  \item[\textbf{RQ1 (Trust axes and their alignment).}] \hfill
+  \begin{itemize}
+    \item \emph{RQ1a.} How do agents perform on each axis (accuracy, localization
+    validity, and rationale alignment) and on full trust?
+    \item \emph{RQ1b.} Do the axes agree at the level of individual bugs, or do agents
+    produce fix-without-localizing ($\mathsf{fl\_wrong\_resolved}$) and the complementary
+    $\mathsf{fl\_correct\_unresolved}$ repairs?
+  \end{itemize}
+  \item[\textbf{RQ2 (Robustness of trust).}] \hfill
+  \begin{itemize}
+    \item \emph{RQ2a.} Do accuracy and interpretability persist when a bug is subjected to
+    semantics-preserving transformations?
+    \item \emph{RQ2b.} Which axis degrades most under transformation?
+  \end{itemize}
+\end{description}
+
+\noindent
+\emph{Summary of Section~\ref{sec:problem}.} We defined trustworthiness as three
+measurable axes over a (bug, repair attempt) pair: accuracy, interpretability (localization
+validity and rationale alignment), and robustness. Together with the derived notion of full
+trust and the two dissociations, $\mathsf{fl\_wrong\_resolved}$ and
+$\mathsf{fl\_correct\_unresolved}$, these axes are what RQ1 and RQ2 investigate.
