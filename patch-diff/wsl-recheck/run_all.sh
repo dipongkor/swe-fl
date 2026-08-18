@@ -1,60 +1,58 @@
 #!/usr/bin/env bash
-# Re-check that all 214 fl_wrong_resolved agent patches (and 64 gold patches) resolve,
-# using the standard SWE-bench Verified harness on a NATIVE x86_64 machine (Windows+WSL2).
-# No emulation: prebuilt swebench/sweb.eval.x86_64.* images pull directly.
+# Re-check all fl_wrong_resolved agent patches (+ gold) resolve, on native x86_64 (WSL2).
+# Disk is capped EXTERNALLY (works on any swebench version, incl. 5.x which dropped
+# --cache_level): instances run in batches of $CHUNK and every sweb.eval.* image is deleted
+# after each batch, so peak disk ~= CHUNK x one image (~4GB) + base ~= <=20 GB at CHUNK=4.
 #
-# DISK: --cache_level env makes the harness DELETE each ~2-4GB instance image immediately
-# after that instance finishes (per-instance, in run_instance's finally). So images do NOT
-# accumulate: peak disk ~= base image + (max_workers x one instance image) ~= 15-20 GB at
-# 4 workers, NOT 64 x 4GB. Workers therefore control both speed and peak disk.
-#
-# Usage (from this folder, inside WSL):
-#   bash run_all.sh                 # run_id=recheck, 4 workers, all repos
-#   bash run_all.sh recheck 3       # fewer workers -> lower peak disk (~12 GB)
-#   REPO=django bash run_all.sh     # only one repo (used by run_by_repo.sh)
+# Usage (inside WSL, from this folder):
+#   bash run_all.sh                 # run_id=recheck, 4 workers, 4 per batch
+#   bash run_all.sh recheck 3       # 3 workers
+#   CHUNK=2 bash run_all.sh         # smaller batches -> lower peak disk
+#   REPO=django bash run_all.sh     # only one repo
 set -uo pipefail
 cd "$(dirname "$0")"
 RUN_ID="${1:-recheck}"
 WORKERS="${2:-4}"
+CHUNK="${CHUNK:-4}"
 DATASET="SWE-bench/SWE-bench_Verified"
 REPO_FILTER="${REPO:-}"
 mkdir -p reports logs
 
-# python: prefer python3, fall back to python. Preflight the swebench install.
 PYBIN="$(command -v python3 || command -v python)"
 [ -z "$PYBIN" ] && { echo "ERROR: no python3/python on PATH"; exit 1; }
 "$PYBIN" -c "import swebench" 2>/dev/null || { echo "ERROR: swebench not installed for $PYBIN. Run: pip3 install swebench datasets"; exit 1; }
 
-# --cache_level (per-instance image cleanup) exists only in newer swebench. Detect it;
-# without it, images may accumulate -> upgrade with: pip3 install -U swebench
+# include --cache_level only if this swebench supports it (older 4.x); harmless otherwise
 CACHE_FLAG=""
-if "$PYBIN" -m swebench.harness.run_evaluation --help 2>&1 | grep -q -- '--cache_level'; then
-  CACHE_FLAG="--cache_level env"
-else
-  echo "WARNING: this swebench lacks --cache_level; images may accumulate on disk."
-  echo "         Recommended: pip3 install -U swebench   (then re-run)"
-fi
+"$PYBIN" -m swebench.harness.run_evaluation --help 2>&1 | grep -q -- '--cache_level' && CACHE_FLAG="--cache_level env"
 
-disk() { docker system df 2>/dev/null | awk '/^Images/{print "   docker images on disk: "$4" (reclaimable "$5")"}'; }
+prune_eval() {
+  docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'sweb\.eval' \
+    | xargs -r docker rmi -f >/dev/null 2>&1 || true
+  docker image prune -f >/dev/null 2>&1 || true
+}
+disk() { docker system df 2>/dev/null | awk '/^Images/{print "   images on disk: "$4}'; }
 
 for f in preds/gold.jsonl preds/agent__*.jsonl; do
-  # optional per-repo filter: only run instance_ids whose repo matches $REPO
-  IDS=$("$PYBIN" _ids.py "$f" "$REPO_FILTER")
-  [ -z "$IDS" ] && continue
+  IDS=$("$PYBIN" _ids.py "$f" "$REPO_FILTER"); [ -z "$IDS" ] && continue
   echo "==================== $f  ($(echo $IDS | wc -w) cells${REPO_FILTER:+, repo=$REPO_FILTER}) ===================="
-  "$PYBIN" -m swebench.harness.run_evaluation \
-    --dataset_name "$DATASET" \
-    --predictions_path "$f" \
-    --instance_ids $IDS \
-    --max_workers "$WORKERS" \
-    --run_id "$RUN_ID" \
-    $CACHE_FLAG \
-    2>&1 | grep -v "httpx\|HTTP Request"
-  docker image prune -f >/dev/null 2>&1 || true      # drop dangling layers between files
-  disk
+  set -- $IDS
+  while [ "$#" -gt 0 ]; do
+    BATCH=""; n=0
+    while [ "$#" -gt 0 ] && [ "$n" -lt "$CHUNK" ]; do BATCH="$BATCH $1"; shift; n=$((n+1)); done
+    echo "  -- batch:$BATCH"
+    "$PYBIN" -m swebench.harness.run_evaluation \
+      --dataset_name "$DATASET" \
+      --predictions_path "$f" \
+      --instance_ids $BATCH \
+      --max_workers "$WORKERS" \
+      --run_id "$RUN_ID" \
+      $CACHE_FLAG \
+      2>&1 | grep -vE "httpx|HTTP Request"
+    prune_eval; disk
+  done
 done
 
 mv -f ./*."$RUN_ID".json reports/ 2>/dev/null || true
 echo "==================== DONE ===================="
-ls -la reports/ 2>/dev/null
-echo "Now run:  python3 summarize.py"
+echo "Run:  $PYBIN summarize.py     (reads per-instance logs, so batching is fine)"
