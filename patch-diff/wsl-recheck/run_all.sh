@@ -20,14 +20,19 @@ DATASET="SWE-bench/SWE-bench_Verified"
 REPO_FILTER="${REPO:-}"
 mkdir -p reports logs
 
+# python: prefer python3, fall back to python. Preflight the swebench install.
+PYBIN="$(command -v python3 || command -v python)"
+[ -z "$PYBIN" ] && { echo "ERROR: no python3/python on PATH"; exit 1; }
+"$PYBIN" -c "import swebench" 2>/dev/null || { echo "ERROR: swebench not installed for $PYBIN. Run: pip3 install swebench datasets"; exit 1; }
+
 disk() { docker system df 2>/dev/null | awk '/^Images/{print "   docker images on disk: "$4" (reclaimable "$5")"}'; }
 
 for f in preds/gold.jsonl preds/agent__*.jsonl; do
   # optional per-repo filter: only run instance_ids whose repo matches $REPO
-  IDS=$(python3 _ids.py "$f" "$REPO_FILTER")
+  IDS=$("$PYBIN" _ids.py "$f" "$REPO_FILTER")
   [ -z "$IDS" ] && continue
   echo "==================== $f  ($(echo $IDS | wc -w) cells${REPO_FILTER:+, repo=$REPO_FILTER}) ===================="
-  python -m swebench.harness.run_evaluation \
+  "$PYBIN" -m swebench.harness.run_evaluation \
     --dataset_name "$DATASET" \
     --predictions_path "$f" \
     --instance_ids $IDS \
