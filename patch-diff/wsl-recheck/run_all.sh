@@ -24,14 +24,7 @@ disk() { docker system df 2>/dev/null | awk '/^Images/{print "   docker images o
 
 for f in preds/gold.jsonl preds/agent__*.jsonl; do
   # optional per-repo filter: only run instance_ids whose repo matches $REPO
-  IDS=$(python3 - "$f" "$REPO_FILTER" <<'PY'
-import json,sys
-f,repo=sys.argv[1],sys.argv[2]
-ids=[json.loads(l)["instance_id"] for l in open(f) if l.strip()]
-if repo: ids=[i for i in ids if i.split("__")[0]==repo]
-print(" ".join(ids))
-PY
-)
+  IDS=$(python3 _ids.py "$f" "$REPO_FILTER")
   [ -z "$IDS" ] && continue
   echo "==================== $f  ($(echo $IDS | wc -w) cells${REPO_FILTER:+, repo=$REPO_FILTER}) ===================="
   python -m swebench.harness.run_evaluation \
