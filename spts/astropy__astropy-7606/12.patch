@@ -1,0 +1,17 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+index e9bd986d3..336e92987 100644
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -1709,8 +1709,11 @@ class UnrecognizedUnit(IrreducibleUnit):
+         __rmul__ = __lt__ = __gt__ = __le__ = __ge__ = __neg__ = \
+         _unrecognized_operator
+ 
++    def _coerce_comparison_operand(self, other):
++        return Unit(other, parse_strict='silent')
++
+     def __eq__(self, other):
+-        other = Unit(other, parse_strict='silent')
++        other = self._coerce_comparison_operand(other)
+         return isinstance(other, UnrecognizedUnit) and self.name == other.name
+ 
+     def __ne__(self, other):

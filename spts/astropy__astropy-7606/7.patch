@@ -1,0 +1,20 @@
+diff --git a/astropy/units/core.py b/astropy/units/core.py
+index e9bd986d3..dcf35b65e 100644
+--- a/astropy/units/core.py
++++ b/astropy/units/core.py
+@@ -13,6 +13,7 @@ import warnings
+ 
+ import numpy as np
+ 
++from .. import log
+ from ..utils.decorators import lazyproperty
+ from ..utils.exceptions import AstropyWarning
+ from ..utils.misc import isiterable, InheritDocstrings
+@@ -1710,6 +1711,7 @@ class UnrecognizedUnit(IrreducibleUnit):
+         _unrecognized_operator
+ 
+     def __eq__(self, other):
++        log.debug("Coercing comparison operand to a unit")
+         other = Unit(other, parse_strict='silent')
+         return isinstance(other, UnrecognizedUnit) and self.name == other.name
+ 
