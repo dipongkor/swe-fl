@@ -1,0 +1,24 @@
+diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py
+index 8e8c3da06a..ab367c8174 100644
+--- a/django/core/handlers/base.py
++++ b/django/core/handlers/base.py
+@@ -24,11 +24,6 @@ class BaseHandler:
+     _middleware_chain = None
+ 
+     def load_middleware(self, is_async=False):
+-        """
+-        Populate middleware lists from settings.MIDDLEWARE.
+-
+-        Must be called after the environment is fixed (see __call__ in subclasses).
+-        """
+         self._view_middleware = []
+         self._template_response_middleware = []
+         self._exception_middleware = []
+@@ -50,7 +45,6 @@ class BaseHandler:
+             else:
+                 middleware_is_async = middleware_can_async
+             try:
+-                # Adapt handler, if needed.
+                 handler = self.adapt_method_mode(
+                     middleware_is_async, handler, handler_is_async,
+                     debug=settings.DEBUG, name='middleware %s' % middleware_path,

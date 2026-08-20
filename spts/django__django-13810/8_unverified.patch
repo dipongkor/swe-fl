@@ -1,0 +1,18 @@
+diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py
+index 8e8c3da06a..c4ebb2de73 100644
+--- a/django/core/handlers/base.py
++++ b/django/core/handlers/base.py
+@@ -58,10 +58,10 @@ class BaseHandler:
+                 mw_instance = middleware(handler)
+             except MiddlewareNotUsed as exc:
+                 if settings.DEBUG:
+-                    if str(exc):
+-                        logger.debug('MiddlewareNotUsed(%r): %s', middleware_path, exc)
+-                    else:
++                    if not str(exc):
+                         logger.debug('MiddlewareNotUsed: %r', middleware_path)
++                    else:
++                        logger.debug('MiddlewareNotUsed(%r): %s', middleware_path, exc)
+                 continue
+ 
+             if mw_instance is None:

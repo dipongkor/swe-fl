@@ -1,0 +1,17 @@
+diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py
+index 8e8c3da06a..7ab2c6c8a6 100644
+--- a/django/core/handlers/base.py
++++ b/django/core/handlers/base.py
+@@ -36,7 +36,11 @@ class BaseHandler:
+         get_response = self._get_response_async if is_async else self._get_response
+         handler = convert_exception_to_response(get_response)
+         handler_is_async = is_async
+-        for middleware_path in reversed(settings.MIDDLEWARE):
++        middleware_paths = list(reversed(settings.MIDDLEWARE))
++        middleware_index = 0
++        while middleware_index < len(middleware_paths):
++            middleware_path = middleware_paths[middleware_index]
++            middleware_index += 1
+             middleware = import_string(middleware_path)
+             middleware_can_sync = getattr(middleware, 'sync_capable', True)
+             middleware_can_async = getattr(middleware, 'async_capable', False)

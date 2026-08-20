@@ -1,0 +1,32 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..9ab3942a76 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -9,6 +9,7 @@ all about the internals of models in order to get the information it needs.
+ import difflib
+ import functools
+ import inspect
++import logging
+ import sys
+ import warnings
+ from collections import Counter, namedtuple
+@@ -44,6 +45,8 @@ from django.utils.deprecation import RemovedInDjango40Warning
+ from django.utils.functional import cached_property
+ from django.utils.tree import Node
+ 
++logger = logging.getLogger('django.db.models.sql.query')
++
+ __all__ = ['Query', 'RawQuery']
+ 
+ 
+@@ -1665,6 +1668,10 @@ class Query(BaseExpression):
+         if isinstance(filter_rhs, F):
+             filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
+         # Generate the inner query.
++        logger.debug(
++            'Building exclusion subquery',
++            extra={'model': self.model._meta.label, 'filter_expression': filter_expr},
++        )
+         query = Query(self.model)
+         query.add_filter(filter_expr)
+         query.clear_ordering(True)

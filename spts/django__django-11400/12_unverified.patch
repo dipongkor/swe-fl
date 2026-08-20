@@ -1,0 +1,23 @@
+diff --git a/django/db/models/fields/reverse_related.py b/django/db/models/fields/reverse_related.py
+index eb6b934259..dc8b571ff9 100644
+--- a/django/db/models/fields/reverse_related.py
++++ b/django/db/models/fields/reverse_related.py
+@@ -114,6 +114,9 @@ class ForeignObjectRel(FieldCacheMixin):
+             self.related_model._meta.model_name,
+         )
+ 
++    def _get_choices_queryset(self, ordering):
++        return self.related_model._default_manager.order_by(*ordering)
++
+     def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, ordering=()):
+         """
+         Return choices with a default blank choices included, for use
+@@ -123,7 +126,7 @@ class ForeignObjectRel(FieldCacheMixin):
+         initially for utilization by RelatedFieldListFilter.
+         """
+         return (blank_choice if include_blank else []) + [
+-            (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)
++            (x.pk, str(x)) for x in self._get_choices_queryset(ordering)
+         ]
+ 
+     def is_hidden(self):

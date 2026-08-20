@@ -1,0 +1,15 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+index 494890cc23..0e000a0941 100644
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -233,7 +233,9 @@ class HashedFilesMixin:
+ 
+         paths = {path: paths[path] for path in adjustable_paths}
+ 
+-        for i in range(self.max_post_process_passes):
++        pass_index = 0
++        while pass_index < self.max_post_process_passes:
++            pass_index += 1
+             substitutions = False
+             for name, hashed_name, processed, subst in self._post_process(paths, adjustable_paths, hashed_files):
+                 yield name, hashed_name, processed

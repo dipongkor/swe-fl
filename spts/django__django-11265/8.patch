@@ -1,0 +1,32 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..08e261b585 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -2142,7 +2142,13 @@ class Query(BaseExpression):
+         # Lets still see if we can trim the first join from the inner query
+         # (that is, self). We can't do this for LEFT JOINs because we would
+         # miss those rows that have nothing on the outer side.
+-        if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:
++        if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type == LOUTER:
++            # TODO: It might be possible to trim more joins from the start of the
++            # inner query if it happens to have a longer join chain containing the
++            # values in select_fields. Lets punt this one for now.
++            select_fields = [r[1] for r in join_field.related_fields]
++            select_alias = lookup_tables[trimmed_paths]
++        else:
+             select_fields = [r[0] for r in join_field.related_fields]
+             select_alias = lookup_tables[trimmed_paths + 1]
+             self.unref_alias(lookup_tables[trimmed_paths])
+@@ -2150,12 +2156,6 @@ class Query(BaseExpression):
+                 self.where_class, None, lookup_tables[trimmed_paths + 1])
+             if extra_restriction:
+                 self.where.add(extra_restriction, AND)
+-        else:
+-            # TODO: It might be possible to trim more joins from the start of the
+-            # inner query if it happens to have a longer join chain containing the
+-            # values in select_fields. Lets punt this one for now.
+-            select_fields = [r[1] for r in join_field.related_fields]
+-            select_alias = lookup_tables[trimmed_paths]
+         # The found starting point is likely a Join instead of a BaseTable reference.
+         # But the first entry in the query's FROM clause must not be a JOIN.
+         for table in self.alias_map:

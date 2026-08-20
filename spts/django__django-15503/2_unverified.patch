@@ -1,0 +1,29 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+index fdca700c9d..d943283c91 100644
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -172,6 +172,11 @@ class ContainedBy(PostgresOperatorLookup):
+ class HasKeyLookup(PostgresOperatorLookup):
+     logical_operator = None
+ 
++    def as_mysql(self, compiler, connection):
++        return self.as_sql(
++            compiler, connection, template="JSON_CONTAINS_PATH(%s, 'one', %%s)"
++        )
++
+     def as_sql(self, compiler, connection, template=None):
+         # Process JSON path from the left-hand side.
+         if isinstance(self.lhs, KeyTransform):
+@@ -204,12 +209,6 @@ class HasKeyLookup(PostgresOperatorLookup):
+         if self.logical_operator:
+             sql = "(%s)" % self.logical_operator.join([sql] * len(rhs_params))
+         return sql, tuple(lhs_params) + tuple(rhs_params)
+-
+-    def as_mysql(self, compiler, connection):
+-        return self.as_sql(
+-            compiler, connection, template="JSON_CONTAINS_PATH(%s, 'one', %%s)"
+-        )
+-
+     def as_oracle(self, compiler, connection):
+         sql, params = self.as_sql(
+             compiler, connection, template="JSON_EXISTS(%s, '%%s')"

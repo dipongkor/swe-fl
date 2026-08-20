@@ -1,0 +1,111 @@
+diff --git a/django/contrib/admin/filters.py b/django/contrib/admin/filters.py
+index d65e01d5e2..e16ce81b90 100644
+--- a/django/contrib/admin/filters.py
++++ b/django/contrib/admin/filters.py
+@@ -6,6 +6,7 @@ Each filter subclass knows how to display a filter for a field that passes a
+ certain test -- e.g. being a DateField or ForeignKey.
+ """
+ import datetime
++import logging
+ 
+ from django.contrib.admin.options import IncorrectLookupParameters
+ from django.contrib.admin.utils import (
+@@ -16,6 +17,8 @@ from django.db import models
+ from django.utils import timezone
+ from django.utils.translation import gettext_lazy as _
+ 
++logger = logging.getLogger('django.contrib.admin.filters')
++
+ 
+ class ListFilter:
+     title = None  # Human-readable title to appear in the right sidebar.
+@@ -419,4 +422,8 @@ FieldListFilter.register(lambda f: True, AllValuesFieldListFilter)
+ class RelatedOnlyFieldListFilter(RelatedFieldListFilter):
+     def field_choices(self, field, request, model_admin):
+         pk_qs = model_admin.get_queryset(request).distinct().values_list('%s__pk' % self.field_path, flat=True)
++        logger.debug(
++            'Restricting related-only filter choices',
++            extra={'model': model_admin.model._meta.label, 'field_path': self.field_path},
++        )
+         return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+index 194514c900..8d325735a8 100644
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -806,15 +806,19 @@ class Field(RegisterLookupMixin):
+             return return_None
+         return str  # return empty string
+ 
+-    def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, limit_choices_to=None, ordering=()):
+-        """
+-        Return choices with a default blank choices included, for use
+-        as <select> choices for this field.
+-        """
++    def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, limit_choices_to=None, ordering=(), choice_manager=None):
+         if self.choices is not None:
+             choices = list(self.choices)
+             if include_blank:
+-                blank_defined = any(choice in ('', None) for choice, _ in self.flatchoices)
++                flat_choices = self.flatchoices
++                choice_index = 0
++                blank_defined = False
++                while choice_index < len(flat_choices):
++                    choice, _ = flat_choices[choice_index]
++                    if choice in ('', None):
++                        blank_defined = True
++                        break
++                    choice_index += 1
+                 if not blank_defined:
+                     choices = blank_choice + choices
+             return choices
+@@ -825,9 +829,10 @@ class Field(RegisterLookupMixin):
+             if hasattr(self.remote_field, 'get_related_field')
+             else 'pk'
+         )
++        choice_manager = choice_manager or rel_model._default_manager
+         return (blank_choice if include_blank else []) + [
+             (choice_func(x), str(x))
+-            for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)
++            for x in choice_manager.complex_filter(limit_choices_to).order_by(*ordering)
+         ]
+ 
+     def value_to_string(self, obj):
+diff --git a/django/db/models/fields/reverse_related.py b/django/db/models/fields/reverse_related.py
+index eb6b934259..fed5be95ab 100644
+--- a/django/db/models/fields/reverse_related.py
++++ b/django/db/models/fields/reverse_related.py
+@@ -114,22 +114,24 @@ class ForeignObjectRel(FieldCacheMixin):
+             self.related_model._meta.model_name,
+         )
+ 
+-    def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, ordering=()):
+-        """
+-        Return choices with a default blank choices included, for use
+-        as <select> choices for this field.
++    def _get_choices_queryset(self, ordering):
++        return self.related_model._default_manager.order_by(*ordering)
+ 
+-        Analog of django.db.models.fields.Field.get_choices(), provided
+-        initially for utilization by RelatedFieldListFilter.
+-        """
+-        return (blank_choice if include_blank else []) + [
+-            (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)
+-        ]
+ 
+     def is_hidden(self):
+         """Should the related object be hidden?"""
+         return bool(self.related_name) and self.related_name[-1] == '+'
+ 
++    def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, ordering=()):
++        if include_blank:
++            initial_choices = blank_choice
++        else:
++            initial_choices = []
++        return initial_choices + [
++            (x.pk, str(x)) for x in self._get_choices_queryset(ordering)
++        ]
++
++
+     def get_joining_columns(self):
+         return self.field.get_reverse_joining_columns()
+ 

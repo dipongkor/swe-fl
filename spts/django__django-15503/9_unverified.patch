@@ -1,0 +1,18 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+index fdca700c9d..dd945dc4ce 100644
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -188,7 +188,12 @@ class HasKeyLookup(PostgresOperatorLookup):
+         rhs_params = []
+         if not isinstance(rhs, (list, tuple)):
+             rhs = [rhs]
+-        for key in rhs:
++        rhs_iterator = iter(rhs)
++        while True:
++            try:
++                key = next(rhs_iterator)
++            except StopIteration:
++                break
+             if isinstance(key, KeyTransform):
+                 *_, rhs_key_transforms = key.preprocess_lhs(compiler, connection)
+             else:

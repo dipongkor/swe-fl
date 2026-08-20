@@ -1,0 +1,14 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+index fdca700c9d..d034eba3ce 100644
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -186,8 +186,7 @@ class HasKeyLookup(PostgresOperatorLookup):
+         # Process JSON path from the right-hand side.
+         rhs = self.rhs
+         rhs_params = []
+-        if not isinstance(rhs, (list, tuple)):
+-            rhs = [rhs]
++        rhs = rhs if isinstance(rhs, (list, tuple)) else [rhs]
+         for key in rhs:
+             if isinstance(key, KeyTransform):
+                 *_, rhs_key_transforms = key.preprocess_lhs(compiler, connection)

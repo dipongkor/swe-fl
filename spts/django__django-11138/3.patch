@@ -1,0 +1,27 @@
+diff --git a/django/db/backends/sqlite3/base.py b/django/db/backends/sqlite3/base.py
+index 6a19236c48..367dfd5e87 100644
+--- a/django/db/backends/sqlite3/base.py
++++ b/django/db/backends/sqlite3/base.py
+@@ -398,16 +398,16 @@ class SQLiteCursorWrapper(Database.Cursor):
+         return FORMAT_QMARK_REGEX.sub('?', query).replace('%%', '%')
+ 
+ 
+-def _sqlite_datetime_parse(dt, tzname=None):
+-    if dt is None:
++def _sqlite_datetime_parse(value, timezone_name=None):
++    if value is None:
+         return None
+     try:
+-        dt = backend_utils.typecast_timestamp(dt)
++        value = backend_utils.typecast_timestamp(value)
+     except (TypeError, ValueError):
+         return None
+-    if tzname is not None:
+-        dt = timezone.localtime(dt, pytz.timezone(tzname))
+-    return dt
++    if timezone_name is not None:
++        value = timezone.localtime(value, pytz.timezone(timezone_name))
++    return value
+ 
+ 
+ def _sqlite_date_trunc(lookup_type, dt):

@@ -1,0 +1,34 @@
+diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py
+index 8e8c3da06a..1a5ac59a87 100644
+--- a/django/core/handlers/base.py
++++ b/django/core/handlers/base.py
+@@ -23,6 +23,14 @@ class BaseHandler:
+     _exception_middleware = None
+     _middleware_chain = None
+ 
++    def _adapt_and_create_middleware(self, middleware, middleware_path,
++                                     middleware_is_async, handler, handler_is_async):
++        handler = self.adapt_method_mode(
++            middleware_is_async, handler, handler_is_async,
++            debug=settings.DEBUG, name='middleware %s' % middleware_path,
++        )
++        return handler, middleware(handler)
++
+     def load_middleware(self, is_async=False):
+         """
+         Populate middleware lists from settings.MIDDLEWARE.
+@@ -51,11 +59,10 @@ class BaseHandler:
+                 middleware_is_async = middleware_can_async
+             try:
+                 # Adapt handler, if needed.
+-                handler = self.adapt_method_mode(
+-                    middleware_is_async, handler, handler_is_async,
+-                    debug=settings.DEBUG, name='middleware %s' % middleware_path,
++                handler, mw_instance = self._adapt_and_create_middleware(
++                    middleware, middleware_path, middleware_is_async,
++                    handler, handler_is_async,
+                 )
+-                mw_instance = middleware(handler)
+             except MiddlewareNotUsed as exc:
+                 if settings.DEBUG:
+                     if str(exc):

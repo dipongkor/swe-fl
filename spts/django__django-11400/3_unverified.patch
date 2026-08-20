@@ -1,0 +1,29 @@
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+index 194514c900..7f0a247ef2 100644
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -828,8 +828,8 @@ class Field(RegisterLookupMixin):
+             else 'pk'
+         )
+         return (blank_choice if include_blank else []) + [
+-            (choice_func(x), str(x))
+-            for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)
++            (choice_func(related_object), str(related_object))
++            for related_object in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)
+         ]
+ 
+     def value_to_string(self, obj):
+diff --git a/django/db/models/fields/reverse_related.py b/django/db/models/fields/reverse_related.py
+index eb6b934259..dc5ba375a1 100644
+--- a/django/db/models/fields/reverse_related.py
++++ b/django/db/models/fields/reverse_related.py
+@@ -124,7 +124,8 @@ class ForeignObjectRel(FieldCacheMixin):
+         initially for utilization by RelatedFieldListFilter.
+         """
+         return (blank_choice if include_blank else []) + [
+-            (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)
++            (related_object.pk, str(related_object))
++            for related_object in self.related_model._default_manager.order_by(*ordering)
+         ]
+ 
+     def is_hidden(self):

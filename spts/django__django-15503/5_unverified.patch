@@ -1,0 +1,29 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+index fdca700c9d..8a2b101fd6 100644
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -172,13 +172,13 @@ class ContainedBy(PostgresOperatorLookup):
+ class HasKeyLookup(PostgresOperatorLookup):
+     logical_operator = None
+ 
+-    def as_sql(self, compiler, connection, template=None):
++    def as_sql(self, compiler, connection, template=None, path_compiler=compile_json_path):
+         # Process JSON path from the left-hand side.
+         if isinstance(self.lhs, KeyTransform):
+             lhs, lhs_params, lhs_key_transforms = self.lhs.preprocess_lhs(
+                 compiler, connection
+             )
+-            lhs_json_path = compile_json_path(lhs_key_transforms)
++            lhs_json_path = path_compiler(lhs_key_transforms)
+         else:
+             lhs, lhs_params = self.process_lhs(compiler, connection)
+             lhs_json_path = "$"
+@@ -197,7 +197,7 @@ class HasKeyLookup(PostgresOperatorLookup):
+                 "%s%s"
+                 % (
+                     lhs_json_path,
+-                    compile_json_path(rhs_key_transforms, include_root=False),
++                    path_compiler(rhs_key_transforms, include_root=False),
+                 )
+             )
+         # Add condition for each key.

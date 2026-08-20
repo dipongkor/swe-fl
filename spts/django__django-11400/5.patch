@@ -1,0 +1,25 @@
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+index 194514c900..7070ade44b 100644
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -806,7 +806,7 @@ class Field(RegisterLookupMixin):
+             return return_None
+         return str  # return empty string
+ 
+-    def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, limit_choices_to=None, ordering=()):
++    def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, limit_choices_to=None, ordering=(), choice_manager=None):
+         """
+         Return choices with a default blank choices included, for use
+         as <select> choices for this field.
+@@ -825,9 +825,10 @@ class Field(RegisterLookupMixin):
+             if hasattr(self.remote_field, 'get_related_field')
+             else 'pk'
+         )
++        choice_manager = choice_manager or rel_model._default_manager
+         return (blank_choice if include_blank else []) + [
+             (choice_func(x), str(x))
+-            for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)
++            for x in choice_manager.complex_filter(limit_choices_to).order_by(*ordering)
+         ]
+ 
+     def value_to_string(self, obj):

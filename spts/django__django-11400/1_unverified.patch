@@ -1,0 +1,33 @@
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+index 194514c900..4fa16d90dc 100644
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -807,10 +807,6 @@ class Field(RegisterLookupMixin):
+         return str  # return empty string
+ 
+     def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, limit_choices_to=None, ordering=()):
+-        """
+-        Return choices with a default blank choices included, for use
+-        as <select> choices for this field.
+-        """
+         if self.choices is not None:
+             choices = list(self.choices)
+             if include_blank:
+diff --git a/django/db/models/fields/reverse_related.py b/django/db/models/fields/reverse_related.py
+index eb6b934259..e1d332b1bd 100644
+--- a/django/db/models/fields/reverse_related.py
++++ b/django/db/models/fields/reverse_related.py
+@@ -115,13 +115,6 @@ class ForeignObjectRel(FieldCacheMixin):
+         )
+ 
+     def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, ordering=()):
+-        """
+-        Return choices with a default blank choices included, for use
+-        as <select> choices for this field.
+-
+-        Analog of django.db.models.fields.Field.get_choices(), provided
+-        initially for utilization by RelatedFieldListFilter.
+-        """
+         return (blank_choice if include_blank else []) + [
+             (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)
+         ]

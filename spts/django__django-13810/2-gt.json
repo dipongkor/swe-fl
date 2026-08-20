@@ -1,0 +1,20 @@
+{
+  "instance_id": "django__django-13810",
+  "root_cause": [
+    {
+      "file": "django/core/handlers/base.py",
+      "old_line": 54,
+      "old_statement": "handler = self.adapt_method_mode(\n    middleware_is_async, handler, handler_is_async,\n    debug=settings.DEBUG, name='middleware %s' % middleware_path,\n)",
+      "current_line": 81,
+      "current_statement": "no change"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "load_middleware builds the handler chain inside-out, carrying two pieces of loop state: the current handler and handler_is_async, its mode flag. For each middleware it first adapts the current handler to the middleware's chosen mode (possibly wrapping an async handler as sync or vice versa, since adapt_method_mode trusts handler_is_async rather than inspecting the callable) and then instantiates the middleware, which may raise MiddlewareNotUsed to opt out. Because the adaptation result is assigned directly to handler before instantiation, an opted-out middleware still leaves the handler converted for its own mode while the continue skips the code that would update handler_is_async. From then on the two are out of sync: subsequent adaptations consult the stale flag, conclude no conversion is needed, and pass a sync-adapted callable up the chain as if it were async. In an ASGI application whose middleware list mixes async-capable middleware with a sync-only middleware that raises MiddlewareNotUsed, the assembled chain ultimately returns a plain HttpResponse where the async handler expects an awaitable, crashing with TypeError: object HttpResponse can't be used in 'await' expression.",
+    "annotator2": "Middleware loading adapts the current handler and immediately stores the wrapper, then constructs the middleware inside the same try block. MyMiddleware declines activation by raising MiddlewareNotUsed, but its adaptation remains in the chain. The following sync-and-async middleware is built around stale mode state, producing an extra asynchronous adaptation log. The assignment is the minimal cause because failure to construct should not mutate the handler chain."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

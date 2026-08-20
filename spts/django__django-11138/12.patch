@@ -1,0 +1,14 @@
+diff --git a/django/db/backends/oracle/operations.py b/django/db/backends/oracle/operations.py
+index c1afb2ed5e..fdb73affa8 100644
+--- a/django/db/backends/oracle/operations.py
++++ b/django/db/backends/oracle/operations.py
+@@ -101,6 +101,9 @@ END;
+             raise ValueError("Invalid time zone name: %s" % tzname)
+         # Convert from UTC to local time, returning TIMESTAMP WITH TIME ZONE
+         # and cast it back to TIMESTAMP to strip the TIME ZONE details.
++        return self._format_timezone_conversion(field_name, tzname)
++
++    def _format_timezone_conversion(self, field_name, tzname):
+         return "CAST((FROM_TZ(%s, '0:00') AT TIME ZONE '%s') AS TIMESTAMP)" % (field_name, tzname)
+ 
+     def datetime_cast_date_sql(self, field_name, tzname):

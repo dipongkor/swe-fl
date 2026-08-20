@@ -1,0 +1,95 @@
+diff --git a/django/db/models/fields/json.py b/django/db/models/fields/json.py
+index fdca700c9d..e53b954d45 100644
+--- a/django/db/models/fields/json.py
++++ b/django/db/models/fields/json.py
+@@ -1,4 +1,5 @@
+ import json
++import logging
+ 
+ from django import forms
+ from django.core import checks, exceptions
+@@ -7,6 +8,8 @@ from django.db.models import lookups
+ from django.db.models.lookups import PostgresOperatorLookup, Transform
+ from django.utils.translation import gettext_lazy as _
+ 
++logger = logging.getLogger('django.db.models.fields.json')
++
+ from . import Field
+ from .mixins import CheckFieldDefaultMixin
+ 
+@@ -172,44 +175,48 @@ class ContainedBy(PostgresOperatorLookup):
+ class HasKeyLookup(PostgresOperatorLookup):
+     logical_operator = None
+ 
+-    def as_sql(self, compiler, connection, template=None):
+-        # Process JSON path from the left-hand side.
+-        if isinstance(self.lhs, KeyTransform):
++    @staticmethod
++    def _combine_json_path(lhs_json_path, rhs_key_transforms, path_compiler=compile_json_path):
++        return "%s%s" % (
++            lhs_json_path,
++            path_compiler(rhs_key_transforms, include_root=False),
++        )
++
++    def as_mysql(self, compiler, connection):
++        return self.as_sql(
++            compiler, connection, template="JSON_CONTAINS_PATH(%s, 'one', %%s)"
++        )
++
++    def as_sql(self, compiler, connection, template=None, path_compiler=compile_json_path):
++        if not isinstance(self.lhs, KeyTransform):
++            lhs, lhs_params = self.process_lhs(compiler, connection)
++            lhs_json_path = "$"
++        else:
+             lhs, lhs_params, lhs_key_transforms = self.lhs.preprocess_lhs(
+                 compiler, connection
+             )
+-            lhs_json_path = compile_json_path(lhs_key_transforms)
+-        else:
+-            lhs, lhs_params = self.process_lhs(compiler, connection)
+-            lhs_json_path = "$"
++            lhs_json_path = path_compiler(lhs_key_transforms)
+         sql = template % lhs
+-        # Process JSON path from the right-hand side.
+         rhs = self.rhs
+-        rhs_params = []
+-        if not isinstance(rhs, (list, tuple)):
+-            rhs = [rhs]
+-        for key in rhs:
++        json_paths = []
++        rhs = rhs if isinstance(rhs, (list, tuple)) else [rhs]
++        rhs_iterator = iter(rhs)
++        while True:
++            try:
++                key = next(rhs_iterator)
++            except StopIteration:
++                break
+             if isinstance(key, KeyTransform):
+                 *_, rhs_key_transforms = key.preprocess_lhs(compiler, connection)
+             else:
+                 rhs_key_transforms = [key]
+-            rhs_params.append(
+-                "%s%s"
+-                % (
+-                    lhs_json_path,
+-                    compile_json_path(rhs_key_transforms, include_root=False),
+-                )
++            logger.debug('Compiling JSON has-key path for %r', key)
++            json_paths.append(
++                self._combine_json_path(lhs_json_path, rhs_key_transforms, path_compiler)
+             )
+-        # Add condition for each key.
+         if self.logical_operator:
+-            sql = "(%s)" % self.logical_operator.join([sql] * len(rhs_params))
+-        return sql, tuple(lhs_params) + tuple(rhs_params)
+-
+-    def as_mysql(self, compiler, connection):
+-        return self.as_sql(
+-            compiler, connection, template="JSON_CONTAINS_PATH(%s, 'one', %%s)"
+-        )
+-
++            sql = "(%s)" % self.logical_operator.join([sql] * len(json_paths))
++        return sql, tuple(lhs_params) + tuple(json_paths)
+     def as_oracle(self, compiler, connection):
+         sql, params = self.as_sql(
+             compiler, connection, template="JSON_EXISTS(%s, '%%s')"

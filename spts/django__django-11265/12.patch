@@ -1,0 +1,23 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..cb1e97d019 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1642,6 +1642,9 @@ class Query(BaseExpression):
+             col = _get_col(targets[0], join_info.targets[0], join_list[-1], simple_col)
+             return col
+ 
++    def _new_exclude_query(self):
++        return Query(self.model)
++
+     def split_exclude(self, filter_expr, can_reuse, names_with_path):
+         """
+         When doing an exclude against any kind of N-to-many relation, we need
+@@ -1665,7 +1668,7 @@ class Query(BaseExpression):
+         if isinstance(filter_rhs, F):
+             filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
+         # Generate the inner query.
+-        query = Query(self.model)
++        query = self._new_exclude_query()
+         query.add_filter(filter_expr)
+         query.clear_ordering(True)
+         # Try to have as simple as possible subquery -> trim leading joins from

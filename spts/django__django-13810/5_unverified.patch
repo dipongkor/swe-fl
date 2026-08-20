@@ -1,0 +1,13 @@
+diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py
+index 8e8c3da06a..8f9605ef7a 100644
+--- a/django/core/handlers/base.py
++++ b/django/core/handlers/base.py
+@@ -23,7 +23,7 @@ class BaseHandler:
+     _exception_middleware = None
+     _middleware_chain = None
+ 
+-    def load_middleware(self, is_async=False):
++    def load_middleware(self, is_async=False, middleware_load_context=None):
+         """
+         Populate middleware lists from settings.MIDDLEWARE.
+ 

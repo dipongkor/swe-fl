@@ -1,0 +1,21 @@
+diff --git a/django/db/models/fields/__init__.py b/django/db/models/fields/__init__.py
+index 194514c900..285b01ba5a 100644
+--- a/django/db/models/fields/__init__.py
++++ b/django/db/models/fields/__init__.py
+@@ -814,7 +814,15 @@ class Field(RegisterLookupMixin):
+         if self.choices is not None:
+             choices = list(self.choices)
+             if include_blank:
+-                blank_defined = any(choice in ('', None) for choice, _ in self.flatchoices)
++                flat_choices = self.flatchoices
++                choice_index = 0
++                blank_defined = False
++                while choice_index < len(flat_choices):
++                    choice, _ = flat_choices[choice_index]
++                    if choice in ('', None):
++                        blank_defined = True
++                        break
++                    choice_index += 1
+                 if not blank_defined:
+                     choices = blank_choice + choices
+             return choices

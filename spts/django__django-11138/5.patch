@@ -1,0 +1,16 @@
+diff --git a/django/db/backends/sqlite3/operations.py b/django/db/backends/sqlite3/operations.py
+index c4b02e5c60..7adb9840e6 100644
+--- a/django/db/backends/sqlite3/operations.py
++++ b/django/db/backends/sqlite3/operations.py
+@@ -84,8 +84,9 @@ class DatabaseOperations(BaseDatabaseOperations):
+     def time_trunc_sql(self, lookup_type, field_name):
+         return "django_time_trunc('%s', %s)" % (lookup_type.lower(), field_name)
+ 
+-    def _convert_tzname_to_sql(self, tzname):
+-        return "'%s'" % tzname if settings.USE_TZ else 'NULL'
++    def _convert_tzname_to_sql(self, tzname, use_timezone=None):
++        use_timezone = settings.USE_TZ if use_timezone is None else use_timezone
++        return "'%s'" % tzname if use_timezone else 'NULL'
+ 
+     def datetime_cast_date_sql(self, field_name, tzname):
+         return "django_datetime_cast_date(%s, %s)" % (

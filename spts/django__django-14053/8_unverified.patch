@@ -1,0 +1,16 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+index 494890cc23..1134ac45a9 100644
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -239,8 +239,9 @@ class HashedFilesMixin:
+                 yield name, hashed_name, processed
+                 substitutions = substitutions or subst
+ 
+-            if not substitutions:
+-                break
++            if substitutions:
++                continue
++            break
+ 
+         if substitutions:
+             yield 'All', None, RuntimeError('Max post-process passes exceeded.')

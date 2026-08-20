@@ -1,0 +1,22 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..961de99cc7 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -2095,7 +2095,7 @@ class Query(BaseExpression):
+         else:
+             return self.extra
+ 
+-    def trim_start(self, names_with_path):
++    def trim_start(self, names_with_path, allow_join_trimming=True):
+         """
+         Trim joins from the start of the join path. The candidates for trim
+         are the PathInfos in names_with_path structure that are m2m joins.
+@@ -2142,7 +2142,7 @@ class Query(BaseExpression):
+         # Lets still see if we can trim the first join from the inner query
+         # (that is, self). We can't do this for LEFT JOINs because we would
+         # miss those rows that have nothing on the outer side.
+-        if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:
++        if allow_join_trimming and self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:
+             select_fields = [r[0] for r in join_field.related_fields]
+             select_alias = lookup_tables[trimmed_paths + 1]
+             self.unref_alias(lookup_tables[trimmed_paths])

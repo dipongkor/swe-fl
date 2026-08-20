@@ -1,0 +1,30 @@
+diff --git a/django/contrib/admin/filters.py b/django/contrib/admin/filters.py
+index d65e01d5e2..50504bee6b 100644
+--- a/django/contrib/admin/filters.py
++++ b/django/contrib/admin/filters.py
+@@ -6,6 +6,7 @@ Each filter subclass knows how to display a filter for a field that passes a
+ certain test -- e.g. being a DateField or ForeignKey.
+ """
+ import datetime
++import logging
+ 
+ from django.contrib.admin.options import IncorrectLookupParameters
+ from django.contrib.admin.utils import (
+@@ -16,6 +17,8 @@ from django.db import models
+ from django.utils import timezone
+ from django.utils.translation import gettext_lazy as _
+ 
++logger = logging.getLogger('django.contrib.admin.filters')
++
+ 
+ class ListFilter:
+     title = None  # Human-readable title to appear in the right sidebar.
+@@ -419,4 +422,8 @@ FieldListFilter.register(lambda f: True, AllValuesFieldListFilter)
+ class RelatedOnlyFieldListFilter(RelatedFieldListFilter):
+     def field_choices(self, field, request, model_admin):
+         pk_qs = model_admin.get_queryset(request).distinct().values_list('%s__pk' % self.field_path, flat=True)
++        logger.debug(
++            'Restricting related-only filter choices',
++            extra={'model': model_admin.model._meta.label, 'field_path': self.field_path},
++        )
+         return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})

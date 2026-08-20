@@ -1,0 +1,17 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..46afa8c3ab 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -2109,8 +2109,11 @@ class Query(BaseExpression):
+         boolean indicating if the joins in the prefix contain a LEFT OUTER join.
+         _"""
+         all_paths = []
+-        for _, paths in names_with_path:
++        path_index = 0
++        while path_index < len(names_with_path):
++            _, paths = names_with_path[path_index]
+             all_paths.extend(paths)
++            path_index += 1
+         contains_louter = False
+         # Trim and operate only on tables that were generated for
+         # the lookup part of the query. That is, avoid trimming

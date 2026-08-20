@@ -1,0 +1,26 @@
+diff --git a/django/db/models/fields/reverse_related.py b/django/db/models/fields/reverse_related.py
+index eb6b934259..52629dd1db 100644
+--- a/django/db/models/fields/reverse_related.py
++++ b/django/db/models/fields/reverse_related.py
+@@ -114,6 +114,11 @@ class ForeignObjectRel(FieldCacheMixin):
+             self.related_model._meta.model_name,
+         )
+ 
++
++    def is_hidden(self):
++        """Should the related object be hidden?"""
++        return bool(self.related_name) and self.related_name[-1] == '+'
++
+     def get_choices(self, include_blank=True, blank_choice=BLANK_CHOICE_DASH, ordering=()):
+         """
+         Return choices with a default blank choices included, for use
+@@ -126,9 +131,6 @@ class ForeignObjectRel(FieldCacheMixin):
+             (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)
+         ]
+ 
+-    def is_hidden(self):
+-        """Should the related object be hidden?"""
+-        return bool(self.related_name) and self.related_name[-1] == '+'
+ 
+     def get_joining_columns(self):
+         return self.field.get_reverse_joining_columns()

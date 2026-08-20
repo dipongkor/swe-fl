@@ -1,0 +1,32 @@
+diff --git a/django/contrib/staticfiles/storage.py b/django/contrib/staticfiles/storage.py
+index 494890cc23..9723c0ab8a 100644
+--- a/django/contrib/staticfiles/storage.py
++++ b/django/contrib/staticfiles/storage.py
+@@ -200,6 +200,10 @@ class HashedFilesMixin:
+ 
+         return converter
+ 
++    @staticmethod
++    def _processed_file(name, hashed_name, processed):
++        return name, hashed_name, processed
++
+     def post_process(self, paths, dry_run=False, **options):
+         """
+         Post process the given dictionary of files (called from collectstatic).
+@@ -229,14 +233,14 @@ class HashedFilesMixin:
+         # Do a single pass first. Post-process all files once, then repeat for
+         # adjustable files.
+         for name, hashed_name, processed, _ in self._post_process(paths, adjustable_paths, hashed_files):
+-            yield name, hashed_name, processed
++            yield self._processed_file(name, hashed_name, processed)
+ 
+         paths = {path: paths[path] for path in adjustable_paths}
+ 
+         for i in range(self.max_post_process_passes):
+             substitutions = False
+             for name, hashed_name, processed, subst in self._post_process(paths, adjustable_paths, hashed_files):
+-                yield name, hashed_name, processed
++                yield self._processed_file(name, hashed_name, processed)
+                 substitutions = substitutions or subst
+ 
+             if not substitutions:

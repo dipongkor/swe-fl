@@ -1,0 +1,230 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..45c247c48d 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -9,6 +9,7 @@ all about the internals of models in order to get the information it needs.
+ import difflib
+ import functools
+ import inspect
++import logging
+ import sys
+ import warnings
+ from collections import Counter, namedtuple
+@@ -44,6 +45,8 @@ from django.utils.deprecation import RemovedInDjango40Warning
+ from django.utils.functional import cached_property
+ from django.utils.tree import Node
+ 
++logger = logging.getLogger('django.db.models.sql.query')
++
+ __all__ = ['Query', 'RawQuery']
+ 
+ 
+@@ -1642,76 +1645,6 @@ class Query(BaseExpression):
+             col = _get_col(targets[0], join_info.targets[0], join_list[-1], simple_col)
+             return col
+ 
+-    def split_exclude(self, filter_expr, can_reuse, names_with_path):
+-        """
+-        When doing an exclude against any kind of N-to-many relation, we need
+-        to use a subquery. This method constructs the nested query, given the
+-        original exclude filter (filter_expr) and the portion up to the first
+-        N-to-many relation field.
+-
+-        For example, if the origin filter is ~Q(child__name='foo'), filter_expr
+-        is ('child__name', 'foo') and can_reuse is a set of joins usable for
+-        filters in the original query.
+-
+-        We will turn this into equivalent of:
+-            WHERE NOT (pk IN (SELECT parent_id FROM thetable
+-                              WHERE name = 'foo' AND parent_id IS NOT NULL))
+-
+-        It might be worth it to consider using WHERE NOT EXISTS as that has
+-        saner null handling, and is easier for the backend's optimizer to
+-        handle.
+-        """
+-        filter_lhs, filter_rhs = filter_expr
+-        if isinstance(filter_rhs, F):
+-            filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
+-        # Generate the inner query.
+-        query = Query(self.model)
+-        query.add_filter(filter_expr)
+-        query.clear_ordering(True)
+-        # Try to have as simple as possible subquery -> trim leading joins from
+-        # the subquery.
+-        trimmed_prefix, contains_louter = query.trim_start(names_with_path)
+-
+-        # Add extra check to make sure the selected field will not be null
+-        # since we are adding an IN <subquery> clause. This prevents the
+-        # database from tripping over IN (...,NULL,...) selects and returning
+-        # nothing
+-        col = query.select[0]
+-        select_field = col.target
+-        alias = col.alias
+-        if self.is_nullable(select_field):
+-            lookup_class = select_field.get_lookup('isnull')
+-            lookup = lookup_class(select_field.get_col(alias), False)
+-            query.where.add(lookup, AND)
+-        if alias in can_reuse:
+-            pk = select_field.model._meta.pk
+-            # Need to add a restriction so that outer query's filters are in effect for
+-            # the subquery, too.
+-            query.bump_prefix(self)
+-            lookup_class = select_field.get_lookup('exact')
+-            # Note that the query.select[0].alias is different from alias
+-            # due to bump_prefix above.
+-            lookup = lookup_class(pk.get_col(query.select[0].alias),
+-                                  pk.get_col(alias))
+-            query.where.add(lookup, AND)
+-            query.external_aliases.add(alias)
+-
+-        condition, needed_inner = self.build_filter(
+-            ('%s__in' % trimmed_prefix, query),
+-            current_negated=True, branch_negated=True, can_reuse=can_reuse)
+-        if contains_louter:
+-            or_null_condition, _ = self.build_filter(
+-                ('%s__isnull' % trimmed_prefix, True),
+-                current_negated=True, branch_negated=True, can_reuse=can_reuse)
+-            condition.add(or_null_condition, OR)
+-            # Note that the end result will be:
+-            # (outercol NOT IN innerq AND outercol IS NOT NULL) OR outercol IS NULL.
+-            # This might look crazy but due to how IN works, this seems to be
+-            # correct. If the IS NOT NULL check is removed then outercol NOT
+-            # IN will return UNKNOWN. If the IS NULL check is removed, then if
+-            # outercol IS NULL we will not match the row.
+-        return condition, needed_inner
+-
+     def set_empty(self):
+         self.where.add(NothingNode(), AND)
+ 
+@@ -2095,7 +2028,83 @@ class Query(BaseExpression):
+         else:
+             return self.extra
+ 
+-    def trim_start(self, names_with_path):
++    def _new_exclude_query(self):
++        return Query(self.model)
++
++    def split_exclude(self, filter_expr, can_reuse, names_with_path):
++        """
++        When doing an exclude against any kind of N-to-many relation, we need
++        to use a subquery. This method constructs the nested query, given the
++        original exclude filter (filter_expr) and the portion up to the first
++        N-to-many relation field.
++
++        For example, if the origin filter is ~Q(child__name='foo'), filter_expr
++        is ('child__name', 'foo') and can_reuse is a set of joins usable for
++        filters in the original query.
++
++        We will turn this into equivalent of:
++            WHERE NOT (pk IN (SELECT parent_id FROM thetable
++                              WHERE name = 'foo' AND parent_id IS NOT NULL))
++
++        It might be worth it to consider using WHERE NOT EXISTS as that has
++        saner null handling, and is easier for the backend's optimizer to
++        handle.
++        """
++        filter_lhs, filter_rhs = filter_expr
++        if isinstance(filter_rhs, F):
++            filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
++        logger.debug(
++            'Building exclusion subquery',
++            extra={'model': self.model._meta.label, 'filter_expression': filter_expr},
++        )
++        inner_query = self._new_exclude_query()
++        inner_query.add_filter(filter_expr)
++        inner_query.clear_ordering(True)
++        # Try to have as simple as possible subquery -> trim leading joins from
++        # the subquery.
++        trimmed_prefix, contains_louter = inner_query.trim_start(names_with_path)
++
++        # Add extra check to make sure the selected field will not be null
++        # since we are adding an IN <subquery> clause. This prevents the
++        # database from tripping over IN (...,NULL,...) selects and returning
++        # nothing
++        col = inner_query.select[0]
++        select_field = col.target
++        alias = col.alias
++        if self.is_nullable(select_field):
++            lookup_class = select_field.get_lookup('isnull')
++            lookup = lookup_class(select_field.get_col(alias), False)
++            inner_query.where.add(lookup, AND)
++        if alias in can_reuse:
++            pk = select_field.model._meta.pk
++            # Need to add a restriction so that outer query's filters are in effect for
++            # the subquery, too.
++            inner_query.bump_prefix(self)
++            lookup_class = select_field.get_lookup('exact')
++            # Note that the inner_query.select[0].alias is different from alias
++            # due to bump_prefix above.
++            lookup = lookup_class(pk.get_col(inner_query.select[0].alias),
++                                  pk.get_col(alias))
++            inner_query.where.add(lookup, AND)
++            inner_query.external_aliases.add(alias)
++
++        condition, needed_inner = self.build_filter(
++            ('%s__in' % trimmed_prefix, inner_query),
++            current_negated=True, branch_negated=True, can_reuse=can_reuse)
++        if contains_louter:
++            or_null_condition, _ = self.build_filter(
++                ('%s__isnull' % trimmed_prefix, True),
++                current_negated=True, branch_negated=True, can_reuse=can_reuse)
++            condition.add(or_null_condition, OR)
++            # Note that the end result will be:
++            # (outercol NOT IN innerq AND outercol IS NOT NULL) OR outercol IS NULL.
++            # This might look crazy but due to how IN works, this seems to be
++            # correct. If the IS NOT NULL check is removed then outercol NOT
++            # IN will return UNKNOWN. If the IS NULL check is removed, then if
++            # outercol IS NULL we will not match the row.
++        return condition, needed_inner
++
++    def trim_start(self, names_with_path, allow_join_trimming=True):
+         """
+         Trim joins from the start of the join path. The candidates for trim
+         are the PathInfos in names_with_path structure that are m2m joins.
+@@ -2109,8 +2118,11 @@ class Query(BaseExpression):
+         boolean indicating if the joins in the prefix contain a LEFT OUTER join.
+         _"""
+         all_paths = []
+-        for _, paths in names_with_path:
++        path_index = 0
++        while path_index < len(names_with_path):
++            _, paths = names_with_path[path_index]
+             all_paths.extend(paths)
++            path_index += 1
+         contains_louter = False
+         # Trim and operate only on tables that were generated for
+         # the lookup part of the query. That is, avoid trimming
+@@ -2139,10 +2151,16 @@ class Query(BaseExpression):
+         trimmed_prefix.append(
+             join_field.foreign_related_fields[0].name)
+         trimmed_prefix = LOOKUP_SEP.join(trimmed_prefix)
+-        # Lets still see if we can trim the first join from the inner query
+-        # (that is, self). We can't do this for LEFT JOINs because we would
+-        # miss those rows that have nothing on the outer side.
+-        if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:
++        if (
++            not allow_join_trimming or
++            self.alias_map[lookup_tables[trimmed_paths + 1]].join_type == LOUTER
++        ):
++            # TODO: It might be possible to trim more joins from the start of the
++            # inner query if it happens to have a longer join chain containing the
++            # values in select_fields. Lets punt this one for now.
++            select_fields = [r[1] for r in join_field.related_fields]
++            select_alias = lookup_tables[trimmed_paths]
++        else:
+             select_fields = [r[0] for r in join_field.related_fields]
+             select_alias = lookup_tables[trimmed_paths + 1]
+             self.unref_alias(lookup_tables[trimmed_paths])
+@@ -2150,12 +2168,6 @@ class Query(BaseExpression):
+                 self.where_class, None, lookup_tables[trimmed_paths + 1])
+             if extra_restriction:
+                 self.where.add(extra_restriction, AND)
+-        else:
+-            # TODO: It might be possible to trim more joins from the start of the
+-            # inner query if it happens to have a longer join chain containing the
+-            # values in select_fields. Lets punt this one for now.
+-            select_fields = [r[1] for r in join_field.related_fields]
+-            select_alias = lookup_tables[trimmed_paths]
+         # The found starting point is likely a Join instead of a BaseTable reference.
+         # But the first entry in the query's FROM clause must not be a JOIN.
+         for table in self.alias_map:

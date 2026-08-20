@@ -1,0 +1,22 @@
+diff --git a/django/db/models/sql/query.py b/django/db/models/sql/query.py
+index d69c24419b..5f26085b7c 100644
+--- a/django/db/models/sql/query.py
++++ b/django/db/models/sql/query.py
+@@ -1664,7 +1664,6 @@ class Query(BaseExpression):
+         filter_lhs, filter_rhs = filter_expr
+         if isinstance(filter_rhs, F):
+             filter_expr = (filter_lhs, OuterRef(filter_rhs.name))
+-        # Generate the inner query.
+         query = Query(self.model)
+         query.add_filter(filter_expr)
+         query.clear_ordering(True)
+@@ -2139,9 +2138,6 @@ class Query(BaseExpression):
+         trimmed_prefix.append(
+             join_field.foreign_related_fields[0].name)
+         trimmed_prefix = LOOKUP_SEP.join(trimmed_prefix)
+-        # Lets still see if we can trim the first join from the inner query
+-        # (that is, self). We can't do this for LEFT JOINs because we would
+-        # miss those rows that have nothing on the outer side.
+         if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:
+             select_fields = [r[0] for r in join_field.related_fields]
+             select_alias = lookup_tables[trimmed_paths + 1]

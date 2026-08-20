@@ -1,0 +1,57 @@
+diff --git a/django/core/handlers/base.py b/django/core/handlers/base.py
+index 8e8c3da06a..1497daf89d 100644
+--- a/django/core/handlers/base.py
++++ b/django/core/handlers/base.py
+@@ -34,8 +34,8 @@ class BaseHandler:
+         self._exception_middleware = []
+ 
+         get_response = self._get_response_async if is_async else self._get_response
+-        handler = convert_exception_to_response(get_response)
+-        handler_is_async = is_async
++        current_handler = convert_exception_to_response(get_response)
++        current_handler_is_async = is_async
+         for middleware_path in reversed(settings.MIDDLEWARE):
+             middleware = import_string(middleware_path)
+             middleware_can_sync = getattr(middleware, 'sync_capable', True)
+@@ -45,17 +45,17 @@ class BaseHandler:
+                     'Middleware %s must have at least one of '
+                     'sync_capable/async_capable set to True.' % middleware_path
+                 )
+-            elif not handler_is_async and middleware_can_sync:
++            elif not current_handler_is_async and middleware_can_sync:
+                 middleware_is_async = False
+             else:
+                 middleware_is_async = middleware_can_async
+             try:
+-                # Adapt handler, if needed.
+-                handler = self.adapt_method_mode(
+-                    middleware_is_async, handler, handler_is_async,
++                # Adapt current_handler, if needed.
++                current_handler = self.adapt_method_mode(
++                    middleware_is_async, current_handler, current_handler_is_async,
+                     debug=settings.DEBUG, name='middleware %s' % middleware_path,
+                 )
+-                mw_instance = middleware(handler)
++                mw_instance = middleware(current_handler)
+             except MiddlewareNotUsed as exc:
+                 if settings.DEBUG:
+                     if str(exc):
+@@ -85,14 +85,14 @@ class BaseHandler:
+                     self.adapt_method_mode(False, mw_instance.process_exception),
+                 )
+ 
+-            handler = convert_exception_to_response(mw_instance)
+-            handler_is_async = middleware_is_async
++            current_handler = convert_exception_to_response(mw_instance)
++            current_handler_is_async = middleware_is_async
+ 
+         # Adapt the top of the stack, if needed.
+-        handler = self.adapt_method_mode(is_async, handler, handler_is_async)
++        current_handler = self.adapt_method_mode(is_async, current_handler, current_handler_is_async)
+         # We only assign to this when initialization is complete as it is used
+         # as a flag for initialization being complete.
+-        self._middleware_chain = handler
++        self._middleware_chain = current_handler
+ 
+     def adapt_method_mode(
+         self, is_async, method, method_is_async=None, debug=False, name=None,

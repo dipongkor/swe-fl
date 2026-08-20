@@ -1,0 +1,41 @@
+{
+  "instance_id": "django__django-11138",
+  "root_cause": [
+    {
+      "file": "django/db/backends/sqlite3/base.py",
+      "old_line": 409,
+      "old_statement": "dt = timezone.localtime(dt, pytz.timezone(tzname))",
+      "current_line": "no change",
+      "current_statement": "no change"
+    },
+    {
+      "file": "django/db/backends/sqlite3/operations.py",
+      "old_line": 88,
+      "old_statement": "return \"'%s'\" % tzname if settings.USE_TZ else 'NULL'",
+      "current_line": "no change",
+      "current_statement": "no change"
+    },
+    {
+      "file": "django/db/backends/mysql/operations.py",
+      "old_line": 73,
+      "old_statement": "field_name = \"CONVERT_TZ(%s, 'UTC', '%s')\" % (field_name, tzname)",
+      "current_line": "no change",
+      "current_statement": "no change"
+    },
+    {
+      "file": "django/db/backends/oracle/operations.py",
+      "old_line": 104,
+      "old_statement": "return \"CAST((FROM_TZ(%s, '0:00') AT TIME ZONE '%s') AS TIMESTAMP)\" % (field_name, tzname)",
+      "current_line": 107,
+      "current_statement": "no change"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "On backends without native timezone support, Django stores datetimes in the local time of the database's TIME_ZONE setting when one is configured, so datetime lookups (__date, __time, Extract, Trunc) must convert stored values from that connection timezone to the current timezone before truncating or extracting. All three backends instead assume the stored values are UTC: MySQL and Oracle hardcode the conversion source in the generated SQL ('UTC' / '0:00'), and the SQLite pipeline neither transports the connection timezone into its registered Python functions nor applies it when parsing, so the UTC stamp from typecast_timestamp stands. Any database whose TIME_ZONE differs from UTC gets values shifted by the wrong offset - even when the connection timezone equals the current timezone, where no conversion should happen at all - so date-boundary lookups miss matching rows.",
+    "annotator2": "Database datetime extraction and truncation must convert from the database connection timezone to the query's requested timezone. The base MySQL and Oracle implementations hard-code UTC as the source. SQLite's SQL layer transmits only the destination timezone, and line 409 consequently converts a value tagged as UTC without first establishing its actual connection-timezone meaning. All three backends can therefore derive the wrong local date or time when the connection timezone is non-UTC."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

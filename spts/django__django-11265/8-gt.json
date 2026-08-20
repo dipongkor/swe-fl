@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-11265",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/query.py",
+      "old_line": 1668,
+      "old_statement": "query = Query(self.model)",
+      "current_line": "no change",
+      "current_statement": "no change"
+    },
+    {
+      "file": "django/db/models/sql/query.py",
+      "old_line": 2145,
+      "old_statement": "if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type != LOUTER:",
+      "current_line": "no change",
+      "current_statement": "if self.alias_map[lookup_tables[trimmed_paths + 1]].join_type == LOUTER:"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Excluding on a multivalued relation is compiled via split_exclude: the filter is moved into an inner subquery whose primary keys the outer query excludes. Two independent steps of that rewrite mishandle FilteredRelation annotations. First, the inner query is instantiated as a bare Query for the model, without copying the outer query's filtered-relation annotations, so adding the very filter being split — which names the annotation (book_alice__isnull) — fails name resolution and raises FieldError: the annotation simply does not exist inside the subquery. Second, even with the annotations available, split_exclude asks trim_start to simplify the subquery by trimming leading joins; the trimming test only refuses LEFT JOINs, but a join generated from a FilteredRelation embeds the relation's condition (the book-title match) in its join clause, and trimming that INNER JOIN drops the condition from the subquery entirely. The subquery then selects authors with any book rather than authors with the filtered book, so the exclude removes too many rows. The first fault crashes the query; the second silently corrupts its results once the first is repaired.",
+    "annotator2": "exclude() moves the filtered lookup into an inner query. That query lacks the registered FilteredRelation alias, and its trimming step treats the resulting inner join as an ordinary removable join. The title predicate associated with book_alice is therefore lost or resolved incorrectly, so the exclusion does not return only the author without the matching book. These two decisions cover the inner-query context and the condition-destroying trim, the jointly necessary points where filtered-relation semantics disappear."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

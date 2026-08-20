@@ -1,0 +1,34 @@
+{
+  "instance_id": "django__django-11400",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/__init__.py",
+      "old_line": 830,
+      "old_statement": "return (blank_choice if include_blank else []) + [\n    (choice_func(x), str(x))\n    for x in rel_model._default_manager.complex_filter(limit_choices_to).order_by(*ordering)\n]",
+      "current_line": "no change",
+      "current_statement": "no change"
+    },
+    {
+      "file": "django/db/models/fields/reverse_related.py",
+      "old_line": 126,
+      "old_statement": "return (blank_choice if include_blank else []) + [\n    (x.pk, str(x)) for x in self.related_model._default_manager.order_by(*ordering)\n]",
+      "current_line": 130,
+      "current_statement": "no change"
+    },
+    {
+      "file": "django/contrib/admin/filters.py",
+      "old_line": 422,
+      "old_statement": "return field.get_choices(include_blank=False, limit_choices_to={'pk__in': pk_qs})",
+      "current_line": "no change",
+      "current_statement": "no change"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Related-field choice lists are built by two get_choices implementations (forward fields in Field.get_choices, reverse relations in ForeignObjectRel.get_choices), both of which apply .order_by(*ordering) unconditionally to the related model's default manager queryset. Calling order_by() with an empty ordering does not preserve the queryset's existing order — it removes it, including the default ordering the manager derives from the related model's Meta.ordering. RelatedFieldListFilter passes ordering=() whenever the related model has no registered ModelAdmin (or its admin declares no ordering), so in exactly the fallback case the choices lose their declared default order and appear in arbitrary database order. Separately, RelatedOnlyFieldListFilter overrides field_choices to restrict choices to values present in the changelist queryset but drops the ordering argument from its get_choices call altogether, so even an explicitly configured related-ModelAdmin ordering is ignored for that filter.",
+    "annotator2": "Admin related filters obtain their labels through field.get_choices. RelatedOnlyFieldListFilter never forwards ordering from the registered related ModelAdmin, producing Jack before Albert despite ordering=('name',). For ordinary and reverse fields, an empty explicit ordering is passed to QuerySet.order_by, which clears Meta.ordering rather than falling back to it. The three statements are the minimal independently reachable choices governing related-only admin ordering and default ordering for forward and reverse relations."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

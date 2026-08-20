@@ -1,0 +1,20 @@
+{
+  "instance_id": "django__django-15503",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/json.py",
+      "old_line": 196,
+      "old_statement": "rhs_params.append(\n    \"%s%s\"\n    % (\n        lhs_json_path,\n        compile_json_path(rhs_key_transforms, include_root=False),\n    )\n)",
+      "current_line": 194,
+      "current_statement": "no change"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "On backends without a native has-key operator (SQLite, MySQL/MariaDB, Oracle), HasKeyLookup.as_sql implements has_key/has_keys/has_any_keys by compiling each right-hand-side key into a JSON path and testing path existence. The keys are run through compile_json_path, whose element heuristic is designed for KeyTransform chains: anything parseable as an integer becomes an array-index step '[n]', everything else a member step '.\"name\"'. For the lookup's final element that heuristic is semantically wrong — has_key='1111' asks for the object key \"1111\", never array element 1111 — so numeric string keys compile to $[1111]-style paths that never match an object member, and the filter silently returns no rows. Keys with leading zeros like '000' hit the same misclassification. PostgreSQL is unaffected because its has-key lookups use the native ?/?&/?| operators with the raw key string instead of a compiled path, which is why the same query works there.",
+    "annotator2": "HasKeyLookup builds a backend JSON path for each requested key. The multiline append sends every component through compile_json_path, whose integer coercion is correct for intermediate array traversal but wrong for the terminal has_key operand. Numeric object keys such as '123', '456', and '789' are emitted as array indexes, so SQLite queries the wrong location and returns empty or unrelated rows. Lines 196-202 are the minimal root cause because they erase the semantic distinction between traversal components and the key being tested."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

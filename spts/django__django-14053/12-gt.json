@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-14053",
+  "root_cause": [
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "old_line": 232,
+      "old_statement": "yield name, hashed_name, processed",
+      "current_line": 236,
+      "current_statement": "yield self._processed_file(name, hashed_name, processed)"
+    },
+    {
+      "file": "django/contrib/staticfiles/storage.py",
+      "old_line": 239,
+      "old_statement": "yield name, hashed_name, processed",
+      "current_line": 243,
+      "current_statement": "yield self._processed_file(name, hashed_name, processed)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "HashedFilesMixin.post_process hashes files in several passes so nested references settle: a first pass over everything, then up to max_post_process_passes repeat passes over the adjustable files (those whose content embeds references, e.g. CSS). Both the first pass and every repeat pass yield each processed file straight back to the caller. collectstatic's collect() treats each yield as one post-processed file, and subclasses handle files as the yields arrive. An adjustable file is therefore reported once for the first pass and once for every repeat pass it participates in: the counts in collectstatic's summary exceed the real number of files, consumers repeat expensive per-file work (re-compression, re-upload) for the same asset, and the earlier of the duplicate yields can carry an intermediate hashed name that is superseded by a later pass — so a consumer acting on the first report records a filename that no final artifact uses. Files whose content needs no adjustment on later passes are still re-yielded with the same name each pass, so the duplication occurs even without any substitution.",
+    "annotator2": "Hashed static files requiring substitutions participate in the initial processing pass and one or more subsequent passes. Both loops yield their intermediate result publicly, causing duplicate names in the collected post_processed sequence. Each yield is independently necessary to explain duplication across the initial and repeated phases, and no surrounding hashing logic is required to produce it."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}
