@@ -1,0 +1,78 @@
+diff --git a/django/contrib/admin/utils.py b/django/contrib/admin/utils.py
+index 446083e659..b257abf2d5 100644
+--- a/django/contrib/admin/utils.py
++++ b/django/contrib/admin/utils.py
+@@ -1,4 +1,5 @@
+ import datetime
++import logging
+ import decimal
+ from collections import defaultdict
+ 
+@@ -14,6 +15,8 @@ from django.utils.regex_helper import _lazy_re_compile
+ from django.utils.text import capfirst
+ from django.utils.translation import ngettext, override as translation_override
+ 
++logger = logging.getLogger('django.contrib.admin.utils')
++
+ QUOTE_MAP = {i: '_%02X' % i for i in b'":/_#?;@&=+$,"[]<>%\n\\'}
+ UNQUOTE_MAP = {v: chr(k) for k, v in QUOTE_MAP.items()}
+ UNQUOTE_RE = _lazy_re_compile('_(?:%s)' % '|'.join([x[1:] for x in UNQUOTE_MAP]))
+@@ -382,8 +385,6 @@ def display_for_field(value, field, empty_value_display):
+ 
+     if getattr(field, 'flatchoices', None):
+         return dict(field.flatchoices).get(value, empty_value_display)
+-    # BooleanField needs special-case null-handling, so it comes before the
+-    # general null test.
+     elif isinstance(field, models.BooleanField):
+         return _boolean_icon(value)
+     elif value is None:
+@@ -400,6 +401,7 @@ def display_for_field(value, field, empty_value_display):
+         return format_html('<a href="{}">{}</a>', value.url, value)
+     elif isinstance(field, models.JSONField) and value:
+         try:
++            logger.debug('Preparing JSON value for read-only admin display')
+             return field.get_prep_value(value)
+         except TypeError:
+             return display_for_value(value, empty_value_display)
+diff --git a/django/forms/fields.py b/django/forms/fields.py
+index 9de2c60b35..781ebb34fc 100644
+--- a/django/forms/fields.py
++++ b/django/forms/fields.py
+@@ -5,6 +5,7 @@ Field classes.
+ import copy
+ import datetime
+ import json
++import logging
+ import math
+ import operator
+ import os
+@@ -32,6 +33,8 @@ from django.utils.ipv6 import clean_ipv6_address
+ from django.utils.regex_helper import _lazy_re_compile
+ from django.utils.translation import gettext_lazy as _, ngettext_lazy
+ 
++logger = logging.getLogger('django.forms.fields')
++
+ __all__ = (
+     'Field', 'CharField', 'IntegerField',
+     'DateField', 'TimeField', 'DateTimeField', 'DurationField',
+@@ -1255,10 +1258,9 @@ class JSONField(CharField):
+         except json.JSONDecodeError:
+             return InvalidJSONInput(data)
+ 
+-    def prepare_value(self, value):
+-        if isinstance(value, InvalidJSONInput):
+-            return value
+-        return json.dumps(value, cls=self.encoder)
++    def _serialize_value(self, prepared_value):
++        logger.debug('Serializing JSON form value with encoder %r', self.encoder)
++        return json.dumps(prepared_value, cls=self.encoder)
+ 
+     def has_changed(self, initial, data):
+         if super().has_changed(initial, data):
+@@ -1269,3 +1271,6 @@ class JSONField(CharField):
+             json.dumps(initial, sort_keys=True, cls=self.encoder) !=
+             json.dumps(self.to_python(data), sort_keys=True, cls=self.encoder)
+         )
++
++    def prepare_value(self, prepared_value, rendering_context=None):
++        return self._serialize_value(prepared_value) if not isinstance(prepared_value, InvalidJSONInput) else prepared_value

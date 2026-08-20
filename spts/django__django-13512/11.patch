@@ -1,0 +1,15 @@
+diff --git a/django/forms/fields.py b/django/forms/fields.py
+index 9de2c60b35..e5f411b6e9 100644
+--- a/django/forms/fields.py
++++ b/django/forms/fields.py
+@@ -1256,9 +1256,7 @@ class JSONField(CharField):
+             return InvalidJSONInput(data)
+ 
+     def prepare_value(self, value):
+-        if isinstance(value, InvalidJSONInput):
+-            return value
+-        return json.dumps(value, cls=self.encoder)
++        return value if isinstance(value, InvalidJSONInput) else json.dumps(value, cls=self.encoder)
+ 
+     def has_changed(self, initial, data):
+         if super().has_changed(initial, data):

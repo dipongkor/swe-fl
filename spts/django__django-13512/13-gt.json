@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-13512",
+  "root_cause": [
+    {
+      "file": "django/forms/fields.py",
+      "old_line": 1261,
+      "old_statement": "return json.dumps(value, cls=self.encoder)",
+      "current_line": 1263,
+      "current_statement": "return json.dumps(prepared_value, cls=self.encoder)"
+    },
+    {
+      "file": "django/contrib/admin/utils.py",
+      "old_line": 403,
+      "old_statement": "return field.get_prep_value(value)",
+      "current_line": 405,
+      "current_statement": "no change"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Both places that render a JSONField's contents for humans serialize with json.dumps in its default configuration, where ensure_ascii=True replaces every non-ASCII character with \\uXXXX escape sequences. forms.JSONField.prepare_value, which fills the edit widget, calls json.dumps(value, cls=self.encoder) directly; and the admin's read-only rendering in display_for_field delegates to the model field's get_prep_value, the database-preparation serializer that is likewise a default json.dumps. As a result, editing or viewing a JSONField containing e.g. Chinese text in the Django admin shows \"\\u4e2d\\u56fd\" instead of the characters themselves, even though the escaped and unescaped forms denote the same JSON value.",
+    "annotator2": "JSON values reach the admin through two rendering paths. Read-only field display uses the model field's database-preparation output, while the editable JSON form calls JSONField.prepare_value. Both paths serialize with the default ASCII-only JSON behavior. The stored value remains correct, but the admin receives strings such as \\u4f60\\u597d instead of the original characters. Lines 403 and 1261 are independently faulty because the admin's read-only display and editable form exercise separate serializers and each regression assertion fails on its corresponding path."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}
