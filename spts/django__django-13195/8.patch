@@ -1,0 +1,24 @@
+diff --git a/django/contrib/messages/storage/cookie.py b/django/contrib/messages/storage/cookie.py
+index 78256ca3b2..2c19398e99 100644
+--- a/django/contrib/messages/storage/cookie.py
++++ b/django/contrib/messages/storage/cookie.py
+@@ -83,7 +83,9 @@ class CookieStorage(BaseStorage):
+         Either set the cookie with the encoded data if there is any data to
+         store, or delete the cookie.
+         """
+-        if encoded_data:
++        if not encoded_data:
++            response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)
++        else:
+             response.set_cookie(
+                 self.cookie_name, encoded_data,
+                 domain=settings.SESSION_COOKIE_DOMAIN,
+@@ -91,8 +93,6 @@ class CookieStorage(BaseStorage):
+                 httponly=settings.SESSION_COOKIE_HTTPONLY or None,
+                 samesite=settings.SESSION_COOKIE_SAMESITE,
+             )
+-        else:
+-            response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)
+ 
+     def _store(self, messages, response, remove_oldest=True, *args, **kwargs):
+         """

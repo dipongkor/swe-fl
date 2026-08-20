@@ -1,0 +1,22 @@
+diff --git a/django/contrib/messages/storage/cookie.py b/django/contrib/messages/storage/cookie.py
+index 78256ca3b2..352f26fa56 100644
+--- a/django/contrib/messages/storage/cookie.py
++++ b/django/contrib/messages/storage/cookie.py
+@@ -78,7 +78,7 @@ class CookieStorage(BaseStorage):
+             messages.pop()
+         return messages, all_retrieved
+ 
+-    def _update_cookie(self, encoded_data, response):
++    def _update_cookie(self, response, encoded_data):
+         """
+         Either set the cookie with the encoded data if there is any data to
+         store, or delete the cookie.
+@@ -120,7 +120,7 @@ class CookieStorage(BaseStorage):
+                     unstored_messages.insert(0, messages.pop())
+                 encoded_data = self._encode(messages + [self.not_finished],
+                                             encode_empty=unstored_messages)
+-        self._update_cookie(encoded_data, response)
++        self._update_cookie(response, encoded_data)
+         return unstored_messages
+ 
+     def _legacy_hash(self, value):

@@ -1,0 +1,109 @@
+diff --git a/django/contrib/messages/storage/cookie.py b/django/contrib/messages/storage/cookie.py
+index 78256ca3b2..a03f7ab98c 100644
+--- a/django/contrib/messages/storage/cookie.py
++++ b/django/contrib/messages/storage/cookie.py
+@@ -78,12 +78,10 @@ class CookieStorage(BaseStorage):
+             messages.pop()
+         return messages, all_retrieved
+ 
+-    def _update_cookie(self, encoded_data, response):
+-        """
+-        Either set the cookie with the encoded data if there is any data to
+-        store, or delete the cookie.
+-        """
+-        if encoded_data:
++    def _update_cookie(self, response, encoded_data):
++        if not encoded_data:
++            response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)
++        else:
+             response.set_cookie(
+                 self.cookie_name, encoded_data,
+                 domain=settings.SESSION_COOKIE_DOMAIN,
+@@ -91,8 +89,6 @@ class CookieStorage(BaseStorage):
+                 httponly=settings.SESSION_COOKIE_HTTPONLY or None,
+                 samesite=settings.SESSION_COOKIE_SAMESITE,
+             )
+-        else:
+-            response.delete_cookie(self.cookie_name, domain=settings.SESSION_COOKIE_DOMAIN)
+ 
+     def _store(self, messages, response, remove_oldest=True, *args, **kwargs):
+         """
+@@ -120,7 +116,7 @@ class CookieStorage(BaseStorage):
+                     unstored_messages.insert(0, messages.pop())
+                 encoded_data = self._encode(messages + [self.not_finished],
+                                             encode_empty=unstored_messages)
+-        self._update_cookie(encoded_data, response)
++        self._update_cookie(response, encoded_data)
+         return unstored_messages
+ 
+     def _legacy_hash(self, value):
+diff --git a/django/contrib/sessions/middleware.py b/django/contrib/sessions/middleware.py
+index 63013eef7a..f3994a83b6 100644
+--- a/django/contrib/sessions/middleware.py
++++ b/django/contrib/sessions/middleware.py
+@@ -24,11 +24,6 @@ class SessionMiddleware(MiddlewareMixin):
+         request.session = self.SessionStore(session_key)
+ 
+     def process_response(self, request, response):
+-        """
+-        If request.session was modified, or if the configuration is to save the
+-        session every time, save the changes and set a session cookie or delete
+-        the session cookie if the session has been emptied.
+-        """
+         try:
+             accessed = request.session.accessed
+             modified = request.session.modified
+diff --git a/django/http/response.py b/django/http/response.py
+index e00bcacefb..740f5ae2cb 100644
+--- a/django/http/response.py
++++ b/django/http/response.py
+@@ -1,5 +1,6 @@
+ import datetime
+ import json
++import logging
+ import mimetypes
+ import os
+ import re
+@@ -19,6 +20,8 @@ from django.utils.encoding import iri_to_uri
+ from django.utils.http import http_date
+ from django.utils.regex_helper import _lazy_re_compile
+ 
++logger = logging.getLogger('django.http.response')
++
+ _charset_from_content_type_re = _lazy_re_compile(r';\s*charset=(?P<charset>[^\s;]+)', re.I)
+ 
+ 
+@@ -206,19 +209,25 @@ class HttpResponseBase:
+         if key not in self:
+             self[key] = value
+ 
+-    def set_signed_cookie(self, key, value, salt='', **kwargs):
+-        value = signing.get_cookie_signer(salt=key + salt).sign(value)
+-        return self.set_cookie(key, value, **kwargs)
++    @staticmethod
++    def _cookie_requires_secure(cookie_name):
++        return cookie_name.startswith(('__Secure-', '__Host-'))
+ 
+-    def delete_cookie(self, key, path='/', domain=None):
+-        # Most browsers ignore the Set-Cookie header if the cookie name starts
+-        # with __Host- or __Secure- and the cookie doesn't use the secure flag.
+-        secure = key.startswith(('__Secure-', '__Host-'))
++    def delete_cookie(self, cookie_name, path='/', domain=None, samesite=None):
++        logger.debug(
++            'Expiring response cookie',
++            extra={'cookie_name': cookie_name, 'cookie_path': path, 'cookie_domain': domain},
++        )
++        secure = self._cookie_requires_secure(cookie_name)
+         self.set_cookie(
+-            key, max_age=0, path=path, domain=domain, secure=secure,
++            cookie_name, max_age=0, path=path, domain=domain, secure=secure, samesite=samesite,
+             expires='Thu, 01 Jan 1970 00:00:00 GMT',
+         )
+ 
++    def set_signed_cookie(self, key, value, salt='', **kwargs):
++        value = signing.get_cookie_signer(salt=key + salt).sign(value)
++        return self.set_cookie(key, value, **kwargs)
++
+     # Common methods used by subclasses
+ 
+     def make_bytes(self, value):
