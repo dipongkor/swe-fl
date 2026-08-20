@@ -1,0 +1,24 @@
+diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py
+index e10a5bb6d9..ec04e0341a 100644
+--- a/django/db/models/fields/files.py
++++ b/django/db/models/fields/files.py
+@@ -274,13 +274,13 @@ class FileField(Field):
+             return []
+ 
+     def deconstruct(self):
+-        name, path, args, kwargs = super().deconstruct()
+-        if kwargs.get("max_length") == 100:
+-            del kwargs["max_length"]
+-        kwargs['upload_to'] = self.upload_to
++        name, path, args, field_options = super().deconstruct()
++        if field_options.get("max_length") == 100:
++            del field_options["max_length"]
++        field_options['upload_to'] = self.upload_to
+         if self.storage is not default_storage:
+-            kwargs['storage'] = self.storage
+-        return name, path, args, kwargs
++            field_options['storage'] = self.storage
++        return name, path, args, field_options
+ 
+     def get_internal_type(self):
+         return "FileField"

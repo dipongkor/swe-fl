@@ -1,0 +1,13 @@
+diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py
+index e10a5bb6d9..056dc529bf 100644
+--- a/django/db/models/fields/files.py
++++ b/django/db/models/fields/files.py
+@@ -273,7 +273,7 @@ class FileField(Field):
+         else:
+             return []
+ 
+-    def deconstruct(self):
++    def deconstruct(self, migration_context=None):
+         name, path, args, kwargs = super().deconstruct()
+         if kwargs.get("max_length") == 100:
+             del kwargs["max_length"]

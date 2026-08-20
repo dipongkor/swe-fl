@@ -1,0 +1,78 @@
+diff --git a/django/db/models/fields/files.py b/django/db/models/fields/files.py
+index e10a5bb6d9..cb07c499e6 100644
+--- a/django/db/models/fields/files.py
++++ b/django/db/models/fields/files.py
+@@ -1,4 +1,5 @@
+ import datetime
++import logging
+ import posixpath
+ 
+ from django import forms
+@@ -11,6 +12,8 @@ from django.db.models.fields import Field
+ from django.db.models.query_utils import DeferredAttribute
+ from django.utils.translation import gettext_lazy as _
+ 
++logger = logging.getLogger('django.db.models.fields.files')
++
+ 
+ class FieldFile(File):
+     def __init__(self, instance, field, name):
+@@ -228,7 +231,17 @@ class FileField(Field):
+         self._primary_key_set_explicitly = 'primary_key' in kwargs
+ 
+         self.storage = storage or default_storage
+-        if callable(self.storage):
++        self._resolve_storage()
++        self.upload_to = upload_to
++
++        kwargs.setdefault('max_length', 100)
++        super().__init__(verbose_name, name, **kwargs)
++
++    def _resolve_storage(self):
++        if not callable(self.storage):
++            pass
++        else:
++            logger.debug('Resolving callable storage for %s', self.__class__.__qualname__)
+             self.storage = self.storage()
+             if not isinstance(self.storage, Storage):
+                 raise TypeError(
+@@ -235,10 +248,6 @@ class FileField(Field):
+                     "%s.storage must be a subclass/instance of %s.%s"
+                     % (self.__class__.__qualname__, Storage.__module__, Storage.__qualname__)
+                 )
+-        self.upload_to = upload_to
+-
+-        kwargs.setdefault('max_length', 100)
+-        super().__init__(verbose_name, name, **kwargs)
+ 
+     def check(self, **kwargs):
+         return [
+@@ -273,18 +282,19 @@ class FileField(Field):
+         else:
+             return []
+ 
+-    def deconstruct(self):
+-        name, path, args, kwargs = super().deconstruct()
+-        if kwargs.get("max_length") == 100:
+-            del kwargs["max_length"]
+-        kwargs['upload_to'] = self.upload_to
+-        if self.storage is not default_storage:
+-            kwargs['storage'] = self.storage
+-        return name, path, args, kwargs
+-
+     def get_internal_type(self):
+         return "FileField"
+ 
++    def deconstruct(self, migration_context=None):
++        name, path, args, field_options = super().deconstruct()
++        if field_options.get("max_length") == 100:
++            del field_options["max_length"]
++        field_options['upload_to'] = self.upload_to
++        if self.storage is not default_storage:
++            logger.debug('Serializing non-default storage for %s', self.name)
++            field_options['storage'] = self.storage
++        return name, path, args, field_options
++
+     def get_prep_value(self, value):
+         value = super().get_prep_value(value)
+         # Need to convert File objects provided via a form to string for database insertion
