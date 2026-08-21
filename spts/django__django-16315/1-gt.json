@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-16315",
+  "root_cause": [
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "old_line": 1728,
+      "old_statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)",
+      "current_line": 1718,
+      "current_statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)"
+    },
+    {
+      "file": "django/db/models/sql/compiler.py",
+      "old_line": 1729,
+      "old_statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)",
+      "current_line": 1718,
+      "current_statement": "on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(\n    fields,\n    self.query.on_conflict,\n    self.query.update_fields,\n    self.query.unique_fields,\n)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "bulk_create with update_conflicts compiles one INSERT ... ON CONFLICT statement from two kinds of inputs: the model fields being inserted, and the user-supplied unique_fields/update_fields controlling the conflict clause. The insert column list is rendered from each field's column attribute, honoring db_column. The conflict suffix, however, is built by on_conflict_suffix_sql from query.update_fields and query.unique_fields, which still hold the raw field-name strings the user passed to bulk_create (the validation helper resolves them to Field objects only in its own local scope and discards the result). The suffix builder simply quotes the values it is given into identifier positions, so the generated clause names columns after the Python field names. For models where db_column differs from the field name, the statement mixes real column names in the INSERT part with nonexistent ones in the ON CONFLICT part, and the database rejects it \u2014 e.g. ON CONFLICT(\"blacklistid\") DO UPDATE SET \"sectorid\" = EXCLUDED.\"sectorid\" against columns actually named BlacklistID and SectorID.",
+    "annotator2": "bulk_create() retains update_fields and unique_fields as model-level names and the insert compiler forwards them directly to the backend's conflict-clause generator. For FieldsWithDbColumns, name and rank map to oTheRNaMe and rAnK in the database, but the generated SQL refers to the Python names. SQLite consequently reports that EXCLUDED.name does not exist before the conflicting rows can be updated. The two arguments independently determine the assignment columns and conflict target, so both are root causes."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

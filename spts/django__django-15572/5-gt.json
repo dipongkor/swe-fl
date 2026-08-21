@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-15572",
+  "root_cause": [
+    {
+      "file": "django/template/autoreload.py",
+      "old_line": 20,
+      "old_statement": "items.update(cwd / to_path(dir) for dir in backend.engine.dirs)",
+      "current_line": 22,
+      "current_statement": "items.update(cwd / to_path(dir) for dir in backend.engine.dirs)"
+    },
+    {
+      "file": "django/template/autoreload.py",
+      "old_line": 28,
+      "old_statement": "items.update(\n    cwd / to_path(directory)\n    for directory in loader.get_dirs()\n    if not is_django_path(directory)\n)",
+      "current_line": 27,
+      "current_statement": "items.update(\n    cwd / to_path(directory)\n    for directory in loader.get_dirs()\n    if not is_django_path(directory)\n)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "get_template_directories() must contain only real template directories because template_changed() classifies any changed file under one of them as a template change and, by returning True, suppresses the dev-server restart. Both collection points in the function admit empty strings, and pathlib normalization (cwd / to_path('')) turns an empty string into the project root, so a configuration like DIRS=[''] makes every file in the project count as a template: template caches are reset but application-code changes no longer trigger an autoreload restart. Before dirs were normalized with pathlib the empty string never matched any file path and was latent and harmless, which is why the symptom appeared as a regression when normalization was introduced.",
+    "annotator2": "Path('') denotes the current directory rather than an absent path. Both comprehensions in get_template_directories accept empty strings and prepend cwd, causing an empty template-directory setting to add the project root to the watched set. The regression directly exercises the backend DIRS path; the second line is the same independently reachable defect for loader-provided directories."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

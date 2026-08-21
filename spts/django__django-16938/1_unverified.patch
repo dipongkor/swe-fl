@@ -1,0 +1,15 @@
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+index 1d3269c41a..7cfb9b78c6 100644
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -135,10 +135,8 @@ class Serializer(base.Serializer):
+             if self.use_natural_foreign_keys and hasattr(
+                 field.remote_field.model, "natural_key"
+             ):
+-                # If the objects in the m2m have a natural key, use it
+                 def handle_m2m(value):
+                     natural = value.natural_key()
+-                    # Iterable natural keys are rolled out as subelements
+                     self.xml.startElement("object", {})
+                     for key_value in natural:
+                         self.xml.startElement("natural", {})

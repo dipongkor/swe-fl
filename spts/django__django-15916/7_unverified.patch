@@ -1,0 +1,38 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+index 192d9fad94..ad4175a7fa 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -3,6 +3,7 @@ Helper functions for creating Form classes from Django models
+ and database field objects.
+ """
+ from itertools import chain
++import logging
+ 
+ from django.core.exceptions import (
+     NON_FIELD_ERRORS,
+@@ -24,6 +25,8 @@ from django.utils.text import capfirst, get_text_list
+ from django.utils.translation import gettext
+ from django.utils.translation import gettext_lazy as _
+ 
++logger = logging.getLogger(__name__)
++
+ __all__ = (
+     "ModelForm",
+     "BaseModelForm",
+@@ -257,6 +260,7 @@ class ModelFormOptions:
+ 
+ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+     def __new__(mcs, name, bases, attrs):
++        logger.debug("Constructing model form class %s", name)
+         base_formfield_callback = None
+         for b in bases:
+             if hasattr(b, "Meta") and hasattr(b.Meta, "formfield_callback"):
+@@ -635,6 +639,8 @@ def modelform_factory(
+     # Give this new form class a reasonable name.
+     class_name = model.__name__ + "Form"
+ 
++    logger.debug("Creating generated model form %s", class_name)
++
+     # Class attributes for the new form class.
+     form_class_attrs = {"Meta": Meta, "formfield_callback": formfield_callback}
+ 

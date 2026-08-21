@@ -1,0 +1,22 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+index 192d9fad94..529eb09990 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -572,6 +572,7 @@ def modelform_factory(
+     help_texts=None,
+     error_messages=None,
+     field_classes=None,
++    class_name=None,
+ ):
+     """
+     Return a ModelForm containing form fields for the given model. You can
+@@ -633,7 +634,8 @@ def modelform_factory(
+     if formfield_callback:
+         Meta.formfield_callback = staticmethod(formfield_callback)
+     # Give this new form class a reasonable name.
+-    class_name = model.__name__ + "Form"
++    if class_name is None:
++        class_name = model.__name__ + "Form"
+ 
+     # Class attributes for the new form class.
+     form_class_attrs = {"Meta": Meta, "formfield_callback": formfield_callback}

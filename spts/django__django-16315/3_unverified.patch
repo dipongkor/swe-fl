@@ -1,0 +1,41 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 0562a71dd1..37a458375c 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1722,7 +1722,7 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         placeholder_rows, param_rows = self.assemble_as_sql(fields, value_rows)
+ 
+-        on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(
++        conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(
+             fields,
+             self.query.on_conflict,
+             self.query.update_fields,
+@@ -1740,8 +1740,8 @@ class SQLInsertCompiler(SQLCompiler):
+             else:
+                 result.append("VALUES (%s)" % ", ".join(placeholder_rows[0]))
+                 params = [param_rows[0]]
+-            if on_conflict_suffix_sql:
+-                result.append(on_conflict_suffix_sql)
++            if conflict_suffix_sql:
++                result.append(conflict_suffix_sql)
+             # Skip empty r_sql to allow subclasses to customize behavior for
+             # 3rd party backends. Refs #19096.
+             r_sql, self.returning_params = self.connection.ops.return_insert_columns(
+@@ -1754,12 +1754,12 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         if can_bulk:
+             result.append(self.connection.ops.bulk_insert_sql(fields, placeholder_rows))
+-            if on_conflict_suffix_sql:
+-                result.append(on_conflict_suffix_sql)
++            if conflict_suffix_sql:
++                result.append(conflict_suffix_sql)
+             return [(" ".join(result), tuple(p for ps in param_rows for p in ps))]
+         else:
+-            if on_conflict_suffix_sql:
+-                result.append(on_conflict_suffix_sql)
++            if conflict_suffix_sql:
++                result.append(conflict_suffix_sql)
+             return [
+                 (" ".join(result + ["VALUES (%s)" % ", ".join(p)]), vals)
+                 for p, vals in zip(placeholder_rows, param_rows)

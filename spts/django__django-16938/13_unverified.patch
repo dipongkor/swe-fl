@@ -1,0 +1,48 @@
+diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py
+index 36048601af..5e989e2cb2 100644
+--- a/django/core/serializers/python.py
++++ b/django/core/serializers/python.py
+@@ -10,6 +10,10 @@ from django.db import DEFAULT_DB_ALIAS, models
+ from django.utils.encoding import is_protected_type
+ 
+ 
++def _pk_only_related_iterator(obj, field):
++    return getattr(obj, field.name).only("pk").iterator()
++
++
+ class Serializer(base.Serializer):
+     """
+     Serialize a QuerySet to basic Python objects.
+@@ -79,7 +83,7 @@ class Serializer(base.Serializer):
+                     return self._value_from_field(value, value._meta.pk)
+ 
+                 def queryset_iterator(obj, field):
+-                    return getattr(obj, field.name).only("pk").iterator()
++                    return _pk_only_related_iterator(obj, field)
+ 
+             m2m_iter = getattr(obj, "_prefetched_objects_cache", {}).get(
+                 field.name,
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+index 1d3269c41a..57a3cffef5 100644
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -14,6 +14,10 @@ from django.db import DEFAULT_DB_ALIAS, models
+ from django.utils.xmlutils import SimplerXMLGenerator, UnserializableContentError
+ 
+ 
++def _pk_only_related_iterator(obj, field):
++    return getattr(obj, field.name).only("pk").iterator()
++
++
+ class Serializer(base.Serializer):
+     """Serialize a QuerySet to XML."""
+ 
+@@ -155,7 +159,7 @@ class Serializer(base.Serializer):
+                     self.xml.addQuickElement("object", attrs={"pk": str(value.pk)})
+ 
+                 def queryset_iterator(obj, field):
+-                    return getattr(obj, field.name).only("pk").iterator()
++                    return _pk_only_related_iterator(obj, field)
+ 
+             m2m_iter = getattr(obj, "_prefetched_objects_cache", {}).get(
+                 field.name,

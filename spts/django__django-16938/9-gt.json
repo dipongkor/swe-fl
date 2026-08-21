@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-16938",
+  "root_cause": [
+    {
+      "file": "django/core/serializers/python.py",
+      "old_line": 82,
+      "old_statement": "return getattr(obj, field.name).only(\"pk\").iterator()",
+      "current_line": 82,
+      "current_statement": "return getattr(obj, field.name).only(\"pk\").iterator()"
+    },
+    {
+      "file": "django/core/serializers/xml_serializer.py",
+      "old_line": 158,
+      "old_statement": "return getattr(obj, field.name).only(\"pk\").iterator()",
+      "current_line": 158,
+      "current_statement": "return getattr(obj, field.name).only(\"pk\").iterator()"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "When serializing a many-to-many field whose model defines no natural key, the serializers fetch the related objects through an optimized iterator that defers everything but the primary key: getattr(obj, field.name).only('pk'). That queryset starts from the related model's default manager, and a manager is allowed to shape its base queryset \u2014 including with select_related() to eagerly join a foreign key. Deferring a field and traversing it with select_related are mutually exclusive in the ORM: the SQL compiler's validation raises FieldError('Field X cannot be both deferred and traversed using select_related at the same time') when the pk-only mask meets the manager's select_related. So merely serializing any object whose m2m target uses such a manager crashes, even though the serializer never needs the joined data \u2014 only the pks. Managers without select_related are unaffected, which is why the reporter's workaround of restoring a plain default manager works.",
+    "annotator2": "Serializing a many-to-many field obtains its queryset from the related manager, whose default manager may already specify select_related. Calling only('pk') on that queryset defers the foreign-key column required by the selected relation, leading to incompatible query construction or extra selected data. Python-derived serializers and the XML serializer have independent iterator implementations, so both statements are root causes for their respective formats."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

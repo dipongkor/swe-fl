@@ -1,0 +1,39 @@
+diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py
+index 36048601af..2ec73d9098 100644
+--- a/django/core/serializers/python.py
++++ b/django/core/serializers/python.py
+@@ -85,7 +85,15 @@ class Serializer(base.Serializer):
+                 field.name,
+                 queryset_iterator(obj, field),
+             )
+-            self._current[field.name] = [m2m_value(related) for related in m2m_iter]
++            related_values = []
++            m2m_iterator = iter(m2m_iter)
++            while True:
++                try:
++                    related = next(m2m_iterator)
++                except StopIteration:
++                    break
++                related_values.append(m2m_value(related))
++            self._current[field.name] = related_values
+ 
+     def getvalue(self):
+         return self.objects
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+index 1d3269c41a..d846ad8fa2 100644
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -161,7 +161,12 @@ class Serializer(base.Serializer):
+                 field.name,
+                 queryset_iterator(obj, field),
+             )
+-            for relobj in m2m_iter:
++            related_iterator = iter(m2m_iter)
++            while True:
++                try:
++                    relobj = next(related_iterator)
++                except StopIteration:
++                    break
+                 handle_m2m(relobj)
+ 
+             self.xml.endElement("field")

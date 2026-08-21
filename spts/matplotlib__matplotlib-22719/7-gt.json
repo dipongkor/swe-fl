@@ -1,0 +1,20 @@
+{
+  "instance_id": "matplotlib__matplotlib-22719",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/category.py",
+      "old_line": 61,
+      "old_statement": "if is_numlike:",
+      "current_line": 62,
+      "current_statement": "if is_numlike:"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "",
+    "annotator2": "An axis with categorical units sends the empty plot data to StrCategoryConverter.convert. The numeric test uses all() over the empty array and is therefore true. Line 61 treats that vacuous result as evidence of numeric input and emits a deprecation warning; when warnings are errors, unit conversion is wrapped as ConversionError. The condition is the minimal root cause because no element actually violates the categorical contract."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "An axis with categorical units sends the empty plot data to StrCategoryConverter.convert. The numeric test uses all() over the empty array and is therefore true. Line 62 treats that vacuous result as evidence of numeric input and emits a deprecation warning; when warnings are errors, unit conversion is wrapped as ConversionError. The condition is the minimal root cause because no element actually violates the categorical contract."
+  }
+}

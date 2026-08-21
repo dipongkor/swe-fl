@@ -1,0 +1,18 @@
+diff --git a/django/template/autoreload.py b/django/template/autoreload.py
+index 84c8554165..73852e5788 100644
+--- a/django/template/autoreload.py
++++ b/django/template/autoreload.py
+@@ -13,7 +13,12 @@ def get_template_directories():
+     # Collect the directories, filtering out Django templates.
+     cwd = Path.cwd()
+     items = set()
+-    for backend in engines.all():
++    backend_iterator = iter(engines.all())
++    while True:
++        try:
++            backend = next(backend_iterator)
++        except StopIteration:
++            break
+         if not isinstance(backend, DjangoTemplates):
+             continue
+ 

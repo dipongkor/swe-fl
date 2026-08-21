@@ -1,0 +1,26 @@
+diff --git a/lib/matplotlib/category.py b/lib/matplotlib/category.py
+index c823b68fd9..c89e71ec0c 100644
+--- a/lib/matplotlib/category.py
++++ b/lib/matplotlib/category.py
+@@ -58,15 +58,17 @@ class StrCategoryConverter(units.ConversionInterface):
+             is_numlike = all(units.ConversionInterface.is_numlike(v)
+                              and not isinstance(v, (str, bytes))
+                              for v in values)
+-        if is_numlike:
++        if not is_numlike:
++            # force an update so it also does type checking
++            unit.update(values)
++            return np.vectorize(
++                unit._mapping.__getitem__, otypes=[float])(values)
++        else:
+             _api.warn_deprecated(
+                 "3.5", message="Support for passing numbers through unit "
+                 "converters is deprecated since %(since)s and support will be "
+                 "removed %(removal)s; use Axis.convert_units instead.")
+             return np.asarray(values, dtype=float)
+-        # force an update so it also does type checking
+-        unit.update(values)
+-        return np.vectorize(unit._mapping.__getitem__, otypes=[float])(values)
+ 
+     @staticmethod
+     def axisinfo(unit, axis):

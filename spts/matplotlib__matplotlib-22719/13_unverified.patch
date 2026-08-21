@@ -1,0 +1,44 @@
+diff --git a/lib/matplotlib/category.py b/lib/matplotlib/category.py
+index c823b68fd9..e828d9078f 100644
+--- a/lib/matplotlib/category.py
++++ b/lib/matplotlib/category.py
+@@ -24,6 +24,13 @@ _log = logging.getLogger(__name__)
+ 
+ 
+ class StrCategoryConverter(units.ConversionInterface):
++    @staticmethod
++    def _all_numlike(values):
++        return all(
++            units.ConversionInterface.is_numlike(value)
++            and not isinstance(value, (str, bytes))
++            for value in values)
++
+     @staticmethod
+     def convert(value, unit, axis):
+         """
+@@ -55,18 +62,18 @@ class StrCategoryConverter(units.ConversionInterface):
+         values = np.atleast_1d(np.array(value, dtype=object))
+         # pass through sequence of non binary numbers
+         with _api.suppress_matplotlib_deprecation_warning():
+-            is_numlike = all(units.ConversionInterface.is_numlike(v)
+-                             and not isinstance(v, (str, bytes))
+-                             for v in values)
+-        if is_numlike:
++            all_numlike = StrCategoryConverter._all_numlike(values)
++        if not all_numlike:
++            # force an update so it also does type checking
++            unit.update(values)
++            return np.vectorize(
++                unit._mapping.__getitem__, otypes=[float])(values)
++        else:
+             _api.warn_deprecated(
+                 "3.5", message="Support for passing numbers through unit "
+                 "converters is deprecated since %(since)s and support will be "
+                 "removed %(removal)s; use Axis.convert_units instead.")
+             return np.asarray(values, dtype=float)
+-        # force an update so it also does type checking
+-        unit.update(values)
+-        return np.vectorize(unit._mapping.__getitem__, otypes=[float])(values)
+ 
+     @staticmethod
+     def axisinfo(unit, axis):

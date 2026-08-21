@@ -1,0 +1,66 @@
+diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py
+index 36048601af..142dbf58c2 100644
+--- a/django/core/serializers/python.py
++++ b/django/core/serializers/python.py
+@@ -61,6 +61,9 @@ class Serializer(base.Serializer):
+             value = self._value_from_field(obj, field)
+         self._current[field.name] = value
+ 
++    def getvalue(self):
++        return self.objects
++
+     def handle_m2m_field(self, obj, field):
+         if field.remote_field.through._meta.auto_created:
+             if self.use_natural_foreign_keys and hasattr(
+@@ -87,9 +90,6 @@ class Serializer(base.Serializer):
+             )
+             self._current[field.name] = [m2m_value(related) for related in m2m_iter]
+ 
+-    def getvalue(self):
+-        return self.objects
+-
+ 
+ def Deserializer(
+     object_list, *, using=DEFAULT_DB_ALIAS, ignorenonexistent=False, **options
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+index 1d3269c41a..638cbf51c1 100644
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -124,6 +124,18 @@ class Serializer(base.Serializer):
+             self.xml.addQuickElement("None")
+         self.xml.endElement("field")
+ 
++    def _start_relational_field(self, field):
++        """Output the <field> element for relational fields."""
++        self.indent(2)
++        self.xml.startElement(
++            "field",
++            {
++                "name": field.name,
++                "rel": field.remote_field.__class__.__name__,
++                "to": str(field.remote_field.model._meta),
++            },
++        )
++
+     def handle_m2m_field(self, obj, field):
+         """
+         Handle a ManyToManyField. Related objects are only serialized as
+@@ -166,18 +178,6 @@ class Serializer(base.Serializer):
+ 
+             self.xml.endElement("field")
+ 
+-    def _start_relational_field(self, field):
+-        """Output the <field> element for relational fields."""
+-        self.indent(2)
+-        self.xml.startElement(
+-            "field",
+-            {
+-                "name": field.name,
+-                "rel": field.remote_field.__class__.__name__,
+-                "to": str(field.remote_field.model._meta),
+-            },
+-        )
+-
+ 
+ class Deserializer(base.Deserializer):
+     """Deserialize XML."""

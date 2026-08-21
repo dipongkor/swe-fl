@@ -1,0 +1,50 @@
+diff --git a/django/core/serializers/python.py b/django/core/serializers/python.py
+index 36048601af..14e69a4340 100644
+--- a/django/core/serializers/python.py
++++ b/django/core/serializers/python.py
+@@ -61,7 +61,7 @@ class Serializer(base.Serializer):
+             value = self._value_from_field(obj, field)
+         self._current[field.name] = value
+ 
+-    def handle_m2m_field(self, obj, field):
++    def handle_m2m_field(self, obj, field, pk_only=True):
+         if field.remote_field.through._meta.auto_created:
+             if self.use_natural_foreign_keys and hasattr(
+                 field.remote_field.model, "natural_key"
+@@ -79,7 +79,10 @@ class Serializer(base.Serializer):
+                     return self._value_from_field(value, value._meta.pk)
+ 
+                 def queryset_iterator(obj, field):
+-                    return getattr(obj, field.name).only("pk").iterator()
++                    related_manager = getattr(obj, field.name)
++                    if pk_only:
++                        related_manager = related_manager.only("pk")
++                    return related_manager.iterator()
+ 
+             m2m_iter = getattr(obj, "_prefetched_objects_cache", {}).get(
+                 field.name,
+diff --git a/django/core/serializers/xml_serializer.py b/django/core/serializers/xml_serializer.py
+index 1d3269c41a..4b8179343c 100644
+--- a/django/core/serializers/xml_serializer.py
++++ b/django/core/serializers/xml_serializer.py
+@@ -124,7 +124,7 @@ class Serializer(base.Serializer):
+             self.xml.addQuickElement("None")
+         self.xml.endElement("field")
+ 
+-    def handle_m2m_field(self, obj, field):
++    def handle_m2m_field(self, obj, field, pk_only=True):
+         """
+         Handle a ManyToManyField. Related objects are only serialized as
+         references to the object's PK (i.e. the related *data* is not dumped,
+@@ -155,7 +155,10 @@ class Serializer(base.Serializer):
+                     self.xml.addQuickElement("object", attrs={"pk": str(value.pk)})
+ 
+                 def queryset_iterator(obj, field):
+-                    return getattr(obj, field.name).only("pk").iterator()
++                    related_manager = getattr(obj, field.name)
++                    if pk_only:
++                        related_manager = related_manager.only("pk")
++                    return related_manager.iterator()
+ 
+             m2m_iter = getattr(obj, "_prefetched_objects_cache", {}).get(
+                 field.name,

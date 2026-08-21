@@ -1,0 +1,32 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 0562a71dd1..a345c11bc8 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1697,7 +1697,13 @@ class SQLInsertCompiler(SQLCompiler):
+         fields = self.query.fields or [opts.pk]
+         result.append("(%s)" % ", ".join(qn(f.column) for f in fields))
+ 
+-        if self.query.fields:
++        if not self.query.fields:
++            # An empty object.
++            value_rows = [
++                [self.connection.ops.pk_default_value()] for _ in self.query.objs
++            ]
++            fields = [None]
++        else:
+             value_rows = [
+                 [
+                     self.prepare_value(field, self.pre_save_val(field, obj))
+@@ -1705,12 +1711,6 @@ class SQLInsertCompiler(SQLCompiler):
+                 ]
+                 for obj in self.query.objs
+             ]
+-        else:
+-            # An empty object.
+-            value_rows = [
+-                [self.connection.ops.pk_default_value()] for _ in self.query.objs
+-            ]
+-            fields = [None]
+ 
+         # Currently the backends just accept values when generating bulk
+         # queries and generate their own placeholders. Doing that isn't

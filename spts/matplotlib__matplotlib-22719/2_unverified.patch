@@ -1,0 +1,72 @@
+diff --git a/lib/matplotlib/category.py b/lib/matplotlib/category.py
+index c823b68fd9..1b71d0f053 100644
+--- a/lib/matplotlib/category.py
++++ b/lib/matplotlib/category.py
+@@ -24,6 +24,33 @@ _log = logging.getLogger(__name__)
+ 
+ 
+ class StrCategoryConverter(units.ConversionInterface):
++    @staticmethod
++    def axisinfo(unit, axis):
++        """
++        Set the default axis ticks and labels.
++
++        Parameters
++        ----------
++        unit : `.UnitData`
++            object string unit information for value
++        axis : `~matplotlib.axis.Axis`
++            axis for which information is being set
++
++            .. note:: *axis* is not used
++
++        Returns
++        -------
++        `~matplotlib.units.AxisInfo`
++            Information to support default tick labeling
++
++        """
++        StrCategoryConverter._validate_unit(unit)
++        # locator and formatter take mapping dict because
++        # args need to be pass by reference for updates
++        majloc = StrCategoryLocator(unit._mapping)
++        majfmt = StrCategoryFormatter(unit._mapping)
++        return units.AxisInfo(majloc=majloc, majfmt=majfmt)
++
+     @staticmethod
+     def convert(value, unit, axis):
+         """
+@@ -68,33 +95,6 @@ class StrCategoryConverter(units.ConversionInterface):
+         unit.update(values)
+         return np.vectorize(unit._mapping.__getitem__, otypes=[float])(values)
+ 
+-    @staticmethod
+-    def axisinfo(unit, axis):
+-        """
+-        Set the default axis ticks and labels.
+-
+-        Parameters
+-        ----------
+-        unit : `.UnitData`
+-            object string unit information for value
+-        axis : `~matplotlib.axis.Axis`
+-            axis for which information is being set
+-
+-            .. note:: *axis* is not used
+-
+-        Returns
+-        -------
+-        `~matplotlib.units.AxisInfo`
+-            Information to support default tick labeling
+-
+-        """
+-        StrCategoryConverter._validate_unit(unit)
+-        # locator and formatter take mapping dict because
+-        # args need to be pass by reference for updates
+-        majloc = StrCategoryLocator(unit._mapping)
+-        majfmt = StrCategoryFormatter(unit._mapping)
+-        return units.AxisInfo(majloc=majloc, majfmt=majfmt)
+-
+     @staticmethod
+     def default_units(data, axis):
+         """

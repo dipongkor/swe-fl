@@ -1,0 +1,35 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 0562a71dd1..4c828737b9 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1685,7 +1685,7 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         return placeholder_rows, param_rows
+ 
+-    def as_sql(self):
++    def as_sql(self, include_conflict_suffix=True):
+         # We don't need quote_name_unless_alias() here, since these are all
+         # going to be column names (so we can avoid the extra overhead).
+         qn = self.connection.ops.quote_name
+@@ -1722,12 +1722,15 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         placeholder_rows, param_rows = self.assemble_as_sql(fields, value_rows)
+ 
+-        on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(
+-            fields,
+-            self.query.on_conflict,
+-            self.query.update_fields,
+-            self.query.unique_fields,
+-        )
++        if include_conflict_suffix:
++            on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(
++                fields,
++                self.query.on_conflict,
++                self.query.update_fields,
++                self.query.unique_fields,
++            )
++        else:
++            on_conflict_suffix_sql = ""
+         if (
+             self.returning_fields
+             and self.connection.features.can_return_columns_from_insert

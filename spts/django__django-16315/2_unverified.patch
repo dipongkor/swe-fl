@@ -1,0 +1,88 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 0562a71dd1..317ef5b48f 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1650,41 +1650,6 @@ class SQLInsertCompiler(SQLCompiler):
+             return getattr(obj, field.attname)
+         return field.pre_save(obj, add=True)
+ 
+-    def assemble_as_sql(self, fields, value_rows):
+-        """
+-        Take a sequence of N fields and a sequence of M rows of values, and
+-        generate placeholder SQL and parameters for each field and value.
+-        Return a pair containing:
+-         * a sequence of M rows of N SQL placeholder strings, and
+-         * a sequence of M rows of corresponding parameter values.
+-
+-        Each placeholder string may contain any number of '%s' interpolation
+-        strings, and each parameter row will contain exactly as many params
+-        as the total number of '%s's in the corresponding placeholder row.
+-        """
+-        if not value_rows:
+-            return [], []
+-
+-        # list of (sql, [params]) tuples for each object to be saved
+-        # Shape: [n_objs][n_fields][2]
+-        rows_of_fields_as_sql = (
+-            (self.field_as_sql(field, v) for field, v in zip(fields, row))
+-            for row in value_rows
+-        )
+-
+-        # tuple like ([sqls], [[params]s]) for each object to be saved
+-        # Shape: [n_objs][2][n_fields]
+-        sql_and_param_pair_rows = (zip(*row) for row in rows_of_fields_as_sql)
+-
+-        # Extract separate lists for placeholders and params.
+-        # Each of these has shape [n_objs][n_fields]
+-        placeholder_rows, param_rows = zip(*sql_and_param_pair_rows)
+-
+-        # Params for each field are still lists, and need to be flattened.
+-        param_rows = [[p for ps in row for p in ps] for row in param_rows]
+-
+-        return placeholder_rows, param_rows
+-
+     def as_sql(self):
+         # We don't need quote_name_unless_alias() here, since these are all
+         # going to be column names (so we can avoid the extra overhead).
+@@ -1765,6 +1730,41 @@ class SQLInsertCompiler(SQLCompiler):
+                 for p, vals in zip(placeholder_rows, param_rows)
+             ]
+ 
++    def assemble_as_sql(self, fields, value_rows):
++        """
++        Take a sequence of N fields and a sequence of M rows of values, and
++        generate placeholder SQL and parameters for each field and value.
++        Return a pair containing:
++         * a sequence of M rows of N SQL placeholder strings, and
++         * a sequence of M rows of corresponding parameter values.
++
++        Each placeholder string may contain any number of '%s' interpolation
++        strings, and each parameter row will contain exactly as many params
++        as the total number of '%s's in the corresponding placeholder row.
++        """
++        if not value_rows:
++            return [], []
++
++        # list of (sql, [params]) tuples for each object to be saved
++        # Shape: [n_objs][n_fields][2]
++        rows_of_fields_as_sql = (
++            (self.field_as_sql(field, v) for field, v in zip(fields, row))
++            for row in value_rows
++        )
++
++        # tuple like ([sqls], [[params]s]) for each object to be saved
++        # Shape: [n_objs][2][n_fields]
++        sql_and_param_pair_rows = (zip(*row) for row in rows_of_fields_as_sql)
++
++        # Extract separate lists for placeholders and params.
++        # Each of these has shape [n_objs][n_fields]
++        placeholder_rows, param_rows = zip(*sql_and_param_pair_rows)
++
++        # Params for each field are still lists, and need to be flattened.
++        param_rows = [[p for ps in row for p in ps] for row in param_rows]
++
++        return placeholder_rows, param_rows
++
+     def execute_sql(self, returning_fields=None):
+         assert not (
+             returning_fields

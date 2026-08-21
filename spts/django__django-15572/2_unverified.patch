@@ -1,0 +1,34 @@
+diff --git a/django/template/autoreload.py b/django/template/autoreload.py
+index 84c8554165..0b541156fb 100644
+--- a/django/template/autoreload.py
++++ b/django/template/autoreload.py
+@@ -7,6 +7,14 @@ from django.utils._os import to_path
+ from django.utils.autoreload import autoreload_started, file_changed, is_django_path
+ 
+ 
++def reset_loaders():
++    for backend in engines.all():
++        if not isinstance(backend, DjangoTemplates):
++            continue
++        for loader in backend.engine.template_loaders:
++            loader.reset()
++
++
+ def get_template_directories():
+     # Iterate through each template backend and find
+     # any template_loader that has a 'get_dirs' method.
+@@ -30,14 +38,6 @@ def get_template_directories():
+     return items
+ 
+ 
+-def reset_loaders():
+-    for backend in engines.all():
+-        if not isinstance(backend, DjangoTemplates):
+-            continue
+-        for loader in backend.engine.template_loaders:
+-            loader.reset()
+-
+-
+ @receiver(autoreload_started, dispatch_uid="template_loaders_watch_changes")
+ def watch_for_template_changes(sender, **kwargs):
+     for directory in get_template_directories():

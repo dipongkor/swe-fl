@@ -1,0 +1,61 @@
+diff --git a/django/db/models/sql/compiler.py b/django/db/models/sql/compiler.py
+index 0562a71dd1..249fdd8a05 100644
+--- a/django/db/models/sql/compiler.py
++++ b/django/db/models/sql/compiler.py
+@@ -1685,6 +1685,14 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         return placeholder_rows, param_rows
+ 
++    def _on_conflict_suffix_sql(self, fields):
++        return self.connection.ops.on_conflict_suffix_sql(
++            fields,
++            self.query.on_conflict,
++            self.query.update_fields,
++            self.query.unique_fields,
++        )
++
+     def as_sql(self):
+         # We don't need quote_name_unless_alias() here, since these are all
+         # going to be column names (so we can avoid the extra overhead).
+@@ -1722,12 +1730,7 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         placeholder_rows, param_rows = self.assemble_as_sql(fields, value_rows)
+ 
+-        on_conflict_suffix_sql = self.connection.ops.on_conflict_suffix_sql(
+-            fields,
+-            self.query.on_conflict,
+-            self.query.update_fields,
+-            self.query.unique_fields,
+-        )
++        conflict_suffix_sql = self._on_conflict_suffix_sql(fields)
+         if (
+             self.returning_fields
+             and self.connection.features.can_return_columns_from_insert
+@@ -1740,8 +1743,8 @@ class SQLInsertCompiler(SQLCompiler):
+             else:
+                 result.append("VALUES (%s)" % ", ".join(placeholder_rows[0]))
+                 params = [param_rows[0]]
+-            if on_conflict_suffix_sql:
+-                result.append(on_conflict_suffix_sql)
++            if conflict_suffix_sql:
++                result.append(conflict_suffix_sql)
+             # Skip empty r_sql to allow subclasses to customize behavior for
+             # 3rd party backends. Refs #19096.
+             r_sql, self.returning_params = self.connection.ops.return_insert_columns(
+@@ -1754,12 +1757,12 @@ class SQLInsertCompiler(SQLCompiler):
+ 
+         if can_bulk:
+             result.append(self.connection.ops.bulk_insert_sql(fields, placeholder_rows))
+-            if on_conflict_suffix_sql:
+-                result.append(on_conflict_suffix_sql)
++            if conflict_suffix_sql:
++                result.append(conflict_suffix_sql)
+             return [(" ".join(result), tuple(p for ps in param_rows for p in ps))]
+         else:
+-            if on_conflict_suffix_sql:
+-                result.append(on_conflict_suffix_sql)
++            if conflict_suffix_sql:
++                result.append(conflict_suffix_sql)
+             return [
+                 (" ".join(result + ["VALUES (%s)" % ", ".join(p)]), vals)
+                 for p, vals in zip(placeholder_rows, param_rows)

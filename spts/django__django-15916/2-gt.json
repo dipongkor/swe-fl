@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-15916",
+  "root_cause": [
+    {
+      "file": "django/forms/models.py",
+      "old_line": 639,
+      "old_statement": "form_class_attrs = {\"Meta\": Meta, \"formfield_callback\": formfield_callback}",
+      "current_line": 1658,
+      "current_statement": "form_class_attrs = {\"Meta\": Meta, \"formfield_callback\": formfield_callback}"
+    },
+    {
+      "file": "django/forms/models.py",
+      "old_line": 266,
+      "old_statement": "formfield_callback = attrs.pop(\"formfield_callback\", base_formfield_callback)",
+      "current_line": 266,
+      "current_statement": "formfield_callback = attrs.pop(\"formfield_callback\", base_formfield_callback)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "A ModelForm's fields are materialized by its metaclass, which threads an optional formfield_callback into fields_for_model. At base that callback travels through an ad-hoc channel: a class attribute popped off attrs, with a fallback that scans the bases' Meta classes \u2014 the form's own Meta is never consulted. modelform_factory interacts fatally with this: it always sets formfield_callback in the new class's attrs, even when its parameter is the default None, and dict.pop treats a present None as a definitive answer, so the fallback that would have found the base form's Meta.formfield_callback is bypassed. The net effect is the reported bug: modelform_factory(model, form=MyForm) builds a form whose fields ignore MyForm's callback (e.g. the all_required behavior vanishes in the factory-made form), and the Meta spelling of the callback does nothing anywhere. The fix promotes formfield_callback to a real ModelFormOptions/Meta option: ModelFormOptions reads it from Meta, the metaclass consumes opts.formfield_callback, and the factory stops injecting the class attribute \u2014 the Meta it synthesizes already inherits the parent form's Meta and stores any explicit factory callback, so both explicit and inherited callbacks flow through ordinary Meta inheritance.",
+    "annotator2": "ModelFormMetaclass selects callbacks through an ad hoc class-attribute channel and never reads the current form's own Meta option. In addition, modelform_factory always inserts a class attribute whose default None masks the callback available through the supplied form's Meta. fields_for_model consequently constructs ordinary TextInput fields instead of the requested Textarea fields for both direct Meta declarations and factory-derived forms. The lookup and factory injection independently explain the two regression scenarios."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

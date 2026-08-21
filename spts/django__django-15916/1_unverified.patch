@@ -1,0 +1,88 @@
+diff --git a/django/forms/models.py b/django/forms/models.py
+index 192d9fad94..865456c600 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -272,9 +272,6 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+ 
+         opts = new_class._meta = ModelFormOptions(getattr(new_class, "Meta", None))
+ 
+-        # We check if a string was passed to `fields` or `exclude`,
+-        # which is likely to be a mistake where the user typed ('foo') instead
+-        # of ('foo',)
+         for opt in ["fields", "exclude", "localized_fields"]:
+             value = getattr(opts, opt)
+             if isinstance(value, str) and value != ALL_FIELDS:
+@@ -290,7 +287,6 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+                 raise TypeError(msg)
+ 
+         if opts.model:
+-            # If a model is defined, extract form fields from it.
+             if opts.fields is None and opts.exclude is None:
+                 raise ImproperlyConfigured(
+                     "Creating a ModelForm without either the 'fields' attribute "
+@@ -299,8 +295,6 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+                 )
+ 
+             if opts.fields == ALL_FIELDS:
+-                # Sentinel for fields_for_model to indicate "get the list of
+-                # fields from the model"
+                 opts.fields = None
+ 
+             fields = fields_for_model(
+@@ -314,19 +308,15 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
+                 opts.help_texts,
+                 opts.error_messages,
+                 opts.field_classes,
+-                # limit_choices_to will be applied during ModelForm.__init__().
+                 apply_limit_choices_to=False,
+             )
+ 
+-            # make sure opts.fields doesn't specify an invalid field
+             none_model_fields = {k for k, v in fields.items() if not v}
+             missing_fields = none_model_fields.difference(new_class.declared_fields)
+             if missing_fields:
+                 message = "Unknown field(s) (%s) specified for %s"
+                 message = message % (", ".join(missing_fields), opts.model.__name__)
+                 raise FieldError(message)
+-            # Override default model fields with any custom declared ones
+-            # (plus, include all the other declared fields).
+             fields.update(new_class.declared_fields)
+         else:
+             fields = new_class.declared_fields
+@@ -603,11 +593,7 @@ def modelform_factory(
+     ``field_classes`` is a dictionary of model field names mapped to a form
+     field class.
+     """
+-    # Create the inner Meta class. FIXME: ideally, we should be able to
+-    # construct a ModelForm without creating and passing in a temporary
+-    # inner class.
+ 
+-    # Build up a list of attributes that the Meta object will have.
+     attrs = {"model": model}
+     if fields is not None:
+         attrs["fields"] = fields
+@@ -626,16 +612,12 @@ def modelform_factory(
+     if field_classes is not None:
+         attrs["field_classes"] = field_classes
+ 
+-    # If parent form class already has an inner Meta, the Meta we're
+-    # creating needs to inherit from the parent's inner meta.
+     bases = (form.Meta,) if hasattr(form, "Meta") else ()
+     Meta = type("Meta", bases, attrs)
+     if formfield_callback:
+         Meta.formfield_callback = staticmethod(formfield_callback)
+-    # Give this new form class a reasonable name.
+     class_name = model.__name__ + "Form"
+ 
+-    # Class attributes for the new form class.
+     form_class_attrs = {"Meta": Meta, "formfield_callback": formfield_callback}
+ 
+     if getattr(Meta, "fields", None) is None and getattr(Meta, "exclude", None) is None:
+@@ -644,7 +626,6 @@ def modelform_factory(
+             "'exclude' explicitly is prohibited."
+         )
+ 
+-    # Instantiate type(form) in order to use the same metaclass as form.
+     return type(form)(class_name, (form,), form_class_attrs)
+ 
+ 

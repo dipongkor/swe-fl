@@ -1,0 +1,14 @@
+diff --git a/django/template/autoreload.py b/django/template/autoreload.py
+index 84c8554165..94a054ce0c 100644
+--- a/django/template/autoreload.py
++++ b/django/template/autoreload.py
+@@ -8,9 +8,6 @@ from django.utils.autoreload import autoreload_started, file_changed, is_django_
+ 
+ 
+ def get_template_directories():
+-    # Iterate through each template backend and find
+-    # any template_loader that has a 'get_dirs' method.
+-    # Collect the directories, filtering out Django templates.
+     cwd = Path.cwd()
+     items = set()
+     for backend in engines.all():
