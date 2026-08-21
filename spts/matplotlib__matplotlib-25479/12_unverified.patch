@@ -1,0 +1,46 @@
+diff --git a/lib/matplotlib/cm.py b/lib/matplotlib/cm.py
+index 38158db956..e5112bbc60 100644
+--- a/lib/matplotlib/cm.py
++++ b/lib/matplotlib/cm.py
+@@ -100,6 +100,10 @@ class ColormapRegistry(Mapping):
+         """
+         return list(self)
+ 
++    @staticmethod
++    def _snapshot(cmap):
++        return cmap.copy()
++
+     def register(self, cmap, *, name=None, force=False):
+         """
+         Register a new colormap.
+@@ -145,7 +149,7 @@ class ColormapRegistry(Mapping):
+             _api.warn_external(f"Overwriting the cmap {name!r} "
+                                "that was already in the registry.")
+ 
+-        self._cmaps[name] = cmap.copy()
++        self._cmaps[name] = self._snapshot(cmap)
+ 
+     def unregister(self, name):
+         """
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+index 05922c93df..76bf6dae9b 100644
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -773,9 +773,15 @@ class Colormap:
+             cmapobject._lut = np.copy(self._lut)
+         return cmapobject
+ 
++    def _metadata_matches(self, other):
++        return (
++            isinstance(other, Colormap)
++            and self.name == other.name
++            and self.colorbar_extend == other.colorbar_extend
++        )
++
+     def __eq__(self, other):
+-        if (not isinstance(other, Colormap) or self.name != other.name or
+-                self.colorbar_extend != other.colorbar_extend):
++        if not self._metadata_matches(other):
+             return False
+         # To compare lookup tables the Colormaps have to be initialized
+         if not self._isinit:

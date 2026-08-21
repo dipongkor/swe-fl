@@ -1,0 +1,27 @@
+{
+  "instance_id": "matplotlib__matplotlib-25479",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/cm.py",
+      "old_line": 148,
+      "old_statement": "self._cmaps[name] = cmap.copy()",
+      "current_line": 148,
+      "current_statement": "self._cmaps[name] = cmap.copy()"
+    },
+    {
+      "file": "lib/matplotlib/colors.py",
+      "old_line": 777,
+      "old_statement": "if (not isinstance(other, Colormap) or self.name != other.name or\n        self.colorbar_extend != other.colorbar_extend):",
+      "current_line": 777,
+      "current_statement": "if not isinstance(candidate, Colormap) or self.name != candidate.name or\n    self.colorbar_extend != candidate.colorbar_extend:"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "The colormap registry does not maintain the invariant that a stored colormap's .name matches its registration key. Registering under a new name leaves the stored copy self-identified by its old name, and every consumer that round-trips through .name breaks: plt.set_cmap writes the stale name into rcParams['image.cmap'] so subsequent default lookups fail, and plt.get_cmap returns an object whose .name is not the key it was registered under. Independently, Colormap.__eq__ treats the name label as significant, so colormaps carrying identical color data under different names compare unequal, conflating identity labels with content.",
+    "annotator2": ""
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

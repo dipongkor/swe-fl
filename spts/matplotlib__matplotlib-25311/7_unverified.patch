@@ -1,0 +1,32 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+index 1dee8a23d9..d08c59a961 100644
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -23,6 +23,7 @@ Container classes for `.Artist`\s.
+ """
+ 
+ import functools
++import logging
+ 
+ import numpy as np
+ 
+@@ -33,6 +34,8 @@ import matplotlib.path as mpath
+ import matplotlib.text as mtext
+ import matplotlib.transforms as mtransforms
+ from matplotlib.font_manager import FontProperties
++
++_log = logging.getLogger(__name__)
+ from matplotlib.image import BboxImage
+ from matplotlib.patches import (
+     FancyBboxPatch, FancyArrowPatch, bbox_artist as mbbox_artist)
+@@ -1506,6 +1509,10 @@ class DraggableBase:
+             ref_artist.set_picker(True)
+         self.got_artist = False
+         self.canvas = self.ref_artist.figure.canvas
++        _log.debug(
++            "Initializing draggable helper on %s canvas",
++            self.canvas.__class__.__qualname__,
++        )
+         self._use_blit = use_blit and self.canvas.supports_blit
+         self.cids = [
+             self.canvas.callbacks._connect_picklable(

@@ -1,0 +1,29 @@
+diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py
+index 719eb4e88..42c7b9461 100644
+--- a/src/_pytest/unittest.py
++++ b/src/_pytest/unittest.py
+@@ -122,13 +122,13 @@ class UnitTestCase(Class):
+ 
+ def _make_xunit_fixture(
+     obj: type,
+-    setup_name: str,
++    setup_method_name: str,
+     teardown_name: str,
+     cleanup_name: Optional[str],
+     scope: "_Scope",
+     pass_self: bool,
+ ):
+-    setup = getattr(obj, setup_name, None)
++    setup = getattr(obj, setup_method_name, None)
+     teardown = getattr(obj, teardown_name, None)
+     if setup is None and teardown is None:
+         return None
+@@ -144,7 +144,7 @@ def _make_xunit_fixture(
+         scope=scope,
+         autouse=True,
+         # Use a unique name to speed up lookup.
+-        name=f"unittest_{setup_name}_fixture_{obj.__qualname__}",
++        name=f"unittest_{setup_method_name}_fixture_{obj.__qualname__}",
+     )
+     def fixture(self, request: FixtureRequest) -> Generator[None, None, None]:
+         if _is_skipped(self):

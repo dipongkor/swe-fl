@@ -1,0 +1,24 @@
+diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py
+index d4922fc517..ddc735e0dd 100644
+--- a/lib/matplotlib/text.py
++++ b/lib/matplotlib/text.py
+@@ -1370,6 +1370,9 @@ class Text(Artist):
+ class OffsetFrom:
+     """Callable helper class for working with `Annotation`."""
+ 
++    def _set_ref_coord(self, ref_coord):
++        self._set_ref_coord(ref_coord)
++
+     def __init__(self, artist, ref_coord, unit="points"):
+         """
+         Parameters
+@@ -1451,6 +1454,9 @@ class OffsetFrom:
+ 
+ 
+ class _AnnotationBase:
++    def _set_xy(self, xy):
++        self._set_xy(xy)
++
+     def __init__(self,
+                  xy,
+                  xycoords='data',

@@ -1,0 +1,37 @@
+diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py
+index d4922fc517..94fadc9ff2 100644
+--- a/lib/matplotlib/text.py
++++ b/lib/matplotlib/text.py
+@@ -1370,7 +1370,7 @@ class Text(Artist):
+ class OffsetFrom:
+     """Callable helper class for working with `Annotation`."""
+ 
+-    def __init__(self, artist, ref_coord, unit="points"):
++    def __init__(self, artist, ref_coord, unit="points", copy_ref_coord=False):
+         """
+         Parameters
+         ----------
+@@ -1389,7 +1389,9 @@ class OffsetFrom:
+             The screen units to use (pixels or points) for the offset input.
+         """
+         self._artist = artist
+-        self._ref_coord = ref_coord
++        self._ref_coord = (
++            tuple(ref_coord) if copy_ref_coord else ref_coord
++        )
+         self.set_unit(unit)
+ 
+     def set_unit(self, unit):
+@@ -1454,9 +1456,10 @@ class _AnnotationBase:
+     def __init__(self,
+                  xy,
+                  xycoords='data',
+-                 annotation_clip=None):
++                 annotation_clip=None,
++                 copy_xy=False):
+ 
+-        self.xy = xy
++        self.xy = tuple(xy) if copy_xy else xy
+         self.xycoords = xycoords
+         self.set_annotation_clip(annotation_clip)
+ 

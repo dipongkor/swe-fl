@@ -1,0 +1,29 @@
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+index 05922c93df..136b8fa7ef 100644
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -774,15 +774,16 @@ class Colormap:
+         return cmapobject
+ 
+     def __eq__(self, other):
+-        if (not isinstance(other, Colormap) or self.name != other.name or
+-                self.colorbar_extend != other.colorbar_extend):
++        if (isinstance(other, Colormap) and self.name == other.name and
++                self.colorbar_extend == other.colorbar_extend):
++            # To compare lookup tables the Colormaps have to be initialized
++            if not self._isinit:
++                self._init()
++            if not other._isinit:
++                other._init()
++            return np.array_equal(self._lut, other._lut)
++        else:
+             return False
+-        # To compare lookup tables the Colormaps have to be initialized
+-        if not self._isinit:
+-            self._init()
+-        if not other._isinit:
+-            other._init()
+-        return np.array_equal(self._lut, other._lut)
+ 
+     def get_bad(self):
+         """Get the color for masked values."""

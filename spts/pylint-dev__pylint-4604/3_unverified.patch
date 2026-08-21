@@ -1,0 +1,39 @@
+diff --git a/pylint/checkers/variables.py b/pylint/checkers/variables.py
+index 3ddafd59..be7cfe30 100644
+--- a/pylint/checkers/variables.py
++++ b/pylint/checkers/variables.py
+@@ -1820,26 +1820,26 @@ class VariablesChecker(BaseChecker):
+                 return True
+         return False
+ 
+-    def _store_type_annotation_node(self, type_annotation):
++    def _store_type_annotation_node(self, annotation_node):
+         """Given a type annotation, store all the name nodes it refers to"""
+-        if isinstance(type_annotation, astroid.Name):
+-            self._type_annotation_names.append(type_annotation.name)
++        if isinstance(annotation_node, astroid.Name):
++            self._type_annotation_names.append(annotation_node.name)
+             return
+ 
+-        if not isinstance(type_annotation, astroid.Subscript):
++        if not isinstance(annotation_node, astroid.Subscript):
+             return
+ 
+         if (
+-            isinstance(type_annotation.value, astroid.Attribute)
+-            and isinstance(type_annotation.value.expr, astroid.Name)
+-            and type_annotation.value.expr.name == TYPING_MODULE
++            isinstance(annotation_node.value, astroid.Attribute)
++            and isinstance(annotation_node.value.expr, astroid.Name)
++            and annotation_node.value.expr.name == TYPING_MODULE
+         ):
+             self._type_annotation_names.append(TYPING_MODULE)
+             return
+ 
+         self._type_annotation_names.extend(
+             annotation.name
+-            for annotation in type_annotation.nodes_of_class(astroid.Name)
++            for annotation in annotation_node.nodes_of_class(astroid.Name)
+         )
+ 
+     def _store_type_annotation_names(self, node):

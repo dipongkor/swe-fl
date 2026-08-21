@@ -1,0 +1,16 @@
+diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py
+index 719eb4e88..f5325da9b 100644
+--- a/src/_pytest/unittest.py
++++ b/src/_pytest/unittest.py
+@@ -152,10 +152,7 @@ def _make_xunit_fixture(
+             raise pytest.skip.Exception(reason, _use_item_location=True)
+         if setup is not None:
+             try:
+-                if pass_self:
+-                    setup(self, request.function)
+-                else:
+-                    setup()
++                setup(self, request.function) if pass_self else setup()
+             # unittest does not call the cleanup function for every BaseException, so we
+             # follow this here.
+             except Exception:

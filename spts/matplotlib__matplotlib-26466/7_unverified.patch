@@ -1,0 +1,26 @@
+diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py
+index d4922fc517..7674a0afe8 100644
+--- a/lib/matplotlib/text.py
++++ b/lib/matplotlib/text.py
+@@ -1389,6 +1389,10 @@ class OffsetFrom:
+             The screen units to use (pixels or points) for the offset input.
+         """
+         self._artist = artist
++        _log.debug(
++            "Storing offset coordinate reference of type %s",
++            type(ref_coord).__qualname__,
++        )
+         self._ref_coord = ref_coord
+         self.set_unit(unit)
+ 
+@@ -1456,6 +1460,10 @@ class _AnnotationBase:
+                  xycoords='data',
+                  annotation_clip=None):
+ 
++        _log.debug(
++            "Storing annotation coordinate reference of type %s",
++            type(xy).__qualname__,
++        )
+         self.xy = xy
+         self.xycoords = xycoords
+         self.set_annotation_clip(annotation_clip)

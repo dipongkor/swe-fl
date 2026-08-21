@@ -1,0 +1,18 @@
+diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py
+index d4922fc517..3110c24cc7 100644
+--- a/lib/matplotlib/text.py
++++ b/lib/matplotlib/text.py
+@@ -1452,11 +1452,11 @@ class OffsetFrom:
+ 
+ class _AnnotationBase:
+     def __init__(self,
+-                 xy,
++                 anchor_xy,
+                  xycoords='data',
+                  annotation_clip=None):
+ 
+-        self.xy = xy
++        self.xy = anchor_xy
+         self.xycoords = xycoords
+         self.set_annotation_clip(annotation_clip)
+ 

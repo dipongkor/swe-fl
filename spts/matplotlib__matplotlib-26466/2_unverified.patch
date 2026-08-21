@@ -1,0 +1,72 @@
+diff --git a/lib/matplotlib/text.py b/lib/matplotlib/text.py
+index d4922fc517..fc9528e5f3 100644
+--- a/lib/matplotlib/text.py
++++ b/lib/matplotlib/text.py
+@@ -1370,6 +1370,17 @@ class Text(Artist):
+ class OffsetFrom:
+     """Callable helper class for working with `Annotation`."""
+ 
++    def set_unit(self, unit):
++        """
++        Set the unit for input to the transform used by ``__call__``.
++
++        Parameters
++        ----------
++        unit : {'points', 'pixels'}
++        """
++        _api.check_in_list(["points", "pixels"], unit=unit)
++        self._unit = unit
++
+     def __init__(self, artist, ref_coord, unit="points"):
+         """
+         Parameters
+@@ -1392,17 +1403,6 @@ class OffsetFrom:
+         self._ref_coord = ref_coord
+         self.set_unit(unit)
+ 
+-    def set_unit(self, unit):
+-        """
+-        Set the unit for input to the transform used by ``__call__``.
+-
+-        Parameters
+-        ----------
+-        unit : {'points', 'pixels'}
+-        """
+-        _api.check_in_list(["points", "pixels"], unit=unit)
+-        self._unit = unit
+-
+     def get_unit(self):
+         """Return the unit for input to the transform used by ``__call__``."""
+         return self._unit
+@@ -1451,6 +1451,15 @@ class OffsetFrom:
+ 
+ 
+ class _AnnotationBase:
++    def _get_xy(self, renderer, xy, coords):
++        x, y = xy
++        xcoord, ycoord = coords if isinstance(coords, tuple) else (coords, coords)
++        if xcoord == 'data':
++            x = float(self.convert_xunits(x))
++        if ycoord == 'data':
++            y = float(self.convert_yunits(y))
++        return self._get_xy_transform(renderer, coords).transform((x, y))
++
+     def __init__(self,
+                  xy,
+                  xycoords='data',
+@@ -1462,15 +1471,6 @@ class _AnnotationBase:
+ 
+         self._draggable = None
+ 
+-    def _get_xy(self, renderer, xy, coords):
+-        x, y = xy
+-        xcoord, ycoord = coords if isinstance(coords, tuple) else (coords, coords)
+-        if xcoord == 'data':
+-            x = float(self.convert_xunits(x))
+-        if ycoord == 'data':
+-            y = float(self.convert_yunits(y))
+-        return self._get_xy_transform(renderer, coords).transform((x, y))
+-
+     def _get_xy_transform(self, renderer, coords):
+ 
+         if isinstance(coords, tuple):

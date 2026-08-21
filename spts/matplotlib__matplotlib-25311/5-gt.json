@@ -1,0 +1,20 @@
+{
+  "instance_id": "matplotlib__matplotlib-25311",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/offsetbox.py",
+      "old_line": 1508,
+      "old_statement": "self.canvas = self.ref_artist.figure.canvas",
+      "current_line": 1508,
+      "current_statement": "self.canvas = (\n    self.ref_artist.figure.canvas if canvas is None else canvas\n)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Making a legend or annotation draggable attaches a DraggableBase helper to the artist (legend._draggable), placing the helper inside the object graph that pickling a figure traverses. DraggableBase.__init__ caches the figure's backend canvas in an instance attribute, although the canvas is a transient GUI-toolkit object and is exactly what matplotlib's figure serialization deliberately excludes to keep figures picklable. When the figure is pickled, the helper's __dict__ carries this canvas reference: with GUI backends pickling fails with TypeError (e.g. cannot pickle 'FigureCanvasQTAgg' object), and even with a picklable canvas such as Agg the canvas is wrongly embedded in the pickle stream. The cached value is redundant, since the canvas is always reachable through ref_artist.figure.canvas at the moment of use.",
+    "annotator2": "Enabling dragging creates a DraggableBase-derived helper owned by the artist. During initialization, line 1508 copies the figure canvas into the helper as an ordinary attribute. The figure's object graph then contains an additional persistent path back to its canvas through the draggable helper. Pickling a draggable legend serializes that path and either includes FigureCanvasAgg in the pickle stream or raises TypeError for an unpicklable GUI canvas. This assignment is the minimal root cause because the callbacks are registered through the picklable callback mechanism; the unwanted serialized canvas is introduced by the stored attribute itself."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

@@ -1,0 +1,24 @@
+diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py
+index 719eb4e88..ff6af075e 100644
+--- a/src/_pytest/unittest.py
++++ b/src/_pytest/unittest.py
+@@ -120,6 +120,10 @@ class UnitTestCase(Class):
+             cls.__pytest_method_setup = method_fixture  # type: ignore[attr-defined]
+ 
+ 
++def _xunit_fixture_name(setup_name: str, obj: type) -> str:
++    return f"unittest_{setup_name}_fixture_{obj.__qualname__}"
++
++
+ def _make_xunit_fixture(
+     obj: type,
+     setup_name: str,
+@@ -144,7 +148,7 @@ def _make_xunit_fixture(
+         scope=scope,
+         autouse=True,
+         # Use a unique name to speed up lookup.
+-        name=f"unittest_{setup_name}_fixture_{obj.__qualname__}",
++        name=_xunit_fixture_name(setup_name, obj),
+     )
+     def fixture(self, request: FixtureRequest) -> Generator[None, None, None]:
+         if _is_skipped(self):

@@ -1,0 +1,20 @@
+diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py
+index 719eb4e88..c571b8883 100644
+--- a/src/_pytest/unittest.py
++++ b/src/_pytest/unittest.py
+@@ -1,4 +1,5 @@
+ """Discover and run std-library "unittest" style tests."""
++import logging
+ import sys
+ import traceback
+ import types
+@@ -128,6 +129,9 @@ def _make_xunit_fixture(
+     scope: "_Scope",
+     pass_self: bool,
+ ):
++    logging.getLogger(__name__).debug(
++        "Creating xunit fixture for %s.%s", obj.__qualname__, setup_name
++    )
+     setup = getattr(obj, setup_name, None)
+     teardown = getattr(obj, teardown_name, None)
+     if setup is None and teardown is None:

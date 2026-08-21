@@ -1,0 +1,23 @@
+diff --git a/pylint/checkers/variables.py b/pylint/checkers/variables.py
+index 3ddafd59..c0be8441 100644
+--- a/pylint/checkers/variables.py
++++ b/pylint/checkers/variables.py
+@@ -49,6 +49,7 @@
+ """variables checkers for Python code
+ """
+ import collections
++import logging
+ import copy
+ import itertools
+ import os
+@@ -1821,6 +1822,10 @@ class VariablesChecker(BaseChecker):
+         return False
+ 
+     def _store_type_annotation_node(self, type_annotation):
++        logging.getLogger(__name__).debug(
++            "Recording names from type annotation %s",
++            type_annotation.__class__.__qualname__,
++        )
+         """Given a type annotation, store all the name nodes it refers to"""
+         if isinstance(type_annotation, astroid.Name):
+             self._type_annotation_names.append(type_annotation.name)

@@ -1,0 +1,20 @@
+{
+  "instance_id": "pylint-dev__pylint-4604",
+  "root_cause": [
+    {
+      "file": "pylint/checkers/variables.py",
+      "old_line": 1829,
+      "old_statement": "if not isinstance(type_annotation, astroid.Subscript):",
+      "current_line": 1833,
+      "current_statement": "if not self._is_nested_type_annotation(type_annotation):"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Type-comment usage tracking is an explicit dispatch over annotation AST node types, and the Attribute case is missing: a module referenced only as a dotted name in a type comment (X = ...  # type: abc.ABC) leaves no record, so the unused-import check sees the import as unused. Bare names are handled by the Name branch and names nested under subscripts are recorded by the Subscript branch, which is why in the regression test only the top-level attribute case 'Bar.Boo' produces the false positive ('Bar imported from foo') while 'foo' is captured via the subscripted line.",
+    "annotator2": "VariablesChecker records imports referenced only by type comments so they are not reported as unused. The base function handles Name and Subscript nodes but prematurely rejects Attribute nodes, even though qualified type comments are represented by astroid.Attribute. The imports forming the attribute expression consequently remain in the unused-import set. The constants.py change only supports conditionally skipping the regression on PyPy."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

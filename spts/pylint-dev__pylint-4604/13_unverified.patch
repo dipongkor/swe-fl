@@ -1,0 +1,75 @@
+diff --git a/pylint/checkers/variables.py b/pylint/checkers/variables.py
+index 3ddafd59..8c50237b 100644
+--- a/pylint/checkers/variables.py
++++ b/pylint/checkers/variables.py
+@@ -49,6 +49,7 @@
+ """variables checkers for Python code
+ """
+ import collections
++import logging
+ import copy
+ import itertools
+ import os
+@@ -1820,33 +1821,42 @@ class VariablesChecker(BaseChecker):
+                 return True
+         return False
+ 
+-    def _store_type_annotation_node(self, type_annotation):
+-        """Given a type annotation, store all the name nodes it refers to"""
+-        if isinstance(type_annotation, astroid.Name):
+-            self._type_annotation_names.append(type_annotation.name)
+-            return
++    @staticmethod
++    def _is_nested_type_annotation(annotation_node):
++        return isinstance(annotation_node, astroid.Subscript)
+ 
+-        if not isinstance(type_annotation, astroid.Subscript):
++    def _store_type_annotation_names(self, node):
++        type_annotation = node.type_annotation
++        if not type_annotation:
+             return
++        self._store_type_annotation_node(node.type_annotation)
+ 
+-        if (
+-            isinstance(type_annotation.value, astroid.Attribute)
+-            and isinstance(type_annotation.value.expr, astroid.Name)
+-            and type_annotation.value.expr.name == TYPING_MODULE
+-        ):
+-            self._type_annotation_names.append(TYPING_MODULE)
++    def _store_type_annotation_node(self, annotation_node, include_nested=True):
++        logging.getLogger(__name__).debug(
++            "Recording names from type annotation %s",
++            annotation_node.__class__.__qualname__,
++        )
++        """Given a type annotation, store all the name nodes it refers to"""
++        if isinstance(annotation_node, astroid.Name):
++            self._type_annotation_names.append(annotation_node.name)
+             return
+ 
+-        self._type_annotation_names.extend(
+-            annotation.name
+-            for annotation in type_annotation.nodes_of_class(astroid.Name)
+-        )
++        if self._is_nested_type_annotation(annotation_node):
++            if (
++                isinstance(annotation_node.value, astroid.Attribute)
++                and isinstance(annotation_node.value.expr, astroid.Name)
++                and annotation_node.value.expr.name == TYPING_MODULE
++            ):
++                self._type_annotation_names.append(TYPING_MODULE)
++                return
+ 
+-    def _store_type_annotation_names(self, node):
+-        type_annotation = node.type_annotation
+-        if not type_annotation:
++            if include_nested:
++                self._type_annotation_names.extend(
++                    annotation.name
++                    for annotation in annotation_node.nodes_of_class(astroid.Name)
++                )
++        else:
+             return
+-        self._store_type_annotation_node(node.type_annotation)
+ 
+     def _check_self_cls_assign(self, node):
+         """Check that self/cls don't get assigned"""

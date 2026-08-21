@@ -1,0 +1,21 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+index 1dee8a23d9..fcc0ba6a09 100644
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -1500,12 +1500,14 @@ class DraggableBase:
+     coordinate and set a relevant attribute.
+     """
+ 
+-    def __init__(self, ref_artist, use_blit=False):
++    def __init__(self, ref_artist, use_blit=False, canvas=None):
+         self.ref_artist = ref_artist
+         if not ref_artist.pickable():
+             ref_artist.set_picker(True)
+         self.got_artist = False
+-        self.canvas = self.ref_artist.figure.canvas
++        self.canvas = (
++            self.ref_artist.figure.canvas if canvas is None else canvas
++        )
+         self._use_blit = use_blit and self.canvas.supports_blit
+         self.cids = [
+             self.canvas.callbacks._connect_picklable(

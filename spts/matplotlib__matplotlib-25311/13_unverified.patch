@@ -1,0 +1,71 @@
+diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py
+index 1dee8a23d9..5eeb73120b 100644
+--- a/lib/matplotlib/offsetbox.py
++++ b/lib/matplotlib/offsetbox.py
+@@ -23,6 +23,7 @@ Container classes for `.Artist`\s.
+ """
+ 
+ import functools
++import logging
+ 
+ import numpy as np
+ 
+@@ -33,6 +34,8 @@ import matplotlib.path as mpath
+ import matplotlib.text as mtext
+ import matplotlib.transforms as mtransforms
+ from matplotlib.font_manager import FontProperties
++
++_log = logging.getLogger(__name__)
+ from matplotlib.image import BboxImage
+ from matplotlib.patches import (
+     FancyBboxPatch, FancyArrowPatch, bbox_artist as mbbox_artist)
+@@ -1500,19 +1503,9 @@ class DraggableBase:
+     coordinate and set a relevant attribute.
+     """
+ 
+-    def __init__(self, ref_artist, use_blit=False):
+-        self.ref_artist = ref_artist
+-        if not ref_artist.pickable():
+-            ref_artist.set_picker(True)
+-        self.got_artist = False
+-        self.canvas = self.ref_artist.figure.canvas
+-        self._use_blit = use_blit and self.canvas.supports_blit
+-        self.cids = [
+-            self.canvas.callbacks._connect_picklable(
+-                'pick_event', self.on_pick),
+-            self.canvas.callbacks._connect_picklable(
+-                'button_release_event', self.on_release),
+-        ]
++    @staticmethod
++    def _get_canvas(ref_artist):
++        return ref_artist.figure.canvas
+ 
+     def on_motion(self, evt):
+         if self._check_still_parented() and self.got_artist:
+@@ -1527,6 +1520,26 @@ class DraggableBase:
+             else:
+                 self.canvas.draw()
+ 
++    def __init__(self, ref_artist, use_blit=False, canvas=None):
++        self.ref_artist = ref_artist
++        if not ref_artist.pickable():
++            ref_artist.set_picker(True)
++        self.got_artist = False
++        self.canvas = (
++            self._get_canvas(self.ref_artist) if canvas is None else canvas
++        )
++        _log.debug(
++            "Initializing draggable helper on %s canvas",
++            self.canvas.__class__.__qualname__,
++        )
++        self._use_blit = use_blit and self.canvas.supports_blit
++        self.cids = [
++            self.canvas.callbacks._connect_picklable(
++                'pick_event', self.on_pick),
++            self.canvas.callbacks._connect_picklable(
++                'button_release_event', self.on_release),
++        ]
++
+     def on_pick(self, evt):
+         if self._check_still_parented() and evt.artist == self.ref_artist:
+             self.mouse_x = evt.mouseevent.x

@@ -1,0 +1,142 @@
+diff --git a/src/_pytest/unittest.py b/src/_pytest/unittest.py
+index 719eb4e88..db0aded53 100644
+--- a/src/_pytest/unittest.py
++++ b/src/_pytest/unittest.py
+@@ -1,4 +1,5 @@
+ """Discover and run std-library "unittest" style tests."""
++import logging
+ import sys
+ import traceback
+ import types
+@@ -120,65 +121,10 @@ class UnitTestCase(Class):
+             cls.__pytest_method_setup = method_fixture  # type: ignore[attr-defined]
+ 
+ 
+-def _make_xunit_fixture(
+-    obj: type,
+-    setup_name: str,
+-    teardown_name: str,
+-    cleanup_name: Optional[str],
+-    scope: "_Scope",
+-    pass_self: bool,
+-):
+-    setup = getattr(obj, setup_name, None)
+-    teardown = getattr(obj, teardown_name, None)
+-    if setup is None and teardown is None:
+-        return None
++def _xunit_fixture_name(prefix: str, setup_method_name: str, obj: type) -> str:
++    return f"{prefix}_{setup_method_name}_fixture_{obj.__qualname__}"
+ 
+-    if cleanup_name:
+-        cleanup = getattr(obj, cleanup_name, lambda *args: None)
+-    else:
+ 
+-        def cleanup(*args):
+-            pass
+-
+-    @pytest.fixture(
+-        scope=scope,
+-        autouse=True,
+-        # Use a unique name to speed up lookup.
+-        name=f"unittest_{setup_name}_fixture_{obj.__qualname__}",
+-    )
+-    def fixture(self, request: FixtureRequest) -> Generator[None, None, None]:
+-        if _is_skipped(self):
+-            reason = self.__unittest_skip_why__
+-            raise pytest.skip.Exception(reason, _use_item_location=True)
+-        if setup is not None:
+-            try:
+-                if pass_self:
+-                    setup(self, request.function)
+-                else:
+-                    setup()
+-            # unittest does not call the cleanup function for every BaseException, so we
+-            # follow this here.
+-            except Exception:
+-                if pass_self:
+-                    cleanup(self)
+-                else:
+-                    cleanup()
+-
+-                raise
+-        yield
+-        try:
+-            if teardown is not None:
+-                if pass_self:
+-                    teardown(self, request.function)
+-                else:
+-                    teardown()
+-        finally:
+-            if pass_self:
+-                cleanup(self)
+-            else:
+-                cleanup()
+-
+-    return fixture
+ 
+ 
+ class TestCaseFunction(Function):
+@@ -404,3 +350,63 @@ def check_testcase_implements_trial_reporter(done: List[int] = []) -> None:
+ def _is_skipped(obj) -> bool:
+     """Return True if the given object has been marked with @unittest.skip."""
+     return bool(getattr(obj, "__unittest_skip__", False))
++
++def _make_xunit_fixture(
++    obj: type,
++    setup_method_name: str,
++    teardown_name: str,
++    cleanup_name: Optional[str],
++    pass_self: bool,
++    scope: "_Scope",
++    fixture_name_prefix: str = "unittest",
++):
++    logging.getLogger(__name__).debug(
++        "Creating xunit fixture for %s.%s", obj.__qualname__, setup_method_name
++    )
++    setup = getattr(obj, setup_method_name, None)
++    teardown = getattr(obj, teardown_name, None)
++    if setup is None and teardown is None:
++        return None
++
++    if not cleanup_name:
++
++        def cleanup(*args):
++            pass
++    else:
++        cleanup = getattr(obj, cleanup_name, lambda *args: None)
++
++    @pytest.fixture(
++        scope=scope,
++        autouse=True,
++        name=_xunit_fixture_name(
++            fixture_name_prefix, setup_method_name, obj
++        ),
++    )
++    def fixture(self, request: FixtureRequest) -> Generator[None, None, None]:
++        if _is_skipped(self):
++            reason = self.__unittest_skip_why__
++            raise pytest.skip.Exception(reason, _use_item_location=True)
++        if setup is not None:
++            try:
++                setup(self, request.function) if pass_self else setup()
++            except Exception:
++                if pass_self:
++                    cleanup(self)
++                else:
++                    cleanup()
++
++                raise
++        yield
++        try:
++            if teardown is not None:
++                if pass_self:
++                    teardown(self, request.function)
++                else:
++                    teardown()
++        finally:
++            if pass_self:
++                cleanup(self)
++            else:
++                cleanup()
++
++    return fixture

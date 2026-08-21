@@ -1,0 +1,56 @@
+diff --git a/lib/matplotlib/cm.py b/lib/matplotlib/cm.py
+index 38158db956..6ad1177793 100644
+--- a/lib/matplotlib/cm.py
++++ b/lib/matplotlib/cm.py
+@@ -16,6 +16,7 @@ Builtin colormaps, colormap handling utilities, and the `ScalarMappable` mixin.
+ 
+ from collections.abc import Mapping
+ import functools
++import logging
+ 
+ import numpy as np
+ from numpy import ma
+@@ -27,6 +28,7 @@ from matplotlib._cm_listed import cmaps as cmaps_listed
+ 
+ 
+ _LUTSIZE = mpl.rcParams['image.lut']
++_log = logging.getLogger(__name__)
+ 
+ 
+ def _gen_cmap_registry():
+@@ -145,6 +147,7 @@ class ColormapRegistry(Mapping):
+             _api.warn_external(f"Overwriting the cmap {name!r} "
+                                "that was already in the registry.")
+ 
++        _log.debug("Registering colormap under name %s", name)
+         self._cmaps[name] = cmap.copy()
+ 
+     def unregister(self, name):
+diff --git a/lib/matplotlib/colors.py b/lib/matplotlib/colors.py
+index 05922c93df..c6eab29fe1 100644
+--- a/lib/matplotlib/colors.py
++++ b/lib/matplotlib/colors.py
+@@ -42,6 +42,7 @@ Colors that Matplotlib recognizes are listed at
+ import base64
+ from collections.abc import Sized, Sequence, Mapping
+ import functools
++import logging
+ import importlib
+ import inspect
+ import io
+@@ -85,6 +86,7 @@ _colors_full_map.update({k.replace('gray', 'grey'): v
+                          if 'gray' in k})
+ _colors_full_map.update(BASE_COLORS)
+ _colors_full_map = _ColorMapping(_colors_full_map)
++_log = logging.getLogger(__name__)
+ 
+ _REPR_PNG_SIZE = (512, 64)
+ 
+@@ -774,6 +776,7 @@ class Colormap:
+         return cmapobject
+ 
+     def __eq__(self, other):
++        _log.debug("Comparing colormap definitions")
+         if (not isinstance(other, Colormap) or self.name != other.name or
+                 self.colorbar_extend != other.colorbar_extend):
+             return False
