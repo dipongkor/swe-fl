@@ -1,0 +1,20 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25931",
+  "root_cause": [
+    {
+      "file": "sklearn/ensemble/_iforest.py",
+      "old_line": 348,
+      "old_statement": "self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)",
+      "current_line": 342,
+      "current_statement": "self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "When contamination is not 'auto', IsolationForest.fit computes offset_ by scoring the training data through the public score_samples method. But fit has already validated X at that point, converting a DataFrame to a bare float ndarray while recording its column names in feature_names_in_. score_samples validates its input again with reset=False, and that validation's feature-name consistency check compares the estimator's recorded names against the argument's: it sees an estimator fitted with feature names receiving an array without any, and emits the UserWarning 'X does not have valid feature names, but IsolationForest was fitted with feature names'. The warning is designed to flag a real train/inference mismatch in user calls, but here it fires from inside fit itself on data the user did supply with names, purely because the internal call re-enters the public validation path with the already-converted array.",
+    "annotator2": "IsolationForest.fit records the DataFrame feature names during its initial validation, while the local X used afterward is the validated NumPy array. For non-auto contamination, line 348 sends that array through the public score_samples path. Its reset=False validation sees an estimator fitted with names but input without names and raises the UserWarning captured as an error by the regression test. Auto contamination returns before this call, which is why it is unaffected. Line 348 is the minimal root cause: it introduces an unnecessary second public validation during fitting and directly creates the contradictory feature-name comparison."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "IsolationForest.fit records the DataFrame feature names during its initial validation, while the local X used afterward is the validated NumPy array. For non-auto contamination, line 342 sends that array through the public score_samples path. Its reset=False validation sees an estimator fitted with names but input without names and raises the UserWarning captured as an error by the regression test. Auto contamination returns before this call, which is why it is unaffected. Line 348 is the minimal root cause: it introduces an unnecessary second public validation during fitting and directly creates the contradictory feature-name comparison."
+  }
+}

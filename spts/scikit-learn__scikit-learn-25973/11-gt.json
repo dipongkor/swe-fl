@@ -1,0 +1,20 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25973",
+  "root_cause": [
+    {
+      "file": "sklearn/feature_selection/_sequential.py",
+      "old_line": 312,
+      "old_statement": "scores[feature_idx] = cross_val_score(\n    estimator,\n    X_new,\n    y,\n    cv=self.cv,\n    scoring=self.scoring,\n    n_jobs=self.n_jobs,\n).mean()",
+      "current_line": 304,
+      "current_statement": "candidate_mask[feature_idx] = True"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "SequentialFeatureSelector documents that cv may be an iterable of (train, test) splits, but its greedy search evaluates cross_val_score many times and hands the same raw iterable to each call. A generator of splits is one-shot: the first cross_val_score consumes it and all subsequent calls see an empty split sequence, producing an empty scores list whose aggregation raises IndexError: list index out of range in _aggregate_score_dicts. The crash site in model_selection/_validation.py is only where the emptiness surfaces; the consumable iterable is never normalized to a reusable form before repeated use.",
+    "annotator2": "SequentialFeatureSelector evaluates many candidate feature masks, calling cross_val_score once per candidate and across multiple selection iterations. The base implementation repeatedly supplies self.cv. Integer and reusable splitter inputs work, but an iterable returned by LeaveOneGroupOut.split is a generator and is exhausted by the first call. The next candidate produces an empty results list, which fails in _aggregate_score_dicts. The minimal faulty base statement is line 312's repeated use of the raw cv parameter."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "SequentialFeatureSelector evaluates many candidate feature masks, calling cross_val_score once per candidate and across multiple selection iterations. The base implementation repeatedly supplies self.cv. Integer and reusable splitter inputs work, but an iterable returned by LeaveOneGroupOut.split is a generator and is exhausted by the first call. The next candidate produces an empty results list, which fails in _aggregate_score_dicts. The minimal faulty base statement is line 304's repeated use of the raw cv parameter."
+  }
+}

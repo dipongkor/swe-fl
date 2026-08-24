@@ -1,0 +1,15 @@
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..0ce257bdd 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -294,8 +294,8 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             # ensemble sorts the indices.
+             X.sort_indices()
+ 
+-        rnd = check_random_state(self.random_state)
+-        y = rnd.uniform(size=X.shape[0])
++        random_state = check_random_state(self.random_state)
++        y = random_state.uniform(size=X.shape[0])
+ 
+         # ensure that max_sample is in [1, n_samples]:
+         n_samples = X.shape[0]

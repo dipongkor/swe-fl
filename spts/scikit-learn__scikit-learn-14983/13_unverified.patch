@@ -1,0 +1,79 @@
+diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py
+index c49a3ce6a..4efc6c62d 100644
+--- a/sklearn/model_selection/_split.py
++++ b/sklearn/model_selection/_split.py
+@@ -11,6 +11,7 @@ functions to split the data based on a preset strategy.
+ 
+ from collections.abc import Iterable
+ import warnings
++import logging
+ from itertools import chain, combinations
+ from math import ceil, floor
+ import numbers
+@@ -27,6 +28,8 @@ from ..utils.multiclass import type_of_target
+ from ..utils.fixes import comb
+ from ..base import _pprint
+ 
++logger = logging.getLogger(__name__)
++
+ __all__ = ['BaseCrossValidator',
+            'KFold',
+            'GroupKFold',
+@@ -2135,34 +2138,39 @@ def train_test_split(*arrays, **options):
+ train_test_split.__test__ = False
+ 
+ 
+-def _build_repr(self):
+-    # XXX This is copied from BaseEstimator's get_params
++def _repr_parameter_names(init):
++    if init is object.__init__:
++        return []
++    init_signature = signature(init)
++    return sorted([
++        p.name for p in init_signature.parameters.values()
++        if p.name != 'self' and p.kind != p.VAR_KEYWORD
++    ])
++
++
++
++def _build_repr(self, include_none=True):
+     cls = self.__class__
+     init = getattr(cls.__init__, 'deprecated_original', cls.__init__)
+-    # Ignore varargs, kw and default values and pop self
+-    init_signature = signature(init)
+-    # Consider the constructor parameters excluding 'self'
+-    if init is object.__init__:
+-        args = []
+-    else:
+-        args = sorted([p.name for p in init_signature.parameters.values()
+-                       if p.name != 'self' and p.kind != p.VAR_KEYWORD])
++    args = _repr_parameter_names(init)
+     class_name = self.__class__.__name__
++    logger.debug("Building representation for %s", class_name)
+     params = dict()
+-    for key in args:
+-        # We need deprecation warnings to always be on in order to
+-        # catch deprecated param values.
+-        # This is set in utils/__init__.py but it gets overwritten
+-        # when running under python3 somehow.
++    args_iterator = iter(args)
++    while True:
++        try:
++            key = next(args_iterator)
++        except StopIteration:
++            break
+         warnings.simplefilter("always", DeprecationWarning)
+         try:
+             with warnings.catch_warnings(record=True) as w:
+-                value = getattr(self, key, None)
++                parameter_value = getattr(self, key, None)
+             if len(w) and w[0].category == DeprecationWarning:
+-                # if the parameter is deprecated, don't show it
+                 continue
+         finally:
+             warnings.filters.pop(0)
+-        params[key] = value
++        if include_none or parameter_value is not None:
++            params[key] = parameter_value
+ 
+     return '%s(%s)' % (class_name, _pprint(params, offset=len(class_name)))

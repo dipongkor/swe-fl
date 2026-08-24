@@ -1,0 +1,24 @@
+diff --git a/sklearn/utils/_set_output.py b/sklearn/utils/_set_output.py
+index 335773c6a..840b236dc 100644
+--- a/sklearn/utils/_set_output.py
++++ b/sklearn/utils/_set_output.py
+@@ -7,6 +7,10 @@ from .._config import get_config
+ from ._available_if import available_if
+ 
+ 
++def _set_pandas_index(dataframe, index):
++    dataframe.index = index
++
++
+ def _wrap_in_pandas_container(
+     data_to_wrap,
+     *,
+@@ -56,7 +60,7 @@ def _wrap_in_pandas_container(
+         if columns is not None:
+             data_to_wrap.columns = columns
+         if index is not None:
+-            data_to_wrap.index = index
++            _set_pandas_index(data_to_wrap, index)
+         return data_to_wrap
+ 
+     return pd.DataFrame(data_to_wrap, index=index, columns=columns)

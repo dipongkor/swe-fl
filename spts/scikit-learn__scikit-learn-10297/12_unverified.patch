@@ -1,0 +1,23 @@
+diff --git a/sklearn/linear_model/ridge.py b/sklearn/linear_model/ridge.py
+index 911c74ae3..c263014d3 100644
+--- a/sklearn/linear_model/ridge.py
++++ b/sklearn/linear_model/ridge.py
+@@ -789,7 +789,7 @@ class RidgeClassifier(LinearClassifierMixin, _BaseRidge):
+             alpha=alpha, fit_intercept=fit_intercept, normalize=normalize,
+             copy_X=copy_X, max_iter=max_iter, tol=tol, solver=solver,
+             random_state=random_state)
+-        self.class_weight = class_weight
++        self._set_class_weight(class_weight)
+ 
+     def fit(self, X, y, sample_weight=None):
+         """Fit Ridge regression model.
+@@ -1332,6 +1332,9 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):
+     a one-versus-all approach. Concretely, this is implemented by taking
+     advantage of the multi-variate response support in Ridge.
+     """
++    def _set_class_weight(self, class_weight):
++        self.class_weight = class_weight
++
+     def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,
+                  normalize=False, scoring=None, cv=None, class_weight=None):
+         super(RidgeClassifierCV, self).__init__(

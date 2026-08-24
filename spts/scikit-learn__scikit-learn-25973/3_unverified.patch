@@ -1,0 +1,34 @@
+diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py
+index e983c55de..523a4198c 100644
+--- a/sklearn/feature_selection/_sequential.py
++++ b/sklearn/feature_selection/_sequential.py
+@@ -298,14 +298,14 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+         # Feature will be added if the current score and past score are greater
+         # than tol when n_feature is auto,
+         candidate_feature_indices = np.flatnonzero(~current_mask)
+-        scores = {}
++        candidate_scores = {}
+         for feature_idx in candidate_feature_indices:
+             candidate_mask = current_mask.copy()
+             candidate_mask[feature_idx] = True
+             if self.direction == "backward":
+                 candidate_mask = ~candidate_mask
+             X_new = X[:, candidate_mask]
+-            scores[feature_idx] = cross_val_score(
++            candidate_scores[feature_idx] = cross_val_score(
+                 estimator,
+                 X_new,
+                 y,
+@@ -313,8 +313,10 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+                 scoring=self.scoring,
+                 n_jobs=self.n_jobs,
+             ).mean()
+-        new_feature_idx = max(scores, key=lambda feature_idx: scores[feature_idx])
+-        return new_feature_idx, scores[new_feature_idx]
++        new_feature_idx = max(
++            candidate_scores, key=lambda feature_idx: candidate_scores[feature_idx]
++        )
++        return new_feature_idx, candidate_scores[new_feature_idx]
+ 
+     def _get_support_mask(self):
+         check_is_fitted(self)

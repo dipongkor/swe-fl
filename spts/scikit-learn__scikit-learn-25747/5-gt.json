@@ -1,0 +1,20 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-25747",
+  "root_cause": [
+    {
+      "file": "sklearn/utils/_set_output.py",
+      "old_line": 59,
+      "old_statement": "data_to_wrap.index = index",
+      "current_line": 60,
+      "current_statement": "data_to_wrap.index = index"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "",
+    "annotator2": "The output wrapper receives both the transformer's result and the estimator's original input. In pandas-output mode, an already constructed DataFrame carries the row index selected by the transform itself. _wrap_in_pandas_container nevertheless assigns the original input index to that DataFrame. The focused transformer returns index ['s0', 's1'], but line 59 overwrites it with [0, 1]; an aggregating transformer can instead raise a length-mismatch error when its output has fewer rows. This single assignment is the minimal root cause because column handling is unrelated and the returned DataFrame is otherwise already a valid output container."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "The output wrapper receives both the transformer's result and the estimator's original input. In pandas-output mode, an already constructed DataFrame carries the row index selected by the transform itself. _wrap_in_pandas_container nevertheless assigns the original input index to that DataFrame. The focused transformer returns index ['s0', 's1'], but line 60 overwrites it with [0, 1]; an aggregating transformer can instead raise a length-mismatch error when its output has fewer rows. This single assignment is the minimal root cause because column handling is unrelated and the returned DataFrame is otherwise already a valid output container."
+  }
+}

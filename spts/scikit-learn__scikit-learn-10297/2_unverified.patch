@@ -1,0 +1,32 @@
+diff --git a/sklearn/linear_model/ridge.py b/sklearn/linear_model/ridge.py
+index 911c74ae3..7c6a7a1eb 100644
+--- a/sklearn/linear_model/ridge.py
++++ b/sklearn/linear_model/ridge.py
+@@ -1332,13 +1332,6 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):
+     a one-versus-all approach. Concretely, this is implemented by taking
+     advantage of the multi-variate response support in Ridge.
+     """
+-    def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,
+-                 normalize=False, scoring=None, cv=None, class_weight=None):
+-        super(RidgeClassifierCV, self).__init__(
+-            alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,
+-            scoring=scoring, cv=cv)
+-        self.class_weight = class_weight
+-
+     def fit(self, X, y, sample_weight=None):
+         """Fit the ridge classifier.
+ 
+@@ -1376,6 +1369,13 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):
+         _BaseRidgeCV.fit(self, X, Y, sample_weight=sample_weight)
+         return self
+ 
++    def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,
++                 normalize=False, scoring=None, cv=None, class_weight=None):
++        super(RidgeClassifierCV, self).__init__(
++            alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,
++            scoring=scoring, cv=cv)
++        self.class_weight = class_weight
++
+     @property
+     def classes_(self):
+         return self._label_binarizer.classes_

@@ -1,0 +1,29 @@
+diff --git a/sklearn/model_selection/_split.py b/sklearn/model_selection/_split.py
+index c49a3ce6a..28b26f3b6 100644
+--- a/sklearn/model_selection/_split.py
++++ b/sklearn/model_selection/_split.py
+@@ -11,6 +11,7 @@ functions to split the data based on a preset strategy.
+ 
+ from collections.abc import Iterable
+ import warnings
++import logging
+ from itertools import chain, combinations
+ from math import ceil, floor
+ import numbers
+@@ -27,6 +28,8 @@ from ..utils.multiclass import type_of_target
+ from ..utils.fixes import comb
+ from ..base import _pprint
+ 
++logger = logging.getLogger(__name__)
++
+ __all__ = ['BaseCrossValidator',
+            'KFold',
+            'GroupKFold',
+@@ -2148,6 +2151,7 @@ def _build_repr(self):
+         args = sorted([p.name for p in init_signature.parameters.values()
+                        if p.name != 'self' and p.kind != p.VAR_KEYWORD])
+     class_name = self.__class__.__name__
++    logger.debug("Building representation for %s", class_name)
+     params = dict()
+     for key in args:
+         # We need deprecation warnings to always be on in order to

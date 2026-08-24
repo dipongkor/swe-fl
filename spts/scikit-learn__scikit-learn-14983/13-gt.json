@@ -1,0 +1,27 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-14983",
+  "root_cause": [
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "old_line": 1066,
+      "old_statement": "class _RepeatedSplits(metaclass=ABCMeta):",
+      "current_line": 1069,
+      "current_statement": "class _RepeatedSplits(metaclass=ABCMeta):"
+    },
+    {
+      "file": "sklearn/model_selection/_split.py",
+      "old_line": 2160,
+      "old_statement": "value = getattr(self, key, None)",
+      "current_line": 2168,
+      "current_statement": "parameter_value = getattr(self, key, None)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "",
+    "annotator2": "Two independent gaps cause the broken representation: _RepeatedSplits has no route to the shared repr builder, and the builder cannot see constructor parameters stored in cvargs."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

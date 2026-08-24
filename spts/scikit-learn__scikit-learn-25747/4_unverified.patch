@@ -1,0 +1,14 @@
+diff --git a/sklearn/utils/_set_output.py b/sklearn/utils/_set_output.py
+index 335773c6a..642b441c5 100644
+--- a/sklearn/utils/_set_output.py
++++ b/sklearn/utils/_set_output.py
+@@ -10,8 +10,8 @@ from ._available_if import available_if
+ def _wrap_in_pandas_container(
+     data_to_wrap,
+     *,
+-    columns,
+     index=None,
++    columns,
+ ):
+     """Create a Pandas DataFrame.
+ 

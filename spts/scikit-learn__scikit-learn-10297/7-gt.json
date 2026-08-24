@@ -1,0 +1,27 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-10297",
+  "root_cause": [
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "old_line": 1336,
+      "old_statement": "def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\n             normalize=False, scoring=None, cv=None, class_weight=None):",
+      "current_line": 1338,
+      "current_statement": "def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,\nnormalize=False, scoring=None, cv=None, class_weight=None):"
+    },
+    {
+      "file": "sklearn/linear_model/ridge.py",
+      "old_line": 1339,
+      "old_statement": "super(RidgeClassifierCV, self).__init__(\n    alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n    scoring=scoring, cv=cv)",
+      "current_line": 1341,
+      "current_statement": "super(RidgeClassifierCV, self).__init__(\n    alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,\n    scoring=scoring, cv=cv)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "The store_cv_values machinery lives in _BaseRidgeCV, whose fit populates cv_values_ when the flag is set, and RidgeClassifierCV's documentation promises that behavior. But RidgeClassifierCV overrides __init__ with a narrower signature that neither accepts store_cv_values nor passes it to super().__init__, so the documented flag is unreachable: passing it raises TypeError at construction, and without it cv_values_ is never stored. Both lines are jointly the fault: the signature omission produces the reported TypeError, and the non-forwarding super call means the signature alone would not connect the flag to the inherited machinery.",
+    "annotator2": "RidgeClassifierCV inherits cross-validation behavior capable of retaining per-sample scores, but its constructor does not expose store_cv_values and its superclass call always uses the default setting. Passing store_cv_values=True therefore raises TypeError at construction, and the hard-coded superclass arguments prevent the inherited fitting path from creating cv_values_. These two constructor statements are the complete propagation fault because one defines the accepted API and the other controls the inherited behavior."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

@@ -1,0 +1,29 @@
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..eaa700d3a 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -3,6 +3,7 @@
+ # License: BSD 3 clause
+ 
+ import numbers
++import logging
+ import numpy as np
+ from scipy.sparse import issparse
+ from warnings import warn
+@@ -25,6 +26,8 @@ from ._bagging import BaseBagging
+ 
+ __all__ = ["IsolationForest"]
+ 
++logger = logging.getLogger(__name__)
++
+ 
+ class IsolationForest(OutlierMixin, BaseBagging):
+     """
+@@ -345,6 +348,7 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             return self
+ 
+         # else, define offset_ wrt contamination parameter
++        logger.debug("Computing contamination-based isolation offset")
+         self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
+ 
+         return self

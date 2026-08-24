@@ -1,0 +1,118 @@
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..02f9db2f0 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -3,6 +3,7 @@
+ # License: BSD 3 clause
+ 
+ import numbers
++import logging
+ import numpy as np
+ from scipy.sparse import issparse
+ from warnings import warn
+@@ -25,6 +26,8 @@ from ._bagging import BaseBagging
+ 
+ __all__ = ["IsolationForest"]
+ 
++logger = logging.getLogger(__name__)
++
+ 
+ class IsolationForest(OutlierMixin, BaseBagging):
+     """
+@@ -265,6 +268,34 @@ class IsolationForest(OutlierMixin, BaseBagging):
+         # copies.
+         return {"prefer": "threads"}
+ 
++    def _contamination_offset(self, X):
++        return np.percentile(
++            self.score_samples(X), 100.0 * self.contamination
++        )
++
++    def predict(self, X):
++        """
++        Predict if a particular sample is an outlier or not.
++
++        Parameters
++        ----------
++        X : {array-like, sparse matrix} of shape (n_samples, n_features)
++            The input samples. Internally, it will be converted to
++            ``dtype=np.float32`` and if a sparse matrix is provided
++            to a sparse ``csr_matrix``.
++
++        Returns
++        -------
++        is_inlier : ndarray of shape (n_samples,)
++            For each observation, tells whether or not (+1 or -1) it should
++            be considered as an inlier according to the fitted model.
++        """
++        check_is_fitted(self)
++        decision_func = self.decision_function(X)
++        is_inlier = np.ones_like(decision_func, dtype=int)
++        is_inlier[decision_func < 0] = -1
++        return is_inlier
++
+     def fit(self, X, y=None, sample_weight=None):
+         """
+         Fit estimator.
+@@ -290,14 +321,11 @@ class IsolationForest(OutlierMixin, BaseBagging):
+         self._validate_params()
+         X = self._validate_data(X, accept_sparse=["csc"], dtype=tree_dtype)
+         if issparse(X):
+-            # Pre-sort indices to avoid that each individual tree of the
+-            # ensemble sorts the indices.
+             X.sort_indices()
+ 
+-        rnd = check_random_state(self.random_state)
+-        y = rnd.uniform(size=X.shape[0])
++        random_state = check_random_state(self.random_state)
++        y = random_state.uniform(size=X.shape[0])
+ 
+-        # ensure that max_sample is in [1, n_samples]:
+         n_samples = X.shape[0]
+ 
+         if isinstance(self.max_samples, str) and self.max_samples == "auto":
+@@ -338,40 +366,14 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             ]
+         )
+ 
+-        if self.contamination == "auto":
+-            # 0.5 plays a special role as described in the original paper.
+-            # we take the opposite as we consider the opposite of their score.
++        if self.contamination != "auto":
++            logger.debug("Computing contamination-based isolation offset")
++            self.offset_ = self._contamination_offset(X)
++        else:
+             self.offset_ = -0.5
+-            return self
+-
+-        # else, define offset_ wrt contamination parameter
+-        self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
+ 
+         return self
+ 
+-    def predict(self, X):
+-        """
+-        Predict if a particular sample is an outlier or not.
+-
+-        Parameters
+-        ----------
+-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+-            The input samples. Internally, it will be converted to
+-            ``dtype=np.float32`` and if a sparse matrix is provided
+-            to a sparse ``csr_matrix``.
+-
+-        Returns
+-        -------
+-        is_inlier : ndarray of shape (n_samples,)
+-            For each observation, tells whether or not (+1 or -1) it should
+-            be considered as an inlier according to the fitted model.
+-        """
+-        check_is_fitted(self)
+-        decision_func = self.decision_function(X)
+-        is_inlier = np.ones_like(decision_func, dtype=int)
+-        is_inlier[decision_func < 0] = -1
+-        return is_inlier
+-
+     def decision_function(self, X):
+         """
+         Average anomaly score of X of the base classifiers.

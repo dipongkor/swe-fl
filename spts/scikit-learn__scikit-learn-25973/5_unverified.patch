@@ -1,0 +1,34 @@
+diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py
+index e983c55de..df071bb5e 100644
+--- a/sklearn/feature_selection/_sequential.py
++++ b/sklearn/feature_selection/_sequential.py
+@@ -291,7 +291,9 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+ 
+         return self
+ 
+-    def _get_best_new_feature_score(self, estimator, X, y, current_mask):
++    def _get_best_new_feature_score(
++        self, estimator, X, y, current_mask, score_aggregator=None
++    ):
+         # Return the best new feature and its score to add to the current_mask,
+         # i.e. return the best new feature and its score to add (resp. remove)
+         # when doing forward selection (resp. backward selection).
+@@ -305,14 +307,16 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+             if self.direction == "backward":
+                 candidate_mask = ~candidate_mask
+             X_new = X[:, candidate_mask]
+-            scores[feature_idx] = cross_val_score(
++            feature_scores = cross_val_score(
+                 estimator,
+                 X_new,
+                 y,
+                 cv=self.cv,
+                 scoring=self.scoring,
+                 n_jobs=self.n_jobs,
+-            ).mean()
++            )
++            aggregator = np.mean if score_aggregator is None else score_aggregator
++            scores[feature_idx] = aggregator(feature_scores)
+         new_feature_idx = max(scores, key=lambda feature_idx: scores[feature_idx])
+         return new_feature_idx, scores[new_feature_idx]
+ 

@@ -1,0 +1,25 @@
+diff --git a/sklearn/ensemble/_iforest.py b/sklearn/ensemble/_iforest.py
+index 4d6c1c3f0..5012f94a5 100644
+--- a/sklearn/ensemble/_iforest.py
++++ b/sklearn/ensemble/_iforest.py
+@@ -338,14 +338,15 @@ class IsolationForest(OutlierMixin, BaseBagging):
+             ]
+         )
+ 
+-        if self.contamination == "auto":
++        if self.contamination != "auto":
++            # define offset_ wrt contamination parameter
++            self.offset_ = np.percentile(
++                self.score_samples(X), 100.0 * self.contamination
++            )
++        else:
+             # 0.5 plays a special role as described in the original paper.
+             # we take the opposite as we consider the opposite of their score.
+             self.offset_ = -0.5
+-            return self
+-
+-        # else, define offset_ wrt contamination parameter
+-        self.offset_ = np.percentile(self.score_samples(X), 100.0 * self.contamination)
+ 
+         return self
+ 

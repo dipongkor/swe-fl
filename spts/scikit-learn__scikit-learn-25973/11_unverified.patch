@@ -1,0 +1,18 @@
+diff --git a/sklearn/feature_selection/_sequential.py b/sklearn/feature_selection/_sequential.py
+index e983c55de..a9df210f1 100644
+--- a/sklearn/feature_selection/_sequential.py
++++ b/sklearn/feature_selection/_sequential.py
+@@ -302,8 +302,11 @@ class SequentialFeatureSelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator
+         for feature_idx in candidate_feature_indices:
+             candidate_mask = current_mask.copy()
+             candidate_mask[feature_idx] = True
+-            if self.direction == "backward":
+-                candidate_mask = ~candidate_mask
++            candidate_mask = (
++                ~candidate_mask
++                if self.direction == "backward"
++                else candidate_mask
++            )
+             X_new = X[:, candidate_mask]
+             scores[feature_idx] = cross_val_score(
+                 estimator,
