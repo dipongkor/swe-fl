@@ -1,0 +1,20 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-9288",
+  "root_cause": [
+    {
+      "file": "sklearn/cluster/k_means_.py",
+      "old_line": 372,
+      "old_statement": "labels, inertia, centers, n_iter_ = kmeans_single(\n    X, sample_weight, n_clusters, max_iter=max_iter, init=init,\n    verbose=verbose, precompute_distances=precompute_distances,\n    tol=tol, x_squared_norms=x_squared_norms,\n    random_state=random_state)",
+      "current_line": 368,
+      "current_statement": "labels, inertia, centers, run_iterations = kmeans_single(\n                X, sample_weight, n_clusters, max_iter=max_iter, init=init,\n                verbose=verbose, precompute_distances=precompute_distances,\n                tol=tol, x_squared_norms=x_squared_norms,\n                random_state=random_state)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "k_means restarts kmeans_single n_init times and keeps the best run. With n_jobs=1 the restarts share one RandomState consumed sequentially; with n_jobs>1 each restart gets an independent pre-drawn integer seed. Every individual run is a valid k-means either way, but the initialization sequences differ between the branches, so a different restart can win the best-of-n_init selection and all fitted attributes (labels_, inertia_, cluster_centers_) diverge between n_jobs=1 and n_jobs>1 despite a fixed random_state. This violates the reproducibility contract of random_state; duplicate reports observed the same divergence via inertia_ and via labels_ (where a worse local optimum won on one branch).",
+    "annotator2": "KMeans promises reproducible behavior for a given random_state, but its serial and parallel execution paths seed their work differently. The serial call at line 372 lets each run consume the shared generator internally; the parallel path generates a predetermined array of integer seeds first. The assertion therefore observes different labels for n_jobs=1 and n_jobs=2."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "KMeans promises reproducible behavior for a given random_state, but its serial and parallel execution paths seed their work differently. The serial call at line 368 lets each run consume the shared generator internally; the parallel path generates a predetermined array of integer seeds first. The assertion therefore observes different labels for n_jobs=1 and n_jobs=2."
+  }
+}

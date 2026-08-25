@@ -1,0 +1,258 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 3ca730e30..9a9ef2503 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -77,61 +77,6 @@ ModuleEntry = NamedTuple('ModuleEntry', [('docname', str),
+                                          ('deprecated', bool)])
+ 
+ 
+-def _parse_annotation(annotation: str) -> List[Node]:
+-    """Parse type annotation."""
+-    def make_xref(text: str) -> addnodes.pending_xref:
+-        if text == 'None':
+-            reftype = 'obj'
+-        else:
+-            reftype = 'class'
+-
+-        return pending_xref('', nodes.Text(text),
+-                            refdomain='py', reftype=reftype, reftarget=text)
+-
+-    def unparse(node: ast.AST) -> List[Node]:
+-        if isinstance(node, ast.Attribute):
+-            return [nodes.Text("%s.%s" % (unparse(node.value)[0], node.attr))]
+-        elif isinstance(node, ast.Expr):
+-            return unparse(node.value)
+-        elif isinstance(node, ast.Index):
+-            return unparse(node.value)
+-        elif isinstance(node, ast.List):
+-            result = [addnodes.desc_sig_punctuation('', '[')]  # type: List[Node]
+-            for elem in node.elts:
+-                result.extend(unparse(elem))
+-                result.append(addnodes.desc_sig_punctuation('', ', '))
+-            result.pop()
+-            result.append(addnodes.desc_sig_punctuation('', ']'))
+-            return result
+-        elif isinstance(node, ast.Module):
+-            return sum((unparse(e) for e in node.body), [])
+-        elif isinstance(node, ast.Name):
+-            return [nodes.Text(node.id)]
+-        elif isinstance(node, ast.Subscript):
+-            result = unparse(node.value)
+-            result.append(addnodes.desc_sig_punctuation('', '['))
+-            result.extend(unparse(node.slice))
+-            result.append(addnodes.desc_sig_punctuation('', ']'))
+-            return result
+-        elif isinstance(node, ast.Tuple):
+-            result = []
+-            for elem in node.elts:
+-                result.extend(unparse(elem))
+-                result.append(addnodes.desc_sig_punctuation('', ', '))
+-            result.pop()
+-            return result
+-        else:
+-            raise SyntaxError  # unsupported syntax
+-
+-    try:
+-        tree = ast_parse(annotation)
+-        result = unparse(tree)
+-        for i, node in enumerate(result):
+-            if isinstance(node, nodes.Text):
+-                result[i] = make_xref(str(node))
+-        return result
+-    except SyntaxError:
+-        return [make_xref(annotation)]
+ 
+ 
+ def _parse_arglist(arglist: str) -> addnodes.desc_parameterlist:
+@@ -1354,3 +1299,59 @@ def setup(app: Sphinx) -> Dict[str, Any]:
+         'parallel_read_safe': True,
+         'parallel_write_safe': True,
+     }
++
++def _parse_annotation(annotation: str) -> List[Node]:
++    """Parse type annotation."""
++    def make_xref(text: str) -> addnodes.pending_xref:
++        if text == 'None':
++            reftype = 'obj'
++        else:
++            reftype = 'class'
++
++        return pending_xref('', nodes.Text(text),
++                            refdomain='py', reftype=reftype, reftarget=text)
++
++    def unparse(node: ast.AST) -> List[Node]:
++        if isinstance(node, ast.Attribute):
++            return [nodes.Text("%s.%s" % (unparse(node.value)[0], node.attr))]
++        elif isinstance(node, ast.Expr):
++            return unparse(node.value)
++        elif isinstance(node, ast.Index):
++            return unparse(node.value)
++        elif isinstance(node, ast.List):
++            result = [addnodes.desc_sig_punctuation('', '[')]  # type: List[Node]
++            for elem in node.elts:
++                result.extend(unparse(elem))
++                result.append(addnodes.desc_sig_punctuation('', ', '))
++            result.pop()
++            result.append(addnodes.desc_sig_punctuation('', ']'))
++            return result
++        elif isinstance(node, ast.Module):
++            return sum((unparse(e) for e in node.body), [])
++        elif isinstance(node, ast.Name):
++            return [nodes.Text(node.id)]
++        elif isinstance(node, ast.Subscript):
++            result = unparse(node.value)
++            result.append(addnodes.desc_sig_punctuation('', '['))
++            result.extend(unparse(node.slice))
++            result.append(addnodes.desc_sig_punctuation('', ']'))
++            return result
++        elif isinstance(node, ast.Tuple):
++            result = []
++            for elem in node.elts:
++                result.extend(unparse(elem))
++                result.append(addnodes.desc_sig_punctuation('', ', '))
++            result.pop()
++            return result
++        else:
++            raise SyntaxError  # unsupported syntax
++
++    try:
++        tree = ast_parse(annotation)
++        result = unparse(tree)
++        for i, node in enumerate(result):
++            if isinstance(node, nodes.Text):
++                result[i] = make_xref(str(node))
++        return result
++    except SyntaxError:
++        return [make_xref(annotation)]
+diff --git a/sphinx/pycode/ast.py b/sphinx/pycode/ast.py
+index 4d8aa8955..b9467ee61 100644
+--- a/sphinx/pycode/ast.py
++++ b/sphinx/pycode/ast.py
+@@ -58,6 +58,65 @@ def parse(code: str, mode: str = 'exec') -> "ast.AST":
+         return ast.parse(code, mode=mode)
+ 
+ 
++
++
++def unparse_arguments(node: ast.arguments) -> str:
++    """Unparse an arguments to string."""
++    defaults = list(node.defaults)
++    positionals = len(node.args)
++    posonlyargs = 0
++    if hasattr(node, "posonlyargs"):  # for py38+
++        posonlyargs += len(node.posonlyargs)  # type:ignore
++        positionals += posonlyargs
++    for _ in range(len(defaults), positionals):
++        defaults.insert(0, None)
++
++    kw_defaults = list(node.kw_defaults)
++    for _ in range(len(kw_defaults), len(node.kwonlyargs)):
++        kw_defaults.insert(0, None)
++
++    args = []  # type: List[str]
++    if hasattr(node, "posonlyargs"):  # for py38+
++        for i, arg in enumerate(node.posonlyargs):  # type: ignore
++            name = unparse(arg)
++            if defaults[i]:
++                if arg.annotation:
++                    name += " = %s" % unparse(defaults[i])
++                else:
++                    name += "=%s" % unparse(defaults[i])
++            args.append(name)
++
++        if node.posonlyargs:  # type: ignore
++            args.append('/')
++
++    for i, arg in enumerate(node.args):
++        name = unparse(arg)
++        if defaults[i + posonlyargs]:
++            if arg.annotation:
++                name += " = %s" % unparse(defaults[i + posonlyargs])
++            else:
++                name += "=%s" % unparse(defaults[i + posonlyargs])
++        args.append(name)
++
++    if node.vararg:
++        args.append("*" + unparse(node.vararg))
++
++    if node.kwonlyargs and not node.vararg:
++        args.append('*')
++    for i, arg in enumerate(node.kwonlyargs):
++        name = unparse(arg)
++        if kw_defaults[i]:
++            if arg.annotation:
++                name += " = %s" % unparse(kw_defaults[i])
++            else:
++                name += "=%s" % unparse(kw_defaults[i])
++        args.append(name)
++
++    if node.kwarg:
++        args.append("**" + unparse(node.kwarg))
++
++    return ", ".join(args)
++
+ def unparse(node: ast.AST) -> str:
+     """Unparse an AST to string."""
+     if node is None:
+@@ -120,61 +179,3 @@ def unparse(node: ast.AST) -> str:
+         return repr(node.value)
+     else:
+         raise NotImplementedError('Unable to parse %s object' % type(node).__name__)
+-
+-
+-def unparse_arguments(node: ast.arguments) -> str:
+-    """Unparse an arguments to string."""
+-    defaults = list(node.defaults)
+-    positionals = len(node.args)
+-    posonlyargs = 0
+-    if hasattr(node, "posonlyargs"):  # for py38+
+-        posonlyargs += len(node.posonlyargs)  # type:ignore
+-        positionals += posonlyargs
+-    for _ in range(len(defaults), positionals):
+-        defaults.insert(0, None)
+-
+-    kw_defaults = list(node.kw_defaults)
+-    for _ in range(len(kw_defaults), len(node.kwonlyargs)):
+-        kw_defaults.insert(0, None)
+-
+-    args = []  # type: List[str]
+-    if hasattr(node, "posonlyargs"):  # for py38+
+-        for i, arg in enumerate(node.posonlyargs):  # type: ignore
+-            name = unparse(arg)
+-            if defaults[i]:
+-                if arg.annotation:
+-                    name += " = %s" % unparse(defaults[i])
+-                else:
+-                    name += "=%s" % unparse(defaults[i])
+-            args.append(name)
+-
+-        if node.posonlyargs:  # type: ignore
+-            args.append('/')
+-
+-    for i, arg in enumerate(node.args):
+-        name = unparse(arg)
+-        if defaults[i + posonlyargs]:
+-            if arg.annotation:
+-                name += " = %s" % unparse(defaults[i + posonlyargs])
+-            else:
+-                name += "=%s" % unparse(defaults[i + posonlyargs])
+-        args.append(name)
+-
+-    if node.vararg:
+-        args.append("*" + unparse(node.vararg))
+-
+-    if node.kwonlyargs and not node.vararg:
+-        args.append('*')
+-    for i, arg in enumerate(node.kwonlyargs):
+-        name = unparse(arg)
+-        if kw_defaults[i]:
+-            if arg.annotation:
+-                name += " = %s" % unparse(kw_defaults[i])
+-            else:
+-                name += "=%s" % unparse(kw_defaults[i])
+-        args.append(name)
+-
+-    if node.kwarg:
+-        args.append("**" + unparse(node.kwarg))
+-
+-    return ", ".join(args)

@@ -1,0 +1,24 @@
+diff --git a/sphinx/application.py b/sphinx/application.py
+index 385b74d8a..994f2881f 100644
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -280,9 +280,7 @@ class Sphinx:
+         """Load translated strings from the configured localedirs if enabled in
+         the configuration.
+         """
+-        if self.config.language is None:
+-            self.translator, has_translation = locale.init([], None)
+-        else:
++        if self.config.language is not None:
+             logger.info(bold(__('loading translations [%s]... ') % self.config.language),
+                         nonl=True)
+ 
+@@ -300,6 +298,8 @@ class Sphinx:
+                 logger.info(__('done'))
+             else:
+                 logger.info(__('not available for built-in messages'))
++        else:
++            self.translator, has_translation = locale.init([], None)
+ 
+     def _init_env(self, freshenv: bool) -> None:
+         filename = path.join(self.doctreedir, ENV_PICKLE_FILENAME)

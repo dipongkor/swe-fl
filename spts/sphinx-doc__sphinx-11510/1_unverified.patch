@@ -1,0 +1,12 @@
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 19f7c0a8d..58b8c039d 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -371,7 +371,6 @@ class Include(BaseInclude, SphinxDirective):
+     def run(self) -> list[Node]:
+         if self.arguments[0].startswith('<') and \
+            self.arguments[0].endswith('>'):
+-            # docutils "standard" includes, do not do path processing
+             return super().run()
+         rel_filename, filename = self.env.relfn2path(self.arguments[0])
+         self.arguments[0] = filename

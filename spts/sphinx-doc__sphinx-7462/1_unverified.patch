@@ -1,0 +1,12 @@
+diff --git a/sphinx/pycode/ast.py b/sphinx/pycode/ast.py
+index 4d8aa8955..40549be28 100644
+--- a/sphinx/pycode/ast.py
++++ b/sphinx/pycode/ast.py
+@@ -116,7 +116,6 @@ def unparse(node: ast.AST) -> str:
+     elif isinstance(node, ast.Tuple):
+         return ", ".join(unparse(e) for e in node.elts)
+     elif sys.version_info > (3, 6) and isinstance(node, ast.Constant):
+-        # this branch should be placed at last
+         return repr(node.value)
+     else:
+         raise NotImplementedError('Unable to parse %s object' % type(node).__name__)

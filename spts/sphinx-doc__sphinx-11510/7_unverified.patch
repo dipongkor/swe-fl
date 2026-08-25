@@ -1,0 +1,12 @@
+diff --git a/sphinx/directives/other.py b/sphinx/directives/other.py
+index 19f7c0a8d..0cd51baaf 100644
+--- a/sphinx/directives/other.py
++++ b/sphinx/directives/other.py
+@@ -376,6 +376,7 @@ class Include(BaseInclude, SphinxDirective):
+         rel_filename, filename = self.env.relfn2path(self.arguments[0])
+         self.arguments[0] = filename
+         self.env.note_included(filename)
++        logger.debug("Including source file %s", filename)
+         return super().run()
+ 
+ 

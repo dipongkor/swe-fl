@@ -1,0 +1,20 @@
+{
+  "instance_id": "sphinx-doc__sphinx-11510",
+  "root_cause": [
+    {
+      "file": "sphinx/directives/other.py",
+      "old_line": 379,
+      "old_statement": "return super().run()",
+      "current_line": 379,
+      "current_statement": "return super().run()"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Included content reaches the build through the docutils include machinery, not through Sphinx's read phase: Include.run() hands off to BaseInclude.run(), which reads the file and inserts its lines directly into the state machine. The 'source-read' event is only emitted in Sphinx's own document-reading path, so text pulled in via '.. include::' bypasses all source-read handlers. If the included file also happens to be a standalone document, handlers do run for it (which is why the reporter saw the handler being called), but only the standalone page is affected; the transcluded copy in the including document keeps the raw file text.",
+    "annotator2": "The top-level reStructuredText parser emits source-read for the document passed to it, but Include.run resolves the child path and then returns BaseInclude.run without placing included RST through the Sphinx source-read lifecycle. BaseInclude reads the child and inserts its original lines into the state machine. Consequently a listener sees and can modify `index`, but never sees `baz/baz`; nested `foo.rst` likewise retains `#magical`. The minimal pre-existing fault is the unconditional delegation at line 379 without an event-aware insertion path."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

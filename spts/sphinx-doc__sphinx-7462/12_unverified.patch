@@ -1,0 +1,48 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 3ca730e30..f2292225d 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -77,6 +77,10 @@ ModuleEntry = NamedTuple('ModuleEntry', [('docname', str),
+                                          ('deprecated', bool)])
+ 
+ 
++def _drop_trailing_separator(result: List[Node]) -> None:
++    result.pop()
++
++
+ def _parse_annotation(annotation: str) -> List[Node]:
+     """Parse type annotation."""
+     def make_xref(text: str) -> addnodes.pending_xref:
+@@ -100,7 +104,7 @@ def _parse_annotation(annotation: str) -> List[Node]:
+             for elem in node.elts:
+                 result.extend(unparse(elem))
+                 result.append(addnodes.desc_sig_punctuation('', ', '))
+-            result.pop()
++            _drop_trailing_separator(result)
+             result.append(addnodes.desc_sig_punctuation('', ']'))
+             return result
+         elif isinstance(node, ast.Module):
+diff --git a/sphinx/pycode/ast.py b/sphinx/pycode/ast.py
+index 4d8aa8955..831d67f23 100644
+--- a/sphinx/pycode/ast.py
++++ b/sphinx/pycode/ast.py
+@@ -58,6 +58,10 @@ def parse(code: str, mode: str = 'exec') -> "ast.AST":
+         return ast.parse(code, mode=mode)
+ 
+ 
++def _unparse_tuple(elements: Any) -> str:
++    return ", ".join(unparse(element) for element in elements)
++
++
+ def unparse(node: ast.AST) -> str:
+     """Unparse an AST to string."""
+     if node is None:
+@@ -114,7 +118,7 @@ def unparse(node: ast.AST) -> str:
+     elif isinstance(node, ast.UnaryOp):
+         return "%s %s" % (unparse(node.op), unparse(node.operand))
+     elif isinstance(node, ast.Tuple):
+-        return ", ".join(unparse(e) for e in node.elts)
++        return _unparse_tuple(node.elts)
+     elif sys.version_info > (3, 6) and isinstance(node, ast.Constant):
+         # this branch should be placed at last
+         return repr(node.value)

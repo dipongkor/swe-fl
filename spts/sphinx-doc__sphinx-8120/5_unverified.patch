@@ -1,0 +1,23 @@
+diff --git a/sphinx/application.py b/sphinx/application.py
+index 385b74d8a..2fd969b9e 100644
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -276,7 +276,7 @@ class Sphinx:
+         # set up the builder
+         self._init_builder()
+ 
+-    def _init_i18n(self) -> None:
++    def _init_i18n(self, include_package_locale: bool = True) -> None:
+         """Load translated strings from the configured localedirs if enabled in
+         the configuration.
+         """
+@@ -293,7 +293,8 @@ class Sphinx:
+                 if catalog.domain == 'sphinx' and catalog.is_outdated():
+                     catalog.write_mo(self.config.language)
+ 
+-            locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)
++            package_locales = [None, path.join(package_dir, 'locale')] if include_package_locale else [None]
++            locale_dirs = package_locales + list(repo.locale_dirs)
+             self.translator, has_translation = locale.init(locale_dirs, self.config.language)
+             if has_translation or self.config.language == 'en':
+                 # "en" never needs to be translated

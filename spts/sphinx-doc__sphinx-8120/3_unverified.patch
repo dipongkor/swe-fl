@@ -1,0 +1,22 @@
+diff --git a/sphinx/application.py b/sphinx/application.py
+index 385b74d8a..2d6172fc9 100644
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -287,14 +287,14 @@ class Sphinx:
+                         nonl=True)
+ 
+             # compile mo files if sphinx.po file in user locale directories are updated
+-            repo = CatalogRepository(self.srcdir, self.config.locale_dirs,
++            repo = CatalogRepository(self.srcdir, self.config.locale_dirs,
+                                      self.config.language, self.config.source_encoding)
+             for catalog in repo.catalogs:
+                 if catalog.domain == 'sphinx' and catalog.is_outdated():
+                     catalog.write_mo(self.config.language)
+ 
+-            locale_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)
+-            self.translator, has_translation = locale.init(locale_dirs, self.config.language)
++            translation_dirs = [None, path.join(package_dir, 'locale')] + list(repo.locale_dirs)
++            self.translator, has_translation = locale.init(translation_dirs, self.config.language)
+             if has_translation or self.config.language == 'en':
+                 # "en" never needs to be translated
+                 logger.info(__('done'))

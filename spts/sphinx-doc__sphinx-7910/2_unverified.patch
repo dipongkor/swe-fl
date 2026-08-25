@@ -1,0 +1,12 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+index 10b1ff3a3..6bfa294a7 100644
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -378,6 +378,7 @@ def _process_docstring(app: Sphinx, what: str, name: str, obj: Any,
+     lines[:] = result_lines[:]
+ 
+ 
++
+ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+                  skip: bool, options: Any) -> bool:
+     """Determine if private and special class members are included in docs.

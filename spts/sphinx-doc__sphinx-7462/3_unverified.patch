@@ -1,0 +1,65 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 3ca730e30..9d9d19f2d 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -96,40 +96,40 @@ def _parse_annotation(annotation: str) -> List[Node]:
+         elif isinstance(node, ast.Index):
+             return unparse(node.value)
+         elif isinstance(node, ast.List):
+-            result = [addnodes.desc_sig_punctuation('', '[')]  # type: List[Node]
++            annotation_nodes = [addnodes.desc_sig_punctuation('', '[')]  # type: List[Node]
+             for elem in node.elts:
+-                result.extend(unparse(elem))
+-                result.append(addnodes.desc_sig_punctuation('', ', '))
+-            result.pop()
+-            result.append(addnodes.desc_sig_punctuation('', ']'))
+-            return result
++                annotation_nodes.extend(unparse(elem))
++                annotation_nodes.append(addnodes.desc_sig_punctuation('', ', '))
++            annotation_nodes.pop()
++            annotation_nodes.append(addnodes.desc_sig_punctuation('', ']'))
++            return annotation_nodes
+         elif isinstance(node, ast.Module):
+             return sum((unparse(e) for e in node.body), [])
+         elif isinstance(node, ast.Name):
+             return [nodes.Text(node.id)]
+         elif isinstance(node, ast.Subscript):
+-            result = unparse(node.value)
+-            result.append(addnodes.desc_sig_punctuation('', '['))
+-            result.extend(unparse(node.slice))
+-            result.append(addnodes.desc_sig_punctuation('', ']'))
+-            return result
++            annotation_nodes = unparse(node.value)
++            annotation_nodes.append(addnodes.desc_sig_punctuation('', '['))
++            annotation_nodes.extend(unparse(node.slice))
++            annotation_nodes.append(addnodes.desc_sig_punctuation('', ']'))
++            return annotation_nodes
+         elif isinstance(node, ast.Tuple):
+-            result = []
++            annotation_nodes = []
+             for elem in node.elts:
+-                result.extend(unparse(elem))
+-                result.append(addnodes.desc_sig_punctuation('', ', '))
+-            result.pop()
+-            return result
++                annotation_nodes.extend(unparse(elem))
++                annotation_nodes.append(addnodes.desc_sig_punctuation('', ', '))
++            annotation_nodes.pop()
++            return annotation_nodes
+         else:
+             raise SyntaxError  # unsupported syntax
+ 
+     try:
+         tree = ast_parse(annotation)
+-        result = unparse(tree)
+-        for i, node in enumerate(result):
++        annotation_nodes = unparse(tree)
++        for i, node in enumerate(annotation_nodes):
+             if isinstance(node, nodes.Text):
+-                result[i] = make_xref(str(node))
+-        return result
++                annotation_nodes[i] = make_xref(str(node))
++        return annotation_nodes
+     except SyntaxError:
+         return [make_xref(annotation)]
+ 

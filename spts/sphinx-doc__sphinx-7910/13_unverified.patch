@@ -1,0 +1,25 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+index 10b1ff3a3..85cdf7853 100644
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -378,6 +378,10 @@ def _process_docstring(app: Sphinx, what: str, name: str, obj: Any,
+     lines[:] = result_lines[:]
+ 
+ 
++def _owner_from_globals(obj: Any, cls_path: str) -> Any:
++    return obj.__globals__[cls_path]
++
++
+ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+                  skip: bool, options: Any) -> bool:
+     """Determine if private and special class members are included in docs.
+@@ -438,7 +442,8 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+                         mod_path = cls_path.split('.')
+                         cls = functools.reduce(getattr, mod_path, mod)
+                     else:
+-                        cls = obj.__globals__[cls_path]
++                        logger.debug("Resolving Napoleon member owner %s", cls_path)
++                        cls = _owner_from_globals(obj, cls_path)
+                 except Exception:
+                     cls_is_owner = False
+                 else:

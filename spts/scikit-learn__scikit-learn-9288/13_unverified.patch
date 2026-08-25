@@ -1,0 +1,36 @@
+diff --git a/sklearn/cluster/k_means_.py b/sklearn/cluster/k_means_.py
+index b7fbdf7da..851f2ab42 100644
+--- a/sklearn/cluster/k_means_.py
++++ b/sklearn/cluster/k_means_.py
+@@ -175,6 +175,10 @@ def _check_normalize_sample_weight(sample_weight, X):
+     return sample_weight
+ 
+ 
++def _is_better_kmeans_run(best_inertia, inertia):
++    return best_inertia is None or inertia < best_inertia
++
++
+ def k_means(X, n_clusters, sample_weight=None, init='k-means++',
+             precompute_distances='auto', n_init=10, max_iter=300,
+             verbose=False, tol=1e-4, random_state=None, copy_x=True,
+@@ -352,7 +356,10 @@ def k_means(X, n_clusters, sample_weight=None, init='k-means++',
+         # the right result.
+         algorithm = "full"
+     if algorithm == "auto":
+-        algorithm = "full" if sp.issparse(X) else 'elkan'
++        if sp.issparse(X):
++            algorithm = "full"
++        else:
++            algorithm = 'elkan'
+     if algorithm == "full":
+         kmeans_single = _kmeans_single_lloyd
+     elif algorithm == "elkan":
+@@ -371,7 +378,7 @@ def k_means(X, n_clusters, sample_weight=None, init='k-means++',
+                 tol=tol, x_squared_norms=x_squared_norms,
+                 random_state=random_state)
+             # determine if these results are the best so far
+-            if best_inertia is None or inertia < best_inertia:
++            if _is_better_kmeans_run(best_inertia, inertia):
+                 best_labels = labels.copy()
+                 best_centers = centers.copy()
+                 best_inertia = inertia

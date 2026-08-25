@@ -1,0 +1,23 @@
+diff --git a/sphinx/ext/napoleon/__init__.py b/sphinx/ext/napoleon/__init__.py
+index 10b1ff3a3..7baa02fb0 100644
+--- a/sphinx/ext/napoleon/__init__.py
++++ b/sphinx/ext/napoleon/__init__.py
+@@ -436,14 +436,14 @@ def _skip_member(app: Sphinx, what: str, name: str, obj: Any,
+ 
+                         mod = importlib.import_module(obj.__module__)
+                         mod_path = cls_path.split('.')
+-                        cls = functools.reduce(getattr, mod_path, mod)
++                        owner_class = functools.reduce(getattr, mod_path, mod)
+                     else:
+-                        cls = obj.__globals__[cls_path]
++                        owner_class = obj.__globals__[cls_path]
+                 except Exception:
+                     cls_is_owner = False
+                 else:
+-                    cls_is_owner = (cls and hasattr(cls, name) and  # type: ignore
+-                                    name in cls.__dict__)
++                    cls_is_owner = (owner_class and hasattr(owner_class, name) and  # type: ignore
++                                    name in owner_class.__dict__)
+             else:
+                 cls_is_owner = False
+ 

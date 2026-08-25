@@ -1,0 +1,50 @@
+diff --git a/sphinx/application.py b/sphinx/application.py
+index 385b74d8a..964214605 100644
+--- a/sphinx/application.py
++++ b/sphinx/application.py
+@@ -276,6 +276,22 @@ class Sphinx:
+         # set up the builder
+         self._init_builder()
+ 
++    def _init_env(self, freshenv: bool) -> None:
++        filename = path.join(self.doctreedir, ENV_PICKLE_FILENAME)
++        if freshenv or not os.path.exists(filename):
++            self.env = BuildEnvironment()
++            self.env.setup(self)
++            self.env.find_files(self.config, self.builder)
++        else:
++            try:
++                with progress_message(__('loading pickled environment')):
++                    with open(filename, 'rb') as f:
++                        self.env = pickle.load(f)
++                        self.env.setup(self)
++            except Exception as err:
++                logger.info(__('failed: %s'), err)
++                self._init_env(freshenv=True)
++
+     def _init_i18n(self) -> None:
+         """Load translated strings from the configured localedirs if enabled in
+         the configuration.
+@@ -301,22 +317,6 @@ class Sphinx:
+             else:
+                 logger.info(__('not available for built-in messages'))
+ 
+-    def _init_env(self, freshenv: bool) -> None:
+-        filename = path.join(self.doctreedir, ENV_PICKLE_FILENAME)
+-        if freshenv or not os.path.exists(filename):
+-            self.env = BuildEnvironment()
+-            self.env.setup(self)
+-            self.env.find_files(self.config, self.builder)
+-        else:
+-            try:
+-                with progress_message(__('loading pickled environment')):
+-                    with open(filename, 'rb') as f:
+-                        self.env = pickle.load(f)
+-                        self.env.setup(self)
+-            except Exception as err:
+-                logger.info(__('failed: %s'), err)
+-                self._init_env(freshenv=True)
+-
+     def preload_builder(self, name: str) -> None:
+         self.registry.preload_builder(self, name)
+ 

@@ -1,0 +1,16 @@
+diff --git a/sklearn/cluster/k_means_.py b/sklearn/cluster/k_means_.py
+index b7fbdf7da..ecb39ff28 100644
+--- a/sklearn/cluster/k_means_.py
++++ b/sklearn/cluster/k_means_.py
+@@ -352,7 +352,10 @@ def k_means(X, n_clusters, sample_weight=None, init='k-means++',
+         # the right result.
+         algorithm = "full"
+     if algorithm == "auto":
+-        algorithm = "full" if sp.issparse(X) else 'elkan'
++        if sp.issparse(X):
++            algorithm = "full"
++        else:
++            algorithm = 'elkan'
+     if algorithm == "full":
+         kmeans_single = _kmeans_single_lloyd
+     elif algorithm == "elkan":
