@@ -1,0 +1,22 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..509148a2a 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -107,7 +107,7 @@ def type_to_xref(text: str, env: BuildEnvironment = None) -> addnodes.pending_xr
+                         refdomain='py', reftype=reftype, reftarget=text, **kwargs)
+ 
+ 
+-def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Node]:
++def _parse_annotation(annotation: str, env: BuildEnvironment = None, classify_text: bool = True) -> List[Node]:
+     """Parse type annotation."""
+     def unparse(node: ast.AST) -> List[Node]:
+         if isinstance(node, ast.Attribute):
+@@ -179,7 +179,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         tree = ast_parse(annotation)
+         result = unparse(tree)
+         for i, node in enumerate(result):
+-            if isinstance(node, nodes.Text) and node.strip():
++            if classify_text and isinstance(node, nodes.Text) and node.strip():
+                 result[i] = type_to_xref(str(node), env)
+         return result
+     except SyntaxError:

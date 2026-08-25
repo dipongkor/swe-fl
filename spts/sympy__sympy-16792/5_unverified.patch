@@ -1,0 +1,22 @@
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..4d992b746 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -574,7 +574,7 @@ def __init__(self, project="project", cse=False):
+         self.project = project
+         self.cse = cse
+ 
+-    def routine(self, name, expr, argument_sequence=None, global_vars=None):
++    def routine(self, name, expr, argument_sequence=None, global_vars=None, allow_redundant_arguments=True):
+         """Creates an Routine object that is appropriate for this language.
+ 
+         This implementation is appropriate for at least C/Fortran.  Subclasses
+@@ -739,6 +739,8 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+                 try:
+                     new_args.append(name_arg_dict[symbol])
+                 except KeyError:
++                    if not allow_redundant_arguments:
++                        raise CodeGenArgumentListError("Unknown argument: %s" % symbol, [symbol])
+                     new_args.append(InputArgument(symbol))
+             arg_list = new_args
+ 

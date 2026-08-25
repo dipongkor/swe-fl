@@ -1,0 +1,34 @@
+diff --git a/sympy/sets/handlers/intersection.py b/sympy/sets/handlers/intersection.py
+index c54dc8f72a..892f575c9a 100644
+--- a/sympy/sets/handlers/intersection.py
++++ b/sympy/sets/handlers/intersection.py
+@@ -220,6 +220,11 @@ def intersection_sets(a, b): # noqa:F811
+     return a
+ 
+ 
++def _linear_factor_solutions(expression, symbol, solve_linear):
++    return [solve_linear(factor, 0) for factor in Mul.make_args(expression)
++            if symbol in factor.free_symbols]
++
++
+ @dispatch(ImageSet, Set)  # type: ignore # noqa:F811
+ def intersection_sets(self, other): # noqa:F811
+     from sympy.solvers.diophantine import diophantine
+@@ -304,7 +309,7 @@ def intersection_sets(self, other): # noqa:F811
+             return None
+         else:
+             # univarite imaginary part in same variable
+-            x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])
++            x, xis = zip(*_linear_factor_solutions(im, n, solve_linear))
+             if x and all(i == n for i in x):
+                 base_set -= FiniteSet(xis)
+             else:
+@@ -312,7 +317,7 @@ def intersection_sets(self, other): # noqa:F811
+         # exclude values that make denominators 0
+         for i in denoms(f):
+             if i.has(n):
+-                sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))
++                sol = list(zip(*_linear_factor_solutions(im, n, solve_linear)))
+                 if sol != []:
+                     x, xis = sol
+                     if x and all(i == n for i in x):

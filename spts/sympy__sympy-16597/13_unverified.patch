@@ -1,0 +1,47 @@
+diff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py
+index ce4dd30f2..516455078 100644
+--- a/sympy/core/assumptions.py
++++ b/sympy/core/assumptions.py
+@@ -160,7 +160,8 @@
+ from random import shuffle
+ 
+ 
+-_assume_rules = FactRules([
++def _build_assumption_rules():
++    return FactRules([
+ 
+     'integer        ->  rational',
+     'rational       ->  real',
+@@ -198,9 +199,12 @@
+     'infinite       ->  !finite',
+     'noninteger     ==  real & !integer',
+     'nonzero        ==  real & !zero',
+-])
++    ])
+ 
+-_assume_defined = _assume_rules.defined_facts.copy()
++
++_legacy_assumption_rules = _build_assumption_rules()
++
++_assume_defined= _legacy_assumption_rules.defined_facts.copy()
+ _assume_defined.add('polar')
+ _assume_defined = frozenset(_assume_defined)
+ 
+@@ -211,7 +215,7 @@ class StdFactKB(FactKB):
+     This is the only kind of FactKB that Basic objects should use.
+     """
+     def __init__(self, facts=None):
+-        super(StdFactKB, self).__init__(_assume_rules)
++        super(StdFactKB, self).__init__(_legacy_assumption_rules)
+         # save a copy of the facts dict
+         if not facts:
+             self._generator = {}
+@@ -293,7 +297,7 @@ def _ask(fact, obj):
+             return a
+ 
+     # Try assumption's prerequisites
+-    prereq = list(_assume_rules.prereq[fact])
++    prereq = list(_legacy_assumption_rules.prereq[fact])
+     shuffle(prereq)
+     for pk in prereq:
+         if pk in assumptions:

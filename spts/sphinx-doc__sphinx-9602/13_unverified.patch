@@ -1,0 +1,37 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..2ed32f048 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -107,7 +107,7 @@ def type_to_xref(text: str, env: BuildEnvironment = None) -> addnodes.pending_xr
+                         refdomain='py', reftype=reftype, reftarget=text, **kwargs)
+ 
+ 
+-def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Node]:
++def _parse_annotation(annotation: str, env: BuildEnvironment = None, classify_text: bool = True) -> List[Node]:
+     """Parse type annotation."""
+     def unparse(node: ast.AST) -> List[Node]:
+         if isinstance(node, ast.Attribute):
+@@ -147,6 +147,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         elif isinstance(node, ast.Subscript):
+             result = unparse(node.value)
+             result.append(addnodes.desc_sig_punctuation('', '['))
++            logger.debug("Unparsing annotation subscript %s", node.value.__class__.__name__)
+             result.extend(unparse(node.slice))
+             result.append(addnodes.desc_sig_punctuation('', ']'))
+             return result
+@@ -178,8 +179,13 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+     try:
+         tree = ast_parse(annotation)
+         result = unparse(tree)
+-        for i, node in enumerate(result):
+-            if isinstance(node, nodes.Text) and node.strip():
++        node_iterator = iter(enumerate(result))
++        while True:
++            try:
++                i, node = next(node_iterator)
++            except StopIteration:
++                break
++            if classify_text and isinstance(node, nodes.Text) and node.strip():
+                 result[i] = type_to_xref(str(node), env)
+         return result
+     except SyntaxError:

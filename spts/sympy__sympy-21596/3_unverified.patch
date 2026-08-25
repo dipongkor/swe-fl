@@ -1,0 +1,51 @@
+diff --git a/sympy/sets/handlers/intersection.py b/sympy/sets/handlers/intersection.py
+index c54dc8f72a..5109e6c4de 100644
+--- a/sympy/sets/handlers/intersection.py
++++ b/sympy/sets/handlers/intersection.py
+@@ -228,7 +228,7 @@ def intersection_sets(self, other): # noqa:F811
+     if (len(self.lamda.variables) > 1
+             or self.lamda.signature != self.lamda.variables):
+         return None
+-    base_set = self.base_sets[0]
++    candidate_set = self.candidate_sets[0]
+ 
+     # Intersection between ImageSets with Integers as base set
+     # For {f(n) : n in Integers} & {g(m) : m in Integers} we solve the
+@@ -237,9 +237,9 @@ def intersection_sets(self, other): # noqa:F811
+     # {f(h(t)) : t in integers}.
+     # If the solutions for n are {n_1, n_2, ..., n_k} then we return
+     # {f(n_i) : 1 <= i <= k}.
+-    if base_set is S.Integers:
++    if candidate_set is S.Integers:
+         gm = None
+-        if isinstance(other, ImageSet) and other.base_sets == (S.Integers,):
++        if isinstance(other, ImageSet) and other.candidate_sets == (S.Integers,):
+             gm = other.lamda.expr
+             var = other.lamda.variables[0]
+             # Symbol of second ImageSet lambda must be distinct from first
+@@ -306,9 +306,9 @@ def intersection_sets(self, other): # noqa:F811
+             # univarite imaginary part in same variable
+             x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])
+             if x and all(i == n for i in x):
+-                base_set -= FiniteSet(xis)
++                candidate_set -= FiniteSet(xis)
+             else:
+-                base_set -= ConditionSet(n, Eq(im, 0), S.Integers)
++                candidate_set -= ConditionSet(n, Eq(im, 0), S.Integers)
+         # exclude values that make denominators 0
+         for i in denoms(f):
+             if i.has(n):
+@@ -316,10 +316,10 @@ def intersection_sets(self, other): # noqa:F811
+                 if sol != []:
+                     x, xis = sol
+                     if x and all(i == n for i in x):
+-                        base_set -= FiniteSet(xis)
++                        candidate_set -= FiniteSet(xis)
+                 else:
+-                    base_set -= ConditionSet(n, Eq(i, 0), S.Integers)
+-        return imageset(lam, base_set)
++                    candidate_set -= ConditionSet(n, Eq(i, 0), S.Integers)
++        return imageset(lam, candidate_set)
+ 
+     elif isinstance(other, Interval):
+         from sympy.solvers.solveset import (invert_real, invert_complex,

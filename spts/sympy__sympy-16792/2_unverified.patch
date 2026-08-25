@@ -1,0 +1,211 @@
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..163927ab1 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -574,6 +574,103 @@ def __init__(self, project="project", cse=False):
+         self.project = project
+         self.cse = cse
+ 
++
++    def write(self, routines, prefix, to_files=False, header=True, empty=True):
++        """Writes all the source code files for the given routines.
++
++        The generated source is returned as a list of (filename, contents)
++        tuples, or is written to files (see below).  Each filename consists
++        of the given prefix, appended with an appropriate extension.
++
++        Parameters
++        ==========
++
++        routines : list
++            A list of Routine instances to be written
++
++        prefix : string
++            The prefix for the output files
++
++        to_files : bool, optional
++            When True, the output is written to files.  Otherwise, a list
++            of (filename, contents) tuples is returned.  [default: False]
++
++        header : bool, optional
++            When True, a header comment is included on top of each source
++            file. [default: True]
++
++        empty : bool, optional
++            When True, empty lines are included to structure the source
++            files. [default: True]
++
++        """
++        if to_files:
++            for dump_fn in self.dump_fns:
++                filename = "%s.%s" % (prefix, dump_fn.extension)
++                with open(filename, "w") as f:
++                    dump_fn(self, routines, f, prefix, header, empty)
++        else:
++            result = []
++            for dump_fn in self.dump_fns:
++                filename = "%s.%s" % (prefix, dump_fn.extension)
++                contents = StringIO()
++                dump_fn(self, routines, contents, prefix, header, empty)
++                result.append((filename, contents.getvalue()))
++            return result
++
++    def dump_code(self, routines, f, prefix, header=True, empty=True):
++        """Write the code by calling language specific methods.
++
++        The generated file contains all the definitions of the routines in
++        low-level code and refers to the header file if appropriate.
++
++        Parameters
++        ==========
++
++        routines : list
++            A list of Routine instances.
++
++        f : file-like
++            Where to write the file.
++
++        prefix : string
++            The filename prefix, used to refer to the proper header file.
++            Only the basename of the prefix is used.
++
++        header : bool, optional
++            When True, a header comment is included on top of each source
++            file.  [default : True]
++
++        empty : bool, optional
++            When True, empty lines are included to structure the source
++            files.  [default : True]
++
++        """
++
++        code_lines = self._preprocessor_statements(prefix)
++
++        for routine in routines:
++            if empty:
++                code_lines.append("\n")
++            code_lines.extend(self._get_routine_opening(routine))
++            code_lines.extend(self._declare_arguments(routine))
++            code_lines.extend(self._declare_globals(routine))
++            code_lines.extend(self._declare_locals(routine))
++            if empty:
++                code_lines.append("\n")
++            code_lines.extend(self._call_printer(routine))
++            if empty:
++                code_lines.append("\n")
++            code_lines.extend(self._get_routine_ending(routine))
++
++        code_lines = self._indent_code(''.join(code_lines))
++
++        if header:
++            code_lines = ''.join(self._get_header() + [code_lines])
++
++        if code_lines:
++            f.write(code_lines)
++
+     def routine(self, name, expr, argument_sequence=None, global_vars=None):
+         """Creates an Routine object that is appropriate for this language.
+ 
+@@ -744,102 +841,6 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+ 
+         return Routine(name, arg_list, return_val, local_vars, global_vars)
+ 
+-    def write(self, routines, prefix, to_files=False, header=True, empty=True):
+-        """Writes all the source code files for the given routines.
+-
+-        The generated source is returned as a list of (filename, contents)
+-        tuples, or is written to files (see below).  Each filename consists
+-        of the given prefix, appended with an appropriate extension.
+-
+-        Parameters
+-        ==========
+-
+-        routines : list
+-            A list of Routine instances to be written
+-
+-        prefix : string
+-            The prefix for the output files
+-
+-        to_files : bool, optional
+-            When True, the output is written to files.  Otherwise, a list
+-            of (filename, contents) tuples is returned.  [default: False]
+-
+-        header : bool, optional
+-            When True, a header comment is included on top of each source
+-            file. [default: True]
+-
+-        empty : bool, optional
+-            When True, empty lines are included to structure the source
+-            files. [default: True]
+-
+-        """
+-        if to_files:
+-            for dump_fn in self.dump_fns:
+-                filename = "%s.%s" % (prefix, dump_fn.extension)
+-                with open(filename, "w") as f:
+-                    dump_fn(self, routines, f, prefix, header, empty)
+-        else:
+-            result = []
+-            for dump_fn in self.dump_fns:
+-                filename = "%s.%s" % (prefix, dump_fn.extension)
+-                contents = StringIO()
+-                dump_fn(self, routines, contents, prefix, header, empty)
+-                result.append((filename, contents.getvalue()))
+-            return result
+-
+-    def dump_code(self, routines, f, prefix, header=True, empty=True):
+-        """Write the code by calling language specific methods.
+-
+-        The generated file contains all the definitions of the routines in
+-        low-level code and refers to the header file if appropriate.
+-
+-        Parameters
+-        ==========
+-
+-        routines : list
+-            A list of Routine instances.
+-
+-        f : file-like
+-            Where to write the file.
+-
+-        prefix : string
+-            The filename prefix, used to refer to the proper header file.
+-            Only the basename of the prefix is used.
+-
+-        header : bool, optional
+-            When True, a header comment is included on top of each source
+-            file.  [default : True]
+-
+-        empty : bool, optional
+-            When True, empty lines are included to structure the source
+-            files.  [default : True]
+-
+-        """
+-
+-        code_lines = self._preprocessor_statements(prefix)
+-
+-        for routine in routines:
+-            if empty:
+-                code_lines.append("\n")
+-            code_lines.extend(self._get_routine_opening(routine))
+-            code_lines.extend(self._declare_arguments(routine))
+-            code_lines.extend(self._declare_globals(routine))
+-            code_lines.extend(self._declare_locals(routine))
+-            if empty:
+-                code_lines.append("\n")
+-            code_lines.extend(self._call_printer(routine))
+-            if empty:
+-                code_lines.append("\n")
+-            code_lines.extend(self._get_routine_ending(routine))
+-
+-        code_lines = self._indent_code(''.join(code_lines))
+-
+-        if header:
+-            code_lines = ''.join(self._get_header() + [code_lines])
+-
+-        if code_lines:
+-            f.write(code_lines)
+-
+ 
+ class CodeGenError(Exception):
+     pass

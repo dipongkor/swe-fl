@@ -1,0 +1,93 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..81caa61e0 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -113,10 +113,10 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         if isinstance(node, ast.Attribute):
+             return [nodes.Text("%s.%s" % (unparse(node.value)[0], node.attr))]
+         elif isinstance(node, ast.BinOp):
+-            result: List[Node] = unparse(node.left)
+-            result.extend(unparse(node.op))
+-            result.extend(unparse(node.right))
+-            return result
++            annotation_nodes: List[Node] = unparse(node.left)
++            annotation_nodes.extend(unparse(node.op))
++            annotation_nodes.extend(unparse(node.right))
++            return annotation_nodes
+         elif isinstance(node, ast.BitOr):
+             return [nodes.Text(' '), addnodes.desc_sig_punctuation('', '|'), nodes.Text(' ')]
+         elif isinstance(node, ast.Constant):  # type: ignore
+@@ -129,39 +129,39 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         elif isinstance(node, ast.Index):
+             return unparse(node.value)
+         elif isinstance(node, ast.List):
+-            result = [addnodes.desc_sig_punctuation('', '[')]
++            annotation_nodes = [addnodes.desc_sig_punctuation('', '[')]
+             if node.elts:
+                 # check if there are elements in node.elts to only pop the
+-                # last element of result if the for-loop was run at least
++                # last element of annotation_nodes if the for-loop was run at least
+                 # once
+                 for elem in node.elts:
+-                    result.extend(unparse(elem))
+-                    result.append(addnodes.desc_sig_punctuation('', ', '))
+-                result.pop()
+-            result.append(addnodes.desc_sig_punctuation('', ']'))
+-            return result
++                    annotation_nodes.extend(unparse(elem))
++                    annotation_nodes.append(addnodes.desc_sig_punctuation('', ', '))
++                annotation_nodes.pop()
++            annotation_nodes.append(addnodes.desc_sig_punctuation('', ']'))
++            return annotation_nodes
+         elif isinstance(node, ast.Module):
+             return sum((unparse(e) for e in node.body), [])
+         elif isinstance(node, ast.Name):
+             return [nodes.Text(node.id)]
+         elif isinstance(node, ast.Subscript):
+-            result = unparse(node.value)
+-            result.append(addnodes.desc_sig_punctuation('', '['))
+-            result.extend(unparse(node.slice))
+-            result.append(addnodes.desc_sig_punctuation('', ']'))
+-            return result
++            annotation_nodes = unparse(node.value)
++            annotation_nodes.append(addnodes.desc_sig_punctuation('', '['))
++            annotation_nodes.extend(unparse(node.slice))
++            annotation_nodes.append(addnodes.desc_sig_punctuation('', ']'))
++            return annotation_nodes
+         elif isinstance(node, ast.Tuple):
+             if node.elts:
+-                result = []
++                annotation_nodes = []
+                 for elem in node.elts:
+-                    result.extend(unparse(elem))
+-                    result.append(addnodes.desc_sig_punctuation('', ', '))
+-                result.pop()
++                    annotation_nodes.extend(unparse(elem))
++                    annotation_nodes.append(addnodes.desc_sig_punctuation('', ', '))
++                annotation_nodes.pop()
+             else:
+-                result = [addnodes.desc_sig_punctuation('', '('),
++                annotation_nodes = [addnodes.desc_sig_punctuation('', '('),
+                           addnodes.desc_sig_punctuation('', ')')]
+ 
+-            return result
++            return annotation_nodes
+         else:
+             if sys.version_info < (3, 8):
+                 if isinstance(node, ast.Ellipsis):
+@@ -177,11 +177,11 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+ 
+     try:
+         tree = ast_parse(annotation)
+-        result = unparse(tree)
+-        for i, node in enumerate(result):
++        annotation_nodes = unparse(tree)
++        for i, node in enumerate(annotation_nodes):
+             if isinstance(node, nodes.Text) and node.strip():
+-                result[i] = type_to_xref(str(node), env)
+-        return result
++                annotation_nodes[i] = type_to_xref(str(node), env)
++        return annotation_nodes
+     except SyntaxError:
+         return [type_to_xref(annotation, env)]
+ 

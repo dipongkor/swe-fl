@@ -1,0 +1,18 @@
+diff --git a/sympy/sets/handlers/intersection.py b/sympy/sets/handlers/intersection.py
+index c54dc8f72a..811d12ee80 100644
+--- a/sympy/sets/handlers/intersection.py
++++ b/sympy/sets/handlers/intersection.py
+@@ -310,7 +310,12 @@ def intersection_sets(self, other): # noqa:F811
+             else:
+                 base_set -= ConditionSet(n, Eq(im, 0), S.Integers)
+         # exclude values that make denominators 0
+-        for i in denoms(f):
++        denominator_iterator = iter(denoms(f))
++        while True:
++            try:
++                i = next(denominator_iterator)
++            except StopIteration:
++                break
+             if i.has(n):
+                 sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))
+                 if sol != []:

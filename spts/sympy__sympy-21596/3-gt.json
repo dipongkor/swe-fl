@@ -1,0 +1,48 @@
+{
+  "instance_id": "sympy__sympy-21596",
+  "root_cause": [
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "old_line": 309,
+      "old_statement": "base_set -= FiniteSet(xis)",
+      "current_line": 309,
+      "current_statement": "candidate_set -= FiniteSet(xis)"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "old_line": 311,
+      "old_statement": "base_set -= ConditionSet(n, Eq(im, 0), S.Integers)",
+      "current_line": 311,
+      "current_statement": "candidate_set -= ConditionSet(n, Eq(im, 0), S.Integers)"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "old_line": 307,
+      "old_statement": "x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])",
+      "current_line": 307,
+      "current_statement": "x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "old_line": 315,
+      "old_statement": "sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))",
+      "current_line": 315,
+      "current_statement": "sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))"
+    },
+    {
+      "file": "sympy/sets/handlers/intersection.py",
+      "old_line": 319,
+      "old_statement": "base_set -= FiniteSet(xis)",
+      "current_line": 319,
+      "current_statement": "candidate_set -= FiniteSet(xis)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "The ImageSet \u2229 Reals handler splits the image expression f(n) into real and imaginary parts and must keep exactly the base points where the imaginary part vanishes, minus any points where f's denominators vanish. The base code gets the central set operation backwards: after solving im = 0 (factor-wise with solve_linear, or falling back to a ConditionSet), it SUBTRACTS those solutions from the base set instead of intersecting with them, so the computed intersection consists of the images of points whose values are not real. Compounding this, the solved values are packed as one tuple into FiniteSet, so the subtraction of that tuple-element removes nothing from an integer base set and the result lingers as an unevaluated Complement of the full base set \u2014 membership tests against the 'intersection with the reals' then accept integers whose images are plainly complex, while the truly real members are the ones nominally excluded. The pole-exclusion loop below has two further faults: its solve step re-solves the imaginary part's factors (an inner comprehension variable shadows the denominator being processed), and its FiniteSet subtraction repeats the tuple-wrapping mistake, so values that zero f's denominators are never actually removed. Rational imaginary parts additionally derail the factor-wise solving because reciprocal denominator factors of im, which have no roots, defeat the all-linear-solutions check and push solvable cases into the ConditionSet fallback.",
+    "annotator2": ""
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

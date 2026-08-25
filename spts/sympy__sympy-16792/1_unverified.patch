@@ -1,0 +1,28 @@
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..00f2107f2 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -694,7 +694,6 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+ 
+         arg_list = []
+ 
+-        # setup input argument list
+         array_symbols = {}
+         for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed):
+             array_symbols[array.base.label] = array
+@@ -717,7 +716,6 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+         arg_list.extend(output_args)
+ 
+         if argument_sequence is not None:
+-            # if the user has supplied IndexedBase instances, we'll accept that
+             new_sequence = []
+             for arg in argument_sequence:
+                 if isinstance(arg, IndexedBase):
+@@ -732,7 +730,6 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+                 msg = msg.format(", ".join([str(m.name) for m in missing]))
+                 raise CodeGenArgumentListError(msg, missing)
+ 
+-            # create redundant arguments to produce the requested sequence
+             name_arg_dict = {x.name: x for x in arg_list}
+             new_args = []
+             for symbol in argument_sequence:

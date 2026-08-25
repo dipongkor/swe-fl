@@ -1,0 +1,18 @@
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..2096d81c7 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -720,10 +720,10 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+             # if the user has supplied IndexedBase instances, we'll accept that
+             new_sequence = []
+             for arg in argument_sequence:
+-                if isinstance(arg, IndexedBase):
+-                    new_sequence.append(arg.label)
+-                else:
++                if not isinstance(arg, IndexedBase):
+                     new_sequence.append(arg)
++                else:
++                    new_sequence.append(arg.label)
+             argument_sequence = new_sequence
+ 
+             missing = [x for x in arg_list if x.name not in argument_sequence]

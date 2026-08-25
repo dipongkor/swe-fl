@@ -1,0 +1,34 @@
+{
+  "instance_id": "sphinx-doc__sphinx-9602",
+  "root_cause": [
+    {
+      "file": "sphinx/domains/python.py",
+      "old_line": 126,
+      "old_statement": "return [nodes.Text(node.value)]",
+      "current_line": 114,
+      "current_statement": "return [nodes.Text(\"%s.%s\" % (unparse(node.value)[0], node.attr))]"
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "old_line": 150,
+      "old_statement": "result.extend(unparse(node.slice))",
+      "current_line": 147,
+      "current_statement": "result.extend(unparse(node.slice))"
+    },
+    {
+      "file": "sphinx/domains/python.py",
+      "old_line": 182,
+      "old_statement": "if isinstance(node, nodes.Text) and node.strip():",
+      "current_line": 179,
+      "current_statement": "if isinstance(node, nodes.Text) and node.strip():\n                result[i] = type_to_xref(str(node), env)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "",
+    "annotator2": "The parser loses the distinction between a subscripted type and the values inside Literal: constants are represented without faithful repr formatting, the Subscript branch emits them without a value marker, and the final classifier assumes all text is a type. The assignment on base line 183 is the consequence of the overbroad line-182 condition, not a separate root-cause statement."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "The parser loses the distinction between a subscripted type and the values inside Literal: constants are represented without faithful repr formatting, the Subscript branch emits them without a value marker, and the final classifier assumes all text is a type. The assignment on base line 183 is the consequence of the overbroad line-179 condition, not a separate root-cause statement."
+  }
+}

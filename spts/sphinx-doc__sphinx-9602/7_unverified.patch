@@ -1,0 +1,12 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..5b59fd0cf 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -147,6 +147,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+         elif isinstance(node, ast.Subscript):
+             result = unparse(node.value)
+             result.append(addnodes.desc_sig_punctuation('', '['))
++            logger.debug("Unparsing annotation subscript %s", node.value.__class__.__name__)
+             result.extend(unparse(node.slice))
+             result.append(addnodes.desc_sig_punctuation('', ']'))
+             return result

@@ -1,0 +1,38 @@
+diff --git a/sympy/utilities/codegen.py b/sympy/utilities/codegen.py
+index f0befb2bd..dee69912d 100644
+--- a/sympy/utilities/codegen.py
++++ b/sympy/utilities/codegen.py
+@@ -692,6 +692,9 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+             else:
+                 return_val.append(Result(expr))
+ 
++        def redundant_input_argument(symbol):
++            return InputArgument(symbol)
++
+         arg_list = []
+ 
+         # setup input argument list
+@@ -734,13 +737,18 @@ def routine(self, name, expr, argument_sequence=None, global_vars=None):
+ 
+             # create redundant arguments to produce the requested sequence
+             name_arg_dict = {x.name: x for x in arg_list}
+-            new_args = []
+-            for symbol in argument_sequence:
++            ordered_args = []
++            symbol_iterator = iter(argument_sequence)
++            while True:
+                 try:
+-                    new_args.append(name_arg_dict[symbol])
++                    symbol = next(symbol_iterator)
++                except StopIteration:
++                    break
++                try:
++                    ordered_args.append(name_arg_dict[symbol])
+                 except KeyError:
+-                    new_args.append(InputArgument(symbol))
+-            arg_list = new_args
++                    ordered_args.append(redundant_input_argument(symbol))
++            arg_list = ordered_args
+ 
+         return Routine(name, arg_list, return_val, local_vars, global_vars)
+ 

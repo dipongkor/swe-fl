@@ -1,0 +1,24 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..dd117e730 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -151,15 +151,15 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+             result.append(addnodes.desc_sig_punctuation('', ']'))
+             return result
+         elif isinstance(node, ast.Tuple):
+-            if node.elts:
++            if not node.elts:
++                result = [addnodes.desc_sig_punctuation('', '('),
++                          addnodes.desc_sig_punctuation('', ')')]
++            else:
+                 result = []
+                 for elem in node.elts:
+                     result.extend(unparse(elem))
+                     result.append(addnodes.desc_sig_punctuation('', ', '))
+                 result.pop()
+-            else:
+-                result = [addnodes.desc_sig_punctuation('', '('),
+-                          addnodes.desc_sig_punctuation('', ')')]
+ 
+             return result
+         else:

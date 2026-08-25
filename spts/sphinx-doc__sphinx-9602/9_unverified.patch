@@ -1,0 +1,18 @@
+diff --git a/sphinx/domains/python.py b/sphinx/domains/python.py
+index 9875a9f4b..9c2cc59fc 100644
+--- a/sphinx/domains/python.py
++++ b/sphinx/domains/python.py
+@@ -178,7 +178,12 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
+     try:
+         tree = ast_parse(annotation)
+         result = unparse(tree)
+-        for i, node in enumerate(result):
++        node_iterator = iter(enumerate(result))
++        while True:
++            try:
++                i, node = next(node_iterator)
++            except StopIteration:
++                break
+             if isinstance(node, nodes.Text) and node.strip():
+                 result[i] = type_to_xref(str(node), env)
+         return result

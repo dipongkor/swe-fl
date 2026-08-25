@@ -1,0 +1,18 @@
+diff --git a/sympy/sets/handlers/intersection.py b/sympy/sets/handlers/intersection.py
+index c54dc8f72a..54e6d8d2dd 100644
+--- a/sympy/sets/handlers/intersection.py
++++ b/sympy/sets/handlers/intersection.py
+@@ -305,10 +305,10 @@ def intersection_sets(self, other): # noqa:F811
+         else:
+             # univarite imaginary part in same variable
+             x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])
+-            if x and all(i == n for i in x):
+-                base_set -= FiniteSet(xis)
+-            else:
++            if not (x and all(i == n for i in x)):
+                 base_set -= ConditionSet(n, Eq(im, 0), S.Integers)
++            else:
++                base_set -= FiniteSet(xis)
+         # exclude values that make denominators 0
+         for i in denoms(f):
+             if i.has(n):

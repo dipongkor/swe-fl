@@ -1,0 +1,17 @@
+diff --git a/sympy/core/assumptions.py b/sympy/core/assumptions.py
+index ce4dd30f2..23fc5dcba 100644
+--- a/sympy/core/assumptions.py
++++ b/sympy/core/assumptions.py
+@@ -158,8 +158,12 @@
+ 
+ 
+ from random import shuffle
++import logging
+ 
++logger = logging.getLogger(__name__)
+ 
++
++logger.debug("Building legacy assumption implication rules")
+ _assume_rules = FactRules([
+ 
+     'integer        ->  rational',
