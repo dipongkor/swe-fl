@@ -1,0 +1,22 @@
+diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py
+index a40a21073..881af9552 100644
+--- a/sphinx/cmd/quickstart.py
++++ b/sphinx/cmd/quickstart.py
+@@ -182,7 +182,7 @@ class QuickstartRenderer(SphinxRenderer):
+             return super().render(template_name, context)
+ 
+ 
+-def ask_user(d: Dict) -> None:
++def ask_user(d: Dict, root_path_validator: Callable[[str], Any] = is_path) -> None:
+     """Ask the user for quickstart values missing from *d*.
+ 
+     Values are:
+@@ -223,7 +223,7 @@ def ask_user(d: Dict) -> None:
+         print(__('sphinx-quickstart will not overwrite existing Sphinx projects.'))
+         print()
+         d['path'] = do_prompt(__('Please enter a new root path (or just Enter to exit)'),
+-                              '', is_path)
++                              '', root_path_validator)
+         if not d['path']:
+             sys.exit(1)
+ 

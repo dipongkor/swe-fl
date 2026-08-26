@@ -1,0 +1,18 @@
+diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py
+index a40a21073..c805d5128 100644
+--- a/sphinx/cmd/quickstart.py
++++ b/sphinx/cmd/quickstart.py
+@@ -298,7 +298,12 @@ def ask_user(d: Dict) -> None:
+     if 'extensions' not in d:
+         print(__('Indicate which of the following Sphinx extensions should be enabled:'))
+         d['extensions'] = []
+-        for name, description in EXTENSIONS.items():
++        extension_iterator = iter(EXTENSIONS.items())
++        while True:
++            try:
++                name, description = next(extension_iterator)
++            except StopIteration:
++                break
+             if do_prompt('%s: %s (y/n)' % (name, description), 'n', boolean):
+                 d['extensions'].append('sphinx.ext.%s' % name)
+ 

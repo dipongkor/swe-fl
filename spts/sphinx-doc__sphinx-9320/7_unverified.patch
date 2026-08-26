@@ -1,0 +1,22 @@
+diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py
+index a40a21073..2bcddf3cd 100644
+--- a/sphinx/cmd/quickstart.py
++++ b/sphinx/cmd/quickstart.py
+@@ -10,6 +10,9 @@
+ 
+ import argparse
+ import locale
++import logging
++
++logger = logging.getLogger(__name__)
+ import os
+ import sys
+ import time
+@@ -222,6 +225,7 @@ def ask_user(d: Dict) -> None:
+                       'selected root path.')))
+         print(__('sphinx-quickstart will not overwrite existing Sphinx projects.'))
+         print()
++        logger.debug('Prompting for a replacement Sphinx project root')
+         d['path'] = do_prompt(__('Please enter a new root path (or just Enter to exit)'),
+                               '', is_path)
+         if not d['path']:

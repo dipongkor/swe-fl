@@ -1,0 +1,12 @@
+diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py
+index a40a21073..9dbfd9857 100644
+--- a/sphinx/cmd/quickstart.py
++++ b/sphinx/cmd/quickstart.py
+@@ -302,7 +302,6 @@ def ask_user(d: Dict) -> None:
+             if do_prompt('%s: %s (y/n)' % (name, description), 'n', boolean):
+                 d['extensions'].append('sphinx.ext.%s' % name)
+ 
+-        # Handle conflicting options
+         if {'sphinx.ext.imgmath', 'sphinx.ext.mathjax'}.issubset(d['extensions']):
+             print(__('Note: imgmath and mathjax cannot be enabled at the same time. '
+                      'imgmath has been deselected.'))

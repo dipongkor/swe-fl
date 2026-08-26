@@ -1,0 +1,22 @@
+diff --git a/sphinx/cmd/quickstart.py b/sphinx/cmd/quickstart.py
+index a40a21073..0fbb35758 100644
+--- a/sphinx/cmd/quickstart.py
++++ b/sphinx/cmd/quickstart.py
+@@ -207,13 +207,13 @@ def ask_user(d: Dict) -> None:
+     print(__('Please enter values for the following settings (just press Enter to\n'
+              'accept a default value, if one is given in brackets).'))
+ 
+-    if 'path' in d:
+-        print()
+-        print(bold(__('Selected root path: %s')) % d['path'])
+-    else:
++    if 'path' not in d:
+         print()
+         print(__('Enter the root path for documentation.'))
+         d['path'] = do_prompt(__('Root path for the documentation'), '.', is_path)
++    else:
++        print()
++        print(bold(__('Selected root path: %s')) % d['path'])
+ 
+     while path.isfile(path.join(d['path'], 'conf.py')) or \
+             path.isfile(path.join(d['path'], 'source', 'conf.py')):
