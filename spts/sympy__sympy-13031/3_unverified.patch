@@ -1,0 +1,78 @@
+diff --git a/sympy/matrices/sparse.py b/sympy/matrices/sparse.py
+index e6f36cdf3..79afb9c68 100644
+--- a/sympy/matrices/sparse.py
++++ b/sympy/matrices/sparse.py
+@@ -987,24 +987,24 @@ def col_join(self, other):
+         """
+         if not self:
+             return type(self)(other)
+-        A, B = self, other
+-        if not A.cols == B.cols:
++        upper, lower = self, other
++        if not upper.cols == lower.cols:
+             raise ShapeError()
+-        A = A.copy()
+-        if not isinstance(B, SparseMatrix):
++        upper = upper.copy()
++        if not isinstance(lower, SparseMatrix):
+             k = 0
+-            b = B._mat
+-            for i in range(B.rows):
+-                for j in range(B.cols):
++            b = lower._mat
++            for i in range(lower.rows):
++                for j in range(lower.cols):
+                     v = b[k]
+                     if v:
+-                        A._smat[(i + A.rows, j)] = v
++                        upper._smat[(i + upper.rows, j)] = v
+                     k += 1
+         else:
+-            for (i, j), v in B._smat.items():
+-                A._smat[i + A.rows, j] = v
+-        A.rows += B.rows
+-        return A
++            for (i, j), v in lower._smat.items():
++                upper._smat[i + upper.rows, j] = v
++        upper.rows += lower.rows
++        return upper
+ 
+     def col_op(self, j, f):
+         """In-place operation on col j using two-arg functor whose args are
+@@ -1193,24 +1193,24 @@ def row_join(self, other):
+         """
+         if not self:
+             return type(self)(other)
+-        A, B = self, other
+-        if not A.rows == B.rows:
++        left, right = self, other
++        if not left.rows == right.rows:
+             raise ShapeError()
+-        A = A.copy()
+-        if not isinstance(B, SparseMatrix):
++        left = left.copy()
++        if not isinstance(right, SparseMatrix):
+             k = 0
+-            b = B._mat
+-            for i in range(B.rows):
+-                for j in range(B.cols):
++            b = right._mat
++            for i in range(right.rows):
++                for j in range(right.cols):
+                     v = b[k]
+                     if v:
+-                        A._smat[(i, j + A.cols)] = v
++                        left._smat[(i, j + left.cols)] = v
+                     k += 1
+         else:
+-            for (i, j), v in B._smat.items():
+-                A._smat[(i, j + A.cols)] = v
+-        A.cols += B.cols
+-        return A
++            for (i, j), v in right._smat.items():
++                left._smat[(i, j + left.cols)] = v
++        left.cols += right.cols
++        return left
+ 
+     def row_op(self, i, f):
+         """In-place operation on row ``i`` using two-arg functor whose args are

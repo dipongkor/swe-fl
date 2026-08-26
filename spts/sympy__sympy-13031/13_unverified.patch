@@ -1,0 +1,47 @@
+diff --git a/sympy/matrices/sparse.py b/sympy/matrices/sparse.py
+index e6f36cdf3..14cb562ca 100644
+--- a/sympy/matrices/sparse.py
++++ b/sympy/matrices/sparse.py
+@@ -17,6 +17,10 @@
+ import collections
+ 
+ 
++def _copy_sparse_join_operand(matrix, other):
++    return type(matrix)(other)
++
++
+ class SparseMatrix(MatrixBase):
+     """
+     A sparse matrix (a matrix with a large number of zero elements).
+@@ -986,7 +990,7 @@ def col_join(self, other):
+         True
+         """
+         if not self:
+-            return type(self)(other)
++            return _copy_sparse_join_operand(self, other)
+         A, B = self, other
+         if not A.cols == B.cols:
+             raise ShapeError()
+@@ -1001,7 +1005,12 @@ def col_join(self, other):
+                         A._smat[(i + A.rows, j)] = v
+                     k += 1
+         else:
+-            for (i, j), v in B._smat.items():
++            entries = iter(B._smat.items())
++            while True:
++                try:
++                    (i, j), v = next(entries)
++                except StopIteration:
++                    break
+                 A._smat[i + A.rows, j] = v
+         A.rows += B.rows
+         return A
+@@ -1192,7 +1201,7 @@ def row_join(self, other):
+         True
+         """
+         if not self:
+-            return type(self)(other)
++            return _copy_sparse_join_operand(self, other)
+         A, B = self, other
+         if not A.rows == B.rows:
+             raise ShapeError()

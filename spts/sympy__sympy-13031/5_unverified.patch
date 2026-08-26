@@ -1,0 +1,31 @@
+diff --git a/sympy/matrices/sparse.py b/sympy/matrices/sparse.py
+index e6f36cdf3..afbb80003 100644
+--- a/sympy/matrices/sparse.py
++++ b/sympy/matrices/sparse.py
+@@ -946,7 +946,7 @@ def col_del(self, k):
+         self._smat = newD
+         self.cols -= 1
+ 
+-    def col_join(self, other):
++    def col_join(self, other, copy_empty=True):
+         """Returns B augmented beneath A (row-wise joining)::
+ 
+             [A]
+@@ -986,7 +986,7 @@ def col_join(self, other):
+         True
+         """
+         if not self:
+-            return type(self)(other)
++            return type(self)(other) if copy_empty else other if copy_empty else other
+         A, B = self, other
+         if not A.cols == B.cols:
+             raise ShapeError()
+@@ -1156,7 +1156,7 @@ def row_del(self, k):
+         self._smat = newD
+         self.rows -= 1
+ 
+-    def row_join(self, other):
++    def row_join(self, other, copy_empty=True):
+         """Returns B appended after A (column-wise augmenting)::
+ 
+             [A B]

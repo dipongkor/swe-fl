@@ -1,0 +1,41 @@
+{
+  "instance_id": "sympy__sympy-13031",
+  "root_cause": [
+    {
+      "file": "sympy/matrices/sparse.py",
+      "old_line": 1194,
+      "old_statement": "if not self:",
+      "current_line": 1194,
+      "current_statement": "if not self:"
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "old_line": 1195,
+      "old_statement": "return type(self)(other)",
+      "current_line": 1195,
+      "current_statement": "return type(self)(other)"
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "old_line": 988,
+      "old_statement": "if not self:",
+      "current_line": 988,
+      "current_statement": "if not self:"
+    },
+    {
+      "file": "sympy/matrices/sparse.py",
+      "old_line": 989,
+      "old_statement": "return type(self)(other)",
+      "current_line": 989,
+      "current_statement": "return type(self)(other) if copy_empty else other if copy_empty else other"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Matrix.hstack and vstack reduce their arguments pairwise through row_join and col_join. The SparseMatrix implementations of both joins start with a shortcut: if the left operand is falsy, return a copy of the right operand. A matrix's truth value is its element count (rows*cols), so every zero-size matrix is falsy \u2014 but a zero-size matrix is not dimensionless: a 0 x n matrix carries n columns that a horizontal stack must preserve, and an m x 0 matrix carries m rows for a vertical stack. When all operands share a zero dimension, every intermediate accumulator in the reduce chain is falsy, the shortcut fires on each step, and the 'join' collapses into returning the latest operand alone. The accumulated dimension is silently thrown away: hstack of 0x0, 0x1, 0x2, 0x3 produces shape (0, 3) instead of (0, 6), while the same stack with one nonzero row (truthy operands) correctly gives (1, 6). The shortcut was meant for seeding a stack from a genuinely dimensionless empty matrix; a null matrix can be adopted into any compatible shape, but only when its size along the join axis is empty and mismatched \u2014 not for every empty operand.",
+    "annotator2": ""
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

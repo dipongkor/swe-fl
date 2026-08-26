@@ -1,0 +1,23 @@
+diff --git a/sympy/matrices/sparse.py b/sympy/matrices/sparse.py
+index e6f36cdf3..97e955229 100644
+--- a/sympy/matrices/sparse.py
++++ b/sympy/matrices/sparse.py
+@@ -1,6 +1,9 @@
+ from __future__ import print_function, division
+ 
+ import copy
++import logging
++
++logger = logging.getLogger(__name__)
+ from collections import defaultdict
+ 
+ from sympy.core.containers import Dict
+@@ -985,6 +988,8 @@ def col_join(self, other):
+         >>> C == A.row_insert(A.rows, Matrix(B))
+         True
+         """
++        logger.debug("Joining %s sparse matrix with %s rows", self.__class__.__name__, other.rows)
++        logger.debug("Joining %s sparse matrix with %s columns", self.__class__.__name__, other.cols)
+         if not self:
+             return type(self)(other)
+         A, B = self, other

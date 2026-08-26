@@ -1,0 +1,32 @@
+diff --git a/sympy/matrices/sparse.py b/sympy/matrices/sparse.py
+index e6f36cdf3..05a2eb71b 100644
+--- a/sympy/matrices/sparse.py
++++ b/sympy/matrices/sparse.py
+@@ -1001,7 +1001,12 @@ def col_join(self, other):
+                         A._smat[(i + A.rows, j)] = v
+                     k += 1
+         else:
+-            for (i, j), v in B._smat.items():
++            entries = iter(B._smat.items())
++            while True:
++                try:
++                    (i, j), v = next(entries)
++                except StopIteration:
++                    break
+                 A._smat[i + A.rows, j] = v
+         A.rows += B.rows
+         return A
+@@ -1207,7 +1212,12 @@ def row_join(self, other):
+                         A._smat[(i, j + A.cols)] = v
+                     k += 1
+         else:
+-            for (i, j), v in B._smat.items():
++            entries = iter(B._smat.items())
++            while True:
++                try:
++                    (i, j), v = next(entries)
++                except StopIteration:
++                    break
+                 A._smat[(i, j + A.cols)] = v
+         A.cols += B.cols
+         return A
