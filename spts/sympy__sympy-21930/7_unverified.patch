@@ -1,0 +1,38 @@
+diff --git a/sympy/physics/secondquant.py b/sympy/physics/secondquant.py
+index d19ee2fc63..f23c52fef6 100644
+--- a/sympy/physics/secondquant.py
++++ b/sympy/physics/secondquant.py
+@@ -5,6 +5,9 @@
+ of Many-Particle Systems."
+ """
+ from collections import defaultdict
++import logging
++
++logger = logging.getLogger(__name__)
+ 
+ from sympy import (Add, Basic, cacheit, Dummy, Expr, Function, I,
+                    KroneckerDelta, Mul, Pow, S, sqrt, Symbol, sympify, Tuple,
+@@ -218,6 +221,7 @@ def _sortkey(cls, index):
+             return (12, label, h)
+ 
+     def _latex(self, printer):
++        logger.debug("Formatting antisymmetric tensor with %d upper and %d lower indices", len(self.args[1]), len(self.args[2]))
+         return "%s^{%s}_{%s}" % (
+             self.symbol,
+             "".join([ i.name for i in self.args[1]]),
+@@ -478,6 +482,7 @@ def __repr__(self):
+         return "CreateBoson(%s)" % self.state
+ 
+     def _latex(self, printer):
++        logger.debug("Formatting boson creation operator")
+         return "b^\\dagger_{%s}" % self.state.name
+ 
+ B = AnnihilateBoson
+@@ -939,6 +944,7 @@ def __repr__(self):
+         return "CreateFermion(%s)" % self.state
+ 
+     def _latex(self, printer):
++        logger.debug("Formatting fermion creation operator")
+         return "a^\\dagger_{%s}" % self.state.name
+ 
+ Fd = CreateFermion

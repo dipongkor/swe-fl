@@ -1,0 +1,20 @@
+{
+  "instance_id": "sympy__sympy-24562",
+  "root_cause": [
+    {
+      "file": "sympy/core/numbers.py",
+      "old_line": 1630,
+      "old_statement": "q *= p.q",
+      "current_line": 1630,
+      "current_statement": "q *= p.q"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Rational(p, q) normalizes its two arguments to integers in sequence: first p is converted (if not an int) to a Rational, whose denominator is folded into q with q *= p.q and whose numerator replaces p; only afterwards is q itself converted. The fold-in therefore applies an arithmetic *= to q while q may still hold its raw argument. When q was given as a string, Python evaluates *= as sequence repetition instead of multiplication: Rational('0.5', '100') turns '100' into '100100' and returns 1/100100 instead of 1/200, and Rational('1.5', '1.5') turns '1.5' into '1.51.5', which the subsequent conversion rejects with TypeError: invalid input: 1.51.5. Mixed calls where the denominator is numeric, e.g. Rational(0.5, 100), are unaffected because the repetition only occurs for string q.",
+    "annotator2": "Rational(p, q) first converts a non-integer numerator into a Rational. It then uses q itself to accumulate the numerator's denominator. That assumes q already has numeric multiplication semantics, but q may still be a supported string input. For Rational('1.5', '1.5'), line 1630 turns q into the invalid string '1.51.5', which raises TypeError when q is subsequently parsed. For Rational('0.5', '100'), it produces the valid but incorrect string '100100', yielding 1/100100 rather than 1/200. Line 1630 is the minimal root cause because it is the operation that corrupts the unparsed denominator before the later conversion."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

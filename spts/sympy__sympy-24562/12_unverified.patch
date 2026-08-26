@@ -1,0 +1,24 @@
+diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py
+index 52f7ea45ad..bfa8e0320b 100644
+--- a/sympy/core/numbers.py
++++ b/sympy/core/numbers.py
+@@ -1480,6 +1480,10 @@ def __format__(self, format_spec):
+ RealNumber = Float
+ 
+ 
++def _scale_rational_denominator(denominator, factor):
++    return denominator * factor
++
++
+ class Rational(Number):
+     """Represents rational numbers (p/q) of any size.
+ 
+@@ -1627,7 +1631,7 @@ def __new__(cls, p, q=None, gcd=None):
+ 
+         if not isinstance(p, SYMPY_INTS):
+             p = Rational(p)
+-            q *= p.q
++            q = _scale_rational_denominator(q, p.q)
+             p = p.p
+         else:
+             p = int(p)

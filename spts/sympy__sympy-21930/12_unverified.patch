@@ -1,0 +1,52 @@
+diff --git a/sympy/physics/secondquant.py b/sympy/physics/secondquant.py
+index d19ee2fc63..db8a35a0fb 100644
+--- a/sympy/physics/secondquant.py
++++ b/sympy/physics/secondquant.py
+@@ -150,6 +150,14 @@ class TensorSymbol(Expr):
+     is_commutative = True
+ 
+ 
++def _creation_operator_latex(symbol, state_name):
++    return "%s^\\dagger_{%s}" % (symbol, state_name)
++
++
++def _tensor_latex(symbol, upper_names, lower_names):
++    return "%s^{%s}_{%s}" % (symbol, upper_names, lower_names)
++
++
+ class AntiSymmetricTensor(TensorSymbol):
+     """Stores upper and lower indices in separate Tuple's.
+ 
+@@ -218,11 +226,9 @@ def _sortkey(cls, index):
+             return (12, label, h)
+ 
+     def _latex(self, printer):
+-        return "%s^{%s}_{%s}" % (
+-            self.symbol,
+-            "".join([ i.name for i in self.args[1]]),
+-            "".join([ i.name for i in self.args[2]])
+-        )
++        return _tensor_latex(self.symbol,
++                             "".join([i.name for i in self.args[1]]),
++                             "".join([i.name for i in self.args[2]]))
+ 
+     @property
+     def symbol(self):
+@@ -478,7 +484,7 @@ def __repr__(self):
+         return "CreateBoson(%s)" % self.state
+ 
+     def _latex(self, printer):
+-        return "b^\\dagger_{%s}" % self.state.name
++        return _creation_operator_latex("b", self.state.name)
+ 
+ B = AnnihilateBoson
+ Bd = CreateBoson
+@@ -939,7 +945,7 @@ def __repr__(self):
+         return "CreateFermion(%s)" % self.state
+ 
+     def _latex(self, printer):
+-        return "a^\\dagger_{%s}" % self.state.name
++        return _creation_operator_latex("a", self.state.name)
+ 
+ Fd = CreateFermion
+ F = AnnihilateFermion

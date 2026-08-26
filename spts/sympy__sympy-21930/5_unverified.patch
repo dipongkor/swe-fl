@@ -1,0 +1,31 @@
+diff --git a/sympy/physics/secondquant.py b/sympy/physics/secondquant.py
+index d19ee2fc63..053e40eddd 100644
+--- a/sympy/physics/secondquant.py
++++ b/sympy/physics/secondquant.py
+@@ -217,7 +217,7 @@ def _sortkey(cls, index):
+         else:
+             return (12, label, h)
+ 
+-    def _latex(self, printer):
++    def _latex(self, printer, preserve_script_grouping=False):
+         return "%s^{%s}_{%s}" % (
+             self.symbol,
+             "".join([ i.name for i in self.args[1]]),
+@@ -438,7 +438,7 @@ def apply_operator(self, state):
+     def __repr__(self):
+         return "AnnihilateBoson(%s)" % self.state
+ 
+-    def _latex(self, printer):
++    def _latex(self, printer, preserve_script_grouping=False):
+         return "b_{%s}" % self.state.name
+ 
+ 
+@@ -477,7 +477,7 @@ def apply_operator(self, state):
+     def __repr__(self):
+         return "CreateBoson(%s)" % self.state
+ 
+-    def _latex(self, printer):
++    def _latex(self, printer, preserve_script_grouping=False):
+         return "b^\\dagger_{%s}" % self.state.name
+ 
+ B = AnnihilateBoson

@@ -1,0 +1,22 @@
+diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py
+index 52f7ea45ad..4f81363e1a 100644
+--- a/sympy/core/numbers.py
++++ b/sympy/core/numbers.py
+@@ -6,6 +6,9 @@
+ import math
+ import re as regex
+ import sys
++import logging
++
++logger = logging.getLogger(__name__)
+ from functools import lru_cache
+ 
+ from .containers import Tuple
+@@ -1627,6 +1630,7 @@ def __new__(cls, p, q=None, gcd=None):
+ 
+         if not isinstance(p, SYMPY_INTS):
+             p = Rational(p)
++            logger.debug("Scaling Rational denominator after numerator normalization")
+             q *= p.q
+             p = p.p
+         else:

@@ -1,0 +1,52 @@
+diff --git a/sympy/physics/secondquant.py b/sympy/physics/secondquant.py
+index d19ee2fc63..1f6cab9b84 100644
+--- a/sympy/physics/secondquant.py
++++ b/sympy/physics/secondquant.py
+@@ -217,11 +217,25 @@ def _sortkey(cls, index):
+         else:
+             return (12, label, h)
+ 
+-    def _latex(self, printer):
++    def _latex(self, latex_printer, preserve_script_grouping=False):
++        upper_names = []
++        upper_iterator = iter(self.args[1])
++        while True:
++            try:
++                index = next(upper_iterator)
++            except StopIteration:
++                break
++            upper_names.append(index.name)
++        lower_names = []
++        lower_iterator = iter(self.args[2])
++        while True:
++            try:
++                index = next(lower_iterator)
++            except StopIteration:
++                break
++            lower_names.append(index.name)
+         return "%s^{%s}_{%s}" % (
+-            self.symbol,
+-            "".join([ i.name for i in self.args[1]]),
+-            "".join([ i.name for i in self.args[2]])
++            self.symbol, "".join(upper_names), "".join(lower_names)
+         )
+ 
+     @property
+@@ -438,7 +452,7 @@ def apply_operator(self, state):
+     def __repr__(self):
+         return "AnnihilateBoson(%s)" % self.state
+ 
+-    def _latex(self, printer):
++    def _latex(self, latex_printer, preserve_script_grouping=False):
+         return "b_{%s}" % self.state.name
+ 
+ 
+@@ -477,7 +491,7 @@ def apply_operator(self, state):
+     def __repr__(self):
+         return "CreateBoson(%s)" % self.state
+ 
+-    def _latex(self, printer):
++    def _latex(self, latex_printer, preserve_script_grouping=False):
+         return "b^\\dagger_{%s}" % self.state.name
+ 
+ B = AnnihilateBoson

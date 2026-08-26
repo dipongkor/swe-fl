@@ -1,0 +1,32 @@
+diff --git a/sympy/physics/secondquant.py b/sympy/physics/secondquant.py
+index d19ee2fc63..48d5d5fb5f 100644
+--- a/sympy/physics/secondquant.py
++++ b/sympy/physics/secondquant.py
+@@ -218,10 +218,24 @@ def _sortkey(cls, index):
+             return (12, label, h)
+ 
+     def _latex(self, printer):
++        upper_names = []
++        upper_iterator = iter(self.args[1])
++        while True:
++            try:
++                index = next(upper_iterator)
++            except StopIteration:
++                break
++            upper_names.append(index.name)
++        lower_names = []
++        lower_iterator = iter(self.args[2])
++        while True:
++            try:
++                index = next(lower_iterator)
++            except StopIteration:
++                break
++            lower_names.append(index.name)
+         return "%s^{%s}_{%s}" % (
+-            self.symbol,
+-            "".join([ i.name for i in self.args[1]]),
+-            "".join([ i.name for i in self.args[2]])
++            self.symbol, "".join(upper_names), "".join(lower_names)
+         )
+ 
+     @property

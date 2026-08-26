@@ -1,0 +1,17 @@
+diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py
+index 52f7ea45ad..6553631fb6 100644
+--- a/sympy/core/numbers.py
++++ b/sympy/core/numbers.py
+@@ -1606,9 +1606,9 @@ def __new__(cls, p, q=None, gcd=None):
+                     if p.count('/') > 1:
+                         raise TypeError('invalid input: %s' % p)
+                     p = p.replace(' ', '')
+-                    pq = p.rsplit('/', 1)
+-                    if len(pq) == 2:
+-                        p, q = pq
++                    fraction_parts = p.rsplit('/', 1)
++                    if len(fraction_parts) == 2:
++                        p, q = fraction_parts
+                         fp = fractions.Fraction(p)
+                         fq = fractions.Fraction(q)
+                         p = fp/fq

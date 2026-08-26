@@ -1,0 +1,12 @@
+diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py
+index 52f7ea45ad..9155a9c30c 100644
+--- a/sympy/core/numbers.py
++++ b/sympy/core/numbers.py
+@@ -1639,7 +1639,6 @@ def __new__(cls, p, q=None, gcd=None):
+         else:
+             q = int(q)
+ 
+-        # p and q are now ints
+         if q == 0:
+             if p == 0:
+                 if _errdict["divide"]:

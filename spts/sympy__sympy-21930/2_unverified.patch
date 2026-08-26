@@ -1,0 +1,31 @@
+diff --git a/sympy/physics/secondquant.py b/sympy/physics/secondquant.py
+index d19ee2fc63..4e22e0d050 100644
+--- a/sympy/physics/secondquant.py
++++ b/sympy/physics/secondquant.py
+@@ -217,12 +217,6 @@ def _sortkey(cls, index):
+         else:
+             return (12, label, h)
+ 
+-    def _latex(self, printer):
+-        return "%s^{%s}_{%s}" % (
+-            self.symbol,
+-            "".join([ i.name for i in self.args[1]]),
+-            "".join([ i.name for i in self.args[2]])
+-        )
+ 
+     @property
+     def symbol(self):
+@@ -304,6 +298,13 @@ def doit(self, **kw_args):
+         """
+         return self
+ 
++    def _latex(self, printer):
++        return "%s^{%s}_{%s}" % (
++            self.symbol,
++            "".join([ i.name for i in self.args[1]]),
++            "".join([ i.name for i in self.args[2]])
++        )
++
+ 
+ class SqOperator(Expr):
+     """
