@@ -1,0 +1,41 @@
+{
+  "instance_id": "django__django-15629",
+  "root_cause": [
+    {
+      "file": "django/db/models/fields/related.py",
+      "old_line": 1183,
+      "old_statement": "return {\"type\": self.db_type(connection), \"check\": self.db_check(connection)}",
+      "current_line": 1183,
+      "current_statement": "return {\"type\": self.db_type(connection), \"check\": self.db_check(connection)}"
+    },
+    {
+      "file": "django/db/backends/sqlite3/schema.py",
+      "old_line": 458,
+      "old_statement": "if new_field.unique and old_type != new_type:",
+      "current_line": 458,
+      "current_statement": "if new_field.unique and old_type != new_type:"
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "old_line": 832,
+      "old_statement": "drop_foreign_keys = (\n    self.connection.features.supports_foreign_keys\n    and (\n        (old_field.primary_key and new_field.primary_key)\n        or (old_field.unique and new_field.unique)\n    )\n    and old_type != new_type\n)",
+      "current_line": 826,
+      "current_statement": "should_drop_foreign_keys = (\n            self.connection.features.supports_foreign_keys\n            and (\n                (old_field.primary_key and new_field.primary_key)\n                or (old_field.unique and new_field.unique)\n            )\n            and old_type != new_type\n        )"
+    },
+    {
+      "file": "django/db/backends/base/schema.py",
+      "old_line": 1041,
+      "old_statement": "fragment, other_actions = self._alter_column_type_sql(\n    new_rel.related_model, old_rel.field, new_rel.field, rel_type\n)",
+      "current_line": 1041,
+      "current_statement": "fragment, other_actions = self._alter_column_type_sql(\n                new_rel.related_model, old_rel.field, new_rel.field, related_type\n            )"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "A foreign key column must have the same type and collation as the primary key it references; MySQL enforces this when the FK constraint is added. Django propagates the type, ForeignKey.db_type delegates to the target field, but collation is dropped at every layer. ForeignKey.db_parameters returns only type and check, omitting the target's collation, so DDL generated from it creates FK columns without COLLATE. In the schema editors, altering a PK's collation does not propagate either: the base editor drops and rebuilds incoming FK constraints and rewrites the dependent FK columns only when the column type changes, and even when that loop runs it emits a type-only alteration with no collation fragment; the SQLite editor likewise rebuilds tables with FKs pointing at the altered field only on a type change. The net effect is that adding db_collation to a primary key leaves every referencing foreign key column at its old collation, producing mismatched-collation FK constraint failures on MySQL and stale column definitions elsewhere.",
+    "annotator2": "A ForeignKey column derives its database type from the referenced field, but its db_parameters mapping drops the target field's collation, so newly created FK and one-to-one columns use the default collation. Altering an existing primary key has a second failure path: the base schema editor activates incoming-FK updates only when the SQL type changes, and its related-column operation is type-only. SQLite has the same type-only gate around rebuilding referencing tables. As a result, a character primary key can use utf8_bin or nocase while its foreign-key columns retain a different collation, causing constraint errors on MySQL and the observed None collation on SQLite. The four lines cover the independently necessary creation, general alteration, related-column, and SQLite rebuild decisions."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

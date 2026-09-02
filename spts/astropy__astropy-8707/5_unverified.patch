@@ -1,0 +1,61 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..bafddad1f 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -545,7 +545,7 @@ class Card(_Verify):
+                 not self.comment)
+ 
+     @classmethod
+-    def fromstring(cls, image):
++    def fromstring(cls, image, pad_image=True):
+         """
+         Construct a `Card` object from a (raw) string. It will pad the string
+         if it is not the length of a card image (80 columns).  If the card
+@@ -554,7 +554,7 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
+-        card._image = _pad(image)
++        card._image = _pad(image) if pad_image else image
+         card._verified = False
+         return card
+ 
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..3535c01ae 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -327,7 +327,7 @@ class Header:
+         self.__dict__['_modified'] = val
+ 
+     @classmethod
+-    def fromstring(cls, data, sep=''):
++    def fromstring(cls, data, sep='', card_factory=None):
+         """
+         Creates an HDU header from a byte string containing the entire header
+         data.
+@@ -349,6 +349,7 @@ class Header:
+         """
+ 
+         cards = []
++        card_factory = card_factory or Card.fromstring
+ 
+         # If the card separator contains characters that may validly appear in
+         # a card, the only way to unambiguously distinguish between cards is to
+@@ -377,7 +378,7 @@ class Header:
+                 if next_image[:8] == 'CONTINUE':
+                     image.append(next_image)
+                     continue
+-                cards.append(Card.fromstring(''.join(image)))
++                cards.append(card_factory(''.join(image)))
+ 
+             if require_full_cardlength:
+                 if next_image == END_CARD:
+@@ -392,7 +393,7 @@ class Header:
+ 
+         # Add the last image that was found before the end, if any
+         if image:
+-            cards.append(Card.fromstring(''.join(image)))
++            cards.append(card_factory(''.join(image)))
+ 
+         return cls._fromcards(cards)
+ 

@@ -1,0 +1,48 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+index 0dc1c77c53..dea1ac0561 100644
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -907,13 +907,10 @@ class MigrationAutodetector:
+         isn's possible.
+         """
+         for app_label, model_name, field_name in sorted(self.old_field_keys & self.new_field_keys):
+-            # Did the field change?
+             old_model_name = self.renamed_models.get((app_label, model_name), model_name)
+             old_field_name = self.renamed_fields.get((app_label, model_name, field_name), field_name)
+             old_field = self.old_apps.get_model(app_label, old_model_name)._meta.get_field(old_field_name)
+             new_field = self.new_apps.get_model(app_label, model_name)._meta.get_field(field_name)
+-            # Implement any model renames on relations; these are handled by RenameModel
+-            # so we need to exclude them from the comparison
+             if hasattr(new_field, "remote_field") and getattr(new_field.remote_field, "model", None):
+                 rename_key = (
+                     new_field.remote_field.model._meta.app_label,
+@@ -921,13 +918,11 @@ class MigrationAutodetector:
+                 )
+                 if rename_key in self.renamed_models:
+                     new_field.remote_field.model = old_field.remote_field.model
+-                # Handle ForeignKey which can only have a single to_field.
+                 remote_field_name = getattr(new_field.remote_field, 'field_name', None)
+                 if remote_field_name:
+                     to_field_rename_key = rename_key + (remote_field_name,)
+                     if to_field_rename_key in self.renamed_fields:
+                         new_field.remote_field.field_name = old_field.remote_field.field_name
+-                # Handle ForeignObjects which can have multiple from_fields/to_fields.
+                 from_fields = getattr(new_field, 'from_fields', None)
+                 if from_fields:
+                     from_rename_key = (app_label, model_name)
+@@ -952,7 +947,6 @@ class MigrationAutodetector:
+                 both_m2m = old_field.many_to_many and new_field.many_to_many
+                 neither_m2m = not old_field.many_to_many and not new_field.many_to_many
+                 if both_m2m or neither_m2m:
+-                    # Either both fields are m2m or neither is
+                     preserve_default = True
+                     if (old_field.null and not new_field.null and not new_field.has_default() and
+                             not new_field.many_to_many):
+@@ -973,7 +967,6 @@ class MigrationAutodetector:
+                         )
+                     )
+                 else:
+-                    # We cannot alter between m2m and concrete fields
+                     self._generate_removed_field(app_label, model_name, field_name)
+                     self._generate_added_field(app_label, model_name, field_name)
+ 

@@ -1,0 +1,50 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..1aa306954 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -554,7 +554,8 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
+-        card._image = _pad(image)
++        card_image = _pad(image)
++        card._image = card_image
+         card._verified = False
+         return card
+ 
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..9d4a89b60 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -370,25 +370,25 @@ class Header:
+                 except ValueError:
+                     end_idx = len(data)
+ 
+-            next_image = data[idx:end_idx]
++            current_image = data[idx:end_idx]
+             idx = end_idx + len(sep)
+ 
+             if image:
+-                if next_image[:8] == 'CONTINUE':
+-                    image.append(next_image)
++                if current_image[:8] == 'CONTINUE':
++                    image.append(current_image)
+                     continue
+                 cards.append(Card.fromstring(''.join(image)))
+ 
+             if require_full_cardlength:
+-                if next_image == END_CARD:
++                if current_image == END_CARD:
+                     image = []
+                     break
+             else:
+-                if next_image.split(sep)[0].rstrip() == 'END':
++                if current_image.split(sep)[0].rstrip() == 'END':
+                     image = []
+                     break
+ 
+-            image = [next_image]
++            image = [current_image]
+ 
+         # Add the last image that was found before the end, if any
+         if image:

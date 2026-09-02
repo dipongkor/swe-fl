@@ -1,0 +1,27 @@
+{
+  "instance_id": "django__django-12406",
+  "root_cause": [
+    {
+      "file": "django/forms/models.py",
+      "old_line": 1188,
+      "old_statement": "if required and (initial is not None):",
+      "current_line": 1188,
+      "current_statement": "if suppress_empty_for_initial and required and (initial is not None):"
+    },
+    {
+      "file": "django/db/models/fields/related.py",
+      "old_line": 978,
+      "old_statement": "return super().formfield(**{\n    'form_class': forms.ModelChoiceField,\n    'queryset': self.remote_field.model._default_manager.using(using),\n    'to_field_name': self.remote_field.field_name,\n    **kwargs,\n})",
+      "current_line": 419,
+      "current_statement": "return super().formfield(**defaults)"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "ModelChoiceField prepends an empty '---------' choice unless empty_label is None, and its constructor nulls empty_label only in one narrow case: required fields that already have an initial value. For the Select widget this is the desired UX \u2014 the blank option doubles as the widget's unfilled state. For RadioSelect it is wrong: radios are naturally unfilled when nothing is checked, so the empty choice materializes as a first radio button labeled '---------' (checked by default on an unbound form), presenting blank as an apparently valid choice even when the model declares blank=False. Two gaps combine: the empty_label rule never considers the widget type, and ForeignKey.formfield never forwards the model's blank attribute to the form field, so the form layer has no way to know blank isn't allowed (blank is a validation concept distinct from required \u2014 the issue's field is null=True, blank=False). The fix threads blank across the boundary (formfield passes blank=self.blank, ModelChoiceField accepts blank=False) and widens the suppression rule: empty_label becomes None also when the widget is a RadioSelect and blank is False, with the check moved after Field.__init__ so the widget kwarg has been normalized to an instance.",
+    "annotator2": "ModelChoiceField's empty-label decision considers only required and initial, so it cannot distinguish a RadioSelect whose unselected state already represents an empty value. ForeignKey form conversion also omits the model's blank setting, leaving the choice field unable to tell whether an empty radio option is valid. Direct blank arguments fall through to Field and error, while a generated form for blank=False retains the unwanted empty choice. The condition and model-to-form boundary are the minimal behavioral decisions covering both paths."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "instance_id": "astropy__astropy-8707",
+  "root_cause": [
+    {
+      "file": "astropy/io/fits/card.py",
+      "old_line": 557,
+      "old_statement": "card._image = _pad(image)",
+      "current_line": 561,
+      "current_statement": "card._image = _pad(image)"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "old_line": 369,
+      "old_statement": "end_idx = data.index(sep, idx)",
+      "current_line": 373,
+      "current_statement": "end_idx = data.index(sep, idx)"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "old_line": 377,
+      "old_statement": "if next_image[:8] == 'CONTINUE':",
+      "current_line": 381,
+      "current_statement": "if next_image[:8] == 'CONTINUE':"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "old_line": 380,
+      "old_statement": "cards.append(Card.fromstring(''.join(image)))",
+      "current_line": 384,
+      "current_statement": "cards.append(Card.fromstring(''.join(image)))"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "old_line": 383,
+      "old_statement": "if next_image == END_CARD:",
+      "current_line": 387,
+      "current_statement": "if next_image == END_CARD:"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "old_line": 387,
+      "old_statement": "if next_image.split(sep)[0].rstrip() == 'END':",
+      "current_line": 391,
+      "current_statement": "if next_image.split(sep)[0].rstrip() == 'END':"
+    },
+    {
+      "file": "astropy/io/fits/header.py",
+      "old_line": 395,
+      "old_statement": "cards.append(Card.fromstring(''.join(image)))",
+      "current_line": 399,
+      "current_statement": "cards.append(Card.fromstring(''.join(image)))"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "Header.fromstring is documented as building a header from a byte string, and its natural Python 3 input is bytes read from a FITS file in binary mode, but both it and Card.fromstring assume str end to end. Card.fromstring pads the raw input with str spaces, crashing immediately on bytes (can't concat str to bytes). Header.fromstring's splitting loop joins card images with str separators (TypeError on bytes) and compares byte slices against str constants ('CONTINUE', END_CARD, 'END'), comparisons that are silently always False in Python 3, breaking loop termination. No normalization or bytes-mode handling exists anywhere on the path, so documented byte-string input cannot be processed at all.",
+    "annotator2": "The FITS parsing entry points are written with text-only operations even though callers can naturally supply data read from a binary FITS file. Card.fromstring passes bytes to a str-padding helper. Header.fromstring searches and splits bytes with a text separator, joins bytes with '', and compares bytes slices to text CONTINUE and END markers. The direct Card path raises at card.py:557 and the raw Header path raises at header.py:380; the remaining listed lines independently cause failures or silent misparses for separator, continuation, end-card, and trailing-card variants of the same supported bytes input."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "The FITS parsing entry points are written with text-only operations even though callers can naturally supply data read from a binary FITS file. Card.fromstring passes bytes to a str-padding helper. Header.fromstring searches and splits bytes with a text separator, joins bytes with '', and compares bytes slices to text CONTINUE and END markers. The direct Card path raises at card.py:561 and the raw Header path raises at header.py:384; the remaining listed lines independently cause failures or silent misparses for separator, continuation, end-card, and trailing-card variants of the same supported bytes input."
+  }
+}

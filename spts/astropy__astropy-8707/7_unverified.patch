@@ -1,0 +1,46 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..7f183cbbd 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -1,6 +1,9 @@
+ # Licensed under a 3-clause BSD style license - see PYFITS.rst
+ 
+ import re
++import logging
++
++logger = logging.getLogger(__name__)
+ import warnings
+ 
+ import numpy as np
+@@ -554,6 +557,7 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
++        logger.debug("Padding FITS card image of length %d", len(image))
+         card._image = _pad(image)
+         card._verified = False
+         return card
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..487503639 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -1,6 +1,9 @@
+ # Licensed under a 3-clause BSD style license - see PYFITS.rst
+ 
+ import collections
++import logging
++
++logger = logging.getLogger(__name__)
+ import copy
+ import itertools
+ import re
+@@ -366,7 +369,8 @@ class Header:
+                 end_idx = idx + Card.length
+             else:
+                 try:
+-                    end_idx = data.index(sep, idx)
++                    logger.debug("Searching for FITS card separator from offset %d", idx)
++                    end_idx = data.index(sep, idx)
+                 except ValueError:
+                     end_idx = len(data)
+ 

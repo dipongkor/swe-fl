@@ -1,0 +1,20 @@
+{
+  "instance_id": "matplotlib__matplotlib-20859",
+  "root_cause": [
+    {
+      "file": "lib/matplotlib/legend.py",
+      "old_line": 437,
+      "old_statement": "elif isinstance(parent, Figure):",
+      "current_line": 438,
+      "current_statement": "elif isinstance(parent, Figure):"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "SubFigure and Figure are sibling subclasses of FigureBase, which provides the shared legend() method; calling subfig.legend() constructs Legend(subfig, ...). Legend.__init__ classifies its parent with two isinstance checks, Axes or Figure, and raises TypeError('Legend needs either Axes or Figure as parent') otherwise. A SubFigure is a FigureBase but not a Figure, so it fails both checks and the constructor raises, making it impossible to add a legend to a subfigure even though the SubFigure API itself offers legend(). Nothing downstream requires the parent to be a full Figure; the classification is simply narrower than the class hierarchy that feeds it.",
+    "annotator2": "SubFigure.legend collects the plotted handles and constructs Legend with the SubFigure as its parent. Legend.__init__ accepts Axes instances and concrete Figure instances, but a SubFigure is neither despite implementing the figure-container interface needed by the legend. Execution therefore reaches the TypeError instead of associating the legend with its subfigure. Line 437 is the minimal root cause because it is the dispatch decision that rejects the otherwise valid parent before any legend-specific operation can proceed."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

@@ -1,0 +1,28 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+index 0dc1c77c53..7fac79872e 100644
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -901,6 +901,9 @@ class MigrationAutodetector:
+             ],
+         )
+ 
++    def _alter_field_operation(self, model_name, field_name, field, preserve_default):
++        return operations.AlterField(model_name=model_name, name=field_name, field=field, preserve_default=preserve_default)
++
+     def generate_altered_fields(self):
+         """
+         Make AlterField operations, or possibly RemovedField/AddField if alter
+@@ -965,12 +968,7 @@ class MigrationAutodetector:
+                         field = new_field
+                     self.add_operation(
+                         app_label,
+-                        operations.AlterField(
+-                            model_name=model_name,
+-                            name=field_name,
+-                            field=field,
+-                            preserve_default=preserve_default,
+-                        )
++                        self._alter_field_operation(model_name, field_name, field, preserve_default)
+                     )
+                 else:
+                     # We cannot alter between m2m and concrete fields

@@ -1,0 +1,34 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+index 44ab024698..f4e112636b 100644
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -383,7 +383,7 @@ class Legend(Artist):
+ 
+         #: A dictionary with the extra handler mappings for this Legend
+         #: instance.
+-        self._custom_handler_map = handler_map
++        self._customfiltered_handlesler_map = handler_map
+ 
+         locals_view = locals()
+         for name in ["numpoints", "markerscale", "shadow", "columnspacing",
+@@ -397,16 +397,16 @@ class Legend(Artist):
+             setattr(self, name, value)
+         del locals_view
+         # trim handles and labels if illegal label...
+-        _lab, _hand = [], []
++        filtered_labels, filtered_handles = [], []
+         for label, handle in zip(labels, handles):
+             if isinstance(label, str) and label.startswith('_'):
+                 _api.warn_external('The handle {!r} has a label of {!r} '
+                                    'which cannot be automatically added to'
+                                    ' the legend.'.format(handle, label))
+             else:
+-                _lab.append(label)
+-                _hand.append(handle)
+-        labels, handles = _lab, _hand
++                filtered_labels.append(label)
++                filtered_handles.append(handle)
++        labels, handles = filtered_labels, filtered_handles
+ 
+         handles = list(handles)
+         if len(handles) < 2:

@@ -1,0 +1,20 @@
+diff --git a/django/db/migrations/autodetector.py b/django/db/migrations/autodetector.py
+index 0dc1c77c53..1aac5b86db 100644
+--- a/django/db/migrations/autodetector.py
++++ b/django/db/migrations/autodetector.py
+@@ -1,4 +1,7 @@
+ import functools
++import logging
++
++logger = logging.getLogger(__name__)
+ import re
+ from itertools import chain
+ 
+@@ -963,6 +966,7 @@ class MigrationAutodetector:
+                             preserve_default = False
+                     else:
+                         field = new_field
++                    logger.debug("Registering altered field %s.%s", model_name, field_name)
+                     self.add_operation(
+                         app_label,
+                         operations.AlterField(

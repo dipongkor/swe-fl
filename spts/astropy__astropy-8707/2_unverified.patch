@@ -1,0 +1,202 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..36ef08b84 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -544,19 +544,6 @@ class Card(_Verify):
+                 (isinstance(self.value, str) and not self.value) and
+                 not self.comment)
+ 
+-    @classmethod
+-    def fromstring(cls, image):
+-        """
+-        Construct a `Card` object from a (raw) string. It will pad the string
+-        if it is not the length of a card image (80 columns).  If the card
+-        image is longer than 80 columns, assume it contains ``CONTINUE``
+-        card(s).
+-        """
+-
+-        card = cls()
+-        card._image = _pad(image)
+-        card._verified = False
+-        return card
+ 
+     @classmethod
+     def normalize_keyword(cls, keyword):
+@@ -1176,6 +1163,20 @@ class Card(_Verify):
+ 
+             yield card
+ 
++    @classmethod
++    def fromstring(cls, image):
++        """
++        Construct a `Card` object from a (raw) string. It will pad the string
++        if it is not the length of a card image (80 columns).  If the card
++        image is longer than 80 columns, assume it contains ``CONTINUE``
++        card(s).
++        """
++
++        card = cls()
++        card._image = _pad(image)
++        card._verified = False
++        return card
++
+ 
+ def _int_or_float(s):
+     """
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..9364a806d 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -326,75 +326,6 @@ class Header:
+     def _modified(self, val):
+         self.__dict__['_modified'] = val
+ 
+-    @classmethod
+-    def fromstring(cls, data, sep=''):
+-        """
+-        Creates an HDU header from a byte string containing the entire header
+-        data.
+-
+-        Parameters
+-        ----------
+-        data : str
+-           String containing the entire header.
+-
+-        sep : str, optional
+-            The string separating cards from each other, such as a newline.  By
+-            default there is no card separator (as is the case in a raw FITS
+-            file).
+-
+-        Returns
+-        -------
+-        header
+-            A new `Header` instance.
+-        """
+-
+-        cards = []
+-
+-        # If the card separator contains characters that may validly appear in
+-        # a card, the only way to unambiguously distinguish between cards is to
+-        # require that they be Card.length long.  However, if the separator
+-        # contains non-valid characters (namely \n) the cards may be split
+-        # immediately at the separator
+-        require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
+-
+-        # Split the header into individual cards
+-        idx = 0
+-        image = []
+-
+-        while idx < len(data):
+-            if require_full_cardlength:
+-                end_idx = idx + Card.length
+-            else:
+-                try:
+-                    end_idx = data.index(sep, idx)
+-                except ValueError:
+-                    end_idx = len(data)
+-
+-            next_image = data[idx:end_idx]
+-            idx = end_idx + len(sep)
+-
+-            if image:
+-                if next_image[:8] == 'CONTINUE':
+-                    image.append(next_image)
+-                    continue
+-                cards.append(Card.fromstring(''.join(image)))
+-
+-            if require_full_cardlength:
+-                if next_image == END_CARD:
+-                    image = []
+-                    break
+-            else:
+-                if next_image.split(sep)[0].rstrip() == 'END':
+-                    image = []
+-                    break
+-
+-            image = [next_image]
+-
+-        # Add the last image that was found before the end, if any
+-        if image:
+-            cards.append(Card.fromstring(''.join(image)))
+-
+-        return cls._fromcards(cards)
+ 
+     @classmethod
+     def fromfile(cls, fileobj, sep='', endcard=True, padding=True):
+@@ -1898,6 +1829,76 @@ class Header:
+         else:
+             self[key] = value
+ 
++    @classmethod
++    def fromstring(cls, data, sep=''):
++        """
++        Creates an HDU header from a byte string containing the entire header
++        data.
++
++        Parameters
++        ----------
++        data : str
++           String containing the entire header.
++
++        sep : str, optional
++            The string separating cards from each other, such as a newline.  By
++            default there is no card separator (as is the case in a raw FITS
++            file).
++
++        Returns
++        -------
++        header
++            A new `Header` instance.
++        """
++
++        cards = []
++
++        # If the card separator contains characters that may validly appear in
++        # a card, the only way to unambiguously distinguish between cards is to
++        # require that they be Card.length long.  However, if the separator
++        # contains non-valid characters (namely \n) the cards may be split
++        # immediately at the separator
++        require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
++
++        # Split the header into individual cards
++        idx = 0
++        image = []
++
++        while idx < len(data):
++            if require_full_cardlength:
++                end_idx = idx + Card.length
++            else:
++                try:
++                    end_idx = data.index(sep, idx)
++                except ValueError:
++                    end_idx = len(data)
++
++            next_image = data[idx:end_idx]
++            idx = end_idx + len(sep)
++
++            if image:
++                if next_image[:8] == 'CONTINUE':
++                    image.append(next_image)
++                    continue
++                cards.append(Card.fromstring(''.join(image)))
++
++            if require_full_cardlength:
++                if next_image == END_CARD:
++                    image = []
++                    break
++            else:
++                if next_image.split(sep)[0].rstrip() == 'END':
++                    image = []
++                    break
++
++            image = [next_image]
++
++        # Add the last image that was found before the end, if any
++        if image:
++            cards.append(Card.fromstring(''.join(image)))
++
++        return cls._fromcards(cards)
++
+ 
+ collections.abc.MutableSequence.register(Header)
+ collections.abc.MutableMapping.register(Header)

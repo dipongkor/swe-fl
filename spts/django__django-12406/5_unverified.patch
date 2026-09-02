@@ -1,0 +1,35 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+index f269d9e17f..bb6971589a 100644
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -970,13 +970,13 @@ class ForeignKey(ForeignObject):
+         if self.remote_field.field_name is None:
+             self.remote_field.field_name = cls._meta.pk.name
+ 
+-    def formfield(self, *, using=None, **kwargs):
++    def formfield(self, *, using=None, form_class=forms.ModelChoiceField, **kwargs):
+         if isinstance(self.remote_field.model, str):
+             raise ValueError("Cannot create form field for %r yet, because "
+                              "its related model %r has not been loaded yet" %
+                              (self.name, self.remote_field.model))
+         return super().formfield(**{
+-            'form_class': forms.ModelChoiceField,
++            'form_class': form_class,
+             'queryset': self.remote_field.model._default_manager.using(using),
+             'to_field_name': self.remote_field.field_name,
+             **kwargs,
+diff --git a/django/forms/models.py b/django/forms/models.py
+index dafc11f995..c2c940b59c 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -1184,8 +1184,8 @@ class ModelChoiceField(ChoiceField):
+     def __init__(self, queryset, *, empty_label="---------",
+                  required=True, widget=None, label=None, initial=None,
+                  help_text='', to_field_name=None, limit_choices_to=None,
+-                 **kwargs):
+-        if required and (initial is not None):
++                 suppress_empty_for_initial=True, **kwargs):
++        if suppress_empty_for_initial and required and (initial is not None):
+             self.empty_label = None
+         else:
+             self.empty_label = empty_label

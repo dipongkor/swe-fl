@@ -1,0 +1,57 @@
+diff --git a/astropy/io/fits/card.py b/astropy/io/fits/card.py
+index 8c1ac5d73..55909d2ee 100644
+--- a/astropy/io/fits/card.py
++++ b/astropy/io/fits/card.py
+@@ -544,6 +544,10 @@ class Card(_Verify):
+                 (isinstance(self.value, str) and not self.value) and
+                 not self.comment)
+ 
++    @staticmethod
++    def _padded_image(image):
++        return _pad(image)
++
+     @classmethod
+     def fromstring(cls, image):
+         """
+@@ -554,7 +558,7 @@ class Card(_Verify):
+         """
+ 
+         card = cls()
+-        card._image = _pad(image)
++        card._image = cls._padded_image(image)
+         card._verified = False
+         return card
+ 
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..98b13b06d 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -326,6 +326,10 @@ class Header:
+     def _modified(self, val):
+         self.__dict__['_modified'] = val
+ 
++    @staticmethod
++    def _append_card(cards, image):
++        cards.append(Card.fromstring(''.join(image)))
++
+     @classmethod
+     def fromstring(cls, data, sep=''):
+         """
+@@ -377,7 +381,7 @@ class Header:
+                 if next_image[:8] == 'CONTINUE':
+                     image.append(next_image)
+                     continue
+-                cards.append(Card.fromstring(''.join(image)))
++                cls._append_card(cards, image)
+ 
+             if require_full_cardlength:
+                 if next_image == END_CARD:
+@@ -392,7 +396,7 @@ class Header:
+ 
+         # Add the last image that was found before the end, if any
+         if image:
+-            cards.append(Card.fromstring(''.join(image)))
++            cls._append_card(cards, image)
+ 
+         return cls._fromcards(cards)
+ 

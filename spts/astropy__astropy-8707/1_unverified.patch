@@ -1,0 +1,27 @@
+diff --git a/astropy/io/fits/header.py b/astropy/io/fits/header.py
+index ad07e6d52..a0fa785b4 100644
+--- a/astropy/io/fits/header.py
++++ b/astropy/io/fits/header.py
+@@ -350,14 +350,8 @@ class Header:
+ 
+         cards = []
+ 
+-        # If the card separator contains characters that may validly appear in
+-        # a card, the only way to unambiguously distinguish between cards is to
+-        # require that they be Card.length long.  However, if the separator
+-        # contains non-valid characters (namely \n) the cards may be split
+-        # immediately at the separator
+         require_full_cardlength = set(sep).issubset(VALID_HEADER_CHARS)
+ 
+-        # Split the header into individual cards
+         idx = 0
+         image = []
+ 
+@@ -390,7 +384,6 @@ class Header:
+ 
+             image = [next_image]
+ 
+-        # Add the last image that was found before the end, if any
+         if image:
+             cards.append(Card.fromstring(''.join(image)))
+ 

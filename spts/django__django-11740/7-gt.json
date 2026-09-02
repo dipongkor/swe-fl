@@ -1,0 +1,20 @@
+{
+  "instance_id": "django__django-11740",
+  "root_cause": [
+    {
+      "file": "django/db/migrations/autodetector.py",
+      "old_line": 966,
+      "old_statement": "self.add_operation(\n    app_label,\n    operations.AlterField(\n        model_name=model_name,\n        name=field_name,\n        field=field,\n        preserve_default=preserve_default,\n    )\n)",
+      "current_line": 970,
+      "current_statement": "self.add_operation(\n                        app_label,\n                        operations.AlterField(\n                            model_name=model_name,\n                            name=field_name,\n                            field=field,\n                            preserve_default=preserve_default,\n                        )\n                    )"
+    }
+  ],
+  "old_reasoning": {
+    "annotator1": "The migrations autodetector computes operations per app and then resolves inter-operation ordering and cross-app migration dependencies from dependency edges that each operation registers via add_operation. Paths that add a foreign key \u2014 creating a model, adding a field \u2014 collect the FK's requirements with _get_dependencies_for_foreign_key (the target model, plus any through model) and pass them along, which is how a new FK to another app yields a dependencies entry like ('testapp', '__first__') in the generated migration. generate_altered_fields never did this: it registers AlterField with no dependencies at all, even when the new field is a relation the old field was not. So altering a plain field (e.g. UUIDField) into a ForeignKey targeting another app produces a migration whose AlterField references the remote model but whose Migration class lists no dependency on that app; when migrations run (or the graph loads) without the target app's migrations already applied/ordered first, resolving the field raises ValueError: Related model 'testapp2.App2' cannot be resolved. The fix computes the FK dependencies for the new field inside the altered-field loop and passes them to add_operation, mirroring the added-field path.",
+    "annotator2": "The autodetector recognizes that Book.author changed from IntegerField to ForeignKey and emits AlterField. Unlike relation-creating paths, this registration supplies no dependency on the target model's app, so the migration graph reports no dependency on testapp.__first__. The add_operation call is the minimal root cause because it discards the relation ordering needed specifically by the generated AlterField."
+  },
+  "new_reasoning": {
+    "annotator1": "no change",
+    "annotator2": "no change"
+  }
+}

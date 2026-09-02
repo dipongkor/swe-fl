@@ -1,0 +1,42 @@
+diff --git a/django/db/models/fields/related.py b/django/db/models/fields/related.py
+index f269d9e17f..61086ad697 100644
+--- a/django/db/models/fields/related.py
++++ b/django/db/models/fields/related.py
+@@ -1,4 +1,7 @@
+ import functools
++import logging
++
++logger = logging.getLogger(__name__)
+ import inspect
+ from functools import partial
+ 
+@@ -975,6 +978,7 @@ class ForeignKey(ForeignObject):
+             raise ValueError("Cannot create form field for %r yet, because "
+                              "its related model %r has not been loaded yet" %
+                              (self.name, self.remote_field.model))
++        logger.debug("Creating form field for relation %s", self.name)
+         return super().formfield(**{
+             'form_class': forms.ModelChoiceField,
+             'queryset': self.remote_field.model._default_manager.using(using),
+diff --git a/django/forms/models.py b/django/forms/models.py
+index dafc11f995..78cb800918 100644
+--- a/django/forms/models.py
++++ b/django/forms/models.py
+@@ -4,6 +4,9 @@ and database field objects.
+ """
+ 
+ from itertools import chain
++import logging
++
++logger = logging.getLogger(__name__)
+ 
+ from django.core.exceptions import (
+     NON_FIELD_ERRORS, FieldError, ImproperlyConfigured, ValidationError,
+@@ -1185,6 +1188,7 @@ class ModelChoiceField(ChoiceField):
+                  required=True, widget=None, label=None, initial=None,
+                  help_text='', to_field_name=None, limit_choices_to=None,
+                  **kwargs):
++        logger.debug("Configuring model choice field empty label")
+         if required and (initial is not None):
+             self.empty_label = None
+         else:

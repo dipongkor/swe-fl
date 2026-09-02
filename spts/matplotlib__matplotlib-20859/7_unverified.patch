@@ -1,0 +1,12 @@
+diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py
+index 44ab024698..55fe97f593 100644
+--- a/lib/matplotlib/legend.py
++++ b/lib/matplotlib/legend.py
+@@ -430,6 +430,7 @@ class Legend(Artist):
+         # method.
+         self._legend_box = None
+ 
++        _log.debug("Configuring legend parent %s", type(parent).__name__)
+         if isinstance(parent, Axes):
+             self.isaxes = True
+             self.axes = parent
